@@ -1,54 +1,118 @@
-# React + TypeScript + Vite
+# d.o.it.brainstorming
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A fully responsive PWA for structured brainstorming with offline-first capabilities.
 
-Currently, two official plugins are available:
+> Unleash structured creativity — anywhere, anytime.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## Expanding the ESLint configuration
+- **React Flow Integration**: Visualize brainstorming workflows with draggable and editable nodes
+- **Material UI v7**: Modern UI components with dark/light mode support
+- **Git History Viewer**: Track changes and versions of your projects
+- **OpenRouter LLM Chat**: AI-powered assistance for brainstorming
+- **AWS S3 Sync**: Backup and sync your projects to the cloud
+- **Offline-First PWA**: Work anywhere, even without an internet connection
+- **Responsive Design**: Mobile-first approach with adaptive layouts
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Tech Stack
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- Vite + React 18 + TypeScript
+- Material UI v7
+- React Flow
+- AWS SDK for S3 integration
+- OpenRouter API for LLM chat
+- Workbox for PWA and offline support
+- Vitest for unit testing
+- Playwright for E2E testing
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/d.o.it.brainstorming.git
+   cd d.o.it.brainstorming
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Create a `.env` file in the root directory with the following variables:
+   ```
+   VITE_S3_ENDPOINT=your_s3_endpoint_here
+   VITE_OPENROUTER_API_URL=your_openrouter_api_url_here
+   VITE_PROJECT_VERSION=0.1.0
+   ```
+
+### Development
+
+Start the development server:
+```bash
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Building for Production
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+Build the app for production:
+```bash
+npm run build
 ```
+
+Preview the production build:
+```bash
+npm run preview
+```
+
+### Testing
+
+Run unit tests:
+```bash
+npm run test
+```
+
+Run E2E tests:
+```bash
+npm run test:e2e
+```
+
+## Project Structure
+
+```
+d.o.it.brainstorming/
+├── public/               # Static assets
+├── src/
+│   ├── assets/           # Images, fonts, etc.
+│   ├── components/       # Reusable UI components
+│   ├── features/         # Feature-specific components
+│   ├── hooks/            # Custom React hooks
+│   ├── lib/              # Utilities and services
+│   ├── pages/            # Application pages
+│   ├── tests/            # Test files
+│   └── types/            # TypeScript type definitions
+├── .env                  # Environment variables
+├── index.html            # HTML entry point
+└── vite.config.ts        # Vite configuration
+```
+
+## PWA Features
+
+- Installable on desktop and mobile devices
+- Works offline with cached data
+- Background sync for updates when online
+- Push notifications (coming soon)
+
+## License
+
+MIT
+
+---
+
+Created by Dominik Oswald

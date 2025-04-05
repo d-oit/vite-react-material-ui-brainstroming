@@ -15,7 +15,8 @@ import {
   OutlinedInput,
   SelectChangeEvent,
 } from '@mui/material';
-import { NodeType, NodeData } from '@/types';
+import { NodeType, NodeData } from '../../types';
+import { useI18n } from '../../contexts/I18nContext';
 
 interface NodeEditDialogProps {
   open: boolean;
@@ -84,7 +85,7 @@ export const NodeEditDialog = ({
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>{initialData ? 'Edit Node' : 'Add New Node'}</DialogTitle>
-      
+
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
           <FormControl fullWidth>
@@ -101,7 +102,7 @@ export const NodeEditDialog = ({
               <MenuItem value={NodeType.RESOURCE}>Resource</MenuItem>
             </Select>
           </FormControl>
-          
+
           <TextField
             label="Label"
             value={label}
@@ -109,7 +110,7 @@ export const NodeEditDialog = ({
             fullWidth
             required
           />
-          
+
           <TextField
             label="Content"
             value={content}
@@ -118,7 +119,7 @@ export const NodeEditDialog = ({
             rows={4}
             fullWidth
           />
-          
+
           <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
             <TextField
               label="Add Tag"
@@ -136,7 +137,7 @@ export const NodeEditDialog = ({
               Add
             </Button>
           </Box>
-          
+
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
             {tags.map((tag) => (
               <Chip
@@ -148,7 +149,7 @@ export const NodeEditDialog = ({
           </Box>
         </Box>
       </DialogContent>
-      
+
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
         <Button onClick={handleSave} variant="contained" color="primary">

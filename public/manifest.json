@@ -1,0 +1,19 @@
+{
+  "name": "d.o.it.brainstorming",
+  "short_name": "d.o.it",
+  "description": "Unleash structured creativity — anywhere, anytime.",
+  "theme_color": "#2196f3",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

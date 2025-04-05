@@ -3,8 +3,8 @@ import ReactFlow, {
   Background,
   Controls,
   MiniMap,
-  Node,
-  Edge,
+  Node as FlowNode,
+  Edge as FlowEdge,
   NodeTypes,
   EdgeTypes,
   Connection,
@@ -19,7 +19,8 @@ import { Box, Button, Fab, useTheme, Paper, Typography } from '@mui/material';
 import { Add as AddIcon, Save as SaveIcon } from '@mui/icons-material';
 import CustomNode from './CustomNode';
 import { NodeEditDialog } from './NodeEditDialog';
-import { NodeType, NodeData } from '@/types';
+import { NodeType, NodeData, Node, Edge } from '../../types';
+import { useI18n } from '../../contexts/I18nContext';
 
 // Define custom node types
 const nodeTypes: NodeTypes = {
@@ -168,7 +169,7 @@ export const BrainstormFlow = ({
         <Background />
         <Controls />
         <MiniMap />
-        
+
         {!readOnly && (
           <Panel position="top-right">
             <Box sx={{ display: 'flex', gap: 1 }}>
@@ -183,7 +184,7 @@ export const BrainstormFlow = ({
             </Box>
           </Panel>
         )}
-        
+
         {nodes.length === 0 && (
           <Panel position="center">
             <Paper sx={{ p: 3, textAlign: 'center', maxWidth: 400 }}>
@@ -205,7 +206,7 @@ export const BrainstormFlow = ({
           </Panel>
         )}
       </ReactFlow>
-      
+
       {!readOnly && (
         <Fab
           color="primary"
@@ -220,7 +221,7 @@ export const BrainstormFlow = ({
           <AddIcon />
         </Fab>
       )}
-      
+
       <NodeEditDialog
         open={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}

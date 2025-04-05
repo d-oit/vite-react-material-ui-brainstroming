@@ -2,11 +2,18 @@ import { memo } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
 import { Card, CardContent, Typography, Box, IconButton, Chip } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import { NodeData, NodeType } from '@/types';
+import { NodeData, NodeType } from '../../types';
+
+interface CustomNodeProps extends NodeProps {
+  data: NodeData & {
+    onEdit?: (id: string) => void;
+    onDelete?: (id: string) => void;
+  };
+}
 
 const getNodeColor = (type: NodeType, customColor?: string): string => {
   if (customColor) return customColor;
-  
+
   switch (type) {
     case NodeType.IDEA:
       return '#e3f2fd'; // Light blue
@@ -36,11 +43,11 @@ const getNodeBorderColor = (type: NodeType): string => {
   }
 };
 
-const CustomNode = ({ data, id, type }: NodeProps<NodeData>) => {
+const CustomNode = ({ data, id, type }: CustomNodeProps) => {
   const nodeType = type as NodeType;
   const backgroundColor = getNodeColor(nodeType, data.color);
   const borderColor = getNodeBorderColor(nodeType);
-  
+
   return (
     <Card
       sx={{
@@ -52,7 +59,7 @@ const CustomNode = ({ data, id, type }: NodeProps<NodeData>) => {
       }}
     >
       <Handle type="target" position={Position.Top} />
-      
+
       <Box
         sx={{
           display: 'flex',
@@ -65,7 +72,7 @@ const CustomNode = ({ data, id, type }: NodeProps<NodeData>) => {
         <Typography variant="subtitle1" fontWeight="bold">
           {data.label}
         </Typography>
-        
+
         <Box>
           <IconButton size="small" onClick={() => data.onEdit?.(id)}>
             <EditIcon fontSize="small" />
@@ -75,12 +82,12 @@ const CustomNode = ({ data, id, type }: NodeProps<NodeData>) => {
           </IconButton>
         </Box>
       </Box>
-      
+
       <CardContent sx={{ p: 1.5 }}>
         <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
           {data.content}
         </Typography>
-        
+
         {data.tags && data.tags.length > 0 && (
           <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
             {data.tags.map((tag) => (
@@ -89,7 +96,7 @@ const CustomNode = ({ data, id, type }: NodeProps<NodeData>) => {
           </Box>
         )}
       </CardContent>
-      
+
       <Handle type="source" position={Position.Bottom} />
     </Card>
   );

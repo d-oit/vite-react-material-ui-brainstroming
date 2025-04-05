@@ -54,14 +54,6 @@ export enum EdgeType {
   BEZIER = 'bezier',
 }
 
-// Git History Types
-export interface GitCommit {
-  hash: string;
-  message: string;
-  author: string;
-  date: string;
-}
-
 // Theme Types
 export enum ThemeMode {
   LIGHT = 'light',
@@ -75,16 +67,6 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: string;
-}
-
-// S3 Types
-export interface S3Config {
-  endpoint: string;
-  region: string;
-  credentials: {
-    accessKeyId: string;
-    secretAccessKey: string;
-  };
 }
 
 // User Preferences
