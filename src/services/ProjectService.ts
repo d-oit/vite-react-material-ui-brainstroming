@@ -112,13 +112,13 @@ export class ProjectService {
   public async saveProjectWithCommit(project: Project, commitMessage: string): Promise<Project> {
     // First update the project
     const updatedProject = this.updateProject(project);
-    
+
     // Then create a commit
     const committedProject = await gitService.commit(updatedProject, commitMessage);
-    
+
     // Update the project with the new version
     const finalProject = this.updateProject(committedProject);
-    
+
     return finalProject;
   }
 
@@ -128,15 +128,21 @@ export class ProjectService {
    * @returns Success status
    */
   public async syncToS3(projectId: string): Promise<boolean> {
+    // Check if S3 is available
+    if (!s3Service.isS3Available()) {
+      console.warn('S3 service is not available. Enable it in .env file with VITE_AWS_S3_ENABLED=true');
+      return false;
+    }
+
     const project = this.getProject(projectId);
-    
+
     if (!project) {
       throw new Error(`Project with ID ${projectId} not found`);
     }
-    
+
     try {
-      await s3Service.uploadProject(project);
-      return true;
+      const result = await s3Service.uploadProject(project);
+      return result !== null;
     } catch (error) {
       console.error('Error syncing to S3:', error);
       return false;

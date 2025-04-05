@@ -48,19 +48,22 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     if (storedSettings) {
       const parsedSettings = JSON.parse(storedSettings);
       setSettings(parsedSettings);
-      
+
       // Configure services with stored settings
       if (parsedSettings.openRouterApiKey) {
         chatService.configure(parsedSettings.openRouterApiKey, parsedSettings.openRouterModel);
       }
-      
-      if (parsedSettings.awsAccessKeyId && parsedSettings.awsSecretAccessKey) {
+
+      // Only configure S3 if it's available and credentials are provided
+      if (s3Service.isS3Available() && parsedSettings.awsAccessKeyId && parsedSettings.awsSecretAccessKey) {
         s3Service.configure(
           parsedSettings.awsAccessKeyId,
           parsedSettings.awsSecretAccessKey,
           parsedSettings.awsRegion,
           parsedSettings.awsBucketName
-        );
+        ).catch(error => {
+          console.warn('Failed to configure S3 service:', error);
+        });
       }
     }
   }, []);
@@ -69,28 +72,35 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
   const updateSettings = (newSettings: Partial<Settings>) => {
     setSettings(prevSettings => {
       const updatedSettings = { ...prevSettings, ...newSettings };
-      
+
       // Save to localStorage
       localStorage.setItem('app_settings', JSON.stringify(updatedSettings));
-      
+
       // Configure services with new settings
       if (newSettings.openRouterApiKey || newSettings.openRouterModel) {
         chatService.configure(
-          updatedSettings.openRouterApiKey, 
+          updatedSettings.openRouterApiKey,
           updatedSettings.openRouterModel
         );
       }
-      
-      if (newSettings.awsAccessKeyId || newSettings.awsSecretAccessKey || 
-          newSettings.awsRegion || newSettings.awsBucketName) {
-        s3Service.configure(
-          updatedSettings.awsAccessKeyId,
-          updatedSettings.awsSecretAccessKey,
-          updatedSettings.awsRegion,
-          updatedSettings.awsBucketName
-        );
+
+      // Only configure S3 if it's available and credentials are provided
+      if (s3Service.isS3Available() &&
+          (newSettings.awsAccessKeyId || newSettings.awsSecretAccessKey ||
+           newSettings.awsRegion || newSettings.awsBucketName)) {
+
+        if (updatedSettings.awsAccessKeyId && updatedSettings.awsSecretAccessKey) {
+          s3Service.configure(
+            updatedSettings.awsAccessKeyId,
+            updatedSettings.awsSecretAccessKey,
+            updatedSettings.awsRegion,
+            updatedSettings.awsBucketName
+          ).catch(error => {
+            console.warn('Failed to configure S3 service:', error);
+          });
+        }
       }
-      
+
       return updatedSettings;
     });
   };
