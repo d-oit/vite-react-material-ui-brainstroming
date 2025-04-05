@@ -17,9 +17,8 @@ import {
   Snackbar,
   TextField,
 } from '@mui/material';
-import { MainLayout } from '@/components/Layout/MainLayout';
-import { useThemeMode } from '@/hooks/useThemeMode';
-import { ThemeMode, UserPreferences } from '@/types';
+import { useSettings } from '../contexts/SettingsContext';
+import { ThemeMode, UserPreferences } from '../types';
 
 // Default user preferences
 const defaultPreferences: UserPreferences = {
@@ -31,47 +30,65 @@ const defaultPreferences: UserPreferences = {
 };
 
 export const SettingsPage = () => {
-  const { themeMode, setThemeMode } = useThemeMode();
+  const { settings, updateSettings } = useSettings();
   const [preferences, setPreferences] = useState<UserPreferences>(() => {
-    // In a real app, you would load this from localStorage or a backend
-    return defaultPreferences;
+    // Use settings from the context
+    return {
+      themeMode: settings.themeMode,
+      autoSave: settings.autoSave,
+      autoBackup: settings.autoBackup,
+      fontSize: settings.fontSize,
+      language: settings.language,
+    };
   });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [s3Endpoint, setS3Endpoint] = useState(import.meta.env.VITE_S3_ENDPOINT || '');
-  const [openRouterApiUrl, setOpenRouterApiUrl] = useState(import.meta.env.VITE_OPENROUTER_API_URL || '');
+  const [s3Endpoint, setS3Endpoint] = useState(settings.awsBucketName || '');
+  const [openRouterApiUrl, setOpenRouterApiUrl] = useState(settings.openRouterApiKey || '');
 
   const handleThemeModeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     const newMode = event.target.value as ThemeMode;
-    setThemeMode(newMode);
     setPreferences({ ...preferences, themeMode: newMode });
+    updateSettings({ themeMode: newMode });
   };
 
   const handleSwitchChange = (name: keyof Pick<UserPreferences, 'autoSave' | 'autoBackup'>) => (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setPreferences({ ...preferences, [name]: event.target.checked });
+    const newValue = event.target.checked;
+    setPreferences({ ...preferences, [name]: newValue });
+    updateSettings({ [name]: newValue });
   };
 
   const handleFontSizeChange = (_event: Event, newValue: number | number[]) => {
-    setPreferences({ ...preferences, fontSize: newValue as number });
+    const fontSize = newValue as number;
+    setPreferences({ ...preferences, fontSize });
+    updateSettings({ fontSize });
   };
 
   const handleLanguageChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setPreferences({ ...preferences, language: event.target.value as string });
+    const language = event.target.value as string;
+    setPreferences({ ...preferences, language });
+    updateSettings({ language });
   };
 
   const handleSaveSettings = () => {
-    // In a real app, you would save this to localStorage or a backend
-    console.log('Saving settings:', preferences);
-    console.log('S3 Endpoint:', s3Endpoint);
-    console.log('OpenRouter API URL:', openRouterApiUrl);
-    
+    // Update all settings at once
+    updateSettings({
+      themeMode: preferences.themeMode,
+      autoSave: preferences.autoSave,
+      autoBackup: preferences.autoBackup,
+      fontSize: preferences.fontSize,
+      language: preferences.language,
+      awsBucketName: s3Endpoint,
+      openRouterApiKey: openRouterApiUrl,
+    });
+
     // Show success message
     setSnackbarOpen(true);
   };
 
   return (
-    <MainLayout title="Settings">
+    <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
       <Box sx={{ mb: 2 }}>
         <Typography variant="h5" component="h1">
           Settings
@@ -80,20 +97,20 @@ export const SettingsPage = () => {
           Customize your brainstorming experience
         </Typography>
       </Box>
-      
+
       <Divider sx={{ mb: 3 }} />
-      
+
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom>
             Appearance
           </Typography>
-          
+
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel id="theme-mode-label">Theme Mode</InputLabel>
             <Select
               labelId="theme-mode-label"
-              value={themeMode}
+              value={preferences.themeMode}
               label="Theme Mode"
               onChange={handleThemeModeChange}
             >
@@ -102,7 +119,7 @@ export const SettingsPage = () => {
               <MenuItem value={ThemeMode.SYSTEM}>System</MenuItem>
             </Select>
           </FormControl>
-          
+
           <Box sx={{ mb: 2 }}>
             <Typography id="font-size-slider" gutterBottom>
               Font Size: {preferences.fontSize}px
@@ -118,7 +135,7 @@ export const SettingsPage = () => {
               max={20}
             />
           </Box>
-          
+
           <FormControl fullWidth>
             <InputLabel id="language-label">Language</InputLabel>
             <Select
@@ -134,12 +151,12 @@ export const SettingsPage = () => {
             </Select>
           </FormControl>
         </Paper>
-        
+
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom>
             Behavior
           </Typography>
-          
+
           <FormGroup>
             <FormControlLabel
               control={
@@ -150,7 +167,7 @@ export const SettingsPage = () => {
               }
               label="Auto-save projects (every 5 seconds)"
             />
-            
+
             <FormControlLabel
               control={
                 <Switch
@@ -162,12 +179,12 @@ export const SettingsPage = () => {
             />
           </FormGroup>
         </Paper>
-        
+
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom>
             API Configuration
           </Typography>
-          
+
           <TextField
             fullWidth
             label="AWS S3 Endpoint"
@@ -176,7 +193,7 @@ export const SettingsPage = () => {
             margin="normal"
             helperText="Used for project backups and sync"
           />
-          
+
           <TextField
             fullWidth
             label="OpenRouter API URL"
@@ -186,7 +203,7 @@ export const SettingsPage = () => {
             helperText="Used for the AI assistant"
           />
         </Paper>
-        
+
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
           <Button
             variant="contained"
@@ -197,7 +214,7 @@ export const SettingsPage = () => {
           </Button>
         </Box>
       </Box>
-      
+
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}
@@ -211,6 +228,6 @@ export const SettingsPage = () => {
           Settings saved successfully!
         </Alert>
       </Snackbar>
-    </MainLayout>
+    </Box>
   );
 };

@@ -148,11 +148,12 @@ export const BrainstormFlow = ({
     <Box
       ref={reactFlowWrapper}
       sx={{
-        height: '100%',
+        height: '600px', // Fixed height to ensure React Flow renders properly
         width: '100%',
         border: `1px solid ${theme.palette.divider}`,
         borderRadius: 1,
         overflow: 'hidden',
+        position: 'relative', // Ensure proper positioning
       }}
     >
       <ReactFlow

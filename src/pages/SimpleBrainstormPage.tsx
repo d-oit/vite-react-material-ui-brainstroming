@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -12,16 +12,23 @@ import {
   IconButton,
   AppBar,
   Toolbar,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import {
   Save as SaveIcon,
   Chat as ChatIcon,
   Close as CloseIcon,
   Menu as MenuIcon,
+  History as HistoryIcon,
 } from '@mui/icons-material';
 import { BrainstormFlow } from '../components/BrainstormFlow/BrainstormFlow';
+import { ChatPanel } from '../components/Chat/ChatPanel';
+import { GitHistoryPanel } from '../components/GitHistory/GitHistoryPanel';
 import { useI18n } from '../contexts/I18nContext';
-import { Node, Edge } from '../types';
+import { useSettings } from '../contexts/SettingsContext';
+import { Node, Edge, Project } from '../types';
+import projectService from '../services/ProjectService';
 
 // Sample data for demonstration
 const sampleNodes: Node[] = [
@@ -72,34 +79,112 @@ const sampleEdges: Edge[] = [
   },
 ];
 
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <Box
+      role="tabpanel"
+      hidden={value !== index}
+      id={`sidebar-tabpanel-${index}`}
+      aria-labelledby={`sidebar-tab-${index}`}
+      sx={{ height: '100%' }}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ height: '100%' }}>{children}</Box>
+      )}
+    </Box>
+  );
+}
+
 export const SimpleBrainstormPage = () => {
   const theme = useTheme();
   const { t } = useI18n();
+  const { settings } = useSettings();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [chatOpen, setChatOpen] = useState(!isMobile);
+  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+  const [sidebarTab, setSidebarTab] = useState(0);
   const [nodes, setNodes] = useState<Node[]>(sampleNodes);
   const [edges, setEdges] = useState<Edge[]>(sampleEdges);
+  const [project, setProject] = useState<Project>({
+    id: crypto.randomUUID(),
+    name: 'Sample Brainstorming Project',
+    description: 'A sample project for demonstration',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    version: '1.0.0',
+    nodes: sampleNodes,
+    edges: sampleEdges,
+  });
+
+  // Auto-save project if enabled
+  useEffect(() => {
+    if (settings.autoSave) {
+      const autoSaveTimer = setTimeout(() => {
+        handleSaveProject();
+      }, 5000);
+
+      return () => clearTimeout(autoSaveTimer);
+    }
+  }, [nodes, edges, settings.autoSave]);
 
   const handleSaveFlow = (updatedNodes: Node[], updatedEdges: Edge[]) => {
     setNodes(updatedNodes);
     setEdges(updatedEdges);
-    console.log('Flow saved:', { nodes: updatedNodes, edges: updatedEdges });
+    setProject(prev => ({
+      ...prev,
+      nodes: updatedNodes,
+      edges: updatedEdges,
+      updatedAt: new Date().toISOString(),
+    }));
   };
 
-  const toggleChat = () => {
-    setChatOpen(prev => !prev);
+  const handleSaveProject = () => {
+    try {
+      const updatedProject = projectService.updateProject({
+        ...project,
+        nodes,
+        edges,
+        updatedAt: new Date().toISOString(),
+      });
+      setProject(updatedProject);
+      console.log('Project saved:', updatedProject);
+    } catch (error) {
+      console.error('Error saving project:', error);
+    }
+  };
+
+  const toggleSidebar = () => {
+    setSidebarOpen(prev => !prev);
+  };
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setSidebarTab(newValue);
+  };
+
+  const handleProjectUpdate = (updatedProject: Project) => {
+    setProject(updatedProject);
+    setNodes(updatedProject.nodes);
+    setEdges(updatedProject.edges);
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 64px)' }}>
       <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
             <Typography variant="h5" component="h1">
-              Sample Brainstorming Project
+              {project.name}
             </Typography>
             <Typography variant="subtitle2" color="text.secondary">
-              Version 1.0.0
+              {t('brainstorm.version')}: {project.version}
             </Typography>
           </Box>
 
@@ -107,7 +192,7 @@ export const SimpleBrainstormPage = () => {
             <Button
               variant="outlined"
               startIcon={<SaveIcon />}
-              onClick={() => console.log('Project saved')}
+              onClick={handleSaveProject}
             >
               {t('common.save')}
             </Button>
@@ -117,7 +202,7 @@ export const SimpleBrainstormPage = () => {
                 variant="contained"
                 color="secondary"
                 startIcon={<ChatIcon />}
-                onClick={toggleChat}
+                onClick={toggleSidebar}
               >
                 {t('chat.title')}
               </Button>
@@ -131,11 +216,12 @@ export const SimpleBrainstormPage = () => {
             flexGrow: 1,
             overflow: 'hidden',
             display: 'flex',
+            height: '600px', // Fixed height for React Flow
           }}
         >
           {isMobile ? (
             <>
-              <Box sx={{ flexGrow: 1, height: '100%' }}>
+              <Box sx={{ flexGrow: 1, height: '600px' }}>
                 <BrainstormFlow
                   initialNodes={nodes}
                   initialEdges={edges}
@@ -145,8 +231,8 @@ export const SimpleBrainstormPage = () => {
 
               <Drawer
                 anchor="right"
-                open={chatOpen}
-                onClose={toggleChat}
+                open={sidebarOpen}
+                onClose={toggleSidebar}
                 sx={{
                   '& .MuiDrawer-paper': {
                     width: '80%',
@@ -154,23 +240,32 @@ export const SimpleBrainstormPage = () => {
                   },
                 }}
               >
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
-                  <IconButton onClick={toggleChat}>
-                    <CloseIcon />
-                  </IconButton>
-                </Box>
+                <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                  <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                    <Tabs
+                      value={sidebarTab}
+                      onChange={handleTabChange}
+                      variant="fullWidth"
+                    >
+                      <Tab icon={<ChatIcon />} label={t('chat.title')} />
+                      <Tab icon={<HistoryIcon />} label={t('gitHistory.title')} />
+                    </Tabs>
+                  </Box>
 
-                <Box sx={{ p: 2 }}>
-                  <Typography variant="h6">{t('chat.title')}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Chat functionality will be implemented here.
-                  </Typography>
+                  <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+                    <TabPanel value={sidebarTab} index={0}>
+                      <ChatPanel projectId={project.id} projectContext={project} />
+                    </TabPanel>
+                    <TabPanel value={sidebarTab} index={1}>
+                      <GitHistoryPanel project={project} onProjectUpdate={handleProjectUpdate} />
+                    </TabPanel>
+                  </Box>
                 </Box>
               </Drawer>
             </>
           ) : (
-            <Box sx={{ display: 'flex', height: '100%' }}>
-              <Box sx={{ flex: chatOpen ? 8 : 12, height: '100%' }}>
+            <Box sx={{ display: 'flex', height: '600px' }}>
+              <Box sx={{ flex: sidebarOpen ? 8 : 12, height: '600px' }}>
                 <BrainstormFlow
                   initialNodes={nodes}
                   initialEdges={edges}
@@ -178,19 +273,28 @@ export const SimpleBrainstormPage = () => {
                 />
               </Box>
 
-              {chatOpen && (
-                <Box sx={{ flex: 4, height: '100%', borderLeft: `1px solid ${theme.palette.divider}` }}>
-                  <Box sx={{ height: '100%', position: 'relative', p: 2 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                      <Typography variant="h6">{t('chat.title')}</Typography>
-                      <IconButton onClick={toggleChat} size="small">
-                        <CloseIcon />
-                      </IconButton>
+              {sidebarOpen && (
+                <Box sx={{ flex: 4, height: '600px', borderLeft: `1px solid ${theme.palette.divider}` }}>
+                  <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                      <Tabs
+                        value={sidebarTab}
+                        onChange={handleTabChange}
+                        variant="fullWidth"
+                      >
+                        <Tab icon={<ChatIcon />} label={t('chat.title')} />
+                        <Tab icon={<HistoryIcon />} label={t('gitHistory.title')} />
+                      </Tabs>
                     </Box>
 
-                    <Typography variant="body2" color="text.secondary">
-                      Chat functionality will be implemented here.
-                    </Typography>
+                    <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+                      <TabPanel value={sidebarTab} index={0}>
+                        <ChatPanel projectId={project.id} projectContext={project} />
+                      </TabPanel>
+                      <TabPanel value={sidebarTab} index={1}>
+                        <GitHistoryPanel project={project} onProjectUpdate={handleProjectUpdate} />
+                      </TabPanel>
+                    </Box>
                   </Box>
                 </Box>
               )}
@@ -198,12 +302,12 @@ export const SimpleBrainstormPage = () => {
           )}
         </Paper>
 
-        {!chatOpen && !isMobile && (
+        {!sidebarOpen && !isMobile && (
           <Button
             variant="contained"
             color="secondary"
             startIcon={<ChatIcon />}
-            onClick={toggleChat}
+            onClick={toggleSidebar}
             sx={{ position: 'fixed', bottom: 16, right: 16 }}
           >
             {t('chat.title')}

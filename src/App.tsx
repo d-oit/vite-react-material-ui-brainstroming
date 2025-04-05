@@ -27,10 +27,14 @@ import {
   Menu as MenuIcon,
   BubbleChart as BrainstormIcon,
   Home as HomeIcon,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  History as HistoryIcon,
+  Chat as ChatIcon
 } from '@mui/icons-material';
 import { useI18n } from './contexts/I18nContext';
+import { SettingsProvider } from './contexts/SettingsContext';
 import { SimpleBrainstormPage } from './pages/SimpleBrainstormPage';
+import { SettingsPage } from './pages/SettingsPage';
 
 // PWA registration
 // import { registerSW } from 'virtual:pwa-register';
@@ -148,7 +152,7 @@ const AppWithTheme = () => {
               <Divider />
               <List>
                 <ListItem disablePadding>
-                  <ListItemButton>
+                  <ListItemButton component={Link} to="/settings">
                     <ListItemIcon>
                       <SettingsIcon />
                     </ListItemIcon>
@@ -163,6 +167,7 @@ const AppWithTheme = () => {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/brainstorm" element={<SimpleBrainstormPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Box>
@@ -190,7 +195,11 @@ const App = () => {
   }, []);
   */
 
-  return <AppWithTheme />;
+  return (
+    <SettingsProvider>
+      <AppWithTheme />
+    </SettingsProvider>
+  );
 };
 
 export default App;
