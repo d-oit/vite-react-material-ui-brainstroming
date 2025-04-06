@@ -6,6 +6,12 @@ import type { UserConfig } from 'vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    hmr: {
+      protocol: 'ws',
+      host: 'localhost',
+    },
+  },
   build: {
     chunkSizeWarningLimit: 4000, // Increase the warning limit to 4MB
     rollupOptions: {

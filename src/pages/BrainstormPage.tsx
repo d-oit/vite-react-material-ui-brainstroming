@@ -160,12 +160,12 @@ export const BrainstormPage = () => {
         </>
       ) : (
         <Grid container spacing={2} sx={{ height: 'calc(100vh - 200px)' }}>
-          <Grid item xs={chatOpen ? 8 : 12}>
+          <Grid size={chatOpen ? { xs: 8 } : { xs: 12 }}>
             <BrainstormFlow initialNodes={nodes} initialEdges={edges} onSave={handleSaveFlow} />
           </Grid>
 
           {chatOpen && (
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <Box sx={{ height: '100%', position: 'relative' }}>
                 <IconButton
                   sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}

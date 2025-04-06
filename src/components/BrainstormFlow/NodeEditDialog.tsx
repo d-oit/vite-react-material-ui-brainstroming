@@ -213,7 +213,7 @@ export const NodeEditDialog = ({
           <Paper sx={{ p: 2, mb: 2 }} elevation={0} variant="outlined">
             <Grid container spacing={2}>
               {/* Size selection */}
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                   <FormatSizeIcon sx={{ mr: 1, color: 'text.secondary' }} />
                   <Typography variant="body2" fontWeight="medium">
@@ -291,22 +291,24 @@ export const NodeEditDialog = ({
               </Grid>
 
               {/* Color selection */}
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                   <PaletteIcon sx={{ mr: 1, color: 'text.secondary' }} />
                   <Typography variant="body2" fontWeight="medium">
                     Color
                   </Typography>
                   <Tooltip title="Reset to default color">
-                    <IconButton
-                      size="small"
-                      onClick={() => setColor(undefined)}
-                      disabled={!color}
-                      sx={{ ml: 'auto' }}
-                      aria-label="Reset to default color"
-                    >
-                      <RefreshIcon fontSize="small" />
-                    </IconButton>
+                    <span>
+                      <IconButton
+                        size="small"
+                        onClick={() => setColor(undefined)}
+                        disabled={!color}
+                        sx={{ ml: 'auto' }}
+                        aria-label="Reset to default color"
+                      >
+                        <RefreshIcon fontSize="small" />
+                      </IconButton>
+                    </span>
                   </Tooltip>
                 </Box>
 

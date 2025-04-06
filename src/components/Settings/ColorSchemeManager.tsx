@@ -201,9 +201,11 @@ const ColorSchemeCard = ({
             </Tooltip>
 
             <Tooltip title="Delete">
-              <IconButton size="small" onClick={onDelete} disabled={scheme.isDefault || isActive}>
-                <DeleteIcon fontSize="small" />
-              </IconButton>
+              <span>
+                <IconButton size="small" onClick={onDelete} disabled={scheme.isDefault || isActive}>
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </span>
             </Tooltip>
           </Box>
         </Box>

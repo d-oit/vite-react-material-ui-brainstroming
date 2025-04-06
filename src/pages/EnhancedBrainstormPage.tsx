@@ -141,13 +141,30 @@ export const EnhancedBrainstormPage = () => {
   const handleSaveProject = useCallback(() => {
     setLoading(true);
     try {
-      const updatedProject = projectService.updateProject({
-        ...project,
-        nodes,
-        edges,
-        updatedAt: new Date().toISOString(),
-      });
-      setProject(updatedProject);
+      // Check if project exists in storage before updating
+      const existingProject = projectService.getProject(project.id);
+
+      if (!existingProject) {
+        // If project doesn't exist, create it first
+        const newProject = projectService.createProject(project.name, project.description || '');
+        // Update the new project with our current data
+        const updatedProject = projectService.updateProject({
+          ...newProject,
+          nodes,
+          edges,
+          updatedAt: new Date().toISOString(),
+        });
+        setProject(updatedProject);
+      } else {
+        // If project exists, update it normally
+        const updatedProject = projectService.updateProject({
+          ...project,
+          nodes,
+          edges,
+          updatedAt: new Date().toISOString(),
+        });
+        setProject(updatedProject);
+      }
       setError(null);
     } catch (error) {
       console.error('Error saving project:', error);
