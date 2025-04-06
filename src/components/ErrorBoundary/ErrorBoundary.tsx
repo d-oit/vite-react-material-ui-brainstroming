@@ -119,7 +119,7 @@ class ErrorBoundaryClass extends Component<Props, State> {
             </Typography>
 
             <Typography variant="body1" color="text.secondary" paragraph>
-              We're sorry, but an error occurred while rendering this page.
+              We&apos;re sorry, but an error occurred while rendering this page.
             </Typography>
 
             <Divider sx={{ my: 3 }} />

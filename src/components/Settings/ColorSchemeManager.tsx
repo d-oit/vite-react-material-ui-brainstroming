@@ -283,8 +283,8 @@ const DeleteConfirmationDialog = ({
       <DialogTitle>Delete Color Scheme</DialogTitle>
       <DialogContent>
         <Typography>
-          Are you sure you want to delete the color scheme "{schemeName}"? This action cannot be
-          undone.
+          Are you sure you want to delete the color scheme &quot;{schemeName}&quot;? This action
+          cannot be undone.
         </Typography>
       </DialogContent>
       <DialogActions>
