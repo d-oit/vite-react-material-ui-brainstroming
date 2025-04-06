@@ -16,8 +16,12 @@ import {
   Alert,
   Snackbar,
   TextField,
+  Container,
+  useTheme,
 } from '@mui/material';
 import { useSettings } from '../contexts/SettingsContext';
+import { useI18n } from '../contexts/I18nContext';
+import { AppShell } from '../components/Layout/AppShell';
 import { ThemeMode, UserPreferences } from '../types';
 
 // Default user preferences
@@ -29,7 +33,12 @@ const defaultPreferences: UserPreferences = {
   language: 'en',
 };
 
-export const SettingsPage = () => {
+interface SettingsPageProps {
+  onThemeToggle?: () => void;
+  isDarkMode?: boolean;
+}
+
+export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
   const { settings, updateSettings } = useSettings();
   const [preferences, setPreferences] = useState<UserPreferences>(() => {
     // Use settings from the context
@@ -87,8 +96,16 @@ export const SettingsPage = () => {
     setSnackbarOpen(true);
   };
 
+  const theme = useTheme();
+  const { t } = useI18n();
+
   return (
-    <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
+    <AppShell
+      title={t('settings.title')}
+      onThemeToggle={onThemeToggle || (() => {})}
+      isDarkMode={isDarkMode || theme.palette.mode === 'dark'}
+    >
+      <Container maxWidth="md" sx={{ py: 4 }}>
       <Box sx={{ mb: 2 }}>
         <Typography variant="h5" component="h1">
           Settings
@@ -228,6 +245,7 @@ export const SettingsPage = () => {
           Settings saved successfully!
         </Alert>
       </Snackbar>
-    </Box>
+      </Container>
+    </AppShell>
   );
 };
