@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 .eslintcache
 playwright-report.txt
-.eslintcache
+

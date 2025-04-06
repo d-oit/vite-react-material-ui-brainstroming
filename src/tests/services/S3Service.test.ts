@@ -115,7 +115,6 @@ describe('S3Service', () => {
       });
       vi.spyOn(AWS, 'S3').mockImplementation(S3Constructor as any);
 
-
       // Call the method
       const result = await s3Service.configure(
         'test-access-key',
