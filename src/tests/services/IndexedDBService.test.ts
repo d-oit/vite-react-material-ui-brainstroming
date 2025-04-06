@@ -9,7 +9,7 @@ describe('IndexedDBService', () => {
   beforeEach(() => {
     // Mock IndexedDB
     mockIDB = mockIndexedDB();
-    
+
     // Reset the initialization state of the service
     // @ts-expect-error - Accessing private property for testing
     indexedDBService.isInitialized = false;
@@ -27,15 +27,15 @@ describe('IndexedDBService', () => {
     it('should initialize the database', async () => {
       // Simulate successful initialization
       const openRequest = mockIDB.open();
-      
+
       // Create a promise that resolves when onsuccess is called
       const initPromise = indexedDBService.init();
-      
+
       // Simulate the onsuccess event
       if (openRequest.onsuccess) {
         openRequest.onsuccess({ target: openRequest });
       }
-      
+
       const result = await initPromise;
       expect(result).toBe(true);
       expect(mockIDB.open).toHaveBeenCalledWith('doitBrainstorming', 2);
@@ -44,15 +44,15 @@ describe('IndexedDBService', () => {
     it('should handle initialization errors', async () => {
       // Simulate failed initialization
       const openRequest = mockIDB.open();
-      
+
       // Create a promise that rejects when onerror is called
       const initPromise = indexedDBService.init().catch(e => e);
-      
+
       // Simulate the onerror event
       if (openRequest.onerror) {
         openRequest.onerror(new Event('error'));
       }
-      
+
       const error = await initPromise;
       expect(error).toBeInstanceOf(Error);
       expect(error.message).toBe('Failed to open IndexedDB');
@@ -82,20 +82,20 @@ describe('IndexedDBService', () => {
       const openRequest = mockIDB.open();
       const transaction = openRequest.result.transaction();
       const store = transaction.objectStore();
-      
+
       // Mock the getAll method to return our mock data
       store.getAll.mockResolvedValue(mockColorSchemes);
-      
+
       // Initialize the service
       const initPromise = indexedDBService.init();
       if (openRequest.onsuccess) {
         openRequest.onsuccess({ target: openRequest });
       }
       await initPromise;
-      
+
       // Call the method
       const colorSchemes = await indexedDBService.getColorSchemes();
-      
+
       // Verify the result
       expect(colorSchemes).toEqual(mockColorSchemes);
       expect(store.getAll).toHaveBeenCalled();
@@ -126,20 +126,20 @@ describe('IndexedDBService', () => {
       const openRequest = mockIDB.open();
       const transaction = openRequest.result.transaction();
       const store = transaction.objectStore();
-      
+
       // Mock the get method to return our mock data
       store.get.mockResolvedValue({ id: 'default', ...mockNodePreferences });
-      
+
       // Initialize the service
       const initPromise = indexedDBService.init();
       if (openRequest.onsuccess) {
         openRequest.onsuccess({ target: openRequest });
       }
       await initPromise;
-      
+
       // Call the method
       const nodePreferences = await indexedDBService.getNodePreferences();
-      
+
       // Verify the result
       expect(nodePreferences).toEqual(mockNodePreferences);
       expect(store.get).toHaveBeenCalledWith('default');
@@ -170,20 +170,20 @@ describe('IndexedDBService', () => {
       const openRequest = mockIDB.open();
       const transaction = openRequest.result.transaction();
       const store = transaction.objectStore();
-      
+
       // Mock the put method
       store.put.mockResolvedValue(undefined);
-      
+
       // Initialize the service
       const initPromise = indexedDBService.init();
       if (openRequest.onsuccess) {
         openRequest.onsuccess({ target: openRequest });
       }
       await initPromise;
-      
+
       // Call the method
       await indexedDBService.saveNodePreferences(mockNodePreferences);
-      
+
       // Verify the result
       expect(store.put).toHaveBeenCalledWith({ id: 'default', ...mockNodePreferences });
     });
@@ -210,20 +210,20 @@ describe('IndexedDBService', () => {
       const openRequest = mockIDB.open();
       const transaction = openRequest.result.transaction();
       const store = transaction.objectStore();
-      
+
       // Mock the put method
       store.put.mockResolvedValue(undefined);
-      
+
       // Initialize the service
       const initPromise = indexedDBService.init();
       if (openRequest.onsuccess) {
         openRequest.onsuccess({ target: openRequest });
       }
       await initPromise;
-      
+
       // Call the method
       await indexedDBService.saveColorScheme(mockColorScheme);
-      
+
       // Verify the result
       expect(store.put).toHaveBeenCalledWith(mockColorScheme);
     });
@@ -235,20 +235,20 @@ describe('IndexedDBService', () => {
       const openRequest = mockIDB.open();
       const transaction = openRequest.result.transaction();
       const store = transaction.objectStore();
-      
+
       // Mock the delete method
       store.delete.mockResolvedValue(undefined);
-      
+
       // Initialize the service
       const initPromise = indexedDBService.init();
       if (openRequest.onsuccess) {
         openRequest.onsuccess({ target: openRequest });
       }
       await initPromise;
-      
+
       // Call the method
       await indexedDBService.deleteColorScheme('custom');
-      
+
       // Verify the result
       expect(store.delete).toHaveBeenCalledWith('custom');
     });

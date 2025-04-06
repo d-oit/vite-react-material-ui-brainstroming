@@ -109,7 +109,7 @@ export const NodeEditDialog = ({
       contentLength: content.length,
       tagsCount: tags.length,
       hasColor: !!color,
-      size
+      size,
     });
 
     onSave(
@@ -216,7 +216,9 @@ export const NodeEditDialog = ({
               <Grid item xs={12} sm={6}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                   <FormatSizeIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                  <Typography variant="body2" fontWeight="medium">Size</Typography>
+                  <Typography variant="body2" fontWeight="medium">
+                    Size
+                  </Typography>
                   <Tooltip title="Toggle size options">
                     <IconButton
                       size="small"
@@ -292,7 +294,9 @@ export const NodeEditDialog = ({
               <Grid item xs={12} sm={6}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                   <PaletteIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                  <Typography variant="body2" fontWeight="medium">Color</Typography>
+                  <Typography variant="body2" fontWeight="medium">
+                    Color
+                  </Typography>
                   <Tooltip title="Reset to default color">
                     <IconButton
                       size="small"
@@ -341,56 +345,56 @@ export const NodeEditDialog = ({
                     tabIndex={0}
                   />
 
-                {/* Color presets */}
-                {(showColorPicker || !isMobile) && (
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: 1,
-                      mt: 1,
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    {[
-                      '#e3f2fd', // Light blue
-                      '#e8f5e9', // Light green
-                      '#fff8e1', // Light yellow
-                      '#f3e5f5', // Light purple
-                      '#0d47a1', // Dark blue
-                      '#1b5e20', // Dark green
-                      '#f57f17', // Dark yellow
-                      '#4a148c', // Dark purple
-                    ].map(presetColor => (
-                      <Tooltip key={presetColor} title={presetColor}>
-                        <Box
-                          sx={{
-                            width: 24,
-                            height: 24,
-                            borderRadius: '50%',
-                            bgcolor: presetColor,
-                            border:
-                              color === presetColor
-                                ? `2px solid ${theme.palette.primary.main}`
-                                : '1px solid rgba(0, 0, 0, 0.2)',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease',
-                            '&:hover': {
-                              transform: 'scale(1.1)',
-                            },
-                          }}
-                          onClick={() => setColor(presetColor)}
-                          role="button"
-                          aria-label={`Use color ${presetColor}`}
-                          tabIndex={0}
-                        />
-                      </Tooltip>
-                    ))}
-                  </Box>
-                )}
-              </Box>
+                  {/* Color presets */}
+                  {(showColorPicker || !isMobile) && (
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: 1,
+                        mt: 1,
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      {[
+                        '#e3f2fd', // Light blue
+                        '#e8f5e9', // Light green
+                        '#fff8e1', // Light yellow
+                        '#f3e5f5', // Light purple
+                        '#0d47a1', // Dark blue
+                        '#1b5e20', // Dark green
+                        '#f57f17', // Dark yellow
+                        '#4a148c', // Dark purple
+                      ].map(presetColor => (
+                        <Tooltip key={presetColor} title={presetColor}>
+                          <Box
+                            sx={{
+                              width: 24,
+                              height: 24,
+                              borderRadius: '50%',
+                              bgcolor: presetColor,
+                              border:
+                                color === presetColor
+                                  ? `2px solid ${theme.palette.primary.main}`
+                                  : '1px solid rgba(0, 0, 0, 0.2)',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease',
+                              '&:hover': {
+                                transform: 'scale(1.1)',
+                              },
+                            }}
+                            onClick={() => setColor(presetColor)}
+                            role="button"
+                            aria-label={`Use color ${presetColor}`}
+                            tabIndex={0}
+                          />
+                        </Tooltip>
+                      ))}
+                    </Box>
+                  )}
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
           </Paper>
 
           {/* Node preview */}

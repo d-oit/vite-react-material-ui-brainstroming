@@ -38,7 +38,7 @@ describe('CustomNode', () => {
     // Check that the label and content are rendered
     expect(screen.getByText('Test Node')).toBeInTheDocument();
     expect(screen.getByText('This is a test node')).toBeInTheDocument();
-    
+
     // Check that the tags are rendered
     expect(screen.getByText('tag1')).toBeInTheDocument();
     expect(screen.getByText('tag2')).toBeInTheDocument();

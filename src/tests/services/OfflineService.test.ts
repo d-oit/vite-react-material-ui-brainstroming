@@ -97,7 +97,9 @@ describe('OfflineService', () => {
 
     it('should process the sync queue when going online', () => {
       // Mock the processSyncQueue method
-      const processSyncQueueSpy = vi.spyOn(offlineService, 'processSyncQueue').mockImplementation(() => Promise.resolve());
+      const processSyncQueueSpy = vi
+        .spyOn(offlineService, 'processSyncQueue')
+        .mockImplementation(() => Promise.resolve());
 
       // Simulate going online
       mockOnlineStatus(true);

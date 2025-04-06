@@ -28,10 +28,8 @@ const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const customRender = (
-  ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>
-) => render(ui, { wrapper: AllTheProviders, ...options });
+const customRender = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) =>
+  render(ui, { wrapper: AllTheProviders, ...options });
 
 // Mock IndexedDB for testing
 const mockIndexedDB = () => {
@@ -138,4 +136,11 @@ const mockLocalStorage = () => {
 
 // Export everything from RTL
 export * from '@testing-library/react';
-export { customRender as render, mockIndexedDB, mockResizeObserver, mockIntersectionObserver, mockOnlineStatus, mockLocalStorage };
+export {
+  customRender as render,
+  mockIndexedDB,
+  mockResizeObserver,
+  mockIntersectionObserver,
+  mockOnlineStatus,
+  mockLocalStorage,
+};
