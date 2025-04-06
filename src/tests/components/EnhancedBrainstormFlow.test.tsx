@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '../test-utils';
+
 import EnhancedBrainstormFlow from '../../components/BrainstormFlow/EnhancedBrainstormFlow';
 import { NodeType } from '../../types';
-import { mockResizeObserver } from '../test-utils';
+import { render, screen, fireEvent, waitFor, mockResizeObserver } from '../test-utils';
 
 // Mock ReactFlow
 vi.mock('@reactflow/core', async () => {

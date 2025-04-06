@@ -1,4 +1,3 @@
-import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
   BubbleChart as BrainstormIcon,
@@ -6,6 +5,7 @@ import {
   Chat as ChatIcon,
   Menu as MenuIcon,
 } from '@mui/icons-material';
+import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface MobileBottomNavProps {

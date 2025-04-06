@@ -1,5 +1,4 @@
-import { memo, useMemo, useState, useEffect } from 'react';
-import { Handle, Position, NodeProps } from 'reactflow';
+import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import {
   Card,
   CardContent,
@@ -10,9 +9,12 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import { NodeData, NodeType } from '../../types';
+import { memo, useMemo, useState, useEffect } from 'react';
+import type { NodeProps } from 'reactflow';
+import { Handle, Position } from 'reactflow';
+
 import { useSettings } from '../../contexts/SettingsContext';
+import type { NodeData, NodeType } from '../../types';
 
 interface CustomNodeProps extends NodeProps {
   data: NodeData & {

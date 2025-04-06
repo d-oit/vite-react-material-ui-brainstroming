@@ -1,8 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { ThemeMode, NodeType } from '../types';
+import type { ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
 import chatService from '../services/ChatService';
+import type { ColorScheme, NodePreferences } from '../services/IndexedDBService';
+import indexedDBService from '../services/IndexedDBService';
 import s3Service from '../services/S3Service';
-import indexedDBService, { ColorScheme, NodePreferences } from '../services/IndexedDBService';
+import { ThemeMode, NodeType } from '../types';
 
 interface Settings {
   themeMode: ThemeMode;

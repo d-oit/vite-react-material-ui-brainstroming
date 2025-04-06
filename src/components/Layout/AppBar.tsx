@@ -1,4 +1,11 @@
-import { useState } from 'react';
+import {
+  Menu as MenuIcon,
+  Brightness4 as DarkModeIcon,
+  Brightness7 as LightModeIcon,
+  AccountCircle,
+  Settings as SettingsIcon,
+  Help as HelpIcon,
+} from '@mui/icons-material';
 import {
   AppBar as MuiAppBar,
   Toolbar,
@@ -12,14 +19,8 @@ import {
   Button,
   Tooltip,
 } from '@mui/material';
-import {
-  Menu as MenuIcon,
-  Brightness4 as DarkModeIcon,
-  Brightness7 as LightModeIcon,
-  AccountCircle,
-  Settings as SettingsIcon,
-  Help as HelpIcon,
-} from '@mui/icons-material';
+import { useState } from 'react';
+
 import { useThemeMode } from '@/hooks/useThemeMode';
 import { ThemeMode } from '@/types';
 

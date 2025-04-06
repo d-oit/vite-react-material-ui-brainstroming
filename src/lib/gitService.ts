@@ -1,4 +1,4 @@
-import { GitCommit } from '@/types';
+import type { GitCommit } from '@/types';
 
 // Mock Git history data (in a real app, this would call a backend API)
 const mockGitHistory: GitCommit[] = [

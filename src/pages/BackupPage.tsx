@@ -1,4 +1,9 @@
-import { useState, useEffect } from 'react';
+import {
+  CloudUpload as UploadIcon,
+  CloudDownload as DownloadIcon,
+  Delete as DeleteIcon,
+  Refresh as RefreshIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -19,12 +24,8 @@ import {
   DialogContentText,
   DialogActions,
 } from '@mui/material';
-import {
-  CloudUpload as UploadIcon,
-  CloudDownload as DownloadIcon,
-  Delete as DeleteIcon,
-  Refresh as RefreshIcon,
-} from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+
 import { MainLayout } from '@/components/Layout/MainLayout';
 import { listProjects, downloadProject } from '@/lib/s3Service';
 

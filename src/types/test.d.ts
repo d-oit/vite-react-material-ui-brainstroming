@@ -7,7 +7,7 @@ declare module 'virtual:pwa-register' {
     onNeedRefresh?: () => void;
     onOfflineReady?: () => void;
     onRegistered?: (registration: ServiceWorkerRegistration) => void;
-    onRegisterError?: (error: any) => void;
+    onRegisterError?: (error: Error | unknown) => void;
   }
 
   export function registerSW(options?: RegisterSWOptions): {
@@ -18,7 +18,7 @@ declare module 'virtual:pwa-register' {
 declare global {
   // Extend jest-dom matchers
   namespace Vi {
-    interface JestAssertion<T = any> extends jest.Matchers<void, T> {
+    interface JestAssertion<T = unknown> extends jest.Matchers<void, T> {
       toBeInTheDocument(): void;
       toHaveTextContent(text: string | RegExp): void;
       toHaveValue(value: string | number | string[]): void;

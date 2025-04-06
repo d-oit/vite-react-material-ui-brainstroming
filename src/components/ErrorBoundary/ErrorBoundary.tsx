@@ -1,10 +1,12 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { Box, Typography, Button, Paper, Divider, Container, useTheme } from '@mui/material';
 import {
   Refresh as RefreshIcon,
   Home as HomeIcon,
   BugReport as BugIcon,
 } from '@mui/icons-material';
+import { Box, Typography, Button, Paper, Divider, Container, useTheme } from '@mui/material';
+import type { ErrorInfo, ReactNode } from 'react';
+import React, { Component } from 'react';
+
 import indexedDBService from '../../services/IndexedDBService';
 
 interface Props {

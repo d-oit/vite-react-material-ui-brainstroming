@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { Box, Container, Paper, Tabs, Tab, Typography, Divider } from '@mui/material';
 import { Dashboard as DashboardIcon, Archive as ArchiveIcon } from '@mui/icons-material';
+import { Box, Container, Paper, Tabs, Tab, Typography, Divider } from '@mui/material';
+import React, { useState } from 'react';
+
 import { AppShell } from '../components/Layout/AppShell';
-import ProjectList from '../components/ProjectList/ProjectList';
 import ProjectArchivePanel from '../components/ProjectArchive/ProjectArchivePanel';
-import { Project } from '../types';
+import ProjectList from '../components/ProjectList/ProjectList';
+import type { Project } from '../types';
 
 interface TabPanelProps {
   children?: React.ReactNode;

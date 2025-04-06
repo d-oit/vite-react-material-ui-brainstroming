@@ -1,14 +1,18 @@
+import AWS, { S3 } from 'aws-sdk';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
+import loggerService from '../../services/LoggerService';
+import s3Service from '../../services/S3Service';
+import type { Project } from '../../types';
 import mockOfflineService from '../mocks/OfflineService';
 import { mockLocalStorage, mockOnlineStatus } from '../test-utils';
-import { Project } from '../../types';
+
+// Import services after mocks
+
+// Mock AWS SDK
 
 // Use the mock instead of the real service
 const offlineService = mockOfflineService;
-
-// Import services after mocks
-import s3Service from '../../services/S3Service';
-import loggerService from '../../services/LoggerService';
 
 // Mock dependencies
 vi.mock('../../services/OfflineService', () => ({
@@ -22,9 +26,6 @@ vi.mock('../../services/LoggerService', () => ({
     warn: vi.fn(),
   },
 }));
-
-// Mock AWS SDK
-import AWS, { S3 } from 'aws-sdk';
 
 // Create a mock S3 instance
 const mockS3Instance = {

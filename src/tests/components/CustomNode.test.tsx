@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '../test-utils';
+
 import CustomNode from '../../components/BrainstormFlow/CustomNode';
 import { NodeType } from '../../types';
-import { mockResizeObserver } from '../test-utils';
+import { render, screen, fireEvent, mockResizeObserver } from '../test-utils';
 
 describe('CustomNode', () => {
   beforeEach(() => {

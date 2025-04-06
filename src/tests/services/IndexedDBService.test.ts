@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
 import indexedDBService from '../../services/IndexedDBService';
-import { mockIndexedDB } from '../test-utils';
 import { NodeType } from '../../types';
+import { mockIndexedDB } from '../test-utils';
 
 describe('IndexedDBService', () => {
   // Set a longer timeout for IndexedDB operations

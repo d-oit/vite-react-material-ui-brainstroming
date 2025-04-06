@@ -1,5 +1,10 @@
 // Service Worker Types
-export type ServiceWorkerState = 'installing' | 'installed' | 'activating' | 'activated' | 'redundant';
+export type ServiceWorkerState =
+  | 'installing'
+  | 'installed'
+  | 'activating'
+  | 'activated'
+  | 'redundant';
 
 export interface ServiceWorkerUpdate {
   type: 'pending' | 'available' | 'activated';

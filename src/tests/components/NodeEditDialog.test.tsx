@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '../test-utils';
+
 import NodeEditDialog from '../../components/BrainstormFlow/NodeEditDialog';
 import { NodeType } from '../../types';
+import { render, screen, fireEvent, waitFor } from '../test-utils';
 
 describe('NodeEditDialog', () => {
   const mockOnClose = vi.fn();

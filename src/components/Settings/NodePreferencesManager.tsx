@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { TouchApp as TouchIcon, ColorLens as ColorLensIcon } from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -20,10 +20,11 @@ import {
   useMediaQuery,
   TextField,
 } from '@mui/material';
-import { TouchApp as TouchIcon, ColorLens as ColorLensIcon } from '@mui/icons-material';
+import { useState } from 'react';
+
 import { useSettings } from '../../contexts/SettingsContext';
+import type { NodePreferences } from '../../services/IndexedDBService';
 import { NodeType } from '../../types';
-import { NodePreferences } from '../../services/IndexedDBService';
 
 // Node size preview component
 const NodeSizePreview = ({

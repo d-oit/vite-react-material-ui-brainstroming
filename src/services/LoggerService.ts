@@ -1,4 +1,5 @@
-import indexedDBService, { LogEntry } from './IndexedDBService';
+import type { LogEntry } from './IndexedDBService';
+import indexedDBService from './IndexedDBService';
 import offlineService from './OfflineService';
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'critical';

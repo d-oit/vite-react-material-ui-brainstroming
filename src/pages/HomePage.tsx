@@ -1,8 +1,9 @@
+import { Dashboard as DashboardIcon, FolderOpen as ProjectsIcon } from '@mui/icons-material';
 import { Box, Typography, Button, Container, Stack } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { Dashboard as DashboardIcon, FolderOpen as ProjectsIcon } from '@mui/icons-material';
-import { useI18n } from '../contexts/I18nContext';
+
 import { AppShell } from '../components/Layout/AppShell';
+import { useI18n } from '../contexts/I18nContext';
 
 interface HomePageProps {
   onThemeToggle: () => void;

@@ -1,8 +1,9 @@
-import type { Node, Edge } from './models';
 import type { MouseEvent } from 'react';
-import { NodeType, EdgeType, ConnectionMode, PanelPosition } from './enums';
 
-export type NodeChange = 
+import type { NodeType, EdgeType, ConnectionMode, PanelPosition } from './enums';
+import type { Node, Edge } from './models';
+
+export type NodeChange =
   | { type: 'position'; id: string; position: { x: number; y: number } }
   | { type: 'dimensions'; id: string; dimensions: { width: number; height: number } }
   | { type: 'select'; id: string; selected: boolean }

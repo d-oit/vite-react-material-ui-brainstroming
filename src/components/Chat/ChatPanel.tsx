@@ -1,4 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import {
+  Send as SendIcon,
+  Person as PersonIcon,
+  SmartToy as BotIcon,
+  WifiOff as OfflineIcon,
+  Info as InfoIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -12,18 +18,13 @@ import {
   Alert,
   Tooltip,
 } from '@mui/material';
-import {
-  Send as SendIcon,
-  Person as PersonIcon,
-  SmartToy as BotIcon,
-  WifiOff as OfflineIcon,
-  Info as InfoIcon,
-} from '@mui/icons-material';
-import { useSettings } from '../../contexts/SettingsContext';
+import { useState, useEffect, useRef } from 'react';
+
 import { useI18n } from '../../contexts/I18nContext';
-import { ChatMessage } from '../../types';
+import { useSettings } from '../../contexts/SettingsContext';
 import chatService from '../../services/ChatService';
 import offlineService from '../../services/OfflineService';
+import type { ChatMessage } from '../../types';
 
 interface ChatPanelProps {
   projectId?: string;

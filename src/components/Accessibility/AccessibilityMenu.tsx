@@ -1,4 +1,12 @@
-import { useState } from 'react';
+import {
+  Accessibility as AccessibilityIcon,
+  TextIncrease as TextIncreaseIcon,
+  TextDecrease as TextDecreaseIcon,
+  Contrast as ContrastIcon,
+  Animation as AnimationIcon,
+  HighlightAlt as FocusIcon,
+  Close as CloseIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -15,15 +23,8 @@ import {
   IconButton,
   useTheme,
 } from '@mui/material';
-import {
-  Accessibility as AccessibilityIcon,
-  TextIncrease as TextIncreaseIcon,
-  TextDecrease as TextDecreaseIcon,
-  Contrast as ContrastIcon,
-  Animation as AnimationIcon,
-  HighlightAlt as FocusIcon,
-  Close as CloseIcon,
-} from '@mui/icons-material';
+import { useState } from 'react';
+
 import { useSettings } from '../../contexts/SettingsContext';
 
 interface AccessibilityMenuProps {

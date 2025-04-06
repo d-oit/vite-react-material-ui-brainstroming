@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Project, Node, Edge } from '@/types';
+
 import { uploadProject, downloadProject } from '@/lib/s3Service';
+import type { Project, Node, Edge } from '@/types';
 
 interface UseProjectProps {
   projectId?: string;

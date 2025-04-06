@@ -1,4 +1,9 @@
-import { useState, useEffect } from 'react';
+import {
+  Commit as CommitIcon,
+  History as HistoryIcon,
+  Restore as RestoreIcon,
+  Save as SaveIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -18,16 +23,12 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material';
-import {
-  Commit as CommitIcon,
-  History as HistoryIcon,
-  Restore as RestoreIcon,
-  Save as SaveIcon,
-} from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+
 import { useI18n } from '../../contexts/I18nContext';
-import { Project } from '../../types';
 import gitService from '../../services/GitService';
 import projectService from '../../services/ProjectService';
+import type { Project } from '../../types';
 
 interface GitHistoryPanelProps {
   project: Project;

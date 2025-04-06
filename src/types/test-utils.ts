@@ -1,7 +1,8 @@
+import type { Mock } from 'vitest';
+
+import { NodeType, EdgeType } from './enums';
 import type { NodeData, Node, Edge } from './models';
 import type { Project } from './project';
-import { NodeType, EdgeType } from './enums';
-import type { Mock } from 'vitest';
 
 export interface MockResizeObserver {
   observe: Mock;
@@ -52,9 +53,9 @@ export function createTestNode(overrides: Partial<TestNode> = {}): TestNode {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       label: 'Test Label',
-      ...overrides.data
+      ...overrides.data,
     },
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -64,7 +65,7 @@ export function createTestEdge(overrides: Partial<Edge> = {}): Edge {
     source: 'source-node',
     target: 'target-node',
     type: EdgeType.DEFAULT,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -79,7 +80,7 @@ export function createTestProject(overrides: Partial<TestProject> = {}): TestPro
     updatedAt: new Date().toISOString(),
     version: 1,
     isArchived: false,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -88,24 +89,26 @@ export function createMockResizeObserver(): MockResizeObserver {
   return {
     observe: vi.fn(),
     unobserve: vi.fn(),
-    disconnect: vi.fn()
+    disconnect: vi.fn(),
   };
 }
 
 export function createMockStorage(): MockStorage {
   const store = new Map<string, string>();
-  
+
   return {
     getItem: vi.fn((key: string) => store.get(key) ?? null),
     setItem: vi.fn((key: string, value: string) => store.set(key, value)),
     removeItem: vi.fn((key: string) => store.delete(key)),
     clear: vi.fn(() => store.clear()),
     key: vi.fn((index: number) => Array.from(store.keys())[index] || null),
-    length: store.size
+    length: store.size,
   };
 }
 
-export function createMockNetworkStatus(overrides: Partial<MockNetworkStatus> = {}): MockNetworkStatus {
+export function createMockNetworkStatus(
+  overrides: Partial<MockNetworkStatus> = {}
+): MockNetworkStatus {
   return {
     online: true,
     type: 'wifi',
@@ -113,6 +116,6 @@ export function createMockNetworkStatus(overrides: Partial<MockNetworkStatus> = 
     downlink: 10,
     rtt: 50,
     saveData: false,
-    ...overrides
+    ...overrides,
   };
 }

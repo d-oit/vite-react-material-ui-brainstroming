@@ -1,8 +1,9 @@
+import { Box, Typography, Paper, CircularProgress, Tabs, Tab, Divider } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, Typography, Paper, CircularProgress, Tabs, Tab, Divider } from '@mui/material';
-import { MainLayout } from '@/components/Layout/MainLayout';
+
 import { GitHistoryViewer } from '@/components/GitHistory/GitHistoryViewer';
+import { MainLayout } from '@/components/Layout/MainLayout';
 import { useProject } from '@/hooks/useProject';
 
 interface TabPanelProps {

@@ -1,23 +1,3 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import ReactFlow, {
-  Background,
-  Controls,
-  MiniMap,
-  Node as FlowNode,
-  // Edge as FlowEdge,
-  NodeTypes,
-  // EdgeTypes,
-  Connection,
-  useNodesState,
-  useEdgesState,
-  addEdge,
-  // Panel,
-  ReactFlowInstance,
-  useReactFlow,
-  XYPosition,
-  ReactFlowProvider,
-} from 'reactflow';
-import 'reactflow/dist/style.css';
 import {
   Box,
   useTheme,
@@ -30,15 +10,49 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  Fab,
+  IconButton,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Tooltip,
+  Paper,
+  Typography,
   FormControlLabel,
   Checkbox,
 } from '@mui/material';
-import CustomNode from './CustomNode';
-import { NodeEditDialog } from './NodeEditDialog';
-import { NodeType, NodeData, Node, Edge } from '../../types';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import type {
+  Node as FlowNode,
+  // Edge as FlowEdge,
+  NodeTypes,
+  // EdgeTypes,
+  Connection,
+  // Panel,
+  ReactFlowInstance,
+  XYPosition,
+} from 'reactflow';
+import ReactFlow, {
+  Background,
+  Controls,
+  MiniMap,
+  useNodesState,
+  useEdgesState,
+  addEdge,
+  useReactFlow,
+  ReactFlowProvider,
+} from 'reactflow';
+import 'reactflow/dist/style.css';
+
 import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import loggerService from '../../services/LoggerService';
+import type { NodeData, Node, Edge } from '../../types';
+import { NodeType } from '../../types';
+
+import CustomNode from './CustomNode';
+import { NodeEditDialog } from './NodeEditDialog';
 
 // Define custom node types
 const nodeTypes: NodeTypes = {

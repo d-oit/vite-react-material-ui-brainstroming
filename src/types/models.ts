@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+
 import { NodeType, EdgeType, ThemeMode, LogLevel, LogCategory, NodeSize } from './enums';
 
 // Basic node types

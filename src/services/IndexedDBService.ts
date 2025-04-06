@@ -108,7 +108,7 @@ export class IndexedDBService {
       return this.initPromise;
     }
 
-    this.initPromise = new Promise((resolve) => {
+    this.initPromise = new Promise(resolve => {
       try {
         if (!window.indexedDB) {
           console.error('IndexedDB is not supported in this browser');
@@ -186,7 +186,9 @@ export class IndexedDBService {
             if (oldVersion < 3) {
               // Add new stores for version 3
               if (!db.objectStoreNames.contains(STORES.PROJECT_HISTORY)) {
-                const historyStore = db.createObjectStore(STORES.PROJECT_HISTORY, { keyPath: 'id' });
+                const historyStore = db.createObjectStore(STORES.PROJECT_HISTORY, {
+                  keyPath: 'id',
+                });
                 historyStore.createIndex('projectId', 'projectId', { unique: false });
                 historyStore.createIndex('timestamp', 'timestamp', { unique: false });
                 historyStore.createIndex('action', 'action', { unique: false });
@@ -599,7 +601,7 @@ export class IndexedDBService {
   public async getSetting(key: string): Promise<unknown> {
     const initialized = await this.init();
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (!initialized || !this.db) {
         console.warn(`Database not initialized, returning null for setting: ${key}`);
         resolve(null);
@@ -634,7 +636,7 @@ export class IndexedDBService {
   public async saveSettings(settings: Record<string, unknown>): Promise<void> {
     const initialized = await this.init();
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (!initialized || !this.db) {
         console.warn('Database not initialized, settings will not be saved');
         // Resolve anyway to prevent cascading errors
@@ -1256,7 +1258,7 @@ export class IndexedDBService {
   public async saveProject(project: Project): Promise<string> {
     const initialized = await this.init();
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (!initialized || !this.db) {
         console.warn(`Database not initialized, project ${project.id} will not be saved`);
         // Still return the project ID to prevent cascading errors
@@ -1297,7 +1299,7 @@ export class IndexedDBService {
   public async getProject(id: string): Promise<Project | null> {
     const initialized = await this.init();
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (!initialized || !this.db) {
         console.warn(`Database not initialized, returning null for project: ${id}`);
         resolve(null);
@@ -1340,7 +1342,7 @@ export class IndexedDBService {
   public async getAllProjects(includeArchived: boolean = false): Promise<Project[]> {
     const initialized = await this.init();
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (!initialized || !this.db) {
         console.warn('Database not initialized, returning empty projects array');
         resolve([]);
@@ -1361,7 +1363,9 @@ export class IndexedDBService {
           }
 
           // Sort by updatedAt (newest first)
-          projects.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+          projects.sort(
+            (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+          );
 
           resolve(projects);
         };
@@ -1384,7 +1388,7 @@ export class IndexedDBService {
   public async deleteProject(id: string): Promise<void> {
     const initialized = await this.init();
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (!initialized || !this.db) {
         console.warn(`Database not initialized, project ${id} will not be deleted`);
         // Resolve anyway to prevent cascading errors
@@ -1498,7 +1502,7 @@ export class IndexedDBService {
   public async addProjectHistoryEntry(entry: Omit<ProjectHistoryEntry, 'id'>): Promise<string> {
     const initialized = await this.init();
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (!initialized || !this.db) {
         console.warn('Database not initialized, project history entry will not be saved');
         // Return a fake ID to prevent cascading errors
@@ -1543,7 +1547,7 @@ export class IndexedDBService {
   public async getProjectHistory(projectId: string, limit = 100): Promise<ProjectHistoryEntry[]> {
     const initialized = await this.init();
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (!initialized || !this.db) {
         console.warn(`Database not initialized, returning empty history for project: ${projectId}`);
         resolve([]);
@@ -1572,7 +1576,6 @@ export class IndexedDBService {
         resolve([]);
       }
     });
-
   }
 }
 

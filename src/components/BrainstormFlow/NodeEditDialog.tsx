@@ -1,4 +1,13 @@
-import { useState, useEffect, useMemo } from 'react';
+import {
+  Palette as PaletteIcon,
+  FormatSize as FormatSizeIcon,
+  Refresh as RefreshIcon,
+  SmartButton as SmartButtonIcon,
+  Smartphone as SmartphoneIcon,
+  Laptop as LaptopIcon,
+  AccessibilityNew as AccessibilityIcon,
+} from '@mui/icons-material';
+import type { SelectChangeEvent } from '@mui/material';
 import {
   Dialog,
   DialogTitle,
@@ -12,7 +21,6 @@ import {
   MenuItem,
   Box,
   Chip,
-  SelectChangeEvent,
   Typography,
   Divider,
   useTheme,
@@ -25,19 +33,13 @@ import {
   Paper,
   Alert,
 } from '@mui/material';
-import {
-  Palette as PaletteIcon,
-  FormatSize as FormatSizeIcon,
-  Refresh as RefreshIcon,
-  SmartButton as SmartButtonIcon,
-  Smartphone as SmartphoneIcon,
-  Laptop as LaptopIcon,
-  AccessibilityNew as AccessibilityIcon,
-} from '@mui/icons-material';
-import loggerService from '../../services/LoggerService';
-import { NodeType, NodeData } from '../../types';
-// import { useI18n } from '../../contexts/I18nContext';
+import { useState, useEffect, useMemo } from 'react';
+
 import { useSettings } from '../../contexts/SettingsContext';
+import loggerService from '../../services/LoggerService';
+import type { NodeData } from '../../types';
+import { NodeType } from '../../types';
+// import { useI18n } from '../../contexts/I18nContext';
 
 interface NodeEditDialogProps {
   open: boolean;

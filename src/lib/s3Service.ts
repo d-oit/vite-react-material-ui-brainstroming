@@ -1,5 +1,6 @@
 import AWS from 'aws-sdk';
-import { Project } from '@/types';
+
+import type { Project } from '@/types';
 
 // Initialize S3 client
 const initS3Client = () => {

@@ -1,4 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import {
+  WifiOff as OfflineIcon,
+  Wifi as WifiIcon,
+  SignalCellular4Bar as CellularIcon,
+  SignalCellular0Bar as WeakSignalIcon,
+  SignalCellular1Bar as LowSignalIcon,
+  SignalCellular2Bar as MediumSignalIcon,
+  SignalCellular3Bar as GoodSignalIcon,
+} from '@mui/icons-material';
 import {
   Dialog,
   DialogTitle,
@@ -15,16 +23,10 @@ import {
   ListItemText,
   useTheme,
 } from '@mui/material';
-import {
-  WifiOff as OfflineIcon,
-  Wifi as WifiIcon,
-  SignalCellular4Bar as CellularIcon,
-  SignalCellular0Bar as WeakSignalIcon,
-  SignalCellular1Bar as LowSignalIcon,
-  SignalCellular2Bar as MediumSignalIcon,
-  SignalCellular3Bar as GoodSignalIcon,
-} from '@mui/icons-material';
-import offlineService, { NetworkStatus } from '../../services/OfflineService';
+import React, { useState, useEffect } from 'react';
+
+import type { NetworkStatus } from '../../services/OfflineService';
+import offlineService from '../../services/OfflineService';
 
 interface NetworkInfoDialogProps {
   open: boolean;

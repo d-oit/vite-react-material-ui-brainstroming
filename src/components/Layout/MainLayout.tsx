@@ -1,5 +1,7 @@
-import { useState, ReactNode } from 'react';
 import { Box, Toolbar, useMediaQuery, useTheme, CssBaseline } from '@mui/material';
+import type { ReactNode } from 'react';
+import { useState } from 'react';
+
 import { AppBar } from './AppBar';
 import { Drawer } from './Drawer';
 import { MobileBottomNav } from './MobileBottomNav';

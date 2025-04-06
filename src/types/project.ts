@@ -43,7 +43,7 @@ export function createEmptyProject(id: string): Project {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     version: DEFAULT_PROJECT_VERSION,
-    isArchived: false
+    isArchived: false,
   };
 }
 

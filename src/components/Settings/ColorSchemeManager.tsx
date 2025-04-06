@@ -1,4 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Check as CheckIcon,
+  ContentCopy as DuplicateIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -18,17 +24,12 @@ import {
   useTheme,
   Stack,
 } from '@mui/material';
+import React, { useState, useEffect } from 'react';
 // import { styled } from '@mui/material/styles';
-import {
-  Add as AddIcon,
-  Delete as DeleteIcon,
-  Edit as EditIcon,
-  Check as CheckIcon,
-  ContentCopy as DuplicateIcon,
-} from '@mui/icons-material';
+
 import { useSettings } from '../../contexts/SettingsContext';
+import type { ColorScheme } from '../../services/IndexedDBService';
 import { NodeType } from '../../types';
-import { ColorScheme } from '../../services/IndexedDBService';
 
 // Color picker component
 const ColorPicker = ({ color, onChange }: { color: string; onChange: (color: string) => void }) => {

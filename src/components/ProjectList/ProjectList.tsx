@@ -1,4 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Archive as ArchiveIcon,
+  MoreVert as MoreVertIcon,
+  History as HistoryIcon,
+  CloudUpload as CloudUploadIcon,
+  Share as ShareIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -23,19 +32,11 @@ import {
   ListItemIcon,
   ListItemText,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Archive as ArchiveIcon,
-  MoreVert as MoreVertIcon,
-  History as HistoryIcon,
-  CloudUpload as CloudUploadIcon,
-  Share as ShareIcon,
-} from '@mui/icons-material';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Project } from '../../types';
+
 import projectService from '../../services/ProjectService';
+import type { Project } from '../../types';
 
 interface ProjectListProps {
   onCreateProject?: (project: Project) => void;

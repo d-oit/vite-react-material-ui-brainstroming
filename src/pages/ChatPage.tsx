@@ -1,6 +1,7 @@
 import { Box, Typography, Paper, Divider } from '@mui/material';
-import { MainLayout } from '@/components/Layout/MainLayout';
+
 import { ChatInterface } from '@/components/Chat/ChatInterface';
+import { MainLayout } from '@/components/Layout/MainLayout';
 
 export const ChatPage = () => {
   return (

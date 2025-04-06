@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   Box,
   Typography,
@@ -24,15 +24,17 @@ import {
   Tab,
   Tabs,
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { useSettings } from '../contexts/SettingsContext';
-import { useI18n } from '../contexts/I18nContext';
+import { useState, useEffect } from 'react';
+
 import { AppShell } from '../components/Layout/AppShell';
-import { ThemeMode, UserPreferences } from '../types';
 import { ColorSchemeManager } from '../components/Settings/ColorSchemeManager';
+import { LogViewer } from '../components/Settings/LogViewer';
 import { NodePreferencesManager } from '../components/Settings/NodePreferencesManager';
 import { SettingsExportImport } from '../components/Settings/SettingsExportImport';
-import { LogViewer } from '../components/Settings/LogViewer';
+import { useI18n } from '../contexts/I18nContext';
+import { useSettings } from '../contexts/SettingsContext';
+import { ThemeMode } from '../types';
+import type { UserPreferences } from '../types';
 
 // Default user preferences
 const defaultPreferences: UserPreferences = {

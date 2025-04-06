@@ -1,29 +1,23 @@
+import type { PaletteMode } from '@mui/material';
+import { ThemeProvider, CssBaseline, createTheme, Button, Snackbar, Alert } from '@mui/material';
 import { useState, useMemo, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import {
-  ThemeProvider,
-  CssBaseline,
-  createTheme,
-  PaletteMode,
-  Button,
-  Snackbar,
-  Alert,
-} from '@mui/material';
 // Icons are imported but not used in this file
 // They might be used in child components or for future implementation
 import { registerSW } from 'virtual:pwa-register';
+
+import AccessibilityMenu from './components/Accessibility/AccessibilityMenu';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
+import OfflineFallback from './components/OfflineIndicator/OfflineFallback';
+import OfflineIndicator from './components/OfflineIndicator/OfflineIndicator';
+import withOfflineFallback from './components/OfflineIndicator/withOfflineFallback';
+import CSPMeta from './components/Security/CSPMeta';
 import { useI18n } from './contexts/I18nContext';
 import { SettingsProvider } from './contexts/SettingsContext';
-import { HomePage } from './pages/HomePage';
 import { EnhancedBrainstormPage } from './pages/EnhancedBrainstormPage';
-import { SettingsPage } from './pages/SettingsPage';
+import { HomePage } from './pages/HomePage';
 import ProjectDashboard from './pages/ProjectDashboard';
-import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
-import OfflineIndicator from './components/OfflineIndicator/OfflineIndicator';
-import OfflineFallback from './components/OfflineIndicator/OfflineFallback';
-import withOfflineFallback from './components/OfflineIndicator/withOfflineFallback';
-import AccessibilityMenu from './components/Accessibility/AccessibilityMenu';
-import CSPMeta from './components/Security/CSPMeta';
+import { SettingsPage } from './pages/SettingsPage';
 import indexedDBService from './services/IndexedDBService';
 import loggerService from './services/LoggerService';
 import offlineService from './services/OfflineService';
@@ -133,18 +127,23 @@ const AppWithTheme = () => {
   // Initialize services
   useEffect(() => {
     // Initialize IndexedDB
-    indexedDBService.init().then(initialized => {
-      if (!initialized) {
-        console.warn('IndexedDB initialization failed, some features may not work properly');
-        loggerService.warn('IndexedDB initialization failed, some features may not work properly');
-      } else {
-        console.log('IndexedDB initialized successfully in App');
-        loggerService.info('IndexedDB initialized successfully in App');
-      }
-    }).catch(error => {
-      console.error('Failed to initialize IndexedDB:', error);
-      loggerService.error('Failed to initialize IndexedDB', error);
-    });
+    indexedDBService
+      .init()
+      .then(initialized => {
+        if (!initialized) {
+          console.warn('IndexedDB initialization failed, some features may not work properly');
+          loggerService.warn(
+            'IndexedDB initialization failed, some features may not work properly'
+          );
+        } else {
+          console.log('IndexedDB initialized successfully in App');
+          loggerService.info('IndexedDB initialized successfully in App');
+        }
+      })
+      .catch(error => {
+        console.error('Failed to initialize IndexedDB:', error);
+        loggerService.error('Failed to initialize IndexedDB', error);
+      });
 
     // Start offline sync service
     offlineService.configure({

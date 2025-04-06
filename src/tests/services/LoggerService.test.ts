@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import loggerService from '../../services/LoggerService';
+
 import indexedDBService from '../../services/IndexedDBService';
+import loggerService from '../../services/LoggerService';
 import offlineService from '../../services/OfflineService';
 import { mockLocalStorage, mockOnlineStatus } from '../test-utils';
 

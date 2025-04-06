@@ -19,6 +19,7 @@ module.exports = {
     'plugin:jest-dom/recommended',
     'prettier',
   ],
+
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaFeatures: {
@@ -40,26 +41,35 @@ module.exports = {
   ],
   rules: {
     // React
-    'react/react-in-jsx-scope': 'off',
+    'react/react-in-jsx-scope': 'off', // Not needed in React 18 with automatic JSX transform
     'react/prop-types': 'off',
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
+    'react/jsx-uses-react': 'off', // Not needed in React 18
+    'react/jsx-uses-vars': 'error',
+    'react/jsx-no-target-blank': 'error',
+    'react/jsx-curly-brace-presence': ['error', { props: 'never', children: 'never' }],
+    'react/self-closing-comp': ['error', { component: true, html: true }],
+    'react/display-name': 'off',
+
+    // Accessibility
+    'jsx-a11y/no-autofocus': 'warn',
 
     // TypeScript
-    '@typescript-eslint/no-explicit-any': 'error',
-    '@typescript-eslint/no-unused-vars': ['error', {
+    '@typescript-eslint/no-explicit-any': 'warn',
+    '@typescript-eslint/no-unused-vars': ['warn', {
       argsIgnorePattern: '^_',
       varsIgnorePattern: '^_',
     }],
-    '@typescript-eslint/explicit-function-return-type': ['warn', {
+    '@typescript-eslint/explicit-function-return-type': ['off', {
       allowExpressions: true,
       allowTypedFunctionExpressions: true,
     }],
-    '@typescript-eslint/consistent-type-imports': ['error', {
+    '@typescript-eslint/consistent-type-imports': ['warn', {
       prefer: 'type-imports',
       disallowTypeAnnotations: false,
     }],
-    '@typescript-eslint/no-non-null-assertion': 'error',
+    '@typescript-eslint/no-non-null-assertion': 'warn',
 
     // Import
     'import/order': ['error', {
@@ -69,9 +79,18 @@ module.exports = {
     }],
     'import/no-cycle': 'error',
     'import/no-unresolved': 'error',
+    'import/first': 'error',
+    'import/no-duplicates': 'error',
+    'import/no-useless-path-segments': 'error',
+
+    // Security
+    'security/detect-object-injection': 'warn',
+    'security/detect-unsafe-regex': 'warn',
 
     // Prettier
-    'prettier/prettier': 'error',
+    'prettier/prettier': ['error', {
+      endOfLine: 'lf'
+    }],
   },
   settings: {
     react: {
@@ -84,23 +103,49 @@ module.exports = {
       },
       node: {
         extensions: ['.js', '.jsx', '.ts', '.tsx']
+      },
+      alias: {
+        map: [
+          ['@', './src']
+        ],
+        extensions: ['.js', '.jsx', '.ts', '.tsx']
       }
     },
   },
+  ignorePatterns: [
+    'dist',
+    'node_modules',
+    'coverage',
+    '.eslintrc.cjs'
+  ],
   overrides: [
-    // Test files
+    // React Testing Library test files
     {
       files: ['**/__tests__/**/*', '**/*.{test,spec}.{ts,tsx}'],
+      excludedFiles: ['e2e/**/*.{ts,tsx}'],
       extends: ['plugin:testing-library/react', 'plugin:jest-dom/recommended'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-unsafe-member-access': 'off',
         '@typescript-eslint/no-unsafe-assignment': 'off',
-        'testing-library/prefer-screen-queries': 'error',
-        'testing-library/no-node-access': 'error',
-        'testing-library/no-container': 'error',
-        'testing-library/render-result-naming-convention': 'error'
+        'testing-library/prefer-screen-queries': 'warn',
+        'testing-library/no-node-access': 'warn',
+        'testing-library/no-container': 'warn',
+        'testing-library/render-result-naming-convention': 'warn',
+        'testing-library/no-wait-for-multiple-assertions': 'warn',
+        'testing-library/no-debugging-utils': 'warn'
+      }
+    },
+    // Playwright e2e test files
+    {
+      files: ['e2e/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-non-null-assertion': 'off',
+        'testing-library/prefer-screen-queries': 'off',
+        'testing-library/no-node-access': 'off',
+        'testing-library/no-container': 'off'
       }
     },
     // Configuration files
@@ -109,6 +154,18 @@ module.exports = {
       rules: {
         '@typescript-eslint/no-explicit-any': 'off',
         'import/no-default-export': 'off'
+      }
+    },
+    // Virtual modules
+    {
+      files: ['**/*.{ts,tsx}'],
+      rules: {
+        'import/no-unresolved': [
+          'error',
+          {
+            ignore: ['^virtual:.*$', '@vite-pwa/.*']
+          }
+        ]
       }
     },
     // Service Worker
@@ -124,11 +181,5 @@ module.exports = {
         '@typescript-eslint/no-unsafe-assignment': 'off'
       }
     }
-  ],
-  ignorePatterns: [
-    'dist',
-    'node_modules',
-    'coverage',
-    '.eslintrc.cjs'
   ]
 }

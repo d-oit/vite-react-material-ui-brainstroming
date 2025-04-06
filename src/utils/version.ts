@@ -7,7 +7,7 @@ export function normalizeVersion(version: string | number): number {
   if (typeof version === 'number') {
     return Math.floor(version);
   }
-  
+
   const match = /^(\d+)/.exec(version);
   return match ? Number(match[1]) : 1;
 }

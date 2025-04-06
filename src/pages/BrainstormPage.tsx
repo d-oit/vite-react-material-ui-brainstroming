@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { Save as SaveIcon, Chat as ChatIcon, Close as CloseIcon } from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -14,12 +13,14 @@ import {
   IconButton,
   Fab,
 } from '@mui/material';
-import { Save as SaveIcon, Chat as ChatIcon, Close as CloseIcon } from '@mui/icons-material';
-import { MainLayout } from '@/components/Layout/MainLayout';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+
 import { BrainstormFlow } from '@/components/BrainstormFlow/BrainstormFlow';
 import { ChatInterface } from '@/components/Chat/ChatInterface';
+import { MainLayout } from '@/components/Layout/MainLayout';
 import { useProject } from '@/hooks/useProject';
-import { Node, Edge } from '@/types';
+import type { Node, Edge } from '@/types';
 
 export const BrainstormPage = () => {
   const { projectId } = useParams<{ projectId: string }>();

@@ -1,4 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import {
+  Create as CreateIcon,
+  Update as UpdateIcon,
+  Delete as DeleteIcon,
+  Archive as ArchiveIcon,
+  Unarchive as UnarchiveIcon,
+  Visibility as ViewIcon,
+  Share as ShareIcon,
+  CloudUpload as ExportIcon,
+  History as HistoryIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -13,19 +23,10 @@ import {
   Chip,
   Tooltip,
 } from '@mui/material';
-import {
-  Create as CreateIcon,
-  Update as UpdateIcon,
-  Delete as DeleteIcon,
-  Archive as ArchiveIcon,
-  Unarchive as UnarchiveIcon,
-  Visibility as ViewIcon,
-  Share as ShareIcon,
-  CloudUpload as ExportIcon,
-  History as HistoryIcon,
-} from '@mui/icons-material';
-import { ProjectHistoryEntry } from '../../types';
+import React, { useState, useEffect } from 'react';
+
 import projectService from '../../services/ProjectService';
+import type { ProjectHistoryEntry } from '../../types';
 
 interface ProjectHistoryPanelProps {
   projectId: string;

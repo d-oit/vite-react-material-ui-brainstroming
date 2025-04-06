@@ -1,5 +1,16 @@
-import { ReactNode, useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  Menu as MenuIcon,
+  Brightness4 as DarkIcon,
+  Brightness7 as LightIcon,
+  BubbleChart as BrainstormIcon,
+  Home as HomeIcon,
+  Settings as SettingsIcon,
+  Add as AddIcon,
+  History as HistoryIcon,
+  Chat as ChatIcon,
+  Close as CloseIcon,
+  FolderOpen as ProjectsIcon,
+} from '@mui/icons-material';
 import {
   Box,
   AppBar,
@@ -22,24 +33,15 @@ import {
   Snackbar,
   Alert,
 } from '@mui/material';
-import {
-  Menu as MenuIcon,
-  Brightness4 as DarkIcon,
-  Brightness7 as LightIcon,
-  BubbleChart as BrainstormIcon,
-  Home as HomeIcon,
-  Settings as SettingsIcon,
-  Add as AddIcon,
-  History as HistoryIcon,
-  Chat as ChatIcon,
-  Close as CloseIcon,
-  FolderOpen as ProjectsIcon,
-} from '@mui/icons-material';
+import type { ReactNode } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+
 import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
-import OfflineIndicator from '../OfflineIndicator/OfflineIndicator';
-import NetworkStatusIcon from '../OfflineIndicator/NetworkStatusIcon';
 import NetworkInfoDialog from '../OfflineIndicator/NetworkInfoDialog';
+import NetworkStatusIcon from '../OfflineIndicator/NetworkStatusIcon';
+import OfflineIndicator from '../OfflineIndicator/OfflineIndicator';
 
 interface AppShellProps {
   children: ReactNode;

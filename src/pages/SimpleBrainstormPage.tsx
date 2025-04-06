@@ -1,4 +1,10 @@
-import { useState, useEffect } from 'react';
+import {
+  Save as SaveIcon,
+  Chat as ChatIcon,
+  Close as CloseIcon,
+  Menu as MenuIcon,
+  History as HistoryIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -16,20 +22,15 @@ import {
   Tab,
   Fab,
 } from '@mui/material';
-import {
-  Save as SaveIcon,
-  Chat as ChatIcon,
-  Close as CloseIcon,
-  Menu as MenuIcon,
-  History as HistoryIcon,
-} from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+
 import { BrainstormFlow } from '../components/BrainstormFlow/BrainstormFlow';
 import { ChatPanel } from '../components/Chat/ChatPanel';
 import { GitHistoryPanel } from '../components/GitHistory/GitHistoryPanel';
 import { useI18n } from '../contexts/I18nContext';
 import { useSettings } from '../contexts/SettingsContext';
-import { Node, Edge, Project } from '../types';
 import projectService from '../services/ProjectService';
+import type { Node, Edge, Project } from '../types';
 
 // Sample data for demonstration
 const sampleNodes: Node[] = [

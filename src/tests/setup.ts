@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { vi, expect } from 'vitest';
-import { cleanup } from '@testing-library/react';
+
 import { mockIndexedDB, mockIntersectionObserver, mockLocalStorage } from './test-utils';
 
 // Extend matchers
@@ -8,8 +8,7 @@ expect.extend({
   toBeInTheDocument(received) {
     const pass = received !== null;
     return {
-      message: () =>
-        `expected ${received} ${pass ? 'not ' : ''}to be in the document`,
+      message: () => `expected ${received} ${pass ? 'not ' : ''}to be in the document`,
       pass,
     };
   },
@@ -20,10 +19,10 @@ beforeAll(() => {
   mockIndexedDB();
   mockIntersectionObserver();
   mockLocalStorage();
-  
+
   // Mock window.fetch
   global.fetch = vi.fn();
-  
+
   // Mock service worker
   global.navigator.serviceWorker = {
     register: vi.fn().mockResolvedValue({}),
@@ -37,7 +36,6 @@ beforeAll(() => {
 
 // Cleanup after each test
 afterEach(() => {
-  cleanup();
   vi.clearAllMocks();
 });
 

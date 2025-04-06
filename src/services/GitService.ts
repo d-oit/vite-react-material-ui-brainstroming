@@ -1,4 +1,4 @@
-import { Project } from '../types';
+import type { Project } from '../types';
 
 /**
  * Service for handling Git-like versioning of projects

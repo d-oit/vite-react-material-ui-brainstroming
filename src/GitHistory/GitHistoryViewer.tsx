@@ -1,4 +1,8 @@
-import { useState, useEffect } from 'react';
+import {
+  Commit as CommitIcon,
+  Person as PersonIcon,
+  Compare as CompareIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Paper,
@@ -17,13 +21,10 @@ import {
   DialogContent,
   DialogActions,
 } from '@mui/material';
-import {
-  Commit as CommitIcon,
-  Person as PersonIcon,
-  Compare as CompareIcon,
-} from '@mui/icons-material';
-import { GitCommit } from '@/types';
+import { useState, useEffect } from 'react';
+
 import { getGitHistory, /* getGitCommitDetails, */ compareGitCommits } from '@/lib/gitService';
+import type { GitCommit } from '@/types';
 
 interface GitHistoryViewerProps {
   projectId: string;

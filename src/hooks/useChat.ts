@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { ChatMessage } from '@/types';
+
 import { sendMessage } from '@/lib/openRouterService';
+import type { ChatMessage } from '@/types';
 
 export const useChat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);

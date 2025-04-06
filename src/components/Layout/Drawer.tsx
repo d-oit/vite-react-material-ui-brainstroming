@@ -1,4 +1,13 @@
 import {
+  Dashboard as DashboardIcon,
+  BubbleChart as BrainstormIcon,
+  History as HistoryIcon,
+  Storage as ProjectsIcon,
+  Settings as SettingsIcon,
+  Chat as ChatIcon,
+  CloudUpload as BackupIcon,
+} from '@mui/icons-material';
+import {
   Drawer as MuiDrawer,
   List,
   ListItem,
@@ -11,15 +20,6 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
-import {
-  Dashboard as DashboardIcon,
-  BubbleChart as BrainstormIcon,
-  History as HistoryIcon,
-  Storage as ProjectsIcon,
-  Settings as SettingsIcon,
-  Chat as ChatIcon,
-  CloudUpload as BackupIcon,
-} from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface DrawerProps {

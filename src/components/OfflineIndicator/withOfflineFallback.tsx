@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import OfflineFallback from './OfflineFallback';
+
 import offlineService from '../../services/OfflineService';
+
+import OfflineFallback from './OfflineFallback';
 
 interface WithOfflineFallbackOptions {
   requiresNetwork?: boolean;

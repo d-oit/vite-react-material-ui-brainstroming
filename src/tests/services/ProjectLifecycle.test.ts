@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { Project, ProjectHistoryEntry } from '../../types';
-import projectService from '../../services/ProjectService';
+
 import indexedDBService from '../../services/IndexedDBService';
+import projectService from '../../services/ProjectService';
+import type { Project, ProjectHistoryEntry } from '../../types';
 
 // Mock the dependencies
 vi.mock('../../services/IndexedDBService', () => ({

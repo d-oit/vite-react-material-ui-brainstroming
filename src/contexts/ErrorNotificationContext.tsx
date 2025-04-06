@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Alert, Snackbar } from '@mui/material';
+import type { ReactNode } from 'react';
+import React, { createContext, useContext, useState } from 'react';
+
 import { useI18n } from './I18nContext';
 
 interface ErrorNotificationContextType {

@@ -1,4 +1,11 @@
-import React from 'react';
+import {
+  WifiOff as OfflineIcon,
+  Edit as EditIcon,
+  Save as SaveIcon,
+  Sync as SyncIcon,
+  Add as AddIcon,
+  Storage as StorageIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -11,14 +18,8 @@ import {
   ListItemText,
   useTheme,
 } from '@mui/material';
-import {
-  WifiOff as OfflineIcon,
-  Edit as EditIcon,
-  Save as SaveIcon,
-  Sync as SyncIcon,
-  Add as AddIcon,
-  Storage as StorageIcon,
-} from '@mui/icons-material';
+import React from 'react';
+
 import offlineService from '../../services/OfflineService';
 
 interface OfflineFallbackProps {

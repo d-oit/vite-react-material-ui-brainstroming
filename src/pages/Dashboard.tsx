@@ -1,5 +1,10 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {
+  Add as AddIcon,
+  BubbleChart as BrainstormIcon,
+  History as HistoryIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -18,15 +23,11 @@ import {
   DialogActions,
   TextField,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  BubbleChart as BrainstormIcon,
-  History as HistoryIcon,
-  Delete as DeleteIcon,
-  Edit as EditIcon,
-} from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import { MainLayout } from '@/components/Layout/MainLayout';
-import { Project } from '@/types';
+import type { Project } from '@/types';
 
 // Mock projects data (in a real app, this would come from a backend or local storage)
 const mockProjects: Project[] = [

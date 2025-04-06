@@ -1,5 +1,3 @@
-import React, { useState, useEffect } from 'react';
-import { IconButton, Tooltip } from '@mui/material';
 import {
   WifiOff as OfflineIcon,
   Wifi as WifiIcon,
@@ -9,7 +7,11 @@ import {
   SignalCellular2Bar as MediumSignalIcon,
   SignalCellular3Bar as GoodSignalIcon,
 } from '@mui/icons-material';
-import offlineService, { NetworkStatus } from '../../services/OfflineService';
+import { IconButton, Tooltip } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+
+import type { NetworkStatus } from '../../services/OfflineService';
+import offlineService from '../../services/OfflineService';
 
 interface NetworkStatusIconProps {
   onClick?: () => void;

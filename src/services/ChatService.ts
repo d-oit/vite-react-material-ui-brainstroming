@@ -1,4 +1,4 @@
-import { ChatMessage } from '../types';
+import type { ChatMessage } from '../types';
 
 /**
  * Service for handling LLM chat functionality

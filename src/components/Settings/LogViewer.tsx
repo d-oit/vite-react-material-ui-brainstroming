@@ -1,4 +1,13 @@
-import { useState, useEffect } from 'react';
+import {
+  Refresh as RefreshIcon,
+  Delete as DeleteIcon,
+  FilterList as FilterIcon,
+  Info as InfoIcon,
+  Warning as WarningIcon,
+  Error as ErrorIcon,
+  Search as SearchIcon,
+  Clear as ClearIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -26,17 +35,9 @@ import {
   Tooltip,
   useTheme,
 } from '@mui/material';
-import {
-  Refresh as RefreshIcon,
-  Delete as DeleteIcon,
-  FilterList as FilterIcon,
-  Info as InfoIcon,
-  Warning as WarningIcon,
-  Error as ErrorIcon,
-  Search as SearchIcon,
-  Clear as ClearIcon,
-} from '@mui/icons-material';
-import { LogEntry } from '../../services/IndexedDBService';
+import { useState, useEffect } from 'react';
+
+import type { LogEntry } from '../../services/IndexedDBService';
 import loggerService from '../../services/LoggerService';
 
 export const LogViewer = () => {

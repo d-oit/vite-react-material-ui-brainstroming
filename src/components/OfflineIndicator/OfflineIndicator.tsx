@@ -1,4 +1,15 @@
-import { useState, useEffect } from 'react';
+import {
+  WifiOff as OfflineIcon,
+  Sync as SyncIcon,
+  CloudDone as CloudDoneIcon,
+  Wifi as WifiIcon,
+  SignalCellular4Bar as CellularIcon,
+  SignalCellular0Bar as WeakSignalIcon,
+  SignalCellular1Bar as LowSignalIcon,
+  SignalCellular2Bar as MediumSignalIcon,
+  SignalCellular3Bar as GoodSignalIcon,
+  Info as InfoIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Snackbar,
@@ -21,19 +32,10 @@ import {
   ListItemText,
   ListItemIcon,
 } from '@mui/material';
-import {
-  WifiOff as OfflineIcon,
-  Sync as SyncIcon,
-  CloudDone as CloudDoneIcon,
-  Wifi as WifiIcon,
-  SignalCellular4Bar as CellularIcon,
-  SignalCellular0Bar as WeakSignalIcon,
-  SignalCellular1Bar as LowSignalIcon,
-  SignalCellular2Bar as MediumSignalIcon,
-  SignalCellular3Bar as GoodSignalIcon,
-  Info as InfoIcon,
-} from '@mui/icons-material';
-import offlineService, { NetworkStatus } from '../../services/OfflineService';
+import { useState, useEffect } from 'react';
+
+import type { NetworkStatus } from '../../services/OfflineService';
+import offlineService from '../../services/OfflineService';
 
 interface OfflineIndicatorProps {
   position?: 'top-right' | 'bottom-right' | 'bottom-left' | 'top-left';

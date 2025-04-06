@@ -1,27 +1,33 @@
+import { Add as AddIcon, Save as SaveIcon } from '@mui/icons-material';
+import { Box, Button, Fab, useTheme, Paper, Typography } from '@mui/material';
 import { useState, useCallback, useRef } from 'react';
-import ReactFlow, {
-  Background,
-  Controls,
-  MiniMap,
+import type {
   // Node as FlowNode,
   // Edge as FlowEdge,
   NodeTypes,
   // EdgeTypes,
   Connection,
+  ReactFlowInstance,
+} from 'reactflow';
+import ReactFlow, {
+  Background,
+  Controls,
+  MiniMap,
   useNodesState,
   useEdgesState,
   addEdge,
   Panel,
-  ReactFlowInstance,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Box, Button, Fab, useTheme, Paper, Typography } from '@mui/material';
-import { Add as AddIcon, Save as SaveIcon } from '@mui/icons-material';
+
+import loggerService from '../../services/LoggerService';
+import type { NodeData, Node, Edge } from '../../types';
+import { NodeType } from '../../types';
+
 import CustomNode from './CustomNode';
 import { NodeEditDialog } from './NodeEditDialog';
-import { NodeType, NodeData, Node, Edge } from '../../types';
+
 // import { useI18n } from '../../contexts/I18nContext';
-import loggerService from '../../services/LoggerService';
 
 // Define custom node types
 const nodeTypes: NodeTypes = {

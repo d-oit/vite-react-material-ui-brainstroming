@@ -1,4 +1,13 @@
-import { ReactNode, useState, useEffect } from 'react';
+import {
+  Chat as ChatIcon,
+  History as HistoryIcon,
+  Close as CloseIcon,
+  Add as AddIcon,
+  Save as SaveIcon,
+  ZoomIn as ZoomInIcon,
+  ZoomOut as ZoomOutIcon,
+  FitScreen as FitScreenIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Paper,
@@ -12,16 +21,9 @@ import {
   Zoom,
   Tooltip,
 } from '@mui/material';
-import {
-  Chat as ChatIcon,
-  History as HistoryIcon,
-  Close as CloseIcon,
-  Add as AddIcon,
-  Save as SaveIcon,
-  ZoomIn as ZoomInIcon,
-  ZoomOut as ZoomOutIcon,
-  FitScreen as FitScreenIcon,
-} from '@mui/icons-material';
+import type { ReactNode } from 'react';
+import { useState, useEffect } from 'react';
+
 import { useI18n } from '../../contexts/I18nContext';
 
 interface TabPanelProps {

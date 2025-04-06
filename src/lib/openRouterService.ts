@@ -1,4 +1,4 @@
-import { ChatMessage } from '@/types';
+import type { ChatMessage } from '@/types';
 
 interface OpenRouterResponse {
   id: string;

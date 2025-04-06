@@ -1,9 +1,10 @@
-import { vi } from 'vitest';
-import React, { type ReactElement } from 'react';
 import { render, type RenderOptions } from '@testing-library/react';
+import React, { type ReactElement } from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { SettingsProvider } from '../contexts/SettingsContext';
+import { vi } from 'vitest';
+
 import { ErrorNotificationProvider } from '../contexts/ErrorNotificationContext';
+import { SettingsProvider } from '../contexts/SettingsContext';
 
 interface MockLocalStorage {
   [key: string]: string;
@@ -55,7 +56,7 @@ export function mockIntersectionObserver() {
     readonly root: Element | null = null;
     readonly rootMargin: string = '';
     readonly thresholds: ReadonlyArray<number> = [];
-    
+
     observe = vi.fn();
     unobserve = vi.fn();
     disconnect = vi.fn();
@@ -116,5 +117,6 @@ const customRender = (
   return render(ui, { wrapper: Wrapper, ...renderOptions });
 };
 
-export * from '@testing-library/react';
+// Re-export everything except render
+export { screen, fireEvent, waitFor, act, within } from '@testing-library/react';
 export { customRender as render };

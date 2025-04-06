@@ -1,4 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import {
+  Archive as ArchiveIcon,
+  Unarchive as UnarchiveIcon,
+  Delete as DeleteIcon,
+  Visibility as ViewIcon,
+  History as HistoryIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -19,16 +25,11 @@ import {
   DialogContentText,
   DialogActions,
 } from '@mui/material';
-import {
-  Archive as ArchiveIcon,
-  Unarchive as UnarchiveIcon,
-  Delete as DeleteIcon,
-  Visibility as ViewIcon,
-  History as HistoryIcon,
-} from '@mui/icons-material';
-import { Project } from '../../types';
-import projectService from '../../services/ProjectService';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import projectService from '../../services/ProjectService';
+import type { Project } from '../../types';
 
 interface ProjectArchivePanelProps {
   onRefresh?: () => void;

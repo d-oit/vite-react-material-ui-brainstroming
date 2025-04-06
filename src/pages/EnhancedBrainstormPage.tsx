@@ -1,16 +1,18 @@
+import { useTheme } from '@mui/material';
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useTheme } from '@mui/material';
-import { useI18n } from '../contexts/I18nContext';
-import { useSettings } from '../contexts/SettingsContext';
-import { Node, Edge, Project, NodeType } from '../types';
-import { AppShell } from '../components/Layout/AppShell';
-import { BrainstormLayout } from '../components/Layout/BrainstormLayout';
+
 import { EnhancedBrainstormFlow } from '../components/BrainstormFlow/EnhancedBrainstormFlow';
-// EnhancedBrainstormFlow now includes its own ReactFlowProvider
 import { ChatPanel } from '../components/Chat/ChatPanel';
 import { GitHistoryPanel } from '../components/GitHistory/GitHistoryPanel';
+import { AppShell } from '../components/Layout/AppShell';
+import { BrainstormLayout } from '../components/Layout/BrainstormLayout';
+import { useI18n } from '../contexts/I18nContext';
+import { useSettings } from '../contexts/SettingsContext';
 import projectService from '../services/ProjectService';
+import type { Node, Edge, Project } from '../types';
+import { NodeType } from '../types';
+// EnhancedBrainstormFlow now includes its own ReactFlowProvider
 
 // Sample data for demonstration
 const sampleNodes: Node[] = [

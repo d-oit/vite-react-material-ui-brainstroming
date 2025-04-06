@@ -3,7 +3,7 @@ export enum NodeType {
   IDEA = 'idea',
   TASK = 'task',
   NOTE = 'note',
-  RESOURCE = 'resource'
+  RESOURCE = 'resource',
 }
 
 // Edge types
@@ -11,14 +11,14 @@ export enum EdgeType {
   DEFAULT = 'default',
   STEP = 'step',
   SMOOTHSTEP = 'smoothstep',
-  STRAIGHT = 'straight'
+  STRAIGHT = 'straight',
 }
 
 // Theme modes
 export enum ThemeMode {
   LIGHT = 'light',
   DARK = 'dark',
-  SYSTEM = 'system'
+  SYSTEM = 'system',
 }
 
 // Log levels
@@ -27,7 +27,7 @@ export enum LogLevel {
   INFO = 'info',
   WARN = 'warn',
   ERROR = 'error',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 // Log categories
@@ -36,20 +36,20 @@ export enum LogCategory {
   USER = 'user',
   NETWORK = 'network',
   STORAGE = 'storage',
-  SYNC = 'sync'
+  SYNC = 'sync',
 }
 
 // Node sizes
 export enum NodeSize {
   SMALL = 'small',
   MEDIUM = 'medium',
-  LARGE = 'large'
+  LARGE = 'large',
 }
 
 // Connection modes
 export enum ConnectionMode {
   STRICT = 'strict',
-  LOOSE = 'loose'
+  LOOSE = 'loose',
 }
 
 // Panel positions
@@ -62,7 +62,7 @@ export enum PanelPosition {
   BOTTOM_RIGHT = 'bottom-right',
   LEFT = 'left',
   RIGHT = 'right',
-  CENTER = 'center'
+  CENTER = 'center',
 }
 
 // Enum value lists for iteration

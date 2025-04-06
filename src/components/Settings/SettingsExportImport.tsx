@@ -1,4 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import {
+  FileDownload as DownloadIcon,
+  FileUpload as UploadIcon,
+  WifiOff as OfflineIcon,
+  Info as InfoIcon,
+  Warning as WarningIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -17,16 +23,11 @@ import {
   Chip,
   Tooltip,
 } from '@mui/material';
-import {
-  FileDownload as DownloadIcon,
-  FileUpload as UploadIcon,
-  WifiOff as OfflineIcon,
-  Info as InfoIcon,
-  Warning as WarningIcon,
-} from '@mui/icons-material';
+import { useState, useRef, useEffect } from 'react';
+
 import { useSettings } from '../../contexts/SettingsContext';
-import offlineService from '../../services/OfflineService';
 import loggerService from '../../services/LoggerService';
+import offlineService from '../../services/OfflineService';
 
 export const SettingsExportImport = () => {
   const { exportSettings, importSettings } = useSettings();

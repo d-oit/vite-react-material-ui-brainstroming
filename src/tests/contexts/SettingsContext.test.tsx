@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, act } from '../test-utils';
+
 import { SettingsProvider, useSettings } from '../../contexts/SettingsContext';
-import { mockLocalStorage } from '../test-utils';
+import { render, screen, fireEvent, waitFor, act, mockLocalStorage } from '../test-utils';
 
 // Create a test component that uses the SettingsContext
 const TestComponent = () => {
@@ -24,7 +24,7 @@ const TestComponent = () => {
       <button onClick={() => importSettings('{"themeMode":"dark","language":"fr"}')}>
         Import Settings
       </button>
-      <div id="export-result"></div>
+      <div id="export-result" />
     </div>
   );
 };

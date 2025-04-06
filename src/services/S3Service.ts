@@ -1,6 +1,7 @@
-import { Project } from '../types';
-import offlineService from './OfflineService';
+import type { Project } from '../types';
+
 import loggerService from './LoggerService';
+import offlineService from './OfflineService';
 
 // Define a type for version info
 interface VersionInfo {
