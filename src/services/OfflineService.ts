@@ -1,4 +1,13 @@
 /**
+ * Network status interface
+ */
+export interface NetworkStatus {
+  online: boolean;
+  type: string; // wifi, cellular, etc.
+  effectiveType: string; // slow-2g, 2g, 3g, 4g
+}
+
+/**
  * Service for managing offline status and synchronization
  */
 export class OfflineService {
@@ -10,11 +19,22 @@ export class OfflineService {
   private maxRetries: number = 5;
   private syncInterval: number = 60000; // 1 minute
   private syncIntervalId: number | null = null;
+  private offlineModeEnabled: boolean = true;
+  private offlineFirstEnabled: boolean = true;
+  private networkStatusListeners: Array<(status: NetworkStatus) => void> = [];
+  private currentNetworkStatus: NetworkStatus = {
+    online: navigator.onLine,
+    type: 'unknown',
+    effectiveType: 'unknown',
+  };
 
   private constructor() {
     // Initialize online/offline event listeners
     window.addEventListener('online', this.handleOnlineStatusChange.bind(this));
     window.addEventListener('offline', this.handleOnlineStatusChange.bind(this));
+
+    // Monitor network quality if available
+    this.initNetworkQualityMonitoring();
   }
 
   public static getInstance(): OfflineService {
@@ -94,6 +114,8 @@ export class OfflineService {
     syncInterval?: number;
     maxRetries?: number;
     autoSync?: boolean;
+    offlineModeEnabled?: boolean;
+    offlineFirstEnabled?: boolean;
   }): void {
     if (config.syncInterval !== undefined) {
       this.syncInterval = config.syncInterval;
@@ -115,6 +137,14 @@ export class OfflineService {
       } else {
         this.stopAutoSync();
       }
+    }
+
+    if (config.offlineModeEnabled !== undefined) {
+      this.offlineModeEnabled = config.offlineModeEnabled;
+    }
+
+    if (config.offlineFirstEnabled !== undefined) {
+      this.offlineFirstEnabled = config.offlineFirstEnabled;
     }
   }
 
@@ -195,6 +225,7 @@ export class OfflineService {
 
     if (this.isOnline !== newOnlineStatus) {
       this.isOnline = newOnlineStatus;
+      this.updateNetworkStatus({ online: newOnlineStatus });
 
       // Notify listeners
       this.listeners.forEach(listener => {
@@ -210,6 +241,86 @@ export class OfflineService {
         this.processSyncQueue();
       }
     }
+  }
+
+  /**
+   * Initialize network quality monitoring
+   */
+  private initNetworkQualityMonitoring(): void {
+    // Check if the Network Information API is available
+    if ('connection' in navigator) {
+      const connection = (navigator as any).connection;
+
+      // Update initial network status
+      this.updateNetworkStatus({
+        type: connection.type,
+        effectiveType: connection.effectiveType,
+      });
+
+      // Listen for changes
+      connection.addEventListener('change', () => {
+        this.updateNetworkStatus({
+          type: connection.type,
+          effectiveType: connection.effectiveType,
+        });
+      });
+    }
+  }
+
+  /**
+   * Update network status and notify listeners
+   */
+  private updateNetworkStatus(partialStatus: Partial<NetworkStatus>): void {
+    this.currentNetworkStatus = {
+      ...this.currentNetworkStatus,
+      ...partialStatus,
+    };
+
+    // Notify network status listeners
+    this.networkStatusListeners.forEach(listener => {
+      try {
+        listener(this.currentNetworkStatus);
+      } catch (error) {
+        console.error('Error in network status listener:', error);
+      }
+    });
+  }
+
+  /**
+   * Get current network status
+   */
+  public getNetworkStatus(): NetworkStatus {
+    return { ...this.currentNetworkStatus };
+  }
+
+  /**
+   * Add a listener for network status changes
+   * @param listener Function to call when network status changes
+   * @returns Function to remove the listener
+   */
+  public addNetworkStatusListener(listener: (status: NetworkStatus) => void): () => void {
+    this.networkStatusListeners.push(listener);
+    // Immediately call with current status
+    listener(this.currentNetworkStatus);
+
+    // Return function to remove listener
+    return () => {
+      this.networkStatusListeners = this.networkStatusListeners.filter(l => l !== listener);
+    };
+  }
+
+  /**
+   * Check if offline mode is enabled
+   */
+  public isOfflineModeEnabled(): boolean {
+    return this.offlineModeEnabled;
+  }
+
+  /**
+   * Check if offline-first approach is enabled
+   */
+  public isOfflineFirstEnabled(): boolean {
+    return this.offlineFirstEnabled;
   }
 }
 

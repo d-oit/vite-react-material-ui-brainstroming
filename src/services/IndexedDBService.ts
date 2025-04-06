@@ -122,6 +122,7 @@ export class IndexedDBService {
       request.onupgradeneeded = event => {
         const db = (event.target as IDBOpenDBRequest).result;
         const oldVersion = event.oldVersion;
+        const transaction = (event.target as IDBOpenDBRequest).transaction;
 
         // Handle schema migrations based on version
         if (oldVersion < 1) {
@@ -167,8 +168,8 @@ export class IndexedDBService {
           }
         }
 
-        // Initialize with default data
-        this.initializeDefaultData(db);
+        // Initialize with default data using the existing transaction
+        this.initializeDefaultData(db, transaction);
       };
     });
 
@@ -178,60 +179,92 @@ export class IndexedDBService {
   /**
    * Initialize the database with default data
    * @param db Database instance
+   * @param transaction Optional existing transaction to use
    */
-  private initializeDefaultData(db: IDBDatabase): void {
-    // Add default color schemes
-    const colorStore = db.transaction(STORES.COLORS, 'readwrite').objectStore(STORES.COLORS);
+  private initializeDefaultData(db: IDBDatabase, transaction?: IDBTransaction): void {
+    try {
+      // Add default color schemes
+      let colorStore: IDBObjectStore;
+      let nodePreferencesStore: IDBObjectStore;
 
-    const defaultColorScheme: ColorScheme = {
-      id: 'default',
-      name: 'Default',
-      colors: {
-        [NodeType.IDEA]: '#e3f2fd', // Light blue
-        [NodeType.TASK]: '#e8f5e9', // Light green
-        [NodeType.NOTE]: '#fff8e1', // Light yellow
-        [NodeType.RESOURCE]: '#f3e5f5', // Light purple
-      },
-      isDefault: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+      // Use the provided transaction if available, otherwise create new ones
+      if (transaction && transaction.objectStoreNames.contains(STORES.COLORS)) {
+        colorStore = transaction.objectStore(STORES.COLORS);
+      } else {
+        // This will only be used outside of onupgradeneeded
+        colorStore = db.transaction(STORES.COLORS, 'readwrite').objectStore(STORES.COLORS);
+      }
 
-    colorStore.add(defaultColorScheme);
+      const defaultColorScheme: ColorScheme = {
+        id: 'default',
+        name: 'Default',
+        colors: {
+          [NodeType.IDEA]: '#e3f2fd', // Light blue
+          [NodeType.TASK]: '#e8f5e9', // Light green
+          [NodeType.NOTE]: '#fff8e1', // Light yellow
+          [NodeType.RESOURCE]: '#f3e5f5', // Light purple
+        },
+        isDefault: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-    // Add dark theme color scheme
-    const darkColorScheme: ColorScheme = {
-      id: 'dark',
-      name: 'Dark Theme',
-      colors: {
-        [NodeType.IDEA]: '#0d47a1', // Dark blue
-        [NodeType.TASK]: '#1b5e20', // Dark green
-        [NodeType.NOTE]: '#f57f17', // Dark yellow
-        [NodeType.RESOURCE]: '#4a148c', // Dark purple
-      },
-      isDefault: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+      // Use try-catch for each operation to handle potential errors
+      try {
+        colorStore.add(defaultColorScheme);
+      } catch (error) {
+        console.warn('Could not add default color scheme, may already exist:', error);
+      }
 
-    colorStore.add(darkColorScheme);
+      // Add dark theme color scheme
+      const darkColorScheme: ColorScheme = {
+        id: 'dark',
+        name: 'Dark Theme',
+        colors: {
+          [NodeType.IDEA]: '#0d47a1', // Dark blue
+          [NodeType.TASK]: '#1b5e20', // Dark green
+          [NodeType.NOTE]: '#f57f17', // Dark yellow
+          [NodeType.RESOURCE]: '#4a148c', // Dark purple
+        },
+        isDefault: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-    // Add default node preferences
-    const nodePreferencesStore = db
-      .transaction(STORES.NODE_PREFERENCES, 'readwrite')
-      .objectStore(STORES.NODE_PREFERENCES);
+      try {
+        colorStore.add(darkColorScheme);
+      } catch (error) {
+        console.warn('Could not add dark color scheme, may already exist:', error);
+      }
 
-    const defaultNodePreferences: NodePreferences = {
-      defaultSize: 'medium',
-      defaultColorScheme: 'default',
-      nodeSizes: {
-        small: { width: 150, fontSize: 0.8 },
-        medium: { width: 200, fontSize: 1 },
-        large: { width: 250, fontSize: 1.2 },
-      },
-    };
+      // Add default node preferences
+      if (transaction && transaction.objectStoreNames.contains(STORES.NODE_PREFERENCES)) {
+        nodePreferencesStore = transaction.objectStore(STORES.NODE_PREFERENCES);
+      } else {
+        // This will only be used outside of onupgradeneeded
+        nodePreferencesStore = db
+          .transaction(STORES.NODE_PREFERENCES, 'readwrite')
+          .objectStore(STORES.NODE_PREFERENCES);
+      }
 
-    nodePreferencesStore.add({ id: 'default', ...defaultNodePreferences });
+      const defaultNodePreferences: NodePreferences = {
+        defaultSize: 'medium',
+        defaultColorScheme: 'default',
+        nodeSizes: {
+          small: { width: 150, fontSize: 0.8 },
+          medium: { width: 200, fontSize: 1 },
+          large: { width: 250, fontSize: 1.2 },
+        },
+      };
+
+      try {
+        nodePreferencesStore.add({ id: 'default', ...defaultNodePreferences });
+      } catch (error) {
+        console.warn('Could not add default node preferences, may already exist:', error);
+      }
+    } catch (error) {
+      console.error('Error initializing default data:', error);
+    }
   }
 
   /**
