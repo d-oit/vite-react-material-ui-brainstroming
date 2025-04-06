@@ -211,12 +211,10 @@ const AppWithTheme = () => {
               />
               <Route
                 path="/projects/:projectId/*"
-                element={
-                  withOfflineFallback(ProjectDetailPage)({
-                    onThemeToggle: toggleThemeMode,
-                    isDarkMode: mode === 'dark',
-                  })
-                }
+                element={withOfflineFallback(ProjectDetailPage)({
+                  onThemeToggle: toggleThemeMode,
+                  isDarkMode: mode === 'dark',
+                })}
               />
               <Route
                 path="/settings"

@@ -18,10 +18,7 @@ export const ChatPage = () => {
       <Divider sx={{ mb: 2 }} />
 
       <Paper sx={{ height: 'calc(100vh - 200px)', overflow: 'hidden' }}>
-        <ChatInterface
-          title="AI Assistant"
-          placeholder="Ask for ideas, suggestions, or help with your brainstorming..."
-        />
+        <ChatInterface projectId="chat" />
       </Paper>
     </MainLayout>
   );

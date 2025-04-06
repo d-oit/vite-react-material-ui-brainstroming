@@ -1,13 +1,13 @@
 import { Box, Paper, Typography } from '@mui/material';
 import { useState } from 'react';
 
-import ChatPanel from './ChatPanel';
+import { ChatPanel } from './ChatPanel';
 
 interface ChatInterfaceProps {
   projectId?: string;
 }
 
-export default function ChatInterface({ projectId }: ChatInterfaceProps) {
+export function ChatInterface({ projectId }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
 
   const handleSendMessage = (message: string) => {

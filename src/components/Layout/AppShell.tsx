@@ -9,6 +9,7 @@ import {
   Chat as ChatIcon,
   Close as CloseIcon,
   FolderOpen as ProjectsIcon,
+  BubbleChart as BrainstormIcon,
 } from '@mui/icons-material';
 import {
   Box,
