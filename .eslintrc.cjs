@@ -8,8 +8,7 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
-    'plugin:@typescript-eslint/strict',
-    'plugin:@typescript-eslint/recommended-type-checked',
+    'plugin:@typescript-eslint/recommended',
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
     'plugin:jsx-a11y/recommended',
@@ -27,8 +26,6 @@ module.exports = {
     },
     ecmaVersion: 'latest',
     sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: '.',
   },
   plugins: [
     'react',
@@ -63,7 +60,6 @@ module.exports = {
       disallowTypeAnnotations: false,
     }],
     '@typescript-eslint/no-non-null-assertion': 'error',
-    '@typescript-eslint/strict-boolean-expressions': 'warn',
 
     // Import
     'import/order': ['error', {

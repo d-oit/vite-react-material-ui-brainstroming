@@ -31,10 +31,10 @@ declare global {
   }
 
   // Add test lifecycle hooks to global scope
-  const beforeAll: typeof import('vitest')['beforeAll'];
-  const afterEach: typeof import('vitest')['afterEach'];
-  const beforeEach: typeof import('vitest')['beforeEach'];
-  const vi: typeof import('vitest')['vi'];
+  const beforeAll: (typeof import('vitest'))['beforeAll'];
+  const afterEach: (typeof import('vitest'))['afterEach'];
+  const beforeEach: (typeof import('vitest'))['beforeEach'];
+  const vi: (typeof import('vitest'))['vi'];
 }
 
 export {};

@@ -43,10 +43,7 @@ declare module 'workbox-routing' {
   export type RouteHandler = (options: RouteHandlerCallbackOptions) => Promise<Response>;
 
   export class NavigationRoute {
-    constructor(
-      handler: RouteHandler,
-      options?: { allowlist?: RegExp[]; denylist?: RegExp[] }
-    );
+    constructor(handler: RouteHandler, options?: { allowlist?: RegExp[]; denylist?: RegExp[] });
   }
 
   export function registerRoute(
@@ -72,10 +69,7 @@ declare module 'workbox-strategies' {
       event?: ExtendableEvent;
     }) => void;
 
-    cacheKeyWillBeUsed?: (options: {
-      request: Request;
-      mode: string;
-    }) => Promise<Request | string>;
+    cacheKeyWillBeUsed?: (options: { request: Request; mode: string }) => Promise<Request | string>;
 
     cachedResponseWillBeUsed?: (options: {
       cacheName: string;
@@ -85,15 +79,9 @@ declare module 'workbox-strategies' {
       event?: ExtendableEvent;
     }) => Promise<Response | null>;
 
-    requestWillFetch?: (options: {
-      request: Request;
-    }) => Promise<Request>;
+    requestWillFetch?: (options: { request: Request }) => Promise<Request>;
 
-    fetchDidFail?: (options: {
-      error: Error;
-      request: Request;
-      event?: ExtendableEvent;
-    }) => void;
+    fetchDidFail?: (options: { error: Error; request: Request; event?: ExtendableEvent }) => void;
   }
 
   export interface StrategyOptions {

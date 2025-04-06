@@ -1,0 +1,1 @@
+Run linting tools to identify and fix all warnings and errors in the codebase. Ensure thoroughness by addressing each issue, including warnings, and do not simply remove unused code. Prioritize best practices and adhere to coding standards. Verify the entire codebase before making any fixes, and apply corrections based on industry best practices. 

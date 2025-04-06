@@ -11,7 +11,6 @@
       "vite/client",
       "node"
     ],
-    "types": ["vitest/globals", "@testing-library/jest-dom", "vite/client"],
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
@@ -55,7 +54,7 @@
     ".eslintrc.cjs"
   ],
   "references": [
-    { 
+    {
       "path": "./tsconfig.node.json"
     }
   ]

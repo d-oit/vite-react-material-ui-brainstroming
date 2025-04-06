@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-declare var self: ServiceWorkerGlobalScope;
+declare let self: ServiceWorkerGlobalScope;
 
 declare module 'workbox-core' {
   export const clientsClaim: () => void;
@@ -9,7 +9,7 @@ declare module 'workbox-core' {
 declare module 'workbox-precaching' {
   export function precacheAndRoute(entries: Array<string | PrecacheEntry>): void;
   export function cleanupOutdatedCaches(): void;
-  
+
   interface PrecacheEntry {
     url: string;
     revision?: string | null;
@@ -29,27 +29,27 @@ declare module 'workbox-strategies' {
     constructor(options?: NetworkFirstOptions);
     handle(options: HandleOptions): Promise<Response>;
   }
-  
+
   export class CacheFirst implements Strategy {
     constructor(options?: CacheFirstOptions);
     handle(options: HandleOptions): Promise<Response>;
   }
-  
+
   interface Strategy {
     handle(options: HandleOptions): Promise<Response>;
   }
-  
+
   interface HandleOptions {
     request: Request;
     event: FetchEvent;
   }
-  
+
   interface NetworkFirstOptions {
     cacheName?: string;
     plugins?: WorkboxPlugin[];
     networkTimeoutSeconds?: number;
   }
-  
+
   interface CacheFirstOptions {
     cacheName?: string;
     plugins?: WorkboxPlugin[];
@@ -68,17 +68,14 @@ declare module 'workbox-expiration' {
 
 declare module 'workbox-background-sync' {
   export class BackgroundSyncPlugin implements WorkboxPlugin {
-    constructor(config: {
-      maxRetentionTime?: number;
-      queueName: string;
-    });
+    constructor(config: { maxRetentionTime?: number; queueName: string });
   }
-  
+
   export class Queue {
     constructor(name: string, options?: QueueOptions);
     pushRequest(entry: { request: Request }): Promise<void>;
   }
-  
+
   interface QueueOptions {
     maxRetentionTime?: number;
     onSync?: (queue: Queue) => Promise<void>;
@@ -87,10 +84,7 @@ declare module 'workbox-background-sync' {
 
 declare module 'workbox-cacheable-response' {
   export class CacheableResponsePlugin implements WorkboxPlugin {
-    constructor(config: {
-      statuses: number[];
-      headers?: { [key: string]: string };
-    });
+    constructor(config: { statuses: number[]; headers?: { [key: string]: string } });
   }
 }
 
@@ -100,7 +94,7 @@ interface WorkboxPlugin {
     response: Response;
     event?: ExtendableEvent;
   }) => Promise<Response | null>;
-  
+
   cacheDidUpdate?: (options: {
     cacheName: string;
     request: Request;
@@ -108,10 +102,6 @@ interface WorkboxPlugin {
     newResponse: Response;
     event?: ExtendableEvent;
   }) => void;
-  
-  fetchDidFail?: (options: {
-    error: Error;
-    request: Request;
-    event?: ExtendableEvent;
-  }) => void;
+
+  fetchDidFail?: (options: { error: Error; request: Request; event?: ExtendableEvent }) => void;
 }
