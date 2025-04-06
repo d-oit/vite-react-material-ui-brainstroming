@@ -1,13 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import {
-  Box,
-  Typography,
-  Button,
-  Paper,
-  Divider,
-  Container,
-  useTheme,
-} from '@mui/material';
+import { Box, Typography, Button, Paper, Divider, Container, useTheme } from '@mui/material';
 import {
   Refresh as RefreshIcon,
   Home as HomeIcon,
@@ -52,7 +44,7 @@ class ErrorBoundaryClass extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     // Log the error to our logging service
     this.logError(error, errorInfo);
-    
+
     this.setState({
       error,
       errorInfo,
@@ -65,7 +57,7 @@ class ErrorBoundaryClass extends Component<Props, State> {
   logError(error: Error, errorInfo: ErrorInfo): void {
     // Log to console
     console.error('Error caught by ErrorBoundary:', error, errorInfo);
-    
+
     // Log to IndexedDB if available
     try {
       indexedDBService.log('error', error.message, {
@@ -87,7 +79,7 @@ class ErrorBoundaryClass extends Component<Props, State> {
       error: null,
       errorInfo: null,
     });
-    
+
     if (this.props.onReset) {
       this.props.onReset();
     }
@@ -106,7 +98,7 @@ class ErrorBoundaryClass extends Component<Props, State> {
       if (this.props.fallback) {
         return this.props.fallback;
       }
-      
+
       // Otherwise, use the default error UI
       return (
         <Container maxWidth="md" sx={{ py: 4 }}>
@@ -121,22 +113,22 @@ class ErrorBoundaryClass extends Component<Props, State> {
             <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
               <BugIcon color="error" sx={{ fontSize: 64 }} />
             </Box>
-            
+
             <Typography variant="h4" gutterBottom>
               Something went wrong
             </Typography>
-            
+
             <Typography variant="body1" color="text.secondary" paragraph>
               We're sorry, but an error occurred while rendering this page.
             </Typography>
-            
+
             <Divider sx={{ my: 3 }} />
-            
+
             <Box sx={{ mb: 3 }}>
               <Typography variant="subtitle2" color="error" align="left">
                 Error: {this.state.error?.message || 'Unknown error'}
               </Typography>
-              
+
               {this.state.errorInfo && (
                 <Box
                   component="pre"
@@ -155,16 +147,12 @@ class ErrorBoundaryClass extends Component<Props, State> {
                 </Box>
               )}
             </Box>
-            
+
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
-              <Button
-                variant="outlined"
-                startIcon={<HomeIcon />}
-                onClick={this.handleGoHome}
-              >
+              <Button variant="outlined" startIcon={<HomeIcon />} onClick={this.handleGoHome}>
                 Go to Home
               </Button>
-              
+
               <Button
                 variant="contained"
                 color="primary"
@@ -178,7 +166,7 @@ class ErrorBoundaryClass extends Component<Props, State> {
         </Container>
       );
     }
-    
+
     // If there's no error, render children normally
     return this.props.children;
   }
@@ -187,7 +175,7 @@ class ErrorBoundaryClass extends Component<Props, State> {
 /**
  * Wrapper component to provide theme to the error boundary
  */
-export const ErrorBoundary: React.FC<Props> = (props) => {
+export const ErrorBoundary: React.FC<Props> = props => {
   return <ErrorBoundaryClass {...props} />;
 };
 

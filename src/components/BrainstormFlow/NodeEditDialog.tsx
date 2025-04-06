@@ -67,7 +67,7 @@ export const NodeEditDialog = ({
   };
 
   const handleDeleteTag = (tagToDelete: string) => {
-    setTags(tags.filter((tag) => tag !== tagToDelete));
+    setTags(tags.filter(tag => tag !== tagToDelete));
   };
 
   const handleSave = () => {
@@ -106,7 +106,7 @@ export const NodeEditDialog = ({
           <TextField
             label="Label"
             value={label}
-            onChange={(e) => setLabel(e.target.value)}
+            onChange={e => setLabel(e.target.value)}
             fullWidth
             required
           />
@@ -114,7 +114,7 @@ export const NodeEditDialog = ({
           <TextField
             label="Content"
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={e => setContent(e.target.value)}
             multiline
             rows={4}
             fullWidth
@@ -124,8 +124,8 @@ export const NodeEditDialog = ({
             <TextField
               label="Add Tag"
               value={newTag}
-              onChange={(e) => setNewTag(e.target.value)}
-              onKeyPress={(e) => {
+              onChange={e => setNewTag(e.target.value)}
+              onKeyPress={e => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
                   handleAddTag();
@@ -139,12 +139,8 @@ export const NodeEditDialog = ({
           </Box>
 
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {tags.map((tag) => (
-              <Chip
-                key={tag}
-                label={tag}
-                onDelete={() => handleDeleteTag(tag)}
-              />
+            {tags.map(tag => (
+              <Chip key={tag} label={tag} onDelete={() => handleDeleteTag(tag)} />
             ))}
           </Box>
         </Box>

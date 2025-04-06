@@ -98,9 +98,7 @@ function TabPanel(props: TabPanelProps) {
       sx={{ height: '100%' }}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ height: '100%' }}>{children}</Box>
-      )}
+      {value === index && <Box sx={{ height: '100%' }}>{children}</Box>}
     </Box>
   );
 }
@@ -190,11 +188,7 @@ export const SimpleBrainstormPage = () => {
           </Box>
 
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              variant="outlined"
-              startIcon={<SaveIcon />}
-              onClick={handleSaveProject}
-            >
+            <Button variant="outlined" startIcon={<SaveIcon />} onClick={handleSaveProject}>
               {t('common.save')}
             </Button>
 
@@ -223,11 +217,7 @@ export const SimpleBrainstormPage = () => {
           {isMobile ? (
             <>
               <Box sx={{ flexGrow: 1, height: '600px' }}>
-                <BrainstormFlow
-                  initialNodes={nodes}
-                  initialEdges={edges}
-                  onSave={handleSaveFlow}
-                />
+                <BrainstormFlow initialNodes={nodes} initialEdges={edges} onSave={handleSaveFlow} />
               </Box>
 
               <Drawer
@@ -243,11 +233,7 @@ export const SimpleBrainstormPage = () => {
               >
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                   <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Tabs
-                      value={sidebarTab}
-                      onChange={handleTabChange}
-                      variant="fullWidth"
-                    >
+                    <Tabs value={sidebarTab} onChange={handleTabChange} variant="fullWidth">
                       <Tab icon={<ChatIcon />} label={t('chat.title')} />
                       <Tab icon={<HistoryIcon />} label={t('gitHistory.title')} />
                     </Tabs>
@@ -267,22 +253,20 @@ export const SimpleBrainstormPage = () => {
           ) : (
             <Box sx={{ display: 'flex', height: '600px' }}>
               <Box sx={{ flex: sidebarOpen ? 8 : 12, height: '600px' }}>
-                <BrainstormFlow
-                  initialNodes={nodes}
-                  initialEdges={edges}
-                  onSave={handleSaveFlow}
-                />
+                <BrainstormFlow initialNodes={nodes} initialEdges={edges} onSave={handleSaveFlow} />
               </Box>
 
               {sidebarOpen && (
-                <Box sx={{ flex: 4, height: '600px', borderLeft: `1px solid ${theme.palette.divider}` }}>
+                <Box
+                  sx={{
+                    flex: 4,
+                    height: '600px',
+                    borderLeft: `1px solid ${theme.palette.divider}`,
+                  }}
+                >
                   <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                     <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                      <Tabs
-                        value={sidebarTab}
-                        onChange={handleTabChange}
-                        variant="fullWidth"
-                      >
+                      <Tabs value={sidebarTab} onChange={handleTabChange} variant="fullWidth">
                         <Tab icon={<ChatIcon />} label={t('chat.title')} />
                         <Tab icon={<HistoryIcon />} label={t('gitHistory.title')} />
                       </Tabs>
@@ -318,4 +302,3 @@ export const SimpleBrainstormPage = () => {
     </Box>
   );
 };
-

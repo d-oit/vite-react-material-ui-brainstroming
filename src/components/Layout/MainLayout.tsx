@@ -23,15 +23,11 @@ export const MainLayout = ({ children, title = 'd.o.it.brainstorming' }: MainLay
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
       <CssBaseline />
-      
+
       <AppBar title={title} onMenuClick={handleDrawerToggle} />
-      
-      <Drawer 
-        open={drawerOpen} 
-        onClose={() => setDrawerOpen(false)} 
-        width={drawerWidth} 
-      />
-      
+
+      <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} width={drawerWidth} />
+
       <Box
         component="main"
         sx={{
@@ -49,7 +45,7 @@ export const MainLayout = ({ children, title = 'd.o.it.brainstorming' }: MainLay
         <Toolbar /> {/* This adds space below the AppBar */}
         {children}
       </Box>
-      
+
       {isMobile && <MobileBottomNav onMenuClick={handleDrawerToggle} />}
     </Box>
   );

@@ -17,7 +17,7 @@ export class LoggerService {
   private constructor() {
     // Get application version from environment
     this.applicationVersion = import.meta.env.VITE_PROJECT_VERSION || '0.1.0';
-    
+
     // Set up periodic log cleanup
     this.setupLogCleanup();
   }
@@ -42,15 +42,15 @@ export class LoggerService {
     if (config.enabled !== undefined) {
       this.isEnabled = config.enabled;
     }
-    
+
     if (config.syncLogsWhenOnline !== undefined) {
       this.syncLogsWhenOnline = config.syncLogsWhenOnline;
     }
-    
+
     if (config.remoteLoggingEndpoint !== undefined) {
       this.remoteLoggingEndpoint = config.remoteLoggingEndpoint;
     }
-    
+
     if (config.maxLogAge !== undefined) {
       this.maxLogAge = config.maxLogAge;
       this.setupLogCleanup();
@@ -82,13 +82,15 @@ export class LoggerService {
    * @param context Additional context
    */
   public error(message: string, error?: Error, context?: Record<string, unknown>): void {
-    const errorContext = error ? {
-      ...context,
-      errorMessage: error.message,
-      stack: error.stack,
-      name: error.name,
-    } : context;
-    
+    const errorContext = error
+      ? {
+          ...context,
+          errorMessage: error.message,
+          stack: error.stack,
+          name: error.name,
+        }
+      : context;
+
     this.log('error', message, errorContext);
   }
 
@@ -100,13 +102,13 @@ export class LoggerService {
    */
   public log(level: LogLevel, message: string, context?: Record<string, unknown>): void {
     if (!this.isEnabled) return;
-    
+
     // Always log to console
     this.logToConsole(level, message, context);
-    
+
     // Log to IndexedDB
     this.logToIndexedDB(level, message, context);
-    
+
     // If we have a remote endpoint and it's an error, try to send it immediately
     if (this.remoteLoggingEndpoint && level === 'error' && offlineService.getOnlineStatus()) {
       this.sendLogToRemote(level, message, context);
@@ -149,31 +151,31 @@ export class LoggerService {
     if (!this.remoteLoggingEndpoint || !offlineService.getOnlineStatus()) {
       return;
     }
-    
+
     try {
       // Get all error logs first (most important)
       const errorLogs = await this.getLogs('error', 100);
-      
+
       // Then get other logs
       const warnLogs = await this.getLogs('warn', 50);
       const infoLogs = await this.getLogs('info', 50);
-      
+
       // Combine logs
       const logs = [...errorLogs, ...warnLogs, ...infoLogs];
-      
+
       if (logs.length === 0) {
         return;
       }
-      
+
       // Send logs to remote endpoint
       await this.sendLogsToRemote(logs);
-      
+
       // If successful, clear the sent logs
       const oldestLog = new Date(Math.min(...logs.map(log => new Date(log.timestamp).getTime())));
       await this.clearLogs(oldestLog);
     } catch (error) {
       console.error('Failed to sync logs to remote:', error);
-      
+
       // If we're configured to sync logs when online, add to sync queue
       if (this.syncLogsWhenOnline) {
         offlineService.addToSyncQueue(async () => {
@@ -192,7 +194,7 @@ export class LoggerService {
   private logToConsole(level: LogLevel, message: string, context?: Record<string, unknown>): void {
     const timestamp = new Date().toISOString();
     const formattedMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
-    
+
     switch (level) {
       case 'info':
         console.info(formattedMessage, context || '');
@@ -212,7 +214,11 @@ export class LoggerService {
    * @param message Log message
    * @param context Additional context
    */
-  private async logToIndexedDB(level: LogLevel, message: string, context?: Record<string, unknown>): Promise<void> {
+  private async logToIndexedDB(
+    level: LogLevel,
+    message: string,
+    context?: Record<string, unknown>
+  ): Promise<void> {
     try {
       await indexedDBService.log(level, message, {
         ...context,
@@ -231,9 +237,13 @@ export class LoggerService {
    * @param message Log message
    * @param context Additional context
    */
-  private async sendLogToRemote(level: LogLevel, message: string, context?: Record<string, unknown>): Promise<void> {
+  private async sendLogToRemote(
+    level: LogLevel,
+    message: string,
+    context?: Record<string, unknown>
+  ): Promise<void> {
     if (!this.remoteLoggingEndpoint) return;
-    
+
     try {
       const logData = {
         level,
@@ -246,7 +256,7 @@ export class LoggerService {
           url: window.location.href,
         },
       };
-      
+
       await fetch(this.remoteLoggingEndpoint, {
         method: 'POST',
         headers: {
@@ -256,7 +266,7 @@ export class LoggerService {
       });
     } catch (error) {
       console.error('Failed to send log to remote endpoint:', error);
-      
+
       // If we're configured to sync logs when online, add to sync queue
       if (this.syncLogsWhenOnline) {
         offlineService.addToSyncQueue(async () => {
@@ -272,7 +282,7 @@ export class LoggerService {
    */
   private async sendLogsToRemote(logs: LogEntry[]): Promise<void> {
     if (!this.remoteLoggingEndpoint) return;
-    
+
     const response = await fetch(this.remoteLoggingEndpoint, {
       method: 'POST',
       headers: {
@@ -284,7 +294,7 @@ export class LoggerService {
         timestamp: new Date().toISOString(),
       }),
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to send logs to remote: ${response.status} ${response.statusText}`);
     }
@@ -295,13 +305,16 @@ export class LoggerService {
    */
   private setupLogCleanup(): void {
     // Clear old logs once a day
-    setInterval(() => {
-      const cutoffDate = new Date(Date.now() - this.maxLogAge);
-      this.clearLogs(cutoffDate).catch(error => {
-        console.error('Failed to clean up old logs:', error);
-      });
-    }, 24 * 60 * 60 * 1000); // 24 hours
-    
+    setInterval(
+      () => {
+        const cutoffDate = new Date(Date.now() - this.maxLogAge);
+        this.clearLogs(cutoffDate).catch(error => {
+          console.error('Failed to clean up old logs:', error);
+        });
+      },
+      24 * 60 * 60 * 1000
+    ); // 24 hours
+
     // Also clean up logs on startup
     const cutoffDate = new Date(Date.now() - this.maxLogAge);
     this.clearLogs(cutoffDate).catch(error => {

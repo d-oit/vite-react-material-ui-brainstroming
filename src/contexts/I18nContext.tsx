@@ -84,7 +84,8 @@ const translations: Record<string, Translations> = {
     'brainstorm.saveFlow': 'Flow speichern',
     'brainstorm.newVersion': 'Neue Version',
     'brainstorm.start': 'Brainstorming starten',
-    'brainstorm.clickToAdd': 'Klicken Sie auf die Schaltfläche +, um Ihre erste Idee, Aufgabe, Notiz oder Ressource hinzuzufügen.',
+    'brainstorm.clickToAdd':
+      'Klicken Sie auf die Schaltfläche +, um Ihre erste Idee, Aufgabe, Notiz oder Ressource hinzuzufügen.',
     'brainstorm.addFirstNode': 'Ersten Knoten hinzufügen',
     'node.add': 'Neuen Knoten hinzufügen',
     'node.edit': 'Knoten bearbeiten',
@@ -119,10 +120,7 @@ interface I18nProviderProps {
   defaultLocale?: string;
 }
 
-export const I18nProvider: React.FC<I18nProviderProps> = ({
-  children,
-  defaultLocale = 'en',
-}) => {
+export const I18nProvider: React.FC<I18nProviderProps> = ({ children, defaultLocale = 'en' }) => {
   const [locale, setLocale] = useState(defaultLocale);
 
   // Translation function

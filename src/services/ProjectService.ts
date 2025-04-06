@@ -36,7 +36,7 @@ export class ProjectService {
       updatedAt: now,
       version: '0.1.0',
       nodes: [],
-      edges: []
+      edges: [],
     };
 
     // Save to local storage
@@ -85,7 +85,7 @@ export class ProjectService {
     // Update the project
     const updatedProject = {
       ...project,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
     projects[index] = updatedProject;
     this.saveProjects(projects);
@@ -130,7 +130,9 @@ export class ProjectService {
   public async syncToS3(projectId: string): Promise<boolean> {
     // Check if S3 is available
     if (!s3Service.isS3Available()) {
-      console.warn('S3 service is not available. Enable it in .env file with VITE_AWS_S3_ENABLED=true');
+      console.warn(
+        'S3 service is not available. Enable it in .env file with VITE_AWS_S3_ENABLED=true'
+      );
       return false;
     }
 

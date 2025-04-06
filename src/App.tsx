@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import {
   ThemeProvider,
@@ -17,7 +17,9 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Divider
+  Divider,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import {
   Brightness4 as DarkIcon,
@@ -26,13 +28,20 @@ import {
   Menu as MenuIcon,
   BubbleChart as BrainstormIcon,
   Home as HomeIcon,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
 } from '@mui/icons-material';
+import { registerSW } from 'virtual:pwa-register';
 import { useI18n } from './contexts/I18nContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { HomePage } from './pages/HomePage';
 import { EnhancedBrainstormPage } from './pages/EnhancedBrainstormPage';
 import { SettingsPage } from './pages/SettingsPage';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
+import OfflineIndicator from './components/OfflineIndicator/OfflineIndicator';
+import AccessibilityMenu from './components/Accessibility/AccessibilityMenu';
+import indexedDBService from './services/IndexedDBService';
+import loggerService from './services/LoggerService';
+import offlineService from './services/OfflineService';
 
 // Define theme settings
 const getDesignTokens = (mode: PaletteMode) => ({
@@ -94,9 +103,8 @@ const getDesignTokens = (mode: PaletteMode) => ({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          boxShadow: mode === 'light'
-            ? '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)'
-            : 'none',
+          boxShadow:
+            mode === 'light' ? '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)' : 'none',
         },
       },
     },
@@ -113,58 +121,132 @@ const getDesignTokens = (mode: PaletteMode) => ({
 const AppWithTheme = () => {
   const [mode, setMode] = useState<PaletteMode>('light');
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [updateSWFunction, setUpdateSWFunction] = useState<
+    ((reload?: boolean) => Promise<void>) | null
+  >(null);
   const { t } = useI18n();
 
   // Update the theme only when the mode changes
   const theme = useMemo(() => createTheme(getDesignTokens(mode)), [mode]);
 
   const toggleThemeMode = () => {
-    setMode(prevMode => prevMode === 'light' ? 'dark' : 'light');
+    setMode(prevMode => (prevMode === 'light' ? 'dark' : 'light'));
   };
 
   const toggleDrawer = () => {
     setDrawerOpen(!drawerOpen);
   };
 
+  const handleUpdateApp = () => {
+    if (updateSWFunction) {
+      updateSWFunction(true);
+    }
+  };
+
+  // Initialize services
+  useEffect(() => {
+    // Initialize IndexedDB
+    indexedDBService.init().catch(error => {
+      console.error('Failed to initialize IndexedDB:', error);
+      loggerService.error('Failed to initialize IndexedDB', error);
+    });
+
+    // Start offline sync service
+    offlineService.configure({
+      syncInterval: 60000, // 1 minute
+      maxRetries: 5,
+      autoSync: true,
+    });
+    offlineService.startAutoSync();
+
+    // Register service worker for PWA
+    try {
+      const updateSW = registerSW({
+        onNeedRefresh(updateFn) {
+          // Store the update function for later use
+          setUpdateSWFunction(() => updateFn);
+          setUpdateAvailable(true);
+
+          // Log the update availability
+          loggerService.info('New app version available');
+        },
+        onOfflineReady() {
+          loggerService.info('App is ready for offline use');
+        },
+        onRegisterError(error) {
+          loggerService.error('Service worker registration failed', error);
+        },
+      });
+    } catch (error) {
+      console.error('Failed to register service worker:', error);
+      loggerService.error(
+        'Failed to register service worker',
+        error instanceof Error ? error : new Error(String(error))
+      );
+    }
+
+    // Clean up on unmount
+    return () => {
+      offlineService.stopAutoSync();
+    };
+  }, []);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <BrowserRouter
-        future={{
-          v7_startTransition: true,
-          v7_relativeSplatPath: true
-        }}
-      >
-        <Routes>
-          <Route path="/" element={<HomePage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />} />
-          <Route path="/brainstorm" element={<EnhancedBrainstormPage />} />
-          <Route path="/brainstorm/:projectId" element={<EnhancedBrainstormPage />} />
-          <Route path="/settings" element={<SettingsPage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+      <ErrorBoundary>
+        <BrowserRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
+          <Routes>
+            <Route
+              path="/"
+              element={<HomePage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />}
+            />
+            <Route path="/brainstorm" element={<EnhancedBrainstormPage />} />
+            <Route path="/brainstorm/:projectId" element={<EnhancedBrainstormPage />} />
+            <Route
+              path="/settings"
+              element={
+                <SettingsPage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+
+          {/* Offline indicator */}
+          <OfflineIndicator position="bottom-right" showSnackbar={true} />
+
+          {/* Accessibility menu */}
+          <AccessibilityMenu position="bottom-left" />
+
+          {/* Update notification */}
+          <Snackbar
+            open={updateAvailable}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          >
+            <Alert
+              severity="info"
+              action={
+                <Button color="inherit" size="small" onClick={handleUpdateApp}>
+                  Update
+                </Button>
+              }
+            >
+              A new version is available!
+            </Alert>
+          </Snackbar>
+        </BrowserRouter>
+      </ErrorBoundary>
     </ThemeProvider>
   );
 };
 
 const App = () => {
-  // Register service worker for PWA
-  // Commented out for now to avoid errors
-  /*
-  useEffect(() => {
-    const updateSW = registerSW({
-      onNeedRefresh() {
-        if (confirm('New content available. Reload?')) {
-          updateSW(true);
-        }
-      },
-      onOfflineReady() {
-        console.log('App is ready for offline use');
-      },
-    });
-  }, []);
-  */
-
   return (
     <SettingsProvider>
       <AppWithTheme />

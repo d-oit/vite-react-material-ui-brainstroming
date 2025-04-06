@@ -1,12 +1,12 @@
-import { 
-  Drawer as MuiDrawer, 
-  List, 
-  ListItem, 
-  ListItemButton, 
-  ListItemIcon, 
-  ListItemText, 
-  Divider, 
-  Box, 
+import {
+  Drawer as MuiDrawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Box,
   Typography,
   useTheme,
   useMediaQuery,
@@ -78,13 +78,13 @@ export const Drawer = ({ open, onClose, width = 240 }: DrawerProps) => {
           v{import.meta.env.VITE_PROJECT_VERSION || '0.1.0'}
         </Typography>
       </Box>
-      
+
       <Divider />
-      
+
       <List>
-        {menuItems.map((item) => (
+        {menuItems.map(item => (
           <ListItem key={item.text} disablePadding>
-            <ListItemButton 
+            <ListItemButton
               onClick={() => handleNavigation(item.path)}
               selected={isActive(item.path)}
             >
@@ -94,15 +94,15 @@ export const Drawer = ({ open, onClose, width = 240 }: DrawerProps) => {
           </ListItem>
         ))}
       </List>
-      
+
       <Box sx={{ flexGrow: 1 }} />
-      
+
       <Divider />
-      
+
       <List>
-        {bottomMenuItems.map((item) => (
+        {bottomMenuItems.map(item => (
           <ListItem key={item.text} disablePadding>
-            <ListItemButton 
+            <ListItemButton
               onClick={() => handleNavigation(item.path)}
               selected={isActive(item.path)}
             >

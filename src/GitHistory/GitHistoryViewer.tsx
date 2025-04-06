@@ -112,9 +112,9 @@ export const GitHistoryViewer = ({ projectId }: GitHistoryViewerProps) => {
         <Typography variant="h6" sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
           Commit History
         </Typography>
-        
+
         <List sx={{ width: '100%' }}>
-          {commits.map((commit) => (
+          {commits.map(commit => (
             <Box key={commit.hash}>
               <ListItem
                 alignItems="flex-start"
@@ -127,10 +127,16 @@ export const GitHistoryViewer = ({ projectId }: GitHistoryViewerProps) => {
                     <CommitIcon />
                   </Avatar>
                 </ListItemAvatar>
-                
+
                 <ListItemText
                   primary={
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
                       <Typography variant="subtitle1" component="span">
                         {commit.message}
                       </Typography>
@@ -158,19 +164,19 @@ export const GitHistoryViewer = ({ projectId }: GitHistoryViewerProps) => {
           ))}
         </List>
       </Paper>
-      
+
       <Paper sx={{ width: '60%', p: 2, height: '100%', overflow: 'auto' }}>
         {selectedCommit ? (
           <Box>
             <Typography variant="h6" gutterBottom>
               Commit Details
             </Typography>
-            
+
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle1">Message</Typography>
               <Typography variant="body1">{selectedCommit.message}</Typography>
             </Box>
-            
+
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle1">Author</Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -178,24 +184,24 @@ export const GitHistoryViewer = ({ projectId }: GitHistoryViewerProps) => {
                 <Typography variant="body1">{selectedCommit.author}</Typography>
               </Box>
             </Box>
-            
+
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle1">Date</Typography>
               <Typography variant="body1">{formatDate(selectedCommit.date)}</Typography>
             </Box>
-            
+
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle1">Commit Hash</Typography>
               <Chip label={selectedCommit.hash} color="primary" />
             </Box>
-            
+
             <Box sx={{ mt: 3 }}>
               <Typography variant="subtitle1">Compare with another commit</Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
                 {commits
-                  .filter((commit) => commit.hash !== selectedCommit.hash)
+                  .filter(commit => commit.hash !== selectedCommit.hash)
                   .slice(0, 5)
-                  .map((commit) => (
+                  .map(commit => (
                     <Chip
                       key={commit.hash}
                       label={`${commit.hash.substring(0, 7)} - ${commit.message.substring(0, 20)}...`}
@@ -208,22 +214,29 @@ export const GitHistoryViewer = ({ projectId }: GitHistoryViewerProps) => {
             </Box>
           </Box>
         ) : (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}
+          >
             <Typography variant="body1" color="text.secondary">
               Select a commit to view details
             </Typography>
           </Box>
         )}
       </Paper>
-      
-      <Dialog open={compareDialogOpen} onClose={() => setCompareDialogOpen(false)} maxWidth="md" fullWidth>
+
+      <Dialog
+        open={compareDialogOpen}
+        onClose={() => setCompareDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>
           Compare Commits
           <Typography variant="subtitle2" color="text.secondary">
             {selectedCommit?.hash.substring(0, 7)} vs {compareCommit?.hash.substring(0, 7)}
           </Typography>
         </DialogTitle>
-        
+
         <DialogContent dividers>
           {compareLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
@@ -234,14 +247,14 @@ export const GitHistoryViewer = ({ projectId }: GitHistoryViewerProps) => {
               <Typography variant="h6" gutterBottom>
                 Changes
               </Typography>
-              
+
               <Box sx={{ mb: 3 }}>
                 <Typography variant="subtitle1" color="success.main" gutterBottom>
                   Added Files ({compareResult.added.length})
                 </Typography>
                 {compareResult.added.length > 0 ? (
                   <List dense>
-                    {compareResult.added.map((file) => (
+                    {compareResult.added.map(file => (
                       <ListItem key={file}>
                         <ListItemText primary={file} />
                       </ListItem>
@@ -253,14 +266,14 @@ export const GitHistoryViewer = ({ projectId }: GitHistoryViewerProps) => {
                   </Typography>
                 )}
               </Box>
-              
+
               <Box sx={{ mb: 3 }}>
                 <Typography variant="subtitle1" color="error.main" gutterBottom>
                   Removed Files ({compareResult.removed.length})
                 </Typography>
                 {compareResult.removed.length > 0 ? (
                   <List dense>
-                    {compareResult.removed.map((file) => (
+                    {compareResult.removed.map(file => (
                       <ListItem key={file}>
                         <ListItemText primary={file} />
                       </ListItem>
@@ -272,14 +285,14 @@ export const GitHistoryViewer = ({ projectId }: GitHistoryViewerProps) => {
                   </Typography>
                 )}
               </Box>
-              
+
               <Box>
                 <Typography variant="subtitle1" color="info.main" gutterBottom>
                   Modified Files ({compareResult.modified.length})
                 </Typography>
                 {compareResult.modified.length > 0 ? (
                   <List dense>
-                    {compareResult.modified.map((file) => (
+                    {compareResult.modified.map(file => (
                       <ListItem key={file}>
                         <ListItemText primary={file} />
                       </ListItem>
@@ -296,7 +309,7 @@ export const GitHistoryViewer = ({ projectId }: GitHistoryViewerProps) => {
             <Typography>No comparison data available</Typography>
           )}
         </DialogContent>
-        
+
         <DialogActions>
           <Button onClick={() => setCompareDialogOpen(false)}>Close</Button>
         </DialogActions>

@@ -46,7 +46,7 @@ const ColorPicker = ({ color, onChange }: { color: string; onChange: (color: str
           const input = document.createElement('input');
           input.type = 'color';
           input.value = color;
-          input.addEventListener('input', (e) => {
+          input.addEventListener('input', e => {
             onChange((e.target as HTMLInputElement).value);
           });
           input.click();
@@ -55,7 +55,7 @@ const ColorPicker = ({ color, onChange }: { color: string; onChange: (color: str
       <TextField
         size="small"
         value={color}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)}
         sx={{ width: 100 }}
       />
     </Box>
@@ -79,7 +79,7 @@ const ColorSchemeCard = ({
   onDuplicate: () => void;
 }) => {
   const theme = useTheme();
-  
+
   return (
     <Card
       sx={{
@@ -112,7 +112,7 @@ const ColorSchemeCard = ({
         <Typography variant="h6" gutterBottom>
           {scheme.name}
         </Typography>
-        
+
         <Grid container spacing={1} sx={{ mb: 2 }}>
           {Object.entries(scheme.colors).map(([type, color]) => (
             <Grid item xs={6} key={type}>
@@ -133,7 +133,7 @@ const ColorSchemeCard = ({
             </Grid>
           ))}
         </Grid>
-        
+
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Button
             variant={isActive ? 'contained' : 'outlined'}
@@ -143,26 +143,22 @@ const ColorSchemeCard = ({
           >
             {isActive ? 'Active' : 'Activate'}
           </Button>
-          
+
           <Box>
             <Tooltip title="Edit">
               <IconButton size="small" onClick={onEdit}>
                 <EditIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-            
+
             <Tooltip title="Duplicate">
               <IconButton size="small" onClick={onDuplicate}>
                 <DuplicateIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-            
+
             <Tooltip title="Delete">
-              <IconButton
-                size="small"
-                onClick={onDelete}
-                disabled={scheme.isDefault || isActive}
-              >
+              <IconButton size="small" onClick={onDelete} disabled={scheme.isDefault || isActive}>
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -192,7 +188,7 @@ const EditColorSchemeDialog = ({
     [NodeType.NOTE]: '#fff8e1',
     [NodeType.RESOURCE]: '#f3e5f5',
   });
-  
+
   // Initialize form when dialog opens
   useEffect(() => {
     if (scheme) {
@@ -208,10 +204,10 @@ const EditColorSchemeDialog = ({
       });
     }
   }, [scheme]);
-  
+
   const handleSave = () => {
     if (!scheme) return;
-    
+
     onSave({
       ...scheme,
       name,
@@ -219,27 +215,25 @@ const EditColorSchemeDialog = ({
       updatedAt: new Date().toISOString(),
     });
   };
-  
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        {scheme?.id ? `Edit ${scheme.name}` : 'Create Color Scheme'}
-      </DialogTitle>
-      
+      <DialogTitle>{scheme?.id ? `Edit ${scheme.name}` : 'Create Color Scheme'}</DialogTitle>
+
       <DialogContent>
         <TextField
           label="Scheme Name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={e => setName(e.target.value)}
           fullWidth
           margin="normal"
           required
         />
-        
+
         <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>
           Node Colors
         </Typography>
-        
+
         <Grid container spacing={2}>
           {Object.entries(colors).map(([type, color]) => (
             <Grid item xs={12} sm={6} key={type}>
@@ -249,8 +243,8 @@ const EditColorSchemeDialog = ({
                 </Typography>
                 <ColorPicker
                   color={color}
-                  onChange={(newColor) => {
-                    setColors((prev) => ({
+                  onChange={newColor => {
+                    setColors(prev => ({
                       ...prev,
                       [type]: newColor,
                     }));
@@ -261,14 +255,10 @@ const EditColorSchemeDialog = ({
           ))}
         </Grid>
       </DialogContent>
-      
+
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button
-          onClick={handleSave}
-          variant="contained"
-          disabled={!name.trim()}
-        >
+        <Button onClick={handleSave} variant="contained" disabled={!name.trim()}>
           Save
         </Button>
       </DialogActions>
@@ -293,7 +283,8 @@ const DeleteConfirmationDialog = ({
       <DialogTitle>Delete Color Scheme</DialogTitle>
       <DialogContent>
         <Typography>
-          Are you sure you want to delete the color scheme "{schemeName}"? This action cannot be undone.
+          Are you sure you want to delete the color scheme "{schemeName}"? This action cannot be
+          undone.
         </Typography>
       </DialogContent>
       <DialogActions>
@@ -316,7 +307,7 @@ export const ColorSchemeManager = () => {
     createColorScheme,
     deleteColorScheme,
   } = useSettings();
-  
+
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [currentScheme, setCurrentScheme] = useState<ColorScheme | null>(null);
@@ -329,7 +320,7 @@ export const ColorSchemeManager = () => {
     message: '',
     severity: 'success',
   });
-  
+
   const handleActivate = (schemeId: string) => {
     updateSettings({ activeColorSchemeId: schemeId });
     setSnackbar({
@@ -338,12 +329,12 @@ export const ColorSchemeManager = () => {
       severity: 'success',
     });
   };
-  
+
   const handleEdit = (scheme: ColorScheme) => {
     setCurrentScheme(scheme);
     setEditDialogOpen(true);
   };
-  
+
   const handleCreate = () => {
     // Create a new scheme with default values
     const newScheme: ColorScheme = {
@@ -359,11 +350,11 @@ export const ColorSchemeManager = () => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    
+
     setCurrentScheme(newScheme);
     setEditDialogOpen(true);
   };
-  
+
   const handleDuplicate = (scheme: ColorScheme) => {
     const duplicatedScheme: ColorScheme = {
       ...scheme,
@@ -373,19 +364,19 @@ export const ColorSchemeManager = () => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    
+
     setCurrentScheme(duplicatedScheme);
     setEditDialogOpen(true);
   };
-  
+
   const handleDelete = (scheme: ColorScheme) => {
     setCurrentScheme(scheme);
     setDeleteDialogOpen(true);
   };
-  
+
   const handleSaveScheme = async (scheme: ColorScheme) => {
     try {
-      if (colorSchemes.some((s) => s.id === scheme.id)) {
+      if (colorSchemes.some(s => s.id === scheme.id)) {
         // Update existing scheme
         await updateColorScheme(scheme);
         setSnackbar({
@@ -402,7 +393,7 @@ export const ColorSchemeManager = () => {
           severity: 'success',
         });
       }
-      
+
       setEditDialogOpen(false);
     } catch (error) {
       console.error('Failed to save color scheme:', error);
@@ -413,10 +404,10 @@ export const ColorSchemeManager = () => {
       });
     }
   };
-  
+
   const handleConfirmDelete = async () => {
     if (!currentScheme) return;
-    
+
     try {
       await deleteColorScheme(currentScheme.id);
       setSnackbar({
@@ -434,24 +425,20 @@ export const ColorSchemeManager = () => {
       });
     }
   };
-  
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h6">Color Schemes</Typography>
-        <Button
-          variant="outlined"
-          startIcon={<AddIcon />}
-          onClick={handleCreate}
-        >
+        <Button variant="outlined" startIcon={<AddIcon />} onClick={handleCreate}>
           New Scheme
         </Button>
       </Box>
-      
+
       <Divider sx={{ mb: 3 }} />
-      
+
       <Grid container spacing={2}>
-        {colorSchemes.map((scheme) => (
+        {colorSchemes.map(scheme => (
           <Grid item xs={12} sm={6} md={4} key={scheme.id}>
             <ColorSchemeCard
               scheme={scheme}
@@ -464,7 +451,7 @@ export const ColorSchemeManager = () => {
           </Grid>
         ))}
       </Grid>
-      
+
       {/* Edit Dialog */}
       <EditColorSchemeDialog
         open={editDialogOpen}
@@ -472,7 +459,7 @@ export const ColorSchemeManager = () => {
         onClose={() => setEditDialogOpen(false)}
         onSave={handleSaveScheme}
       />
-      
+
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog
         open={deleteDialogOpen}
@@ -480,7 +467,7 @@ export const ColorSchemeManager = () => {
         onClose={() => setDeleteDialogOpen(false)}
         onConfirm={handleConfirmDelete}
       />
-      
+
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}

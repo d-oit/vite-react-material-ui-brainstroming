@@ -54,27 +54,30 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
-    
+
     // Check if API key is configured
     if (!settings.openRouterApiKey) {
       setError(t('chat.apiKeyMissing'));
       return;
     }
-    
+
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
       role: 'user',
       content: input,
       timestamp: new Date().toISOString(),
     };
-    
+
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      const assistantMessage = await chatService.sendMessage([...messages, userMessage], projectContext);
+      const assistantMessage = await chatService.sendMessage(
+        [...messages, userMessage],
+        projectContext
+      );
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
@@ -106,7 +109,7 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
           {t('chat.poweredBy')} OpenRouter
         </Typography>
       </Box>
-      
+
       <Box
         sx={{
           flexGrow: 1,
@@ -150,7 +153,7 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
               >
                 {message.role === 'user' ? <PersonIcon /> : <BotIcon />}
               </Avatar>
-              
+
               <Paper
                 elevation={1}
                 sx={{
@@ -162,20 +165,24 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
                 <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
                   {message.content}
                 </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: 'block', mt: 1 }}
+                >
                   {new Date(message.timestamp).toLocaleTimeString()}
                 </Typography>
               </Paper>
             </Box>
           ))
         )}
-        
+
         {isLoading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
             <CircularProgress size={24} />
           </Box>
         )}
-        
+
         {error && (
           <Paper
             elevation={0}
@@ -189,25 +196,25 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
             <Typography variant="body2">{error}</Typography>
           </Paper>
         )}
-        
+
         <div ref={messagesEndRef} />
       </Box>
-      
+
       <Divider />
-      
+
       <Box sx={{ p: 2, display: 'flex', gap: 1 }}>
         <TextField
           fullWidth
           placeholder={t('chat.typeMessage')}
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={e => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
           multiline
           maxRows={4}
           disabled={isLoading || !settings.openRouterApiKey}
           sx={{ flexGrow: 1 }}
         />
-        
+
         <Button
           variant="contained"
           color="primary"
@@ -218,7 +225,7 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
           {t('chat.send')}
         </Button>
       </Box>
-      
+
       {messages.length > 0 && (
         <Box sx={{ p: 1, display: 'flex', justifyContent: 'center' }}>
           <Button size="small" onClick={clearChat}>

@@ -27,20 +27,20 @@ export class GitService {
   public async commit(project: Project, commitMessage: string): Promise<Project> {
     const projects = this.getProjects();
     const existingProject = projects.find(p => p.id === project.id);
-    
+
     // Create a new version based on the current date
     const now = new Date();
     const version = `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()}-${now.getHours()}${now.getMinutes()}`;
-    
+
     // Create a commit object
     const commit = {
       id: crypto.randomUUID(),
       message: commitMessage,
       timestamp: now.toISOString(),
       version,
-      projectSnapshot: { ...project }
+      projectSnapshot: { ...project },
     };
-    
+
     if (existingProject) {
       // Update existing project
       existingProject.commits = existingProject.commits || [];
@@ -48,14 +48,14 @@ export class GitService {
       existingProject.currentCommitId = commit.id;
       existingProject.version = version;
       existingProject.updatedAt = now.toISOString();
-      
+
       // Save updated projects
       this.saveProjects(projects);
-      
+
       return {
         ...project,
         version,
-        updatedAt: now.toISOString()
+        updatedAt: now.toISOString(),
       };
     } else {
       // Create new project entry
@@ -67,18 +67,18 @@ export class GitService {
         updatedAt: now.toISOString(),
         version,
         currentCommitId: commit.id,
-        commits: [commit]
+        commits: [commit],
       };
-      
+
       // Save updated projects
       projects.push(newProjectEntry);
       this.saveProjects(projects);
-      
+
       return {
         ...project,
         version,
         createdAt: now.toISOString(),
-        updatedAt: now.toISOString()
+        updatedAt: now.toISOString(),
       };
     }
   }
@@ -91,11 +91,11 @@ export class GitService {
   public getCommits(projectId: string): any[] {
     const projects = this.getProjects();
     const project = projects.find(p => p.id === projectId);
-    
+
     if (!project) {
       return [];
     }
-    
+
     return project.commits || [];
   }
 
@@ -108,21 +108,21 @@ export class GitService {
   public checkout(projectId: string, commitId: string): Project | null {
     const projects = this.getProjects();
     const project = projects.find(p => p.id === projectId);
-    
+
     if (!project) {
       return null;
     }
-    
+
     const commit = project.commits?.find(c => c.id === commitId);
-    
+
     if (!commit) {
       return null;
     }
-    
+
     // Update current commit ID
     project.currentCommitId = commitId;
     this.saveProjects(projects);
-    
+
     return commit.projectSnapshot;
   }
 
@@ -134,11 +134,11 @@ export class GitService {
   public getCurrentCommit(projectId: string): any | null {
     const projects = this.getProjects();
     const project = projects.find(p => p.id === projectId);
-    
+
     if (!project || !project.currentCommitId) {
       return null;
     }
-    
+
     return project.commits?.find(c => c.id === project.currentCommitId) || null;
   }
 

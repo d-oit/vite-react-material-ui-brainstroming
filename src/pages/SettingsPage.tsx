@@ -32,6 +32,7 @@ import { ThemeMode, UserPreferences } from '../types';
 import { ColorSchemeManager } from '../components/Settings/ColorSchemeManager';
 import { NodePreferencesManager } from '../components/Settings/NodePreferencesManager';
 import { SettingsExportImport } from '../components/Settings/SettingsExportImport';
+import { LogViewer } from '../components/Settings/LogViewer';
 
 // Default user preferences
 const defaultPreferences: UserPreferences = {
@@ -70,11 +71,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`settings-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ py: 3 }}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
     </div>
   );
 }
@@ -107,12 +104,13 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
     localStorage.setItem('settings_accordion_state', JSON.stringify(expanded));
   }, [expanded]);
 
-  const handleAccordionChange = (panel: keyof AccordionState) => (_event: React.SyntheticEvent, isExpanded: boolean) => {
-    setExpanded({
-      ...expanded,
-      [panel]: isExpanded,
-    });
-  };
+  const handleAccordionChange =
+    (panel: keyof AccordionState) => (_event: React.SyntheticEvent, isExpanded: boolean) => {
+      setExpanded({
+        ...expanded,
+        [panel]: isExpanded,
+      });
+    };
 
   const handleThemeModeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     const newMode = event.target.value as ThemeMode;
@@ -120,13 +118,13 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
     updateSettings({ themeMode: newMode });
   };
 
-  const handleSwitchChange = (name: keyof Pick<UserPreferences, 'autoSave' | 'autoBackup'>) => (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const newValue = event.target.checked;
-    setPreferences({ ...preferences, [name]: newValue });
-    updateSettings({ [name]: newValue });
-  };
+  const handleSwitchChange =
+    (name: keyof Pick<UserPreferences, 'autoSave' | 'autoBackup'>) =>
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = event.target.checked;
+      setPreferences({ ...preferences, [name]: newValue });
+      updateSettings({ [name]: newValue });
+    };
 
   const handleFontSizeChange = (_event: Event, newValue: number | number[]) => {
     const fontSize = newValue as number;
@@ -179,14 +177,17 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
             width: '8px',
           },
           '&::-webkit-scrollbar-track': {
-            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+            backgroundColor:
+              theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
           },
           '&::-webkit-scrollbar-thumb': {
-            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+            backgroundColor:
+              theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
             borderRadius: '4px',
           },
           '&::-webkit-scrollbar-thumb:hover': {
-            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)',
+            backgroundColor:
+              theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)',
           },
         }}
       >
@@ -211,9 +212,14 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
               scrollButtons="auto"
             >
               <Tab label="General" id="settings-tab-0" aria-controls="settings-tabpanel-0" />
-              <Tab label="Node Appearance" id="settings-tab-1" aria-controls="settings-tabpanel-1" />
+              <Tab
+                label="Node Appearance"
+                id="settings-tab-1"
+                aria-controls="settings-tabpanel-1"
+              />
               <Tab label="Node Size" id="settings-tab-2" aria-controls="settings-tabpanel-2" />
               <Tab label="Export/Import" id="settings-tab-3" aria-controls="settings-tabpanel-3" />
+              <Tab label="Logs" id="settings-tab-4" aria-controls="settings-tabpanel-4" />
             </Tabs>
           </Box>
 
@@ -331,7 +337,7 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
                     fullWidth
                     label="AWS S3 Endpoint"
                     value={s3Endpoint}
-                    onChange={(e) => setS3Endpoint(e.target.value)}
+                    onChange={e => setS3Endpoint(e.target.value)}
                     margin="normal"
                     helperText="Used for project backups and sync"
                   />
@@ -340,7 +346,7 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
                     fullWidth
                     label="OpenRouter API URL"
                     value={openRouterApiUrl}
-                    onChange={(e) => setOpenRouterApiUrl(e.target.value)}
+                    onChange={e => setOpenRouterApiUrl(e.target.value)}
                     margin="normal"
                     helperText="Used for the AI assistant"
                   />
@@ -349,11 +355,7 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
             </Box>
 
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSaveSettings}
-              >
+              <Button variant="contained" color="primary" onClick={handleSaveSettings}>
                 Save Settings
               </Button>
             </Box>
@@ -370,6 +372,10 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
           <TabPanel value={tabValue} index={3}>
             <SettingsExportImport />
           </TabPanel>
+
+          <TabPanel value={tabValue} index={4}>
+            <LogViewer />
+          </TabPanel>
         </Box>
 
         <Snackbar
@@ -385,5 +391,3 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
     </AppShell>
   );
 };
-
-

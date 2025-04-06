@@ -14,11 +14,7 @@ import {
   IconButton,
   Fab,
 } from '@mui/material';
-import {
-  Save as SaveIcon,
-  Chat as ChatIcon,
-  Close as CloseIcon,
-} from '@mui/icons-material';
+import { Save as SaveIcon, Chat as ChatIcon, Close as CloseIcon } from '@mui/icons-material';
 import { MainLayout } from '@/components/Layout/MainLayout';
 import { BrainstormFlow } from '@/components/BrainstormFlow/BrainstormFlow';
 import { ChatInterface } from '@/components/Chat/ChatInterface';
@@ -32,15 +28,11 @@ export const BrainstormPage = () => {
   const [chatOpen, setChatOpen] = useState(!isMobile);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
-  
-  const {
-    project,
-    loading,
-    error,
-    isSaving,
-    saveProject,
-    createNewVersion,
-  } = useProject({ projectId, autoSave: true });
+
+  const { project, loading, error, isSaving, saveProject, createNewVersion } = useProject({
+    projectId,
+    autoSave: true,
+  });
 
   useEffect(() => {
     if (project) {
@@ -53,11 +45,11 @@ export const BrainstormPage = () => {
     if (project) {
       setNodes(updatedNodes);
       setEdges(updatedEdges);
-      
+
       // Update project with new nodes and edges
       project.nodes = updatedNodes;
       project.edges = updatedEdges;
-      
+
       // Save project
       saveProject();
     }
@@ -76,7 +68,9 @@ export const BrainstormPage = () => {
   if (loading) {
     return (
       <MainLayout title="Brainstorming">
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <Box
+          sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}
+        >
           <CircularProgress />
         </Box>
       </MainLayout>
@@ -106,7 +100,7 @@ export const BrainstormPage = () => {
             Version {project.version}
           </Typography>
         </Box>
-        
+
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
             variant="outlined"
@@ -116,15 +110,11 @@ export const BrainstormPage = () => {
           >
             {isSaving ? 'Saving...' : 'Save'}
           </Button>
-          
-          <Button
-            variant="outlined"
-            onClick={handleCreateNewVersion}
-            disabled={isSaving}
-          >
+
+          <Button variant="outlined" onClick={handleCreateNewVersion} disabled={isSaving}>
             New Version
           </Button>
-          
+
           {isMobile && (
             <Button
               variant="contained"
@@ -137,19 +127,15 @@ export const BrainstormPage = () => {
           )}
         </Box>
       </Box>
-      
+
       <Divider sx={{ mb: 2 }} />
-      
+
       {isMobile ? (
         <>
           <Box sx={{ height: 'calc(100vh - 200px)' }}>
-            <BrainstormFlow
-              initialNodes={nodes}
-              initialEdges={edges}
-              onSave={handleSaveFlow}
-            />
+            <BrainstormFlow initialNodes={nodes} initialEdges={edges} onSave={handleSaveFlow} />
           </Box>
-          
+
           <Drawer
             anchor="right"
             open={chatOpen}
@@ -166,7 +152,7 @@ export const BrainstormPage = () => {
                 <CloseIcon />
               </IconButton>
             </Box>
-            
+
             <Box sx={{ height: 'calc(100% - 48px)' }}>
               <ChatInterface />
             </Box>
@@ -175,13 +161,9 @@ export const BrainstormPage = () => {
       ) : (
         <Grid container spacing={2} sx={{ height: 'calc(100vh - 200px)' }}>
           <Grid item xs={chatOpen ? 8 : 12}>
-            <BrainstormFlow
-              initialNodes={nodes}
-              initialEdges={edges}
-              onSave={handleSaveFlow}
-            />
+            <BrainstormFlow initialNodes={nodes} initialEdges={edges} onSave={handleSaveFlow} />
           </Grid>
-          
+
           {chatOpen && (
             <Grid item xs={4}>
               <Box sx={{ height: '100%', position: 'relative' }}>
@@ -197,12 +179,12 @@ export const BrainstormPage = () => {
           )}
         </Grid>
       )}
-      
+
       {/* Floating action buttons - stacked vertically with proper spacing */}
-      <Box 
-        sx={{ 
-          position: 'fixed', 
-          bottom: 16, 
+      <Box
+        sx={{
+          position: 'fixed',
+          bottom: 16,
           right: 16,
           display: 'flex',
           flexDirection: 'column',
@@ -211,16 +193,11 @@ export const BrainstormPage = () => {
         }}
       >
         {!chatOpen && !isMobile && (
-          <Fab
-            color="secondary"
-            aria-label="chat"
-            onClick={toggleChat}
-            size="medium"
-          >
+          <Fab color="secondary" aria-label="chat" onClick={toggleChat} size="medium">
             <ChatIcon />
           </Fab>
         )}
-        
+
         <Fab
           color="primary"
           aria-label="save"
@@ -234,4 +211,3 @@ export const BrainstormPage = () => {
     </MainLayout>
   );
 };
-

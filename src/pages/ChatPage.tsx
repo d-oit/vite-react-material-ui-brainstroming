@@ -13,11 +13,11 @@ export const ChatPage = () => {
           Powered by OpenRouter AI
         </Typography>
       </Box>
-      
+
       <Divider sx={{ mb: 2 }} />
-      
+
       <Paper sx={{ height: 'calc(100vh - 200px)', overflow: 'hidden' }}>
-        <ChatInterface 
+        <ChatInterface
           title="AI Assistant"
           placeholder="Ask for ideas, suggestions, or help with your brainstorming..."
         />

@@ -74,10 +74,7 @@ export const GitHistoryPanel = ({ project, onProjectUpdate }: GitHistoryPanelPro
     setSuccess(null);
 
     try {
-      const updatedProject = await projectService.saveProjectWithCommit(
-        project,
-        commitMessage
-      );
+      const updatedProject = await projectService.saveProjectWithCommit(project, commitMessage);
       onProjectUpdate(updatedProject);
       setCommitDialogOpen(false);
       setCommitMessage('');
@@ -98,7 +95,7 @@ export const GitHistoryPanel = ({ project, onProjectUpdate }: GitHistoryPanelPro
 
     try {
       const projectSnapshot = gitService.checkout(project.id, commitId);
-      
+
       if (projectSnapshot) {
         onProjectUpdate(projectSnapshot);
         setSuccess(t('gitHistory.checkoutSuccessful'));
@@ -115,14 +112,23 @@ export const GitHistoryPanel = ({ project, onProjectUpdate }: GitHistoryPanelPro
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box
+        sx={{
+          p: 2,
+          borderBottom: 1,
+          borderColor: 'divider',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <Box>
           <Typography variant="h6">{t('gitHistory.title')}</Typography>
           <Typography variant="body2" color="text.secondary">
             {t('gitHistory.currentVersion')}: {project.version}
           </Typography>
         </Box>
-        
+
         <Button
           variant="contained"
           color="primary"
@@ -132,19 +138,19 @@ export const GitHistoryPanel = ({ project, onProjectUpdate }: GitHistoryPanelPro
           {t('gitHistory.commit')}
         </Button>
       </Box>
-      
+
       {error && (
         <Alert severity="error" sx={{ m: 2 }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
-      
+
       {success && (
         <Alert severity="success" sx={{ m: 2 }} onClose={() => setSuccess(null)}>
           {success}
         </Alert>
       )}
-      
+
       <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
@@ -201,7 +207,7 @@ export const GitHistoryPanel = ({ project, onProjectUpdate }: GitHistoryPanelPro
           </List>
         )}
       </Box>
-      
+
       <Dialog open={commitDialogOpen} onClose={() => setCommitDialogOpen(false)}>
         <DialogTitle>{t('gitHistory.createCommit')}</DialogTitle>
         <DialogContent>
@@ -211,7 +217,7 @@ export const GitHistoryPanel = ({ project, onProjectUpdate }: GitHistoryPanelPro
             label={t('gitHistory.commitMessage')}
             fullWidth
             value={commitMessage}
-            onChange={(e) => setCommitMessage(e.target.value)}
+            onChange={e => setCommitMessage(e.target.value)}
             disabled={loading}
           />
         </DialogContent>

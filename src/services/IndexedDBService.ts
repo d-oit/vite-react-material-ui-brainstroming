@@ -107,19 +107,19 @@ export class IndexedDBService {
 
       const request = window.indexedDB.open(DB_NAME, DB_VERSION);
 
-      request.onerror = (event) => {
+      request.onerror = event => {
         console.error('Error opening IndexedDB:', event);
         reject(new Error('Failed to open IndexedDB'));
       };
 
-      request.onsuccess = (event) => {
+      request.onsuccess = event => {
         this.db = (event.target as IDBOpenDBRequest).result;
         this.isInitialized = true;
         console.log('IndexedDB initialized successfully');
         resolve(true);
       };
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = event => {
         const db = (event.target as IDBOpenDBRequest).result;
         const oldVersion = event.oldVersion;
 
@@ -217,7 +217,9 @@ export class IndexedDBService {
     colorStore.add(darkColorScheme);
 
     // Add default node preferences
-    const nodePreferencesStore = db.transaction(STORES.NODE_PREFERENCES, 'readwrite').objectStore(STORES.NODE_PREFERENCES);
+    const nodePreferencesStore = db
+      .transaction(STORES.NODE_PREFERENCES, 'readwrite')
+      .objectStore(STORES.NODE_PREFERENCES);
 
     const defaultNodePreferences: NodePreferences = {
       defaultSize: 'medium',
@@ -253,7 +255,7 @@ export class IndexedDBService {
         resolve(request.result);
       };
 
-      request.onerror = (event) => {
+      request.onerror = event => {
         console.error('Error getting color schemes:', event);
         reject(new Error('Failed to get color schemes'));
       };
@@ -282,7 +284,7 @@ export class IndexedDBService {
         resolve(request.result || null);
       };
 
-      request.onerror = (event) => {
+      request.onerror = event => {
         console.error(`Error getting color scheme ${id}:`, event);
         reject(new Error(`Failed to get color scheme ${id}`));
       };
@@ -311,7 +313,7 @@ export class IndexedDBService {
         resolve(request.result || null);
       };
 
-      request.onerror = (event) => {
+      request.onerror = event => {
         console.error('Error getting default color scheme:', event);
         reject(new Error('Failed to get default color scheme'));
       };
@@ -344,7 +346,7 @@ export class IndexedDBService {
         resolve();
       };
 
-      request.onerror = (event) => {
+      request.onerror = event => {
         console.error('Error saving color scheme:', event);
         reject(new Error('Failed to save color scheme'));
       };
@@ -366,7 +368,7 @@ export class IndexedDBService {
       }
 
       // Don't allow deleting the default color scheme
-      this.getColorScheme(id).then((colorScheme) => {
+      this.getColorScheme(id).then(colorScheme => {
         if (colorScheme?.isDefault) {
           reject(new Error('Cannot delete the default color scheme'));
           return;
@@ -380,7 +382,7 @@ export class IndexedDBService {
           resolve();
         };
 
-        request.onerror = (event) => {
+        request.onerror = event => {
           console.error(`Error deleting color scheme ${id}:`, event);
           reject(new Error(`Failed to delete color scheme ${id}`));
         };
@@ -423,7 +425,7 @@ export class IndexedDBService {
         }
       };
 
-      request.onerror = (event) => {
+      request.onerror = event => {
         console.error('Error getting node preferences:', event);
         reject(new Error('Failed to get node preferences'));
       };
@@ -452,7 +454,7 @@ export class IndexedDBService {
         resolve();
       };
 
-      request.onerror = (event) => {
+      request.onerror = event => {
         console.error('Error saving node preferences:', event);
         reject(new Error('Failed to save node preferences'));
       };
@@ -482,7 +484,7 @@ export class IndexedDBService {
         resolve();
       };
 
-      request.onerror = (event) => {
+      request.onerror = event => {
         console.error(`Error saving setting ${key}:`, event);
         reject(new Error(`Failed to save setting ${key}`));
       };
@@ -511,7 +513,7 @@ export class IndexedDBService {
         resolve(request.result ? request.result.value : null);
       };
 
-      request.onerror = (event) => {
+      request.onerror = event => {
         console.error(`Error getting setting ${key}:`, event);
         reject(new Error(`Failed to get setting ${key}`));
       };
@@ -548,7 +550,7 @@ export class IndexedDBService {
           }
         };
 
-        request.onerror = (event) => {
+        request.onerror = event => {
           console.error(`Error saving setting ${key}:`, event);
           reject(new Error(`Failed to save setting ${key}`));
         };
@@ -586,7 +588,7 @@ export class IndexedDBService {
         resolve(settings);
       };
 
-      request.onerror = (event) => {
+      request.onerror = event => {
         console.error('Error getting all settings:', event);
         reject(new Error('Failed to get all settings'));
       };
@@ -630,7 +632,7 @@ export class IndexedDBService {
         resolve();
       };
 
-      request.onerror = (event) => {
+      request.onerror = event => {
         console.error('Error adding log entry:', event);
         // Don't reject here to prevent cascading errors
         resolve();
@@ -667,13 +669,13 @@ export class IndexedDBService {
 
       request.onsuccess = () => {
         // Sort by timestamp descending (newest first)
-        const logs = request.result.sort((a, b) =>
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        const logs = request.result.sort(
+          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
         resolve(logs);
       };
 
-      request.onerror = (event) => {
+      request.onerror = event => {
         console.error('Error getting logs:', event);
         reject(new Error('Failed to get logs'));
       };
@@ -721,7 +723,7 @@ export class IndexedDBService {
                 }
               };
 
-              deleteRequest.onerror = (event) => {
+              deleteRequest.onerror = event => {
                 console.error(`Error deleting log ${log.id}:`, event);
                 // Continue with other deletions
               };
@@ -734,7 +736,7 @@ export class IndexedDBService {
           }
         };
 
-        request.onerror = (event) => {
+        request.onerror = event => {
           console.error('Error getting logs for deletion:', event);
           reject(new Error('Failed to get logs for deletion'));
         };
@@ -746,11 +748,335 @@ export class IndexedDBService {
           resolve();
         };
 
-        request.onerror = (event) => {
+        request.onerror = event => {
           console.error('Error clearing logs:', event);
           reject(new Error('Failed to clear logs'));
         };
       }
+    });
+  }
+
+  /**
+   * Set encryption password for secure data
+   * @param password Password to use for encryption
+   */
+  public setEncryptionPassword(password: string): void {
+    this.encryptionPassword = password;
+  }
+
+  /**
+   * Check if encryption is available and configured
+   * @returns True if encryption is available and password is set
+   */
+  public isEncryptionConfigured(): boolean {
+    return this.encryptionAvailable && this.encryptionPassword !== null;
+  }
+
+  /**
+   * Store secure data with encryption
+   * @param key Unique key for the data
+   * @param data Data to store securely
+   * @returns Promise that resolves when the data is stored
+   */
+  public async storeSecureData(key: string, data: unknown): Promise<void> {
+    await this.init();
+
+    if (!this.isEncryptionConfigured()) {
+      throw new Error('Encryption is not available or password is not set');
+    }
+
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+
+      // Check if the key already exists
+      const transaction = this.db.transaction(STORES.SECURE_STORE, 'readwrite');
+      const store = transaction.objectStore(STORES.SECURE_STORE);
+      const index = store.index('key');
+      const request = index.get(key);
+
+      request.onsuccess = async () => {
+        try {
+          const now = new Date().toISOString();
+          const encryptedData = await encrypt(data, this.encryptionPassword!);
+
+          if (request.result) {
+            // Update existing entry
+            const updatedData: SecureData = {
+              ...request.result,
+              data: encryptedData,
+              updatedAt: now,
+            };
+
+            const updateRequest = store.put(updatedData);
+
+            updateRequest.onsuccess = () => resolve();
+            updateRequest.onerror = event => {
+              console.error('Error updating secure data:', event);
+              reject(new Error('Failed to update secure data'));
+            };
+          } else {
+            // Create new entry
+            const newData: SecureData = {
+              id: crypto.randomUUID(),
+              key,
+              data: encryptedData,
+              createdAt: now,
+              updatedAt: now,
+            };
+
+            const addRequest = store.add(newData);
+
+            addRequest.onsuccess = () => resolve();
+            addRequest.onerror = event => {
+              console.error('Error adding secure data:', event);
+              reject(new Error('Failed to add secure data'));
+            };
+          }
+        } catch (error) {
+          console.error('Error encrypting data:', error);
+          reject(new Error('Failed to encrypt data'));
+        }
+      };
+
+      request.onerror = event => {
+        console.error('Error getting secure data:', event);
+        reject(new Error('Failed to get secure data'));
+      };
+    });
+  }
+
+  /**
+   * Retrieve secure data with decryption
+   * @param key Key of the data to retrieve
+   * @returns Promise that resolves with the decrypted data
+   */
+  public async getSecureData<T>(key: string): Promise<T | null> {
+    await this.init();
+
+    if (!this.isEncryptionConfigured()) {
+      throw new Error('Encryption is not available or password is not set');
+    }
+
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+
+      const transaction = this.db.transaction(STORES.SECURE_STORE, 'readonly');
+      const store = transaction.objectStore(STORES.SECURE_STORE);
+      const index = store.index('key');
+      const request = index.get(key);
+
+      request.onsuccess = async () => {
+        if (!request.result) {
+          resolve(null);
+          return;
+        }
+
+        try {
+          const secureData = request.result as SecureData;
+          const decryptedData = await decrypt<T>(secureData.data, this.encryptionPassword!);
+          resolve(decryptedData);
+        } catch (error) {
+          console.error('Error decrypting data:', error);
+          reject(new Error('Failed to decrypt data'));
+        }
+      };
+
+      request.onerror = event => {
+        console.error('Error getting secure data:', event);
+        reject(new Error('Failed to get secure data'));
+      };
+    });
+  }
+
+  /**
+   * Delete secure data
+   * @param key Key of the data to delete
+   * @returns Promise that resolves when the data is deleted
+   */
+  public async deleteSecureData(key: string): Promise<void> {
+    await this.init();
+
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+
+      const transaction = this.db.transaction(STORES.SECURE_STORE, 'readwrite');
+      const store = transaction.objectStore(STORES.SECURE_STORE);
+      const index = store.index('key');
+      const request = index.get(key);
+
+      request.onsuccess = () => {
+        if (!request.result) {
+          resolve(); // Nothing to delete
+          return;
+        }
+
+        const secureData = request.result as SecureData;
+        const deleteRequest = store.delete(secureData.id);
+
+        deleteRequest.onsuccess = () => resolve();
+        deleteRequest.onerror = event => {
+          console.error('Error deleting secure data:', event);
+          reject(new Error('Failed to delete secure data'));
+        };
+      };
+
+      request.onerror = event => {
+        console.error('Error getting secure data for deletion:', event);
+        reject(new Error('Failed to get secure data for deletion'));
+      };
+    });
+  }
+
+  /**
+   * Add an entry to the offline queue
+   * @param operation Operation name
+   * @param data Operation data
+   * @param priority Priority (higher number = higher priority)
+   * @returns Promise that resolves when the entry is added
+   */
+  public async addToOfflineQueue(operation: string, data: unknown, priority = 0): Promise<string> {
+    await this.init();
+
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+
+      const transaction = this.db.transaction(STORES.OFFLINE_QUEUE, 'readwrite');
+      const store = transaction.objectStore(STORES.OFFLINE_QUEUE);
+
+      const entry: OfflineQueueEntry = {
+        id: crypto.randomUUID(),
+        operation,
+        data,
+        timestamp: new Date().toISOString(),
+        retries: 0,
+        priority,
+      };
+
+      const request = store.add(entry);
+
+      request.onsuccess = () => resolve(entry.id);
+      request.onerror = event => {
+        console.error('Error adding to offline queue:', event);
+        reject(new Error('Failed to add to offline queue'));
+      };
+    });
+  }
+
+  /**
+   * Get entries from the offline queue
+   * @param limit Maximum number of entries to return
+   * @returns Promise that resolves with queue entries
+   */
+  public async getOfflineQueue(limit = 100): Promise<OfflineQueueEntry[]> {
+    await this.init();
+
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+
+      const transaction = this.db.transaction(STORES.OFFLINE_QUEUE, 'readonly');
+      const store = transaction.objectStore(STORES.OFFLINE_QUEUE);
+      const request = store.getAll(null, limit);
+
+      request.onsuccess = () => {
+        // Sort by priority (descending) and then by timestamp (ascending)
+        const entries = request.result.sort((a, b) => {
+          if (a.priority !== b.priority) {
+            return b.priority - a.priority; // Higher priority first
+          }
+          return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+        });
+
+        resolve(entries);
+      };
+
+      request.onerror = event => {
+        console.error('Error getting offline queue:', event);
+        reject(new Error('Failed to get offline queue'));
+      };
+    });
+  }
+
+  /**
+   * Remove an entry from the offline queue
+   * @param id Entry ID
+   * @returns Promise that resolves when the entry is removed
+   */
+  public async removeFromOfflineQueue(id: string): Promise<void> {
+    await this.init();
+
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+
+      const transaction = this.db.transaction(STORES.OFFLINE_QUEUE, 'readwrite');
+      const store = transaction.objectStore(STORES.OFFLINE_QUEUE);
+      const request = store.delete(id);
+
+      request.onsuccess = () => resolve();
+      request.onerror = event => {
+        console.error(`Error removing entry ${id} from offline queue:`, event);
+        reject(new Error(`Failed to remove entry ${id} from offline queue`));
+      };
+    });
+  }
+
+  /**
+   * Update retry count for an offline queue entry
+   * @param id Entry ID
+   * @returns Promise that resolves when the entry is updated
+   */
+  public async incrementOfflineQueueRetry(id: string): Promise<void> {
+    await this.init();
+
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+
+      const transaction = this.db.transaction(STORES.OFFLINE_QUEUE, 'readwrite');
+      const store = transaction.objectStore(STORES.OFFLINE_QUEUE);
+      const request = store.get(id);
+
+      request.onsuccess = () => {
+        if (!request.result) {
+          reject(new Error(`Entry ${id} not found in offline queue`));
+          return;
+        }
+
+        const entry = request.result as OfflineQueueEntry;
+        entry.retries += 1;
+
+        const updateRequest = store.put(entry);
+
+        updateRequest.onsuccess = () => resolve();
+        updateRequest.onerror = event => {
+          console.error(`Error updating retry count for entry ${id}:`, event);
+          reject(new Error(`Failed to update retry count for entry ${id}`));
+        };
+      };
+
+      request.onerror = event => {
+        console.error(`Error getting entry ${id} from offline queue:`, event);
+        reject(new Error(`Failed to get entry ${id} from offline queue`));
+      };
     });
   }
 

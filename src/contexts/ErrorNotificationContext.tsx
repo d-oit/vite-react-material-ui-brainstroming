@@ -14,7 +14,9 @@ interface ErrorNotificationProviderProps {
   children: ReactNode;
 }
 
-export const ErrorNotificationProvider: React.FC<ErrorNotificationProviderProps> = ({ children }) => {
+export const ErrorNotificationProvider: React.FC<ErrorNotificationProviderProps> = ({
+  children,
+}) => {
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const { t } = useI18n();
@@ -50,10 +52,10 @@ export const ErrorNotificationProvider: React.FC<ErrorNotificationProviderProps>
 
 export const useErrorNotification = (): ErrorNotificationContextType => {
   const context = useContext(ErrorNotificationContext);
-  
+
   if (context === undefined) {
     throw new Error('useErrorNotification must be used within an ErrorNotificationProvider');
   }
-  
+
   return context;
 };

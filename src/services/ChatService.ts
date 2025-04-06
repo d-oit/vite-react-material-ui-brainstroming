@@ -38,10 +38,7 @@ export class ChatService {
    * @param projectContext Project context to include
    * @returns LLM response
    */
-  public async sendMessage(
-    messages: ChatMessage[],
-    projectContext?: any
-  ): Promise<ChatMessage> {
+  public async sendMessage(messages: ChatMessage[], projectContext?: any): Promise<ChatMessage> {
     if (!this.apiKey) {
       throw new Error('ChatService is not configured. Call configure() first.');
     }
@@ -65,7 +62,7 @@ export class ChatService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
+          Authorization: `Bearer ${this.apiKey}`,
           'HTTP-Referer': window.location.origin,
           'X-Title': 'd.o.it.brainstorming',
         },
@@ -81,7 +78,8 @@ export class ChatService {
       }
 
       const data = await response.json();
-      const assistantMessage = data.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
+      const assistantMessage =
+        data.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
 
       return {
         id: crypto.randomUUID(),
@@ -108,7 +106,7 @@ export class ChatService {
       const response = await fetch('https://openrouter.ai/api/v1/models', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
+          Authorization: `Bearer ${this.apiKey}`,
           'HTTP-Referer': window.location.origin,
           'X-Title': 'd.o.it.brainstorming',
         },

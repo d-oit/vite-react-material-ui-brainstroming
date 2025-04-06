@@ -9,35 +9,38 @@ export const useChat = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Add a user message
-  const addUserMessage = useCallback(async (content: string): Promise<void> => {
-    if (!content.trim()) return;
+  const addUserMessage = useCallback(
+    async (content: string): Promise<void> => {
+      if (!content.trim()) return;
 
-    // Create user message
-    const userMessage: ChatMessage = {
-      id: uuidv4(),
-      role: 'user',
-      content,
-      timestamp: new Date().toISOString(),
-    };
+      // Create user message
+      const userMessage: ChatMessage = {
+        id: uuidv4(),
+        role: 'user',
+        content,
+        timestamp: new Date().toISOString(),
+      };
 
-    // Add user message to chat
-    setMessages(prev => [...prev, userMessage]);
-    setIsLoading(true);
-    setError(null);
+      // Add user message to chat
+      setMessages(prev => [...prev, userMessage]);
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      // Send message to OpenRouter API
-      const assistantMessage = await sendMessage([...messages, userMessage]);
-      
-      // Add assistant message to chat
-      setMessages(prev => [...prev, assistantMessage]);
-    } catch (err) {
-      console.error('Error in chat:', err);
-      setError('Failed to get response from assistant');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [messages]);
+      try {
+        // Send message to OpenRouter API
+        const assistantMessage = await sendMessage([...messages, userMessage]);
+
+        // Add assistant message to chat
+        setMessages(prev => [...prev, assistantMessage]);
+      } catch (err) {
+        console.error('Error in chat:', err);
+        setError('Failed to get response from assistant');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [messages]
+  );
 
   // Clear chat history
   const clearChat = useCallback(() => {

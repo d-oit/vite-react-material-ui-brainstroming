@@ -41,7 +41,7 @@ export class OfflineService {
     this.listeners.push(listener);
     // Immediately call with current status
     listener(this.isOnline);
-    
+
     // Return function to remove listener
     return () => {
       this.listeners = this.listeners.filter(l => l !== listener);
@@ -54,7 +54,7 @@ export class OfflineService {
    */
   public addToSyncQueue(operation: () => Promise<void>): void {
     this.syncQueue.push(operation);
-    
+
     // If we're online, try to sync immediately
     if (this.isOnline && !this.syncInProgress) {
       this.processSyncQueue();
@@ -68,7 +68,7 @@ export class OfflineService {
     if (this.syncIntervalId !== null) {
       return; // Already started
     }
-    
+
     this.syncIntervalId = window.setInterval(() => {
       if (this.isOnline && !this.syncInProgress) {
         this.processSyncQueue();
@@ -97,18 +97,18 @@ export class OfflineService {
   }): void {
     if (config.syncInterval !== undefined) {
       this.syncInterval = config.syncInterval;
-      
+
       // Restart auto-sync if it was running
       if (this.syncIntervalId !== null) {
         this.stopAutoSync();
         this.startAutoSync();
       }
     }
-    
+
     if (config.maxRetries !== undefined) {
       this.maxRetries = config.maxRetries;
     }
-    
+
     if (config.autoSync !== undefined) {
       if (config.autoSync) {
         this.startAutoSync();
@@ -134,14 +134,14 @@ export class OfflineService {
     if (!this.isOnline || this.syncInProgress || this.syncQueue.length === 0) {
       return;
     }
-    
+
     this.syncInProgress = true;
-    
+
     try {
       // Process each operation in the queue
       const operations = [...this.syncQueue];
       this.syncQueue = [];
-      
+
       for (const operation of operations) {
         try {
           await this.executeWithRetry(operation);
@@ -153,7 +153,7 @@ export class OfflineService {
       }
     } finally {
       this.syncInProgress = false;
-      
+
       // If there are still operations in the queue, try again later
       if (this.syncQueue.length > 0 && this.isOnline) {
         setTimeout(() => this.processSyncQueue(), 5000);
@@ -168,18 +168,18 @@ export class OfflineService {
    */
   private async executeWithRetry(operation: () => Promise<void>): Promise<void> {
     let retries = 0;
-    
+
     while (retries < this.maxRetries) {
       try {
         await operation();
         return; // Success
       } catch (error) {
         retries++;
-        
+
         if (retries >= this.maxRetries) {
           throw error; // Max retries reached
         }
-        
+
         // Exponential backoff
         const delay = Math.pow(2, retries) * 1000;
         await new Promise(resolve => setTimeout(resolve, delay));
@@ -192,10 +192,10 @@ export class OfflineService {
    */
   private handleOnlineStatusChange(): void {
     const newOnlineStatus = navigator.onLine;
-    
+
     if (this.isOnline !== newOnlineStatus) {
       this.isOnline = newOnlineStatus;
-      
+
       // Notify listeners
       this.listeners.forEach(listener => {
         try {
@@ -204,7 +204,7 @@ export class OfflineService {
           console.error('Error in online status listener:', error);
         }
       });
-      
+
       // If we're back online, process the sync queue
       if (this.isOnline) {
         this.processSyncQueue();

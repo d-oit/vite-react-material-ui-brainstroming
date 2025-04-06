@@ -1,14 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  Paper,
-  CircularProgress,
-  Tabs,
-  Tab,
-  Divider,
-} from '@mui/material';
+import { Box, Typography, Paper, CircularProgress, Tabs, Tab, Divider } from '@mui/material';
 import { MainLayout } from '@/components/Layout/MainLayout';
 import { GitHistoryViewer } from '@/components/GitHistory/GitHistoryViewer';
 import { useProject } from '@/hooks/useProject';
@@ -31,11 +23,7 @@ const TabPanel = (props: TabPanelProps) => {
       style={{ height: 'calc(100% - 48px)' }}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ p: 2, height: '100%' }}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box sx={{ p: 2, height: '100%' }}>{children}</Box>}
     </div>
   );
 };
@@ -43,12 +31,8 @@ const TabPanel = (props: TabPanelProps) => {
 export const HistoryPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const [tabValue, setTabValue] = useState(0);
-  
-  const {
-    project,
-    loading,
-    error,
-  } = useProject({ projectId });
+
+  const { project, loading, error } = useProject({ projectId });
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -57,7 +41,9 @@ export const HistoryPage = () => {
   if (loading) {
     return (
       <MainLayout title="Project History">
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <Box
+          sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}
+        >
           <CircularProgress />
         </Box>
       </MainLayout>
@@ -86,9 +72,9 @@ export const HistoryPage = () => {
           Current Version: {project.version}
         </Typography>
       </Box>
-      
+
       <Divider sx={{ mb: 2 }} />
-      
+
       <Box sx={{ height: 'calc(100vh - 200px)' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={tabValue} onChange={handleTabChange} aria-label="history tabs">
@@ -96,19 +82,19 @@ export const HistoryPage = () => {
             <Tab label="Version History" id="history-tab-1" aria-controls="history-tabpanel-1" />
           </Tabs>
         </Box>
-        
+
         <TabPanel value={tabValue} index={0}>
           <GitHistoryViewer projectId={project.id} />
         </TabPanel>
-        
+
         <TabPanel value={tabValue} index={1}>
           <Box sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Version History
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              This feature will display the version history of the project, showing different versions
-              and allowing you to compare or restore previous versions.
+              This feature will display the version history of the project, showing different
+              versions and allowing you to compare or restore previous versions.
             </Typography>
           </Box>
         </TabPanel>

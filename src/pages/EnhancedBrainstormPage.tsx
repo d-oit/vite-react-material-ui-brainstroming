@@ -214,18 +214,8 @@ export const EnhancedBrainstormPage = () => {
             onEdgesChange={handleEdgesChange}
           />
         }
-        chatPanel={
-          <ChatPanel
-            projectId={project.id}
-            projectContext={project}
-          />
-        }
-        historyPanel={
-          <GitHistoryPanel
-            project={project}
-            onProjectUpdate={handleProjectUpdate}
-          />
-        }
+        chatPanel={<ChatPanel projectId={project.id} projectContext={project} />}
+        historyPanel={<GitHistoryPanel project={project} onProjectUpdate={handleProjectUpdate} />}
         onSave={handleSaveProject}
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
@@ -235,6 +225,3 @@ export const EnhancedBrainstormPage = () => {
     </AppShell>
   );
 };
-
-
-

@@ -104,120 +104,132 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
   }, [project]);
 
   // Add node
-  const addNode = useCallback((node: Omit<Node, 'id'>): string => {
-    if (!project) return '';
+  const addNode = useCallback(
+    (node: Omit<Node, 'id'>): string => {
+      if (!project) return '';
 
-    const nodeId = uuidv4();
-    const newNode: Node = {
-      ...node,
-      id: nodeId,
-    };
-
-    setProject(prev => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        nodes: [...prev.nodes, newNode],
-        updatedAt: new Date().toISOString(),
+      const nodeId = uuidv4();
+      const newNode: Node = {
+        ...node,
+        id: nodeId,
       };
-    });
 
-    return nodeId;
-  }, [project]);
+      setProject(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          nodes: [...prev.nodes, newNode],
+          updatedAt: new Date().toISOString(),
+        };
+      });
+
+      return nodeId;
+    },
+    [project]
+  );
 
   // Update node
-  const updateNode = useCallback((nodeId: string, updates: Partial<Node>): boolean => {
-    if (!project) return false;
+  const updateNode = useCallback(
+    (nodeId: string, updates: Partial<Node>): boolean => {
+      if (!project) return false;
 
-    setProject(prev => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        nodes: prev.nodes.map(node => 
-          node.id === nodeId ? { ...node, ...updates } : node
-        ),
-        updatedAt: new Date().toISOString(),
-      };
-    });
+      setProject(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          nodes: prev.nodes.map(node => (node.id === nodeId ? { ...node, ...updates } : node)),
+          updatedAt: new Date().toISOString(),
+        };
+      });
 
-    return true;
-  }, [project]);
+      return true;
+    },
+    [project]
+  );
 
   // Remove node
-  const removeNode = useCallback((nodeId: string): boolean => {
-    if (!project) return false;
+  const removeNode = useCallback(
+    (nodeId: string): boolean => {
+      if (!project) return false;
 
-    setProject(prev => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        nodes: prev.nodes.filter(node => node.id !== nodeId),
-        // Also remove any edges connected to this node
-        edges: prev.edges.filter(edge => 
-          edge.source !== nodeId && edge.target !== nodeId
-        ),
-        updatedAt: new Date().toISOString(),
-      };
-    });
+      setProject(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          nodes: prev.nodes.filter(node => node.id !== nodeId),
+          // Also remove any edges connected to this node
+          edges: prev.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId),
+          updatedAt: new Date().toISOString(),
+        };
+      });
 
-    return true;
-  }, [project]);
+      return true;
+    },
+    [project]
+  );
 
   // Add edge
-  const addEdge = useCallback((edge: Omit<Edge, 'id'>): string => {
-    if (!project) return '';
+  const addEdge = useCallback(
+    (edge: Omit<Edge, 'id'>): string => {
+      if (!project) return '';
 
-    const edgeId = uuidv4();
-    const newEdge: Edge = {
-      ...edge,
-      id: edgeId,
-    };
-
-    setProject(prev => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        edges: [...prev.edges, newEdge],
-        updatedAt: new Date().toISOString(),
+      const edgeId = uuidv4();
+      const newEdge: Edge = {
+        ...edge,
+        id: edgeId,
       };
-    });
 
-    return edgeId;
-  }, [project]);
+      setProject(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          edges: [...prev.edges, newEdge],
+          updatedAt: new Date().toISOString(),
+        };
+      });
+
+      return edgeId;
+    },
+    [project]
+  );
 
   // Update edge
-  const updateEdge = useCallback((edgeId: string, updates: Partial<Edge>): boolean => {
-    if (!project) return false;
+  const updateEdge = useCallback(
+    (edgeId: string, updates: Partial<Edge>): boolean => {
+      if (!project) return false;
 
-    setProject(prev => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        edges: prev.edges.map(edge => 
-          edge.id === edgeId ? { ...edge, ...updates } : edge
-        ),
-        updatedAt: new Date().toISOString(),
-      };
-    });
+      setProject(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          edges: prev.edges.map(edge => (edge.id === edgeId ? { ...edge, ...updates } : edge)),
+          updatedAt: new Date().toISOString(),
+        };
+      });
 
-    return true;
-  }, [project]);
+      return true;
+    },
+    [project]
+  );
 
   // Remove edge
-  const removeEdge = useCallback((edgeId: string): boolean => {
-    if (!project) return false;
+  const removeEdge = useCallback(
+    (edgeId: string): boolean => {
+      if (!project) return false;
 
-    setProject(prev => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        edges: prev.edges.filter(edge => edge.id !== edgeId),
-        updatedAt: new Date().toISOString(),
-      };
-    });
+      setProject(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          edges: prev.edges.filter(edge => edge.id !== edgeId),
+          updatedAt: new Date().toISOString(),
+        };
+      });
 
-    return true;
-  }, [project]);
+      return true;
+    },
+    [project]
+  );
 
   // Auto-save effect
   useEffect(() => {

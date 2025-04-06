@@ -155,12 +155,21 @@ export const Dashboard = () => {
               <Grid item xs={12} sm={6} md={4} key={project.id}>
                 <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                   <CardContent sx={{ flexGrow: 1 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start',
+                      }}
+                    >
                       <Typography variant="h6" component="h2" gutterBottom>
                         {project.name}
                       </Typography>
                       <Box>
-                        <IconButton size="small" onClick={() => navigate(`/projects/edit/${project.id}`)}>
+                        <IconButton
+                          size="small"
+                          onClick={() => navigate(`/projects/edit/${project.id}`)}
+                        >
                           <EditIcon fontSize="small" />
                         </IconButton>
                         <IconButton size="small" onClick={() => handleDeleteProject(project.id)}>

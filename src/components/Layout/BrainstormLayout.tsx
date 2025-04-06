@@ -42,9 +42,7 @@ function TabPanel(props: TabPanelProps) {
       sx={{ height: '100%', overflow: 'auto' }}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ height: '100%' }}>{children}</Box>
-      )}
+      {value === index && <Box sx={{ height: '100%' }}>{children}</Box>}
     </Box>
   );
 }
@@ -74,41 +72,41 @@ export const BrainstormLayout = ({
   const { t } = useI18n();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
-  
+
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [sidebarTab, setSidebarTab] = useState(0);
   const [showControls, setShowControls] = useState(false);
-  
+
   // Auto-hide controls after 3 seconds of inactivity
   useEffect(() => {
     if (showControls) {
       const timer = setTimeout(() => {
         setShowControls(false);
       }, 3000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [showControls]);
-  
+
   const handleMouseMove = () => {
     setShowControls(true);
   };
-  
+
   const toggleSidebar = () => {
     setSidebarOpen(prev => !prev);
   };
-  
+
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setSidebarTab(newValue);
   };
-  
+
   const sidebarWidth = isLargeScreen ? 400 : 320;
-  
+
   return (
-    <Box 
-      sx={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
         height: '100%',
         position: 'relative',
       }}
@@ -128,7 +126,7 @@ export const BrainstormLayout = ({
           <>
             <Box sx={{ flexGrow: 1, height: '100%', position: 'relative' }}>
               {mainContent}
-              
+
               {/* Mobile controls - more compact and touch-friendly */}
               <Box
                 sx={{
@@ -156,7 +154,7 @@ export const BrainstormLayout = ({
                 </IconButton>
               </Box>
             </Box>
-            
+
             <Drawer
               anchor="right"
               open={sidebarOpen}
@@ -170,16 +168,12 @@ export const BrainstormLayout = ({
             >
               <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                  <Tabs
-                    value={sidebarTab}
-                    onChange={handleTabChange}
-                    variant="fullWidth"
-                  >
+                  <Tabs value={sidebarTab} onChange={handleTabChange} variant="fullWidth">
                     <Tab icon={<ChatIcon />} label={t('chat.title')} />
                     <Tab icon={<HistoryIcon />} label={t('gitHistory.title')} />
                   </Tabs>
                 </Box>
-                
+
                 <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
                   <TabPanel value={sidebarTab} index={0}>
                     {chatPanel}
@@ -193,8 +187,8 @@ export const BrainstormLayout = ({
           </>
         ) : (
           <Box sx={{ display: 'flex', height: '100%', width: '100%' }}>
-            <Box 
-              sx={{ 
+            <Box
+              sx={{
                 flex: sidebarOpen ? `0 0 calc(100% - ${sidebarWidth}px)` : 1,
                 height: '100%',
                 position: 'relative',
@@ -205,7 +199,7 @@ export const BrainstormLayout = ({
               }}
             >
               {mainContent}
-              
+
               {/* Desktop zoom controls */}
               <Zoom in={showControls}>
                 <Box
@@ -241,10 +235,10 @@ export const BrainstormLayout = ({
                 </Box>
               </Zoom>
             </Box>
-            
+
             {sidebarOpen && (
-              <Box 
-                sx={{ 
+              <Box
+                sx={{
                   width: sidebarWidth,
                   height: '100%',
                   borderLeft: `1px solid ${theme.palette.divider}`,
@@ -268,7 +262,7 @@ export const BrainstormLayout = ({
                     </IconButton>
                   </Box>
                 </Box>
-                
+
                 <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
                   <TabPanel value={sidebarTab} index={0}>
                     {chatPanel}
@@ -282,7 +276,7 @@ export const BrainstormLayout = ({
           </Box>
         )}
       </Paper>
-      
+
       {/* Floating action buttons - repositioned to avoid overlap */}
       <Box
         sx={{
@@ -302,26 +296,18 @@ export const BrainstormLayout = ({
             </Fab>
           </Tooltip>
         )}
-        
+
         {!sidebarOpen && (
           <Tooltip title={t('chat.openAssistant')}>
-            <Fab 
-              color="secondary" 
-              size="medium" 
-              onClick={toggleSidebar}
-            >
+            <Fab color="secondary" size="medium" onClick={toggleSidebar}>
               <ChatIcon />
             </Fab>
           </Tooltip>
         )}
-        
+
         {/* Add button for creating new nodes */}
         <Tooltip title={t('brainstorm.addNode')}>
-          <Fab 
-            color="default" 
-            size="medium" 
-            onClick={onAddNode}
-          >
+          <Fab color="default" size="medium" onClick={onAddNode}>
             <AddIcon />
           </Fab>
         </Tooltip>
@@ -329,10 +315,3 @@ export const BrainstormLayout = ({
     </Box>
   );
 };
-
-
-
-
-
-
-

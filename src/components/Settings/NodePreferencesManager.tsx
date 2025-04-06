@@ -37,7 +37,7 @@ const NodeSizePreview = ({
   onClick: () => void;
 }) => {
   const theme = useTheme();
-  
+
   return (
     <Card
       sx={{
@@ -73,7 +73,8 @@ const NodeSizePreview = ({
             color: theme.palette.text.secondary,
           }}
         >
-          This is a preview of how your {size.toLowerCase()} node will look with the current settings.
+          This is a preview of how your {size.toLowerCase()} node will look with the current
+          settings.
         </Typography>
       </CardContent>
     </Card>
@@ -83,7 +84,7 @@ const NodeSizePreview = ({
 // Main component
 export const NodePreferencesManager = () => {
   const { settings, updateSettings, nodePreferences, updateNodePreferences } = useSettings();
-  
+
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -93,9 +94,9 @@ export const NodePreferencesManager = () => {
     message: '',
     severity: 'success',
   });
-  
+
   const [localPreferences, setLocalPreferences] = useState<NodePreferences | null>(nodePreferences);
-  
+
   if (!localPreferences) {
     return (
       <Alert severity="warning">
@@ -103,7 +104,7 @@ export const NodePreferencesManager = () => {
       </Alert>
     );
   }
-  
+
   const handleSizeChange = (size: 'small' | 'medium' | 'large') => {
     updateSettings({ preferredNodeSize: size });
     setSnackbar({
@@ -112,7 +113,7 @@ export const NodePreferencesManager = () => {
       severity: 'success',
     });
   };
-  
+
   const handleSizeConfigChange = (
     size: 'small' | 'medium' | 'large',
     property: 'width' | 'fontSize',
@@ -128,10 +129,10 @@ export const NodePreferencesManager = () => {
         },
       },
     };
-    
+
     setLocalPreferences(updatedPreferences);
   };
-  
+
   const handleSavePreferences = async () => {
     try {
       await updateNodePreferences(localPreferences);
@@ -149,7 +150,7 @@ export const NodePreferencesManager = () => {
       });
     }
   };
-  
+
   const handleResetPreferences = () => {
     const defaultPreferences: NodePreferences = {
       defaultSize: 'medium',
@@ -160,7 +161,7 @@ export const NodePreferencesManager = () => {
         large: { width: 250, fontSize: 1.2 },
       },
     };
-    
+
     setLocalPreferences(defaultPreferences);
     setSnackbar({
       open: true,
@@ -168,7 +169,7 @@ export const NodePreferencesManager = () => {
       severity: 'success',
     });
   };
-  
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -182,39 +183,36 @@ export const NodePreferencesManager = () => {
           >
             Reset to Defaults
           </Button>
-          <Button
-            variant="contained"
-            onClick={handleSavePreferences}
-          >
+          <Button variant="contained" onClick={handleSavePreferences}>
             Save Changes
           </Button>
         </Box>
       </Box>
-      
+
       <Divider sx={{ mb: 3 }} />
-      
+
       <Typography variant="subtitle1" gutterBottom>
         Default Node Size
       </Typography>
-      
+
       <FormControl component="fieldset" sx={{ mb: 3 }}>
         <RadioGroup
           row
           value={settings.preferredNodeSize}
-          onChange={(e) => handleSizeChange(e.target.value as 'small' | 'medium' | 'large')}
+          onChange={e => handleSizeChange(e.target.value as 'small' | 'medium' | 'large')}
         >
           <FormControlLabel value="small" control={<Radio />} label="Small" />
           <FormControlLabel value="medium" control={<Radio />} label="Medium" />
           <FormControlLabel value="large" control={<Radio />} label="Large" />
         </RadioGroup>
       </FormControl>
-      
+
       <Typography variant="subtitle1" gutterBottom>
         Size Preview
       </Typography>
-      
+
       <Grid container spacing={2} sx={{ mb: 4 }}>
-        {(['small', 'medium', 'large'] as const).map((size) => (
+        {(['small', 'medium', 'large'] as const).map(size => (
           <Grid item key={size}>
             <NodeSizePreview
               size={size}
@@ -227,20 +225,20 @@ export const NodePreferencesManager = () => {
           </Grid>
         ))}
       </Grid>
-      
+
       <Typography variant="subtitle1" gutterBottom>
         Customize Sizes
       </Typography>
-      
+
       <Grid container spacing={3}>
-        {(['small', 'medium', 'large'] as const).map((size) => (
+        {(['small', 'medium', 'large'] as const).map(size => (
           <Grid item xs={12} md={4} key={size}>
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
                   {size.charAt(0).toUpperCase() + size.slice(1)}
                 </Typography>
-                
+
                 <Typography variant="body2" gutterBottom>
                   Width: {localPreferences.nodeSizes[size].width}px
                 </Typography>
@@ -253,7 +251,7 @@ export const NodePreferencesManager = () => {
                   valueLabelDisplay="auto"
                   sx={{ mb: 3 }}
                 />
-                
+
                 <Typography variant="body2" gutterBottom>
                   Font Size: {localPreferences.nodeSizes[size].fontSize}rem
                 </Typography>
@@ -270,7 +268,7 @@ export const NodePreferencesManager = () => {
           </Grid>
         ))}
       </Grid>
-      
+
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}

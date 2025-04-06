@@ -38,7 +38,7 @@ const mockGitHistory: GitCommit[] = [
 export const getGitHistory = async (projectId: string): Promise<GitCommit[]> => {
   // In a real app, this would fetch from a backend API
   // For now, we'll return mock data with a delay to simulate an API call
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     setTimeout(() => {
       resolve(mockGitHistory);
     }, 500);
@@ -49,9 +49,9 @@ export const getGitHistory = async (projectId: string): Promise<GitCommit[]> => 
 export const getGitCommitDetails = async (commitHash: string): Promise<GitCommit | null> => {
   // In a real app, this would fetch from a backend API
   // For now, we'll find the commit in our mock data
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     setTimeout(() => {
-      const commit = mockGitHistory.find((c) => c.hash === commitHash) || null;
+      const commit = mockGitHistory.find(c => c.hash === commitHash) || null;
       resolve(commit);
     }, 300);
   });
@@ -64,7 +64,7 @@ export const compareGitCommits = async (
 ): Promise<{ added: string[]; removed: string[]; modified: string[] }> => {
   // In a real app, this would fetch from a backend API
   // For now, we'll return mock data
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     setTimeout(() => {
       resolve({
         added: ['src/components/NewFeature.tsx'],

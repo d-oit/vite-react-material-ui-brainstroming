@@ -11,13 +11,9 @@ interface HomePageProps {
 
 export const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
   const { t } = useI18n();
-  
+
   return (
-    <AppShell
-      title={t('app.title')}
-      onThemeToggle={onThemeToggle}
-      isDarkMode={isDarkMode}
-    >
+    <AppShell title={t('app.title')} onThemeToggle={onThemeToggle} isDarkMode={isDarkMode}>
       <Container maxWidth="md">
         <Box sx={{ my: 4, textAlign: 'center' }}>
           <Typography variant="h2" component="h1" gutterBottom>
@@ -30,9 +26,9 @@ export const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
             Welcome to the d.o.it.brainstorming app!
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
-            <Button 
-              variant="contained" 
-              color="primary" 
+            <Button
+              variant="contained"
+              color="primary"
               size="large"
               component={Link}
               to="/brainstorm"

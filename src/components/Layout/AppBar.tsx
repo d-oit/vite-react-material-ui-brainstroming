@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { 
-  AppBar as MuiAppBar, 
-  Toolbar, 
-  Typography, 
-  IconButton, 
-  Menu, 
-  MenuItem, 
+import {
+  AppBar as MuiAppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Menu,
+  MenuItem,
   Box,
   useMediaQuery,
   useTheme,
@@ -54,24 +54,24 @@ export const AppBar = ({ title, onMenuClick }: AppBarProps) => {
         >
           <MenuIcon />
         </IconButton>
-        
+
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           {title}
         </Typography>
-        
+
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Tooltip title={themeMode === ThemeMode.DARK ? 'Light Mode' : 'Dark Mode'}>
             <IconButton color="inherit" onClick={toggleThemeMode}>
               {themeMode === ThemeMode.DARK ? <LightModeIcon /> : <DarkModeIcon />}
             </IconButton>
           </Tooltip>
-          
+
           {!isMobile && (
             <Button color="inherit" startIcon={<HelpIcon />}>
               Help
             </Button>
           )}
-          
+
           <IconButton
             color="inherit"
             aria-label="account of current user"
@@ -81,7 +81,7 @@ export const AppBar = ({ title, onMenuClick }: AppBarProps) => {
           >
             <AccountCircle />
           </IconButton>
-          
+
           <Menu
             id="menu-appbar"
             anchorEl={anchorEl}

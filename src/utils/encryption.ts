@@ -15,7 +15,7 @@ export async function deriveKey(password: string): Promise<CryptoKey> {
   const encoder = new TextEncoder();
   const passwordBuffer = encoder.encode(password);
   const saltBuffer = encoder.encode(SALT);
-  
+
   // Import the password as a key
   const baseKey = await window.crypto.subtle.importKey(
     'raw',
@@ -24,7 +24,7 @@ export async function deriveKey(password: string): Promise<CryptoKey> {
     false,
     ['deriveKey']
   );
-  
+
   // Derive a key for AES-GCM
   return window.crypto.subtle.deriveKey(
     {
@@ -50,14 +50,14 @@ export async function encrypt(data: unknown, password: string): Promise<string> 
   try {
     // Generate a key from the password
     const key = await deriveKey(password);
-    
+
     // Generate a random initialization vector
     const iv = window.crypto.getRandomValues(new Uint8Array(12));
-    
+
     // Convert data to JSON and then to ArrayBuffer
     const encoder = new TextEncoder();
     const dataBuffer = encoder.encode(JSON.stringify(data));
-    
+
     // Encrypt the data
     const encryptedBuffer = await window.crypto.subtle.encrypt(
       {
@@ -67,12 +67,12 @@ export async function encrypt(data: unknown, password: string): Promise<string> 
       key,
       dataBuffer
     );
-    
+
     // Combine IV and encrypted data
     const result = new Uint8Array(iv.length + encryptedBuffer.byteLength);
     result.set(iv);
     result.set(new Uint8Array(encryptedBuffer), iv.length);
-    
+
     // Convert to base64
     return btoa(String.fromCharCode(...result));
   } catch (error) {
@@ -91,14 +91,14 @@ export async function decrypt<T>(encryptedData: string, password: string): Promi
   try {
     // Generate a key from the password
     const key = await deriveKey(password);
-    
+
     // Convert base64 to Uint8Array
     const encryptedBytes = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
-    
+
     // Extract IV and encrypted data
     const iv = encryptedBytes.slice(0, 12);
     const data = encryptedBytes.slice(12);
-    
+
     // Decrypt the data
     const decryptedBuffer = await window.crypto.subtle.decrypt(
       {
@@ -108,7 +108,7 @@ export async function decrypt<T>(encryptedData: string, password: string): Promi
       key,
       data
     );
-    
+
     // Convert ArrayBuffer to string and parse JSON
     const decoder = new TextDecoder();
     const decryptedString = decoder.decode(decryptedBuffer);
@@ -141,10 +141,10 @@ export function generateRandomPassword(length = 16): string {
   const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
   const randomValues = window.crypto.getRandomValues(new Uint8Array(length));
   let result = '';
-  
+
   for (let i = 0; i < length; i++) {
     result += charset.charAt(randomValues[i] % charset.length);
   }
-  
+
   return result;
 }

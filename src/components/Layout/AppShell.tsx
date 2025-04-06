@@ -63,47 +63,47 @@ export const AppShell = ({
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
-  
+
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [errorOpen, setErrorOpen] = useState(!!error);
-  
+
   // Update error state when prop changes
   useEffect(() => {
     setErrorOpen(!!error);
   }, [error]);
-  
+
   const toggleDrawer = (open: boolean) => () => {
     setDrawerOpen(open);
   };
-  
+
   const handleNavigation = (path: string) => {
     navigate(path);
     if (isMobile) {
       setDrawerOpen(false);
     }
   };
-  
+
   const navigationItems = [
-    { 
-      text: t('nav.home'), 
-      icon: <HomeIcon />, 
+    {
+      text: t('nav.home'),
+      icon: <HomeIcon />,
       path: '/',
-      active: location.pathname === '/' 
+      active: location.pathname === '/',
     },
-    { 
-      text: t('nav.brainstorm'), 
-      icon: <BrainstormIcon />, 
+    {
+      text: t('nav.brainstorm'),
+      icon: <BrainstormIcon />,
       path: '/brainstorm',
-      active: location.pathname === '/brainstorm' 
+      active: location.pathname === '/brainstorm',
     },
-    { 
-      text: t('nav.settings'), 
-      icon: <SettingsIcon />, 
+    {
+      text: t('nav.settings'),
+      icon: <SettingsIcon />,
       path: '/settings',
-      active: location.pathname === '/settings' 
+      active: location.pathname === '/settings',
     },
   ];
-  
+
   const drawerContent = (
     <Box
       sx={{
@@ -133,9 +133,9 @@ export const AppShell = ({
           </IconButton>
         )}
       </Box>
-      
+
       <List sx={{ flexGrow: 1, pt: 0 }}>
-        {navigationItems.map((item) => (
+        {navigationItems.map(item => (
           <ListItem key={item.text} disablePadding>
             <ListItemButton
               onClick={() => handleNavigation(item.path)}
@@ -164,9 +164,9 @@ export const AppShell = ({
           </ListItem>
         ))}
       </List>
-      
+
       <Divider />
-      
+
       <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="body2" color="text.secondary">
           v{import.meta.env.VITE_APP_VERSION || '1.0.0'}
@@ -177,17 +177,18 @@ export const AppShell = ({
       </Box>
     </Box>
   );
-  
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppBar 
-        position="fixed" 
+      <AppBar
+        position="fixed"
         elevation={1}
         sx={{
           zIndex: theme.zIndex.drawer + 1,
-          backgroundColor: theme.palette.mode === 'dark' 
-            ? theme.palette.background.default 
-            : theme.palette.primary.main,
+          backgroundColor:
+            theme.palette.mode === 'dark'
+              ? theme.palette.background.default
+              : theme.palette.primary.main,
           backdropFilter: 'blur(8px)',
           ...(theme.palette.mode === 'light' && {
             boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
@@ -205,11 +206,11 @@ export const AppShell = ({
           >
             <MenuIcon />
           </IconButton>
-          
-          <Typography 
-            variant="h6" 
-            component="div" 
-            sx={{ 
+
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{
               flexGrow: 1,
               whiteSpace: 'nowrap',
               overflow: 'hidden',
@@ -218,7 +219,7 @@ export const AppShell = ({
           >
             {title || t('app.title')}
           </Typography>
-          
+
           {!isMobile && (
             <IconButton color="inherit" onClick={onThemeToggle}>
               {isDarkMode ? <LightIcon /> : <DarkIcon />}
@@ -226,7 +227,7 @@ export const AppShell = ({
           )}
         </Toolbar>
       </AppBar>
-      
+
       {/* Drawer - different for mobile vs desktop */}
       {isMobile ? (
         <SwipeableDrawer
@@ -263,7 +264,7 @@ export const AppShell = ({
           {drawerContent}
         </Drawer>
       )}
-      
+
       {/* Main content */}
       <Box
         component="main"
@@ -275,13 +276,14 @@ export const AppShell = ({
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
           }),
-          ...(drawerOpen && !isMobile && {
-            marginLeft: '280px',
-            transition: theme.transitions.create('margin', {
-              easing: theme.transitions.easing.easeOut,
-              duration: theme.transitions.duration.enteringScreen,
+          ...(drawerOpen &&
+            !isMobile && {
+              marginLeft: '280px',
+              transition: theme.transitions.create('margin', {
+                easing: theme.transitions.easing.easeOut,
+                duration: theme.transitions.duration.enteringScreen,
+              }),
             }),
-          }),
           position: 'relative',
           display: 'flex',
           flexDirection: 'column',
@@ -290,7 +292,7 @@ export const AppShell = ({
         }}
       >
         {children}
-        
+
         {/* Floating action buttons - grouped in a single container */}
         <Box
           sx={{
@@ -304,21 +306,17 @@ export const AppShell = ({
           }}
         >
           {onCreateNew && (
-            <Fab
-              color="primary"
-              aria-label="add"
-              onClick={onCreateNew}
-            >
+            <Fab color="primary" aria-label="add" onClick={onCreateNew}>
               <AddIcon />
             </Fab>
           )}
         </Box>
       </Box>
-      
+
       {/* Loading indicator */}
       <Backdrop
-        sx={{ 
-          color: '#fff', 
+        sx={{
+          color: '#fff',
           zIndex: theme.zIndex.drawer + 2,
           backdropFilter: 'blur(4px)',
         }}
@@ -326,7 +324,7 @@ export const AppShell = ({
       >
         <CircularProgress color="inherit" />
       </Backdrop>
-      
+
       {/* Error snackbar */}
       <Snackbar
         open={errorOpen}
@@ -346,4 +344,3 @@ export const AppShell = ({
     </Box>
   );
 };
-

@@ -92,36 +92,42 @@ const FlowContent = ({
   const { fitView, zoomIn, zoomOut, setViewport } = useReactFlow();
 
   // Handle nodes change with external callback
-  const handleNodesChange = useCallback((changes: any) => {
-    onNodesChange(changes);
-    if (externalNodesChange) {
-      const updatedNodes = nodes.map(node => {
-        const change = changes.find((c: any) => c.id === node.id && c.type === 'position');
-        if (change) {
-          return {
-            ...node,
-            position: change.position || node.position,
-          };
-        }
-        return node;
-      });
-      externalNodesChange(updatedNodes);
-    }
-  }, [nodes, onNodesChange, externalNodesChange]);
+  const handleNodesChange = useCallback(
+    (changes: any) => {
+      onNodesChange(changes);
+      if (externalNodesChange) {
+        const updatedNodes = nodes.map(node => {
+          const change = changes.find((c: any) => c.id === node.id && c.type === 'position');
+          if (change) {
+            return {
+              ...node,
+              position: change.position || node.position,
+            };
+          }
+          return node;
+        });
+        externalNodesChange(updatedNodes);
+      }
+    },
+    [nodes, onNodesChange, externalNodesChange]
+  );
 
   // Handle edges change with external callback
-  const handleEdgesChange = useCallback((changes: any) => {
-    onEdgesChange(changes);
-    if (externalEdgesChange) {
-      // Filter out removed edges
-      const removedEdgeIds = changes
-        .filter((c: any) => c.type === 'remove')
-        .map((c: any) => c.id);
+  const handleEdgesChange = useCallback(
+    (changes: any) => {
+      onEdgesChange(changes);
+      if (externalEdgesChange) {
+        // Filter out removed edges
+        const removedEdgeIds = changes
+          .filter((c: any) => c.type === 'remove')
+          .map((c: any) => c.id);
 
-      const updatedEdges = edges.filter(edge => !removedEdgeIds.includes(edge.id));
-      externalEdgesChange(updatedEdges);
-    }
-  }, [edges, onEdgesChange, externalEdgesChange]);
+        const updatedEdges = edges.filter(edge => !removedEdgeIds.includes(edge.id));
+        externalEdgesChange(updatedEdges);
+      }
+    },
+    [edges, onEdgesChange, externalEdgesChange]
+  );
 
   // Connect nodes
   const onConnect = useCallback(
@@ -213,8 +219,8 @@ const FlowContent = ({
       event?.stopPropagation(); // Prevent node selection
 
       // Check if skipDeleteConfirmation is enabled in settings
-      const skipConfirmation = process.env.VITE_SKIP_DELETE_CONFIRMATION === 'true' ||
-                              settings.skipDeleteConfirmation;
+      const skipConfirmation =
+        process.env.VITE_SKIP_DELETE_CONFIRMATION === 'true' || settings.skipDeleteConfirmation;
 
       if (skipConfirmation) {
         handleNodeDelete(nodeId);
@@ -229,9 +235,7 @@ const FlowContent = ({
   const handleNodeDelete = useCallback(
     (nodeId: string) => {
       const updatedNodes = nodes.filter(node => node.id !== nodeId);
-      const updatedEdges = edges.filter(
-        edge => edge.source !== nodeId && edge.target !== nodeId
-      );
+      const updatedEdges = edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId);
 
       setNodes(updatedNodes);
       setEdges(updatedEdges);
@@ -403,9 +407,8 @@ const FlowContent = ({
             pannable
             position="bottom-left"
             style={{
-              backgroundColor: theme.palette.mode === 'dark'
-                ? theme.palette.grey[900]
-                : theme.palette.grey[100],
+              backgroundColor:
+                theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[100],
               border: `1px solid ${theme.palette.divider}`,
             }}
           />
@@ -416,9 +419,8 @@ const FlowContent = ({
             position="bottom-right"
             showInteractive={false}
             style={{
-              backgroundColor: theme.palette.mode === 'dark'
-                ? theme.palette.grey[900]
-                : theme.palette.grey[100],
+              backgroundColor:
+                theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[100],
               border: `1px solid ${theme.palette.divider}`,
             }}
           />
@@ -426,20 +428,13 @@ const FlowContent = ({
       </ReactFlow>
 
       {/* Confirmation Dialog */}
-      <Dialog
-        open={deleteConfirmOpen}
-        onClose={() => setDeleteConfirmOpen(false)}
-      >
+      <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
         <DialogTitle>{t('brainstorm.confirmDelete')}</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            {t('brainstorm.confirmDeleteMessage')}
-          </DialogContentText>
+          <DialogContentText>{t('brainstorm.confirmDeleteMessage')}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteConfirmOpen(false)}>
-            {t('common.cancel')}
-          </Button>
+          <Button onClick={() => setDeleteConfirmOpen(false)}>{t('common.cancel')}</Button>
           <Button
             onClick={() => {
               if (nodeToDelete) {
@@ -501,4 +496,3 @@ declare global {
     };
   }
 }
-

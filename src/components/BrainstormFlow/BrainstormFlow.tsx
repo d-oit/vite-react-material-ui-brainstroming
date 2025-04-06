@@ -78,7 +78,7 @@ export const BrainstormFlow = ({
         style: { stroke: '#2196f3', strokeWidth: 2 }, // Add styling
       };
 
-      setEdges((eds) => addEdge(newEdge, eds));
+      setEdges(eds => addEdge(newEdge, eds));
     },
     [edges, setEdges]
   );
@@ -86,7 +86,7 @@ export const BrainstormFlow = ({
   // Handle node edit
   const handleEditNode = useCallback(
     (nodeId: string) => {
-      const node = nodes.find((n) => n.id === nodeId);
+      const node = nodes.find(n => n.id === nodeId);
       if (node) {
         setEditingNode(node);
         setIsDialogOpen(true);
@@ -98,8 +98,8 @@ export const BrainstormFlow = ({
   // Handle node delete
   const handleDeleteNode = useCallback(
     (nodeId: string) => {
-      setNodes((nds) => nds.filter((n) => n.id !== nodeId));
-      setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId));
+      setNodes(nds => nds.filter(n => n.id !== nodeId));
+      setEdges(eds => eds.filter(e => e.source !== nodeId && e.target !== nodeId));
     },
     [setNodes, setEdges]
   );
@@ -115,8 +115,8 @@ export const BrainstormFlow = ({
     (data: NodeData, type: NodeType) => {
       if (editingNode) {
         // Update existing node
-        setNodes((nds) =>
-          nds.map((n) => {
+        setNodes(nds =>
+          nds.map(n => {
             if (n.id === editingNode.id) {
               return {
                 ...n,
@@ -146,7 +146,7 @@ export const BrainstormFlow = ({
             onDelete: handleDeleteNode,
           },
         };
-        setNodes((nds) => [...nds, newNode]);
+        setNodes(nds => [...nds, newNode]);
       }
       setIsDialogOpen(false);
     },
@@ -161,12 +161,9 @@ export const BrainstormFlow = ({
   }, [nodes, edges, onSave]);
 
   // Handle flow initialization
-  const onInit = useCallback(
-    (instance: ReactFlowInstance) => {
-      setReactFlowInstance(instance);
-    },
-    []
-  );
+  const onInit = useCallback((instance: ReactFlowInstance) => {
+    setReactFlowInstance(instance);
+  }, []);
 
   return (
     <Box

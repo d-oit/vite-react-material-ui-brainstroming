@@ -198,7 +198,9 @@ export class S3Service {
    * @param projectId Project ID
    * @returns Array of version information or empty array if failed
    */
-  public async listProjectVersions(projectId: string): Promise<{ version: string, lastModified: Date }[]> {
+  public async listProjectVersions(
+    projectId: string
+  ): Promise<{ version: string; lastModified: Date }[]> {
     if (!this._isAvailable || !this._isConfigured) {
       console.warn('S3 service is not available or not configured');
       return [];

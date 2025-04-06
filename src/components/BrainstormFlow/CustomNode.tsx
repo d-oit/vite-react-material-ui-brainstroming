@@ -1,6 +1,15 @@
 import { memo, useMemo } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
-import { Card, CardContent, Typography, Box, IconButton, Chip, useTheme, useMediaQuery } from '@mui/material';
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  IconButton,
+  Chip,
+  useTheme,
+  useMediaQuery,
+} from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { NodeData, NodeType } from '../../types';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -29,8 +38,6 @@ const getNodeBorderColor = (backgroundColor: string): string => {
   return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
 };
 
-
-
 const CustomNode = ({ data, id, type }: CustomNodeProps) => {
   const nodeType = type as NodeType;
   const { getNodeColor, nodePreferences } = useSettings();
@@ -52,7 +59,7 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
     if (isMobile) {
       return {
         width: Math.min(sizeConfig.width, 250), // Cap width on mobile
-        fontSize: sizeConfig.fontSize * 0.9 // Slightly smaller font on mobile
+        fontSize: sizeConfig.fontSize * 0.9, // Slightly smaller font on mobile
       };
     }
 
@@ -80,7 +87,7 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
           height: 10,
           background: borderColor,
           border: '2px solid white',
-          zIndex: 10
+          zIndex: 10,
         }}
         className="react-flow__handle-custom"
       />
@@ -102,7 +109,7 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
-            maxWidth: isMobile ? '150px' : '200px'
+            maxWidth: isMobile ? '150px' : '200px',
           }}
         >
           {data.label}
@@ -114,7 +121,7 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
           </IconButton>
           <IconButton
             size="small"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation(); // Prevent node selection
               data.onDelete?.(id, e);
             }}
@@ -141,7 +148,7 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
 
         {data.tags && data.tags.length > 0 && (
           <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {data.tags.map((tag) => (
+            {data.tags.map(tag => (
               <Chip key={tag} label={tag} size="small" />
             ))}
           </Box>
@@ -156,7 +163,7 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
           height: 10,
           background: borderColor,
           border: '2px solid white',
-          zIndex: 10
+          zIndex: 10,
         }}
         className="react-flow__handle-custom"
       />
@@ -165,5 +172,3 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
 };
 
 export default memo(CustomNode);
-
-

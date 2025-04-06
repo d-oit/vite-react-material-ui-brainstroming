@@ -60,10 +60,10 @@ export const BackupPage = () => {
     try {
       setLoading(true);
       const project = await downloadProject(projectId, version);
-      
+
       // In a real app, you would save this to local storage or your app's state
       console.log('Downloaded project:', project);
-      
+
       showSnackbar('Project downloaded successfully', 'success');
     } catch (err) {
       console.error('Error downloading project:', err);
@@ -80,7 +80,7 @@ export const BackupPage = () => {
 
   const handleDelete = async () => {
     if (!projectToDelete) return;
-    
+
     try {
       // In a real app, you would call an API to delete the project from S3
       // For now, we'll just remove it from the local state
@@ -112,7 +112,7 @@ export const BackupPage = () => {
             Manage your project backups on AWS S3
           </Typography>
         </Box>
-        
+
         <Box>
           <Button
             variant="outlined"
@@ -124,39 +124,30 @@ export const BackupPage = () => {
           </Button>
         </Box>
       </Box>
-      
+
       <Divider sx={{ mb: 2 }} />
-      
+
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
           Backup Current Project
         </Typography>
-        
+
         <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<UploadIcon />}
-            disabled={loading}
-          >
+          <Button variant="contained" color="primary" startIcon={<UploadIcon />} disabled={loading}>
             Backup Current Project
           </Button>
-          
-          <Button
-            variant="outlined"
-            startIcon={<UploadIcon />}
-            disabled={loading}
-          >
+
+          <Button variant="outlined" startIcon={<UploadIcon />} disabled={loading}>
             Backup All Projects
           </Button>
         </Box>
       </Paper>
-      
+
       <Paper sx={{ p: 3 }}>
         <Typography variant="h6" gutterBottom>
           Cloud Backups
         </Typography>
-        
+
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
             <CircularProgress />
@@ -173,7 +164,7 @@ export const BackupPage = () => {
           </Box>
         ) : (
           <List>
-            {projects.map((project) => (
+            {projects.map(project => (
               <Box key={project.id}>
                 <ListItem>
                   <ListItemText
@@ -206,12 +197,8 @@ export const BackupPage = () => {
           </List>
         )}
       </Paper>
-      
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={() => setSnackbarOpen(false)}
-      >
+
+      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={() => setSnackbarOpen(false)}>
         <Alert
           onClose={() => setSnackbarOpen(false)}
           severity={snackbarSeverity}
@@ -220,11 +207,8 @@ export const BackupPage = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-      
-      <Dialog
-        open={confirmDialogOpen}
-        onClose={() => setConfirmDialogOpen(false)}
-      >
+
+      <Dialog open={confirmDialogOpen} onClose={() => setConfirmDialogOpen(false)}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <DialogContentText>

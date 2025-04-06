@@ -102,8 +102,9 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
         // Set active color scheme
         const activeSchemeId = settings.activeColorSchemeId || 'default';
-        const activeScheme = schemes.find(scheme => scheme.id === activeSchemeId) ||
-                            await indexedDBService.getDefaultColorScheme();
+        const activeScheme =
+          schemes.find(scheme => scheme.id === activeSchemeId) ||
+          (await indexedDBService.getDefaultColorScheme());
         if (activeScheme) {
           setActiveColorScheme(activeScheme);
         }
@@ -130,15 +131,21 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
 
     // Only configure S3 if it's available and credentials are provided
-    if (s3Service.isS3Available() && settingsToUse.awsAccessKeyId && settingsToUse.awsSecretAccessKey) {
-      s3Service.configure(
-        settingsToUse.awsAccessKeyId,
-        settingsToUse.awsSecretAccessKey,
-        settingsToUse.awsRegion,
-        settingsToUse.awsBucketName
-      ).catch(error => {
-        console.warn('Failed to configure S3 service:', error);
-      });
+    if (
+      s3Service.isS3Available() &&
+      settingsToUse.awsAccessKeyId &&
+      settingsToUse.awsSecretAccessKey
+    ) {
+      s3Service
+        .configure(
+          settingsToUse.awsAccessKeyId,
+          settingsToUse.awsSecretAccessKey,
+          settingsToUse.awsRegion,
+          settingsToUse.awsBucketName
+        )
+        .catch(error => {
+          console.warn('Failed to configure S3 service:', error);
+        });
     }
   };
 
@@ -156,32 +163,36 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
       // Configure services with new settings
       if (newSettings.openRouterApiKey || newSettings.openRouterModel) {
-        chatService.configure(
-          updatedSettings.openRouterApiKey,
-          updatedSettings.openRouterModel
-        );
+        chatService.configure(updatedSettings.openRouterApiKey, updatedSettings.openRouterModel);
       }
 
       // Only configure S3 if it's available and credentials are provided
-      if (s3Service.isS3Available() &&
-          (newSettings.awsAccessKeyId || newSettings.awsSecretAccessKey ||
-           newSettings.awsRegion || newSettings.awsBucketName)) {
-
+      if (
+        s3Service.isS3Available() &&
+        (newSettings.awsAccessKeyId ||
+          newSettings.awsSecretAccessKey ||
+          newSettings.awsRegion ||
+          newSettings.awsBucketName)
+      ) {
         if (updatedSettings.awsAccessKeyId && updatedSettings.awsSecretAccessKey) {
-          s3Service.configure(
-            updatedSettings.awsAccessKeyId,
-            updatedSettings.awsSecretAccessKey,
-            updatedSettings.awsRegion,
-            updatedSettings.awsBucketName
-          ).catch(error => {
-            console.warn('Failed to configure S3 service:', error);
-          });
+          s3Service
+            .configure(
+              updatedSettings.awsAccessKeyId,
+              updatedSettings.awsSecretAccessKey,
+              updatedSettings.awsRegion,
+              updatedSettings.awsBucketName
+            )
+            .catch(error => {
+              console.warn('Failed to configure S3 service:', error);
+            });
         }
       }
 
       // Update active color scheme if changed
-      if (newSettings.activeColorSchemeId &&
-          newSettings.activeColorSchemeId !== prevSettings.activeColorSchemeId) {
+      if (
+        newSettings.activeColorSchemeId &&
+        newSettings.activeColorSchemeId !== prevSettings.activeColorSchemeId
+      ) {
         const newActiveScheme = colorSchemes.find(
           scheme => scheme.id === newSettings.activeColorSchemeId
         );
@@ -232,7 +243,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       const exportData = {
         settings,
         colorSchemes,
-        nodePreferences
+        nodePreferences,
       };
       return JSON.stringify(exportData, null, 2);
     } catch (error) {
@@ -254,7 +265,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       // Import settings
       setSettings(prevSettings => ({
         ...prevSettings,
-        ...importData.settings
+        ...importData.settings,
       }));
       await indexedDBService.saveSettings(importData.settings);
 
@@ -275,9 +286,9 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
       // Set active color scheme
       if (importData.settings.activeColorSchemeId) {
-        const activeScheme = colorSchemes.find(
-          scheme => scheme.id === importData.settings.activeColorSchemeId
-        ) || await indexedDBService.getColorScheme(importData.settings.activeColorSchemeId);
+        const activeScheme =
+          colorSchemes.find(scheme => scheme.id === importData.settings.activeColorSchemeId) ||
+          (await indexedDBService.getColorScheme(importData.settings.activeColorSchemeId));
 
         if (activeScheme) {
           setActiveColorScheme(activeScheme);
@@ -314,7 +325,10 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
   };
 
   // Create a new color scheme
-  const createColorScheme = async (name: string, colors: Record<NodeType, string>): Promise<ColorScheme> => {
+  const createColorScheme = async (
+    name: string,
+    colors: Record<NodeType, string>
+  ): Promise<ColorScheme> => {
     try {
       const newScheme: ColorScheme = {
         id: crypto.randomUUID(),
@@ -370,21 +384,23 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
   };
 
   return (
-    <SettingsContext.Provider value={{
-      settings,
-      updateSettings,
-      resetSettings,
-      colorSchemes,
-      activeColorScheme,
-      nodePreferences,
-      getNodeColor,
-      exportSettings,
-      importSettings,
-      updateColorScheme,
-      createColorScheme,
-      deleteColorScheme,
-      updateNodePreferences
-    }}>
+    <SettingsContext.Provider
+      value={{
+        settings,
+        updateSettings,
+        resetSettings,
+        colorSchemes,
+        activeColorScheme,
+        nodePreferences,
+        getNodeColor,
+        exportSettings,
+        importSettings,
+        updateColorScheme,
+        createColorScheme,
+        deleteColorScheme,
+        updateNodePreferences,
+      }}
+    >
       {children}
     </SettingsContext.Provider>
   );
@@ -397,4 +413,3 @@ export const useSettings = (): SettingsContextType => {
   }
   return context;
 };
-

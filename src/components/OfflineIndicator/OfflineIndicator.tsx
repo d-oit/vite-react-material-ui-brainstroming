@@ -32,7 +32,9 @@ export const OfflineIndicator = ({
   showSnackbar = true,
 }: OfflineIndicatorProps) => {
   const [isOnline, setIsOnline] = useState(offlineService.getOnlineStatus());
-  const [pendingOperations, setPendingOperations] = useState(offlineService.getPendingOperationsCount());
+  const [pendingOperations, setPendingOperations] = useState(
+    offlineService.getPendingOperationsCount()
+  );
   const [syncDialogOpen, setSyncDialogOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -56,21 +58,21 @@ export const OfflineIndicator = ({
 
   // Monitor online status and pending operations
   useEffect(() => {
-    const removeStatusListener = offlineService.addOnlineStatusListener((online) => {
+    const removeStatusListener = offlineService.addOnlineStatusListener(online => {
       setIsOnline(online);
-      
+
       // Show snackbar when status changes
       if (showSnackbar) {
         setSnackbarMessage(online ? 'You are back online' : 'You are offline');
         setSnackbarOpen(true);
       }
     });
-    
+
     // Check pending operations periodically
     const intervalId = setInterval(() => {
       setPendingOperations(offlineService.getPendingOperationsCount());
     }, 2000);
-    
+
     return () => {
       removeStatusListener();
       clearInterval(intervalId);
@@ -80,7 +82,7 @@ export const OfflineIndicator = ({
   // Handle sync button click
   const handleSyncClick = async () => {
     if (pendingOperations === 0 || !isOnline) return;
-    
+
     setSyncInProgress(true);
     try {
       await offlineService.processSyncQueue();
@@ -158,10 +160,12 @@ export const OfflineIndicator = ({
         <DialogTitle>Pending Synchronization</DialogTitle>
         <DialogContent>
           <Typography>
-            You have {pendingOperations} operation{pendingOperations !== 1 ? 's' : ''} waiting to be synchronized.
+            You have {pendingOperations} operation{pendingOperations !== 1 ? 's' : ''} waiting to be
+            synchronized.
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            These operations will be automatically synchronized in the background, but you can also synchronize them manually.
+            These operations will be automatically synchronized in the background, but you can also
+            synchronize them manually.
           </Typography>
         </DialogContent>
         <DialogActions>

@@ -15,16 +15,13 @@ import {
   DialogActions,
   CircularProgress,
 } from '@mui/material';
-import {
-  FileDownload as DownloadIcon,
-  FileUpload as UploadIcon,
-} from '@mui/icons-material';
+import { FileDownload as DownloadIcon, FileUpload as UploadIcon } from '@mui/icons-material';
 import { useSettings } from '../../contexts/SettingsContext';
 
 export const SettingsExportImport = () => {
   const { exportSettings, importSettings } = useSettings();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -34,7 +31,7 @@ export const SettingsExportImport = () => {
     message: '',
     severity: 'info',
   });
-  
+
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
     title: string;
@@ -46,14 +43,14 @@ export const SettingsExportImport = () => {
     message: '',
     onConfirm: () => {},
   });
-  
+
   const [loading, setLoading] = useState(false);
-  
+
   const handleExport = async () => {
     try {
       setLoading(true);
       const settingsJson = await exportSettings();
-      
+
       // Create a blob and download it
       const blob = new Blob([settingsJson], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -64,7 +61,7 @@ export const SettingsExportImport = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
+
       setSnackbar({
         open: true,
         message: 'Settings exported successfully',
@@ -81,19 +78,19 @@ export const SettingsExportImport = () => {
       setLoading(false);
     }
   };
-  
+
   const handleImportClick = () => {
     fileInputRef.current?.click();
   };
-  
+
   const handleFileSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    
+
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       const content = e.target?.result as string;
-      
+
       // Show confirmation dialog
       setConfirmDialog({
         open: true,
@@ -102,18 +99,18 @@ export const SettingsExportImport = () => {
         onConfirm: () => processImport(content),
       });
     };
-    
+
     reader.readAsText(file);
-    
+
     // Reset the input so the same file can be selected again
     event.target.value = '';
   };
-  
+
   const processImport = async (content: string) => {
     try {
       setLoading(true);
       const success = await importSettings(content);
-      
+
       if (success) {
         setSnackbar({
           open: true,
@@ -131,7 +128,9 @@ export const SettingsExportImport = () => {
       console.error('Failed to import settings:', error);
       setSnackbar({
         open: true,
-        message: 'Failed to import settings: ' + (error instanceof Error ? error.message : 'Unknown error'),
+        message:
+          'Failed to import settings: ' +
+          (error instanceof Error ? error.message : 'Unknown error'),
         severity: 'error',
       });
     } finally {
@@ -139,23 +138,23 @@ export const SettingsExportImport = () => {
       setConfirmDialog({ ...confirmDialog, open: false });
     }
   };
-  
+
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
         Export and Import Settings
       </Typography>
-      
+
       <Divider sx={{ mb: 3 }} />
-      
+
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="subtitle1" gutterBottom>
             Export Settings
           </Typography>
           <Typography variant="body2" color="text.secondary" paragraph>
-            Export all your settings, color schemes, and node preferences to a JSON file.
-            You can use this file to backup your settings or transfer them to another device.
+            Export all your settings, color schemes, and node preferences to a JSON file. You can
+            use this file to backup your settings or transfer them to another device.
           </Typography>
           <Button
             variant="contained"
@@ -167,15 +166,15 @@ export const SettingsExportImport = () => {
           </Button>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardContent>
           <Typography variant="subtitle1" gutterBottom>
             Import Settings
           </Typography>
           <Typography variant="body2" color="text.secondary" paragraph>
-            Import settings from a previously exported JSON file.
-            This will replace your current settings, color schemes, and node preferences.
+            Import settings from a previously exported JSON file. This will replace your current
+            settings, color schemes, and node preferences.
           </Typography>
           <Button
             variant="outlined"
@@ -194,7 +193,7 @@ export const SettingsExportImport = () => {
           />
         </CardContent>
       </Card>
-      
+
       {/* Confirmation Dialog */}
       <Dialog
         open={confirmDialog.open}
@@ -213,7 +212,7 @@ export const SettingsExportImport = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      
+
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
