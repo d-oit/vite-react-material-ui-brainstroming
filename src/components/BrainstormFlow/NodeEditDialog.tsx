@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -20,12 +20,21 @@ import {
   Tooltip,
   IconButton,
   useMediaQuery,
+  ToggleButtonGroup,
+  ToggleButton,
+  Paper,
+  Alert,
 } from '@mui/material';
 import {
   Palette as PaletteIcon,
   FormatSize as FormatSizeIcon,
   Refresh as RefreshIcon,
+  SmartButton as SmartButtonIcon,
+  Smartphone as SmartphoneIcon,
+  Laptop as LaptopIcon,
+  AccessibilityNew as AccessibilityIcon,
 } from '@mui/icons-material';
+import loggerService from '../../services/LoggerService';
 import { NodeType, NodeData } from '../../types';
 // import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -57,6 +66,8 @@ export const NodeEditDialog = ({
   const [color, setColor] = useState<string | undefined>(undefined);
   const [size, setSize] = useState<'small' | 'medium' | 'large'>(settings.preferredNodeSize);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showSizeSelector, setShowSizeSelector] = useState(false);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -289,6 +300,73 @@ export const NodeEditDialog = ({
             </Grid>
           </Grid>
 
+          {/* Size selector */}
+          <Box sx={{ mb: 2, mt: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="subtitle2">Node Size</Typography>
+              <Tooltip title="Toggle size options">
+                <IconButton
+                  size="small"
+                  onClick={() => setShowSizeSelector(!showSizeSelector)}
+                  aria-label="Toggle size options"
+                  color={showSizeSelector ? 'primary' : 'default'}
+                >
+                  <FormatSizeIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
+
+            {showSizeSelector && (
+              <Paper sx={{ p: 2, mt: 1, mb: 2 }} elevation={1}>
+                <ToggleButtonGroup
+                  value={size}
+                  exclusive
+                  onChange={(e, newSize) => {
+                    if (newSize) setSize(newSize);
+                  }}
+                  aria-label="Node size"
+                  fullWidth
+                  size={isMobile ? 'small' : 'medium'}
+                >
+                  <ToggleButton value="small" aria-label="Small size">
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <SmartphoneIcon fontSize="small" />
+                      <Typography variant="caption">Small</Typography>
+                    </Box>
+                  </ToggleButton>
+                  <ToggleButton value="medium" aria-label="Medium size">
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <SmartButtonIcon />
+                      <Typography variant="caption">Medium</Typography>
+                    </Box>
+                  </ToggleButton>
+                  <ToggleButton value="large" aria-label="Large size">
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <LaptopIcon />
+                      <Typography variant="caption">Large</Typography>
+                    </Box>
+                  </ToggleButton>
+                </ToggleButtonGroup>
+
+                <Box
+                  sx={{
+                    mt: 1,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Typography variant="caption" color="text.secondary">
+                    Width: {nodePreferences ? nodePreferences.nodeSizes[size].width : 200}px
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Font: {nodePreferences ? nodePreferences.nodeSizes[size].fontSize : 1}rem
+                  </Typography>
+                </Box>
+              </Paper>
+            )}
+          </Box>
+
           {/* Node preview */}
           <Box
             sx={{
@@ -327,6 +405,25 @@ export const NodeEditDialog = ({
               >
                 {label || 'Node Title'}
               </Typography>
+
+              {/* Tags in preview - moved above content */}
+              {tags.length > 0 && (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1, mt: 0.5 }}>
+                  {tags.map(tag => (
+                    <Chip
+                      key={tag}
+                      label={tag}
+                      size="small"
+                      sx={{
+                        height: 20,
+                        fontSize: '0.7rem',
+                        backgroundColor: `${theme.palette.primary.main}20`, // 20 = 12% opacity
+                      }}
+                    />
+                  ))}
+                </Box>
+              )}
+
               <Typography
                 variant="body2"
                 sx={{

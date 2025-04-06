@@ -30,12 +30,15 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import CustomNode from './CustomNode';
 import { NodeEditDialog } from './NodeEditDialog';
 import { NodeType, NodeData, Node, Edge } from '../../types';
 import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
+import loggerService from '../../services/LoggerService';
 
 // Define custom node types
 const nodeTypes: NodeTypes = {
@@ -220,6 +223,9 @@ const FlowContent = ({
     (nodeId: string, event?: React.MouseEvent) => {
       event?.stopPropagation(); // Prevent node selection
 
+      // Log the delete request
+      loggerService.info(`Node deletion requested for node ${nodeId}`);
+
       // Check if skipDeleteConfirmation is enabled in settings
       const skipConfirmation =
         process.env.VITE_SKIP_DELETE_CONFIRMATION === 'true' || settings.skipDeleteConfirmation;
@@ -236,23 +242,59 @@ const FlowContent = ({
 
   const handleNodeDelete = useCallback(
     (nodeId: string) => {
-      const updatedNodes = nodes.filter(node => node.id !== nodeId);
-      const updatedEdges = edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId);
+      try {
+        // Find the node to be deleted (for logging)
+        const nodeToDelete = nodes.find(node => node.id === nodeId);
 
-      setNodes(updatedNodes);
-      setEdges(updatedEdges);
-      setNodeEditOpen(false);
-      setSelectedNode(null);
+        // Find all connected edges
+        const connectedEdges = edges.filter(
+          edge => edge.source === nodeId || edge.target === nodeId
+        );
+        const connectedEdgeIds = connectedEdges.map(edge => edge.id);
 
-      if (externalNodesChange) {
-        externalNodesChange(updatedNodes);
+        // Filter out the node and its connected edges
+        const updatedNodes = nodes.filter(node => node.id !== nodeId);
+        const updatedEdges = edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId);
+
+        // Log the deletion
+        loggerService.info(
+          `Deleting node ${nodeId} with ${connectedEdgeIds.length} connected edges`,
+          {
+            nodeType: nodeToDelete?.type,
+            connectedEdgeIds,
+          }
+        );
+
+        // Update state
+        setNodes(updatedNodes);
+        setEdges(updatedEdges);
+        setNodeEditOpen(false);
+        setSelectedNode(null);
+
+        // Notify external handlers
+        if (externalNodesChange) {
+          externalNodesChange(updatedNodes);
+        }
+
+        if (externalEdgesChange) {
+          externalEdgesChange(updatedEdges);
+        }
+
+        // Show success message
+        showSnackbar(
+          connectedEdgeIds.length > 0
+            ? t('brainstorm.nodeAndEdgesDeleted', { count: connectedEdgeIds.length })
+            : t('brainstorm.nodeDeleted'),
+          'info'
+        );
+      } catch (error) {
+        // Log and show error
+        loggerService.error(
+          'Error deleting node',
+          error instanceof Error ? error : new Error(String(error))
+        );
+        showSnackbar(t('brainstorm.errorDeletingNode'), 'error');
       }
-
-      if (externalEdgesChange) {
-        externalEdgesChange(updatedEdges);
-      }
-
-      showSnackbar(t('brainstorm.nodeDeleted'), 'info');
     },
     [nodes, edges, setNodes, setEdges, externalNodesChange, externalEdgesChange, t]
   );
@@ -430,13 +472,45 @@ const FlowContent = ({
       </ReactFlow>
 
       {/* Confirmation Dialog */}
-      <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
-        <DialogTitle>{t('brainstorm.confirmDelete')}</DialogTitle>
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">{t('brainstorm.confirmDelete')}</DialogTitle>
         <DialogContent>
-          <DialogContentText>{t('brainstorm.confirmDeleteMessage')}</DialogContentText>
+          <DialogContentText id="delete-dialog-description">
+            {t('brainstorm.confirmDeleteMessage')}
+          </DialogContentText>
+
+          <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  onChange={e => {
+                    // Update the skipDeleteConfirmation setting
+                    if (e.target.checked) {
+                      updateSettings({
+                        ...settings,
+                        skipDeleteConfirmation: true,
+                      });
+
+                      // Log the setting change
+                      loggerService.info('User enabled skipDeleteConfirmation setting');
+                    }
+                  }}
+                  color="primary"
+                />
+              }
+              label={t('brainstorm.dontAskAgain')}
+            />
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteConfirmOpen(false)}>{t('common.cancel')}</Button>
+          <Button onClick={() => setDeleteConfirmOpen(false)} aria-label={t('common.cancel')}>
+            {t('common.cancel')}
+          </Button>
           <Button
             onClick={() => {
               if (nodeToDelete) {
@@ -446,6 +520,8 @@ const FlowContent = ({
               setDeleteConfirmOpen(false);
             }}
             color="error"
+            variant="contained"
+            aria-label={t('common.delete')}
           >
             {t('common.delete')}
           </Button>

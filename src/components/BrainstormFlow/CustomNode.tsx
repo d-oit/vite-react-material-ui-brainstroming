@@ -67,17 +67,39 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
       return {
         width: Math.min(sizeConfig.width, viewportWidth * 0.8), // 80% of viewport on mobile
         fontSize: sizeConfig.fontSize * 0.9, // Slightly smaller font on mobile
+        padding: 0.75, // Reduced padding on mobile
+        iconSize: 'small', // Smaller icons on mobile
+        chipSize: 'small', // Smaller chips on mobile
+        maxContentLines: 3, // Fewer content lines on mobile
       };
     } else if (viewportWidth < 1024) {
       // Tablet
       return {
         width: Math.min(sizeConfig.width, viewportWidth * 0.4), // 40% of viewport on tablet
         fontSize: sizeConfig.fontSize * 0.95, // Slightly smaller font on tablet
+        padding: 1, // Standard padding on tablet
+        iconSize: 'small', // Standard icons on tablet
+        chipSize: 'small', // Standard chips on tablet
+        maxContentLines: 4, // Standard content lines on tablet
       };
     }
 
-    return sizeConfig;
+    // Desktop
+    return {
+      ...sizeConfig,
+      padding: 1.5, // Standard padding on desktop
+      iconSize: 'small', // Standard icons on desktop
+      chipSize: 'small', // Standard chips on desktop
+      maxContentLines: 5, // Standard content lines on desktop
+    };
   }, [nodePreferences, isMobile, data.size]);
+
+  // Log node size calculation for debugging
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('Node size calculated:', { nodeSize, isMobile, nodeType, id });
+    }
+  }, [nodeSize, isMobile, nodeType, id]);
 
   // Determine if content should be collapsed based on screen size and content length
   const shouldCollapseContent = useMemo(() => {
@@ -113,6 +135,9 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
           },
         }),
       }}
+      role="article"
+      aria-label={`${nodeType.toLowerCase()} node: ${data.label}`}
+      tabIndex={0}
     >
       <Handle
         type="target"
@@ -125,6 +150,9 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
           zIndex: 10,
         }}
         className="react-flow__handle-custom"
+        aria-label="Connection target point"
+        role="button"
+        tabIndex={0}
       />
 
       <Box
@@ -151,7 +179,12 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
         </Typography>
 
         <Box>
-          <IconButton size="small" onClick={() => data.onEdit?.(id)}>
+          <IconButton
+            size="small"
+            onClick={() => data.onEdit?.(id)}
+            aria-label="Edit node"
+            title="Edit node"
+          >
             <EditIcon fontSize="small" />
           </IconButton>
           <IconButton
@@ -160,43 +193,24 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
               e.stopPropagation(); // Prevent node selection
               data.onDelete?.(id, e);
             }}
+            aria-label="Delete node"
+            title="Delete node"
+            color="error"
           >
             <DeleteIcon fontSize="small" />
           </IconButton>
         </Box>
       </Box>
 
-      <CardContent sx={{ p: 1.5 }}>
-        <Typography
-          variant="body2"
-          sx={{
-            whiteSpace: 'pre-wrap',
-            fontSize: `calc(${nodeSize.fontSize}rem * 0.9)`,
-            overflow: 'hidden',
-            display: '-webkit-box',
-            WebkitLineClamp: isMobile ? 3 : 5,
-            WebkitBoxOrient: 'vertical',
-            transition: 'all 0.3s ease',
-            cursor: shouldCollapseContent ? 'pointer' : 'default',
-          }}
-          onClick={() => {
-            if (shouldCollapseContent && data.onEdit) {
-              data.onEdit(id);
-            }
-          }}
-        >
-          {shouldCollapseContent
-            ? `${data.content.substring(0, 100)}... (tap to expand)`
-            : data.content}
-        </Typography>
-
+      <CardContent sx={{ p: nodeSize.padding }}>
+        {/* Tags section - moved above content for better information hierarchy */}
         {data.tags && data.tags.length > 0 && (
           <Box
             sx={{
-              mt: 1,
               display: 'flex',
               flexWrap: 'wrap',
               gap: 0.5,
+              mb: 1,
               // Hide tags on mobile if there are more than 2
               ...(isMobile &&
                 data.tags.length > 2 && {
@@ -211,12 +225,14 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
                   },
                 }),
             }}
+            aria-label="Tags"
+            role="group"
           >
             {data.tags.map(tag => (
               <Chip
                 key={tag}
                 label={tag}
-                size="small"
+                size={nodeSize.chipSize}
                 sx={{
                   // Make chips more compact on mobile
                   ...(isMobile && {
@@ -226,11 +242,38 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
                       fontSize: '0.625rem',
                     },
                   }),
+                  backgroundColor: `${borderColor}40`, // 40 = 25% opacity
                 }}
+                aria-label={`Tag: ${tag}`}
               />
             ))}
           </Box>
         )}
+
+        {/* Content section */}
+        <Typography
+          variant="body2"
+          sx={{
+            whiteSpace: 'pre-wrap',
+            fontSize: `calc(${nodeSize.fontSize}rem * 0.9)`,
+            overflow: 'hidden',
+            display: '-webkit-box',
+            WebkitLineClamp: nodeSize.maxContentLines,
+            WebkitBoxOrient: 'vertical',
+            transition: 'all 0.3s ease',
+            cursor: shouldCollapseContent ? 'pointer' : 'default',
+          }}
+          onClick={() => {
+            if (shouldCollapseContent && data.onEdit) {
+              data.onEdit(id);
+            }
+          }}
+          aria-label={shouldCollapseContent ? 'Collapsed content (tap to expand)' : 'Content'}
+        >
+          {shouldCollapseContent
+            ? `${data.content.substring(0, 100)}... (tap to expand)`
+            : data.content}
+        </Typography>
       </CardContent>
 
       <Handle
@@ -248,6 +291,9 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
           }),
         }}
         className="react-flow__handle-custom"
+        aria-label="Connection source point"
+        role="button"
+        tabIndex={0}
       />
     </Card>
   );

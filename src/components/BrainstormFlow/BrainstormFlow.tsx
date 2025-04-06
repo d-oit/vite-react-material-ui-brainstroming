@@ -21,6 +21,7 @@ import CustomNode from './CustomNode';
 import { NodeEditDialog } from './NodeEditDialog';
 import { NodeType, NodeData, Node, Edge } from '../../types';
 // import { useI18n } from '../../contexts/I18nContext';
+import loggerService from '../../services/LoggerService';
 
 // Define custom node types
 const nodeTypes: NodeTypes = {
@@ -97,11 +98,30 @@ export const BrainstormFlow = ({
 
   // Handle node delete
   const handleDeleteNode = useCallback(
-    (nodeId: string) => {
-      setNodes(nds => nds.filter(n => n.id !== nodeId));
-      setEdges(eds => eds.filter(e => e.source !== nodeId && e.target !== nodeId));
+    (nodeId: string, event?: React.MouseEvent) => {
+      event?.stopPropagation(); // Prevent node selection
+
+      try {
+        // Find connected edges
+        const connectedEdges = edges.filter(
+          edge => edge.source === nodeId || edge.target === nodeId
+        );
+
+        // Log the deletion
+        loggerService.info(`Deleting node ${nodeId} with ${connectedEdges.length} connected edges`);
+
+        // Update nodes and edges
+        setNodes(nds => nds.filter(n => n.id !== nodeId));
+        setEdges(eds => eds.filter(e => e.source !== nodeId && e.target !== nodeId));
+      } catch (error) {
+        console.error('Error deleting node:', error);
+        loggerService.error(
+          'Error deleting node',
+          error instanceof Error ? error : new Error(String(error))
+        );
+      }
     },
-    [setNodes, setEdges]
+    [setNodes, setEdges, edges]
   );
 
   // Add new node
