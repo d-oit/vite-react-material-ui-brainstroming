@@ -1,4 +1,5 @@
-import AWS, { S3 } from 'aws-sdk';
+// Import AWS SDK
+import AWS from 'aws-sdk';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import loggerService from '../../services/LoggerService';
@@ -63,11 +64,10 @@ vi.mock('aws-sdk', () => {
 });
 
 describe('S3Service', () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-  let mockStorage: any;
+  // Storage is mocked globally
 
   beforeEach(() => {
-    mockStorage = mockLocalStorage();
+    mockLocalStorage();
     mockOnlineStatus(true);
 
     // Reset mocks
@@ -110,10 +110,11 @@ describe('S3Service', () => {
 
     it('should handle configuration errors', async () => {
       // Mock AWS SDK to throw an error
-      const S3Mock = vi.mocked(S3);
-      S3Mock.mockImplementationOnce(() => {
+      const S3Constructor = vi.fn(() => {
         throw new Error('Test error');
       });
+      vi.spyOn(AWS, 'S3').mockImplementation(S3Constructor as any);
+
 
       // Call the method
       const result = await s3Service.configure(
@@ -142,7 +143,7 @@ describe('S3Service', () => {
         id: 'test-project',
         name: 'Test Project',
         description: 'A test project',
-        version: '1.0.0',
+        version: 1,
         nodes: [],
         edges: [],
         createdAt: new Date().toISOString(),
@@ -177,7 +178,7 @@ describe('S3Service', () => {
         id: 'test-project',
         name: 'Test Project',
         description: 'A test project',
-        version: '1.0.0',
+        version: 1,
         nodes: [],
         edges: [],
         createdAt: new Date().toISOString(),
@@ -218,7 +219,7 @@ describe('S3Service', () => {
         id: 'test-project',
         name: 'Test Project',
         description: 'A test project',
-        version: '1.0.0',
+        version: 1,
         nodes: [],
         edges: [],
         createdAt: new Date().toISOString(),
@@ -277,11 +278,15 @@ describe('S3Service', () => {
       await s3Service.configure('test-access-key', 'test-secret-key', 'us-east-1', 'test-bucket');
 
       // Get mocked S3 instance
-      const S3Mock = vi.mocked(S3);
-      const mockS3Instance = S3Mock.mock.results[0].value;
-      mockS3Instance.getObject.mockReturnValueOnce({
+      // Mock S3 getObject method
+      const mockGetObject = vi.fn().mockReturnValue({
         promise: vi.fn().mockRejectedValue(new Error('Test error')),
       });
+
+      // Apply the mock to AWS.S3 prototype
+      vi.spyOn(AWS.S3.prototype, 'getObject').mockImplementation(mockGetObject);
+
+      // Now the mock is set up
 
       // Call the method
       const result = await s3Service.downloadProject('test-project', '1.0.0');

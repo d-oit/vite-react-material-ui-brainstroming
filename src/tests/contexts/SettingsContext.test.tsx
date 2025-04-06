@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { SettingsProvider, useSettings } from '../../contexts/SettingsContext';
-import { render, screen, fireEvent, waitFor, act, mockLocalStorage } from '../test-utils';
+import { render, screen, fireEvent, waitFor, mockLocalStorage } from '../test-utils';
 
 // Create a test component that uses the SettingsContext
 const TestComponent = () => {
@@ -11,9 +11,14 @@ const TestComponent = () => {
     <div>
       <div data-testid="theme-mode">{settings.themeMode}</div>
       <div data-testid="language">{settings.language}</div>
-      <button onClick={() => updateSettings({ themeMode: 'dark' })}>Set Dark Theme</button>
-      <button onClick={() => updateSettings({ language: 'de' })}>Set German Language</button>
+      <button type="button" onClick={() => updateSettings({ themeMode: 'dark' })}>
+        Set Dark Theme
+      </button>
+      <button type="button" onClick={() => updateSettings({ language: 'de' })}>
+        Set German Language
+      </button>
       <button
+        type="button"
         onClick={async () => {
           const json = await exportSettings();
           document.getElementById('export-result')!.textContent = json;
@@ -21,7 +26,7 @@ const TestComponent = () => {
       >
         Export Settings
       </button>
-      <button onClick={() => importSettings('{"themeMode":"dark","language":"fr"}')}>
+      <button type="button" onClick={() => importSettings('{"themeMode":"dark","language":"fr"}')}>
         Import Settings
       </button>
       <div id="export-result" />
@@ -111,8 +116,11 @@ describe('SettingsContext', () => {
     await waitFor(() => {
       const exportResult = document.getElementById('export-result')!.textContent;
       expect(exportResult).toContain('"themeMode":"light"');
-      expect(exportResult).toContain('"language":"en"');
     });
+
+    // Check that language was exported
+    const exportResult = document.getElementById('export-result')!.textContent;
+    expect(exportResult).toContain('"language":"en"');
   });
 
   it('imports settings from JSON', async () => {
@@ -126,11 +134,13 @@ describe('SettingsContext', () => {
     // Import settings
     fireEvent.click(screen.getByText('Import Settings'));
 
-    // Check that the settings were imported
+    // Check that the theme mode was imported
     await waitFor(() => {
       expect(screen.getByTestId('theme-mode')).toHaveTextContent('dark');
-      expect(screen.getByTestId('language')).toHaveTextContent('fr');
     });
+
+    // Check that the language was imported
+    expect(screen.getByTestId('language')).toHaveTextContent('fr');
 
     // Check that the settings were saved to localStorage
     expect(mockStorage.setItem).toHaveBeenCalledWith(

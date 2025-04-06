@@ -30,7 +30,10 @@ export function isValidVersion(version: unknown): version is number {
     return Number.isInteger(version) && version > 0;
   }
   if (typeof version === 'string') {
-    return /^\d+(\.\d+)*$/.test(version);
+    // Use a safer regex with explicit limits
+    // This regex matches version strings like '1', '1.0', '1.0.0', etc.
+    // with a maximum of 5 version segments and each segment limited to 5 digits
+    return /^\d{1,5}(\.\d{1,5}){0,4}$/.test(version);
   }
   return false;
 }

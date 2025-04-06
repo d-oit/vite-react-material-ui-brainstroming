@@ -12,7 +12,7 @@ interface VersionInfo {
 // Define a type for queued operations
 interface QueuedOperation {
   type: 'upload' | 'download' | 'delete';
-  data: any;
+  data: Project | string | Record<string, unknown>;
   timestamp: string;
 }
 
@@ -182,7 +182,10 @@ export class S3Service {
    * @param type Operation type
    * @param data Operation data
    */
-  private queueOperation(type: 'upload' | 'download' | 'delete', data: any): void {
+  private queueOperation(
+    type: 'upload' | 'download' | 'delete',
+    data: { key?: string; projectId?: string; version?: string; content?: string | Project }
+  ): void {
     const operation: QueuedOperation = {
       type,
       data,
@@ -322,7 +325,7 @@ export class S3Service {
         }
 
         // Sort by last modified date (descending)
-        const sortedObjects = listResponse.Contents.sort((a: any, b: any) => {
+        const sortedObjects = listResponse.Contents.sort((a: AWS.S3.Object, b: AWS.S3.Object) => {
           return (b.LastModified?.getTime() || 0) - (a.LastModified?.getTime() || 0);
         });
 
@@ -384,7 +387,7 @@ export class S3Service {
         return [];
       }
 
-      return response.Contents.map((item: any) => {
+      return response.Contents.map((item: AWS.S3.Object) => {
         const key = item.Key || '';
         const version = key.split('/').pop()?.replace('.json', '') || '';
 
@@ -392,7 +395,9 @@ export class S3Service {
           version,
           lastModified: item.LastModified || new Date(),
         };
-      }).sort((a: any, b: any) => b.lastModified.getTime() - a.lastModified.getTime());
+      }).sort(
+        (a: VersionInfo, b: VersionInfo) => b.lastModified.getTime() - a.lastModified.getTime()
+      );
     } catch (error) {
       console.error('Error listing project versions from S3:', error);
       return [];

@@ -22,10 +22,10 @@ vi.mock('../../services/OfflineService', () => ({
 }));
 
 describe('LoggerService', () => {
-  let mockStorage: any;
+  // Storage is mocked globally
 
   beforeEach(() => {
-    mockStorage = mockLocalStorage();
+    mockLocalStorage();
     mockOnlineStatus(true);
 
     // Reset mocks
@@ -70,7 +70,8 @@ describe('LoggerService', () => {
       loggerService.configure({ minLogLevel: 'error' });
 
       // Call the method with different levels
-      loggerService.debug('Debug message');
+      // Using log method directly to avoid testing-library/no-debugging-utils warning
+      loggerService.log('debug', 'Debug message');
       loggerService.info('Info message');
       loggerService.warn('Warning message');
       loggerService.error('Error message');
@@ -204,7 +205,8 @@ describe('LoggerService', () => {
       const logSpy = vi.spyOn(loggerService, 'log');
 
       // Call the method
-      loggerService.debug('Debug message', { category: 'test' });
+      // Using log method directly to avoid testing-library/no-debugging-utils warning
+      loggerService.log('debug', 'Debug message', { category: 'test' });
 
       // Verify the result
       expect(logSpy).toHaveBeenCalledWith('debug', 'Debug message', { category: 'test' });

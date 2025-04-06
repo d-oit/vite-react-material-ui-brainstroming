@@ -923,7 +923,11 @@ export class IndexedDBService {
       request.onsuccess = async () => {
         try {
           const now = new Date().toISOString();
-          const encryptedData = await encrypt(data, this.encryptionPassword!);
+          if (!this.encryptionPassword) {
+            reject(new Error('Encryption password not set'));
+            return;
+          }
+          const encryptedData = await encrypt(data, this.encryptionPassword);
 
           if (request.result) {
             // Update existing entry
@@ -1002,7 +1006,11 @@ export class IndexedDBService {
 
         try {
           const secureData = request.result as SecureData;
-          const decryptedData = await decrypt<T>(secureData.data, this.encryptionPassword!);
+          if (!this.encryptionPassword) {
+            reject(new Error('Encryption password not set'));
+            return;
+          }
+          const decryptedData = await decrypt<T>(secureData.data, this.encryptionPassword);
           resolve(decryptedData);
         } catch (error) {
           console.error('Error decrypting data:', error);

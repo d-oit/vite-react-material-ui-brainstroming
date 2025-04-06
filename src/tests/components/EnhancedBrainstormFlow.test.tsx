@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import EnhancedBrainstormFlow from '../../components/BrainstormFlow/EnhancedBrainstormFlow';
+import { EnhancedBrainstormFlow } from '../../components/BrainstormFlow/EnhancedBrainstormFlow';
 import { NodeType } from '../../types';
 import { render, screen, fireEvent, waitFor, mockResizeObserver } from '../test-utils';
 
@@ -154,7 +154,7 @@ describe('EnhancedBrainstormFlow', () => {
     ];
 
     // Render the component
-    const { container } = render(
+    render(
       <EnhancedBrainstormFlow
         initialNodes={nodes}
         initialEdges={[]}

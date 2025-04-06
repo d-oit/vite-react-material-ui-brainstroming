@@ -79,12 +79,16 @@ export function getCSPDirectives(): CSPDirectives {
   if (isDevelopment) {
     // Merge development directives
     Object.entries(developmentDirectives).forEach(([key, values]) => {
-      directives[key] = [...(directives[key] || []), ...values];
+      // Use type assertion to ensure type safety
+      const directiveKey = key as keyof typeof directives;
+      directives[directiveKey] = [...(directives[directiveKey] || []), ...values];
     });
   } else {
     // Merge production directives
     Object.entries(productionDirectives).forEach(([key, values]) => {
-      directives[key] = [...(directives[key] || []), ...values];
+      // Use type assertion to ensure type safety
+      const directiveKey = key as keyof typeof directives;
+      directives[directiveKey] = [...(directives[directiveKey] || []), ...values];
     });
   }
 

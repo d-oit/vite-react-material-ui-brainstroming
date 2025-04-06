@@ -1,4 +1,16 @@
 // Base types
+// Enums
+import {
+  NodeType,
+  EdgeType,
+  ThemeMode,
+  LogLevel,
+  LogCategory,
+  NodeSize,
+  ConnectionMode,
+  PanelPosition,
+} from './enums';
+
 export type {
   NodeData,
   Node,
@@ -53,18 +65,6 @@ export {
 
 // Version utilities
 export { normalizeVersion, formatVersion, isValidVersion, DEFAULT_VERSION } from '../utils/version';
-
-// Enums
-import {
-  NodeType,
-  EdgeType,
-  ThemeMode,
-  LogLevel,
-  LogCategory,
-  NodeSize,
-  ConnectionMode,
-  PanelPosition,
-} from './enums';
 
 export {
   NodeType,

@@ -1,5 +1,6 @@
 import type { Project, ProjectHistoryEntry } from '../types';
-import { Node, Edge } from '../types';
+// These types are used in the Project type
+// import { Node, Edge } from '../types';
 
 import gitService from './GitService';
 import indexedDBService from './IndexedDBService';

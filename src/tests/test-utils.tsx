@@ -6,17 +6,23 @@ import { vi } from 'vitest';
 import { ErrorNotificationProvider } from '../contexts/ErrorNotificationContext';
 import { SettingsProvider } from '../contexts/SettingsContext';
 
-interface MockLocalStorage {
-  [key: string]: string;
-}
+// Map is used instead of object literal to avoid object injection warnings
 
 interface ExtendedRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   route?: string;
 }
 
+// Mock online status
+export function mockOnlineStatus(isOnline: boolean) {
+  Object.defineProperty(navigator, 'onLine', {
+    value: isOnline,
+    writable: true,
+  });
+}
+
 // Mock IndexedDB
 export function mockIndexedDB() {
-  const store: Record<string, any> = {};
+  // Store is not needed for this mock
 
   const indexedDB = {
     open: vi.fn().mockReturnValue({
@@ -76,21 +82,24 @@ export function mockIntersectionObserver() {
 
 // Mock localStorage
 export function mockLocalStorage() {
-  const store: MockLocalStorage = {};
+  const store = new Map<string, string>();
 
   const mockStorage = {
-    getItem: vi.fn((key: string) => store[key] || null),
+    getItem: vi.fn((key: string) => store.get(key) || null),
     setItem: vi.fn((key: string, value: string) => {
-      store[key] = value;
+      store.set(key, value);
     }),
     removeItem: vi.fn((key: string) => {
-      delete store[key];
+      store.delete(key);
     }),
     clear: vi.fn(() => {
-      Object.keys(store).forEach(key => delete store[key]);
+      store.clear();
     }),
-    key: vi.fn((index: number) => Object.keys(store)[index] || null),
-    length: Object.keys(store).length,
+    key: vi.fn((index: number) => {
+      // Convert Map keys to array for indexing
+      return Array.from(store.keys())[index] || null;
+    }),
+    length: vi.fn(() => store.size),
   };
 
   Object.defineProperty(window, 'localStorage', {

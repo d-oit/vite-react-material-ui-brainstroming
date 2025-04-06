@@ -257,7 +257,18 @@ export class OfflineService {
   private initNetworkQualityMonitoring(): void {
     // Check if the Network Information API is available
     if ('connection' in navigator) {
-      const connection = (navigator as any).connection;
+      // Define NetworkInformation interface
+      interface NetworkInformation {
+        type: string;
+        effectiveType: string;
+        downlink: number;
+        rtt: number;
+        saveData: boolean;
+        addEventListener: (type: string, listener: EventListener) => void;
+        removeEventListener: (type: string, listener: EventListener) => void;
+      }
+
+      const connection = (navigator as { connection: NetworkInformation }).connection;
 
       // Update initial network status with all available properties
       this.updateNetworkStatus({

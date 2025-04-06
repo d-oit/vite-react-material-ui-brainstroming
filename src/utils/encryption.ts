@@ -143,7 +143,12 @@ export function generateRandomPassword(length = 16): string {
   let result = '';
 
   for (let i = 0; i < length; i++) {
-    result += charset.charAt(randomValues[i] % charset.length);
+    // Use a safe method to access array elements
+    const index = randomValues[i] % charset.length;
+    // Ensure index is within bounds
+    if (index >= 0 && index < charset.length) {
+      result += charset.charAt(index);
+    }
   }
 
   return result;
