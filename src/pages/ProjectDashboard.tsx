@@ -39,6 +39,7 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
   onThemeToggle,
   isDarkMode,
 }) => {
+  const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
 

@@ -91,11 +91,11 @@ const FlowContent = ({
 }: EnhancedBrainstormFlowProps) => {
   const theme = useTheme();
   const { t } = useI18n();
-  const { settings } = useSettings();
+  const { settings, updateSettings } = useSettings();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [nodeEditOpen, setNodeEditOpen] = useState(false);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
@@ -213,6 +213,8 @@ const FlowContent = ({
             ...node,
             data: {
               ...nodeData,
+              onEdit: node.data.onEdit,
+              onDelete: node.data.onDelete,
             },
           };
         }
@@ -314,6 +316,27 @@ const FlowContent = ({
     [settings, handleNodeDelete]
   );
 
+  // Process nodes to add event handlers
+  const processNodes = useCallback(
+    (nodesToProcess: Node[]): Node[] => {
+      return nodesToProcess.map(node => ({
+        ...node,
+        data: {
+          ...node.data,
+          onEdit: (id: string) => {
+            const selectedNode = nodes.find(n => n.id === id);
+            if (selectedNode) {
+              setSelectedNode(selectedNode);
+              setNodeEditOpen(true);
+            }
+          },
+          onDelete: handleNodeDeleteRequest,
+        },
+      }));
+    },
+    [nodes, handleNodeDeleteRequest]
+  );
+
   // Add a new node
   const addNode = useCallback(
     (type: NodeType = NodeType.IDEA) => {
@@ -345,7 +368,9 @@ const FlowContent = ({
         },
       };
 
-      const updatedNodes = [...nodes, newNode];
+      // Process the node to add event handlers
+      const processedNode = processNodes([newNode])[0];
+      const updatedNodes = [...nodes, processedNode];
       setNodes(updatedNodes);
 
       if (externalNodesChange) {
@@ -353,12 +378,12 @@ const FlowContent = ({
       }
 
       // Select the new node for editing
-      setSelectedNode(newNode);
+      setSelectedNode(processedNode);
       setNodeEditOpen(true);
 
       showSnackbar(t('brainstorm.nodeCreated'), 'success');
     },
-    [reactFlowInstance, nodes, setNodes, externalNodesChange, readOnly, t]
+    [reactFlowInstance, nodes, setNodes, externalNodesChange, readOnly, t, processNodes]
   );
 
   // Save the flow
@@ -390,6 +415,14 @@ const FlowContent = ({
       window.brainstormFlowApi = undefined;
     };
   }, [zoomIn, zoomOut, fitView, addNode, saveFlow]);
+
+  // Process initial nodes to add event handlers
+  useEffect(() => {
+    if (initialNodes.length > 0) {
+      const processedNodes = processNodes(initialNodes);
+      setNodes(processedNodes);
+    }
+  }, [initialNodes, processNodes, setNodes]);
 
   // Auto-fit view on initial load
   useEffect(() => {

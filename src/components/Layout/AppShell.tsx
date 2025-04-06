@@ -2,7 +2,6 @@ import {
   Menu as MenuIcon,
   Brightness4 as DarkIcon,
   Brightness7 as LightIcon,
-  BubbleChart as BrainstormIcon,
   Home as HomeIcon,
   Settings as SettingsIcon,
   Add as AddIcon,

@@ -14,9 +14,9 @@ import withOfflineFallback from './components/OfflineIndicator/withOfflineFallba
 import CSPMeta from './components/Security/CSPMeta';
 import { useI18n } from './contexts/I18nContext';
 import { SettingsProvider } from './contexts/SettingsContext';
-import { EnhancedBrainstormPage } from './pages/EnhancedBrainstormPage';
 import { HomePage } from './pages/HomePage';
 import ProjectDashboard from './pages/ProjectDashboard';
+import { ProjectDetailPage } from './pages/ProjectDetailPage';
 import { SettingsPage } from './pages/SettingsPage';
 import indexedDBService from './services/IndexedDBService';
 import loggerService from './services/LoggerService';
@@ -209,10 +209,14 @@ const AppWithTheme = () => {
                   <ProjectDashboard onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
                 }
               />
-              <Route path="/brainstorm" element={withOfflineFallback(EnhancedBrainstormPage)()} />
               <Route
-                path="/brainstorm/:projectId"
-                element={withOfflineFallback(EnhancedBrainstormPage)()}
+                path="/projects/:projectId/*"
+                element={
+                  withOfflineFallback(ProjectDetailPage)({
+                    onThemeToggle: toggleThemeMode,
+                    isDarkMode: mode === 'dark',
+                  })
+                }
               />
               <Route
                 path="/settings"
