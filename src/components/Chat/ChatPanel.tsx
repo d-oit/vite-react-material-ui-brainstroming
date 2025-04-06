@@ -9,12 +9,21 @@ import {
   CircularProgress,
   IconButton,
   Avatar,
+  Alert,
+  Tooltip,
 } from '@mui/material';
-import { Send as SendIcon, Person as PersonIcon, SmartToy as BotIcon } from '@mui/icons-material';
+import {
+  Send as SendIcon,
+  Person as PersonIcon,
+  SmartToy as BotIcon,
+  WifiOff as OfflineIcon,
+  Info as InfoIcon,
+} from '@mui/icons-material';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useI18n } from '../../contexts/I18nContext';
 import { ChatMessage } from '../../types';
 import chatService from '../../services/ChatService';
+import offlineService from '../../services/OfflineService';
 
 interface ChatPanelProps {
   projectId?: string;
@@ -28,7 +37,19 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState(offlineService.getOnlineStatus());
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Monitor online status
+  useEffect(() => {
+    const removeStatusListener = offlineService.addOnlineStatusListener(online => {
+      setIsOnline(online);
+    });
+
+    return () => {
+      removeStatusListener();
+    };
+  }, []);
 
   // Load chat history from localStorage on mount
   useEffect(() => {
@@ -55,9 +76,15 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
   const handleSendMessage = async () => {
     if (!input.trim()) return;
 
+    // Check if online
+    if (!isOnline) {
+      setError(t('chat.offlineError') || 'Cannot send messages while offline');
+      return;
+    }
+
     // Check if API key is configured
     if (!settings.openRouterApiKey) {
-      setError(t('chat.apiKeyMissing'));
+      setError(t('chat.apiKeyMissing') || 'API key is not configured');
       return;
     }
 
@@ -81,7 +108,13 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
-      setError(t('chat.errorSendingMessage'));
+
+      // Check if the error is due to being offline
+      if (!navigator.onLine) {
+        setError(t('chat.offlineError') || 'Cannot send messages while offline');
+      } else {
+        setError(t('chat.errorSendingMessage') || 'Error sending message');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -103,12 +136,49 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-        <Typography variant="h6">{t('chat.title')}</Typography>
-        <Typography variant="body2" color="text.secondary">
-          {t('chat.poweredBy')} OpenRouter
-        </Typography>
+      <Box
+        sx={{
+          p: 2,
+          borderBottom: 1,
+          borderColor: 'divider',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <Box>
+          <Typography variant="h6">{t('chat.title')}</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {t('chat.poweredBy')} OpenRouter
+          </Typography>
+        </Box>
+        {!isOnline && (
+          <Tooltip title={t('chat.offlineMode') || 'Offline Mode - Chat functionality is limited'}>
+            <OfflineIcon color="warning" />
+          </Tooltip>
+        )}
       </Box>
+
+      {/* Offline warning banner */}
+      {!isOnline && (
+        <Alert
+          severity="warning"
+          sx={{
+            m: 2,
+            mt: 0,
+            display: 'flex',
+            alignItems: 'center',
+            '& .MuiAlert-icon': {
+              alignItems: 'center',
+            },
+          }}
+        >
+          <Typography variant="body2">
+            {t('chat.offlineWarning') ||
+              'You are currently offline. Chat functionality is unavailable until you reconnect.'}
+          </Typography>
+        </Alert>
+      )}
 
       <Box
         sx={{
@@ -205,14 +275,21 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
       <Box sx={{ p: 2, display: 'flex', gap: 1 }}>
         <TextField
           fullWidth
-          placeholder={t('chat.typeMessage')}
+          placeholder={
+            isOnline
+              ? t('chat.typeMessage')
+              : t('chat.offlineDisabled') || 'Chat unavailable while offline'
+          }
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
           multiline
           maxRows={4}
-          disabled={isLoading || !settings.openRouterApiKey}
+          disabled={isLoading || !settings.openRouterApiKey || !isOnline}
           sx={{ flexGrow: 1 }}
+          helperText={
+            !isOnline ? t('chat.offlineHelp') || 'Chat will be available when you reconnect' : ''
+          }
         />
 
         <Button
@@ -220,7 +297,7 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
           color="primary"
           endIcon={<SendIcon />}
           onClick={handleSendMessage}
-          disabled={isLoading || !input.trim() || !settings.openRouterApiKey}
+          disabled={isLoading || !input.trim() || !settings.openRouterApiKey || !isOnline}
         >
           {t('chat.send')}
         </Button>

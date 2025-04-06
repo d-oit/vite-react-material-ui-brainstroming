@@ -209,8 +209,7 @@ const AppWithTheme = () => {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
 
-            {/* Offline indicator */}
-            <OfflineIndicator position="bottom-right" showSnackbar={true} />
+            {/* Offline indicator removed as per UI update plan */}
 
             {/* Accessibility menu */}
             <AccessibilityMenu position="bottom-left" />

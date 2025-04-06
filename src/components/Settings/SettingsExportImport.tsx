@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -14,18 +14,29 @@ import {
   DialogContentText,
   DialogActions,
   CircularProgress,
+  Chip,
+  Tooltip,
 } from '@mui/material';
-import { FileDownload as DownloadIcon, FileUpload as UploadIcon } from '@mui/icons-material';
+import {
+  FileDownload as DownloadIcon,
+  FileUpload as UploadIcon,
+  WifiOff as OfflineIcon,
+  Info as InfoIcon,
+  Warning as WarningIcon,
+} from '@mui/icons-material';
 import { useSettings } from '../../contexts/SettingsContext';
+import offlineService from '../../services/OfflineService';
+import loggerService from '../../services/LoggerService';
 
 export const SettingsExportImport = () => {
   const { exportSettings, importSettings } = useSettings();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isOnline, setIsOnline] = useState(offlineService.getOnlineStatus());
 
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
-    severity: 'success' | 'error' | 'info';
+    severity: 'success' | 'error' | 'info' | 'warning';
   }>({
     open: false,
     message: '',
@@ -45,6 +56,22 @@ export const SettingsExportImport = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [validationResult, setValidationResult] = useState<{
+    isValid: boolean;
+    warnings: string[];
+    errors: string[];
+  } | null>(null);
+
+  // Monitor online status
+  useEffect(() => {
+    const removeStatusListener = offlineService.addOnlineStatusListener(online => {
+      setIsOnline(online);
+    });
+
+    return () => {
+      removeStatusListener();
+    };
+  }, []);
 
   const handleExport = async () => {
     try {
@@ -67,11 +94,21 @@ export const SettingsExportImport = () => {
         message: 'Settings exported successfully',
         severity: 'success',
       });
+
+      // Log the export
+      loggerService.info('Settings exported successfully');
     } catch (error) {
       console.error('Failed to export settings:', error);
+      loggerService.error(
+        'Failed to export settings',
+        error instanceof Error ? error : new Error(String(error))
+      );
+
       setSnackbar({
         open: true,
-        message: 'Failed to export settings',
+        message:
+          'Failed to export settings: ' +
+          (error instanceof Error ? error.message : 'Unknown error'),
         severity: 'error',
       });
     } finally {
@@ -106,26 +143,103 @@ export const SettingsExportImport = () => {
     event.target.value = '';
   };
 
+  // Validate settings JSON before import
+  const validateSettingsJson = (
+    content: string
+  ): {
+    isValid: boolean;
+    warnings: string[];
+    errors: string[];
+  } => {
+    const warnings: string[] = [];
+    const errors: string[] = [];
+    let isValid = true;
+
+    try {
+      // Try to parse the JSON
+      const data = JSON.parse(content);
+
+      // Check if it's a valid settings object
+      if (!data) {
+        errors.push('Empty data');
+        isValid = false;
+      }
+
+      // Check for required fields in settings format
+      if (isValid) {
+        // If it's the new format with metadata
+        if (data.metadata) {
+          if (!data.settings) {
+            errors.push('Missing settings data');
+            isValid = false;
+          }
+
+          // Check version compatibility
+          if (data.metadata.version && data.metadata.version !== '1.0.0') {
+            warnings.push(`Settings version mismatch: ${data.metadata.version}`);
+          }
+        }
+        // If it's a direct settings object (legacy format)
+        else if (!data.themeMode) {
+          warnings.push('Legacy format detected, some settings may not be imported correctly');
+        }
+      }
+
+      return { isValid, warnings, errors };
+    } catch (error) {
+      errors.push('Invalid JSON format');
+      return { isValid: false, warnings, errors };
+    }
+  };
+
   const processImport = async (content: string) => {
     try {
       setLoading(true);
+
+      // Validate the settings JSON
+      const validation = validateSettingsJson(content);
+      setValidationResult(validation);
+
+      if (!validation.isValid) {
+        setSnackbar({
+          open: true,
+          message: `Failed to import settings: ${validation.errors.join(', ')}`,
+          severity: 'error',
+        });
+        return;
+      }
+
+      // If there are warnings, log them
+      if (validation.warnings.length > 0) {
+        loggerService.warn(`Settings import warnings: ${validation.warnings.join(', ')}`);
+      }
+
       const success = await importSettings(content);
 
       if (success) {
         setSnackbar({
           open: true,
-          message: 'Settings imported successfully',
-          severity: 'success',
+          message:
+            'Settings imported successfully' +
+            (validation.warnings.length > 0 ? ' (with warnings)' : ''),
+          severity: validation.warnings.length > 0 ? 'warning' : 'success',
         });
+        loggerService.info('Settings imported successfully');
       } else {
         setSnackbar({
           open: true,
           message: 'Failed to import settings: Invalid format',
           severity: 'error',
         });
+        loggerService.error('Failed to import settings: Invalid format');
       }
     } catch (error) {
       console.error('Failed to import settings:', error);
+      loggerService.error(
+        'Failed to import settings',
+        error instanceof Error ? error : new Error(String(error))
+      );
+
       setSnackbar({
         open: true,
         message:
@@ -141,11 +255,33 @@ export const SettingsExportImport = () => {
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
-        Export and Import Settings
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6" gutterBottom>
+          Export and Import Settings
+        </Typography>
+
+        {!isOnline && (
+          <Tooltip title="You are currently offline. Some functionality may be limited.">
+            <Chip
+              icon={<OfflineIcon />}
+              label="Offline"
+              color="warning"
+              size="small"
+              sx={{ ml: 2 }}
+            />
+          </Tooltip>
+        )}
+      </Box>
 
       <Divider sx={{ mb: 3 }} />
+
+      {validationResult && validationResult.warnings.length > 0 && (
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          <Typography variant="body2">
+            <strong>Warning:</strong> {validationResult.warnings.join(', ')}
+          </Typography>
+        </Alert>
+      )}
 
       <Card sx={{ mb: 3 }}>
         <CardContent>
@@ -161,6 +297,7 @@ export const SettingsExportImport = () => {
             startIcon={<DownloadIcon />}
             onClick={handleExport}
             disabled={loading}
+            aria-label="Export settings to JSON file"
           >
             {loading ? <CircularProgress size={24} /> : 'Export Settings'}
           </Button>
@@ -181,15 +318,18 @@ export const SettingsExportImport = () => {
             startIcon={<UploadIcon />}
             onClick={handleImportClick}
             disabled={loading}
+            aria-label="Import settings from JSON file"
           >
             {loading ? <CircularProgress size={24} /> : 'Import Settings'}
           </Button>
           <input
             type="file"
             ref={fileInputRef}
-            style={{ display: 'none' }}
+            className="visually-hidden"
             accept=".json"
             onChange={handleFileSelected}
+            aria-label="File input for importing settings"
+            title="Select a settings JSON file to import"
           />
         </CardContent>
       </Card>
