@@ -35,18 +35,21 @@ A fully responsive PWA for structured brainstorming with offline-first capabilit
 ### Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/yourusername/d.o.it.brainstorming.git
    cd d.o.it.brainstorming
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Create a `.env` file in the root directory with the following variables:
-   ```
+
+   ```env
    VITE_S3_ENDPOINT=your_s3_endpoint_here
    VITE_OPENROUTER_API_URL=your_openrouter_api_url_here
    VITE_PROJECT_VERSION=0.1.0
@@ -55,6 +58,7 @@ A fully responsive PWA for structured brainstorming with offline-first capabilit
 ### Development
 
 Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -62,11 +66,13 @@ npm run dev
 ### Building for Production
 
 Build the app for production:
+
 ```bash
 npm run build
 ```
 
 Preview the production build:
+
 ```bash
 npm run preview
 ```
@@ -74,18 +80,60 @@ npm run preview
 ### Testing
 
 Run unit tests:
+
 ```bash
 npm run test
 ```
 
 Run E2E tests:
+
 ```bash
 npm run test:e2e
 ```
 
+### Code Quality
+
+#### Linting
+
+Check for linting issues:
+
+```bash
+npm run lint
+```
+
+Fix linting issues automatically:
+
+```bash
+npm run lint:fix
+```
+
+Run CI-level linting (zero warnings):
+
+```bash
+npm run ci:lint
+```
+
+#### Formatting
+
+Format code with Prettier:
+
+```bash
+npm run format
+```
+
+Check if code is properly formatted:
+
+```bash
+npm run format:check
+```
+
+#### Pre-commit Hooks
+
+This project uses Husky and lint-staged to automatically lint and format code before commits. This ensures that all committed code meets the project's quality standards.
+
 ## Project Structure
 
-```
+```text
 d.o.it.brainstorming/
 ├── public/               # Static assets
 ├── src/
