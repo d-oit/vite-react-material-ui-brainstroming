@@ -1,4 +1,4 @@
-import type { PaletteMode } from '@mui/material';
+import type { PaletteMode, ThemeOptions } from '@mui/material';
 import { ThemeProvider, CssBaseline, createTheme, Button, Snackbar, Alert } from '@mui/material';
 import { useState, useMemo, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
@@ -23,79 +23,80 @@ import loggerService from './services/LoggerService';
 import offlineService from './services/OfflineService';
 
 // Define theme settings
-const getDesignTokens = (mode: PaletteMode) => ({
-  palette: {
-    mode,
-    ...(mode === 'light'
-      ? {
-          // Light mode
-          primary: {
-            main: '#2196f3',
+const getDesignTokens = (mode: PaletteMode): ThemeOptions => {
+  return {
+    palette: {
+      mode,
+      ...(mode === 'light'
+        ? {
+            // Light mode
+            primary: {
+              main: '#2196f3',
+            },
+            secondary: {
+              main: '#f50057',
+            },
+            background: {
+              default: '#f5f5f5',
+              paper: '#ffffff',
+            },
+          }
+        : {
+            // Dark mode
+            primary: {
+              main: '#90caf9',
+            },
+            secondary: {
+              main: '#f48fb1',
+            },
+            background: {
+              default: '#121212',
+              paper: '#1e1e1e',
+            },
+          }),
+    },
+    typography: {
+      fontFamily: [
+        '-apple-system',
+        'BlinkMacSystemFont',
+        '"Segoe UI"',
+        'Roboto',
+        '"Helvetica Neue"',
+        'Arial',
+        'sans-serif',
+        '"Apple Color Emoji"',
+        '"Segoe UI Emoji"',
+        '"Segoe UI Symbol"',
+      ].join(','),
+    },
+    shape: {
+      borderRadius: 8,
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            textTransform: 'none',
           },
-          secondary: {
-            main: '#f50057',
+        },
+      },
+      MuiAppBar: {
+        styleOverrides: {
+          root: {
+            boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
           },
-          background: {
-            default: '#f5f5f5',
-            paper: '#ffffff',
+        },
+      },
+      MuiDrawer: {
+        styleOverrides: {
+          paper: {
+            backgroundColor: mode === 'light' ? '#ffffff' : '#1e1e1e',
           },
-        }
-      : {
-          // Dark mode
-          primary: {
-            main: '#90caf9',
-          },
-          secondary: {
-            main: '#f48fb1',
-          },
-          background: {
-            default: '#121212',
-            paper: '#1e1e1e',
-          },
-        }),
-  },
-  typography: {
-    fontFamily: [
-      '-apple-system',
-      'BlinkMacSystemFont',
-      '"Segoe UI"',
-      'Roboto',
-      '"Helvetica Neue"',
-      'Arial',
-      'sans-serif',
-      '"Apple Color Emoji"',
-      '"Segoe UI Emoji"',
-      '"Segoe UI Symbol"',
-    ].join(','),
-  },
-  shape: {
-    borderRadius: 8,
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
         },
       },
     },
-    MuiAppBar: {
-      styleOverrides: {
-        root: {
-          boxShadow:
-            mode === 'light' ? '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)' : 'none',
-        },
-      },
-    },
-    MuiDrawer: {
-      styleOverrides: {
-        paper: {
-          backgroundColor: mode === 'light' ? '#ffffff' : '#1e1e1e',
-        },
-      },
-    },
-  },
-});
+  };
+};
 
 const AppWithTheme = () => {
   const [mode, setMode] = useState<PaletteMode>('light');

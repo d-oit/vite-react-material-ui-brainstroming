@@ -2,6 +2,11 @@ import { NodeType } from '../types/enums';
 import { ProjectTemplate } from '../types/project';
 import type { Project, Node, Edge } from '../types';
 
+// Define a type for template metadata
+interface TemplateMetadata extends Partial<Project> {
+  features?: string[];
+}
+
 // Helper function to create a template node
 function createTemplateNode(
   id: string,
@@ -37,11 +42,20 @@ function createTemplateEdge(id: string, source: string, target: string, label?: 
 }
 
 // Software Development Template
-export const softwareDevelopmentTemplate: Partial<Project> = {
+export const softwareDevelopmentTemplate: TemplateMetadata = {
   name: 'Software Development Project',
   description: 'A template for planning and tracking software development projects',
   template: ProjectTemplate.SOFTWARE_DEVELOPMENT,
   isTemplate: true,
+  features: [
+    'Project overview and scope definition',
+    'Requirements gathering and tracking',
+    'System design and architecture',
+    'Implementation planning',
+    'Testing and QA processes',
+    'Deployment planning',
+    'Resource allocation',
+  ],
   nodes: [
     createTemplateNode(
       'node-1',
@@ -122,11 +136,20 @@ export const softwareDevelopmentTemplate: Partial<Project> = {
 };
 
 // Marketing Campaign Template
-export const marketingCampaignTemplate: Partial<Project> = {
+export const marketingCampaignTemplate: TemplateMetadata = {
   name: 'Marketing Campaign',
   description: 'A template for planning and executing marketing campaigns',
   template: ProjectTemplate.MARKETING_CAMPAIGN,
   isTemplate: true,
+  features: [
+    'Campaign overview and goals',
+    'Market research and audience analysis',
+    'Content creation planning',
+    'Channel strategy',
+    'Campaign execution timeline',
+    'Analytics and performance tracking',
+    'Budget and resource allocation',
+  ],
   nodes: [
     createTemplateNode(
       'node-1',
@@ -206,11 +229,20 @@ export const marketingCampaignTemplate: Partial<Project> = {
 };
 
 // Research Project Template
-export const researchProjectTemplate: Partial<Project> = {
+export const researchProjectTemplate: TemplateMetadata = {
   name: 'Research Project',
   description: 'A template for planning and conducting research projects',
   template: ProjectTemplate.RESEARCH_PROJECT,
   isTemplate: true,
+  features: [
+    'Research question and hypothesis formulation',
+    'Literature review organization',
+    'Methodology planning',
+    'Data collection framework',
+    'Data analysis approach',
+    'Findings and conclusions structure',
+    'Resource tracking',
+  ],
   nodes: [
     createTemplateNode(
       'node-1',
@@ -290,11 +322,21 @@ export const researchProjectTemplate: Partial<Project> = {
 };
 
 // Business Plan Template
-export const businessPlanTemplate: Partial<Project> = {
+export const businessPlanTemplate: TemplateMetadata = {
   name: 'Business Plan',
   description: 'A template for creating a comprehensive business plan',
   template: ProjectTemplate.BUSINESS_PLAN,
   isTemplate: true,
+  features: [
+    'Executive summary structure',
+    'Company description framework',
+    'Market analysis components',
+    'Products/services definition',
+    'Marketing strategy planning',
+    'Operations planning',
+    'Financial projections framework',
+    'Management team organization',
+  ],
   nodes: [
     createTemplateNode(
       'node-1',
@@ -375,17 +417,23 @@ export const businessPlanTemplate: Partial<Project> = {
 };
 
 // Custom/Blank Template
-export const customTemplate: Partial<Project> = {
+export const customTemplate: TemplateMetadata = {
   name: 'Blank Canvas',
   description: 'Start with a clean slate for any type of brainstorming session',
   template: ProjectTemplate.CUSTOM,
   isTemplate: true,
+  features: [
+    'Empty canvas to start from scratch',
+    'Complete freedom to design your own structure',
+    'No predefined nodes or connections',
+    'Ideal for custom brainstorming sessions',
+  ],
   nodes: [],
   edges: [],
 };
 
 // Map of all templates
-export const projectTemplates: Record<ProjectTemplate, Partial<Project>> = {
+export const projectTemplates: Record<ProjectTemplate, TemplateMetadata> = {
   [ProjectTemplate.SOFTWARE_DEVELOPMENT]: softwareDevelopmentTemplate,
   [ProjectTemplate.MARKETING_CAMPAIGN]: marketingCampaignTemplate,
   [ProjectTemplate.RESEARCH_PROJECT]: researchProjectTemplate,
@@ -401,7 +449,7 @@ export function createProjectFromTemplate(
 ): Project {
   const template = projectTemplates[templateType];
   const now = new Date().toISOString();
-  
+
   return {
     id: crypto.randomUUID(),
     name: name || template.name || 'New Project',

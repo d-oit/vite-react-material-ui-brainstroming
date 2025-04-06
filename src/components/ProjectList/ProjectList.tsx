@@ -103,7 +103,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
   };
 
   const handleOpenProject = (id: string) => {
-    navigate(`/brainstorm/${id}`);
+    navigate(`/projects/${id}`);
   };
 
   const handleArchiveProject = async (id: string) => {

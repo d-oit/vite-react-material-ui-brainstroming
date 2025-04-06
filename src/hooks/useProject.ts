@@ -24,8 +24,31 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
     setError(null);
 
     try {
-      const loadedProject = await downloadProject(projectId, version);
-      setProject(loadedProject);
+      // Try to load from S3, but don't fail if S3 is not configured
+      try {
+        const loadedProject = await downloadProject(projectId, version);
+        if (loadedProject) {
+          setProject(loadedProject);
+          return;
+        }
+      } catch (s3Error) {
+        // If the error is about S3 not being configured, just log it and continue
+        if (s3Error instanceof Error && s3Error.message.includes('S3 not configured')) {
+          console.log('S3 not configured, skipping cloud sync');
+        } else {
+          // For other errors, log them but don't fail the operation
+          console.warn('Error downloading from S3:', s3Error);
+        }
+      }
+
+      // If we get here, either S3 failed or returned no project
+      // Try to load from local storage as a fallback
+      const localProject = await loadProjectFromLocalStorage(projectId);
+      if (localProject) {
+        setProject(localProject);
+      } else {
+        setError('Project not found');
+      }
     } catch (err) {
       setError('Failed to load project');
       console.error(err);
@@ -33,6 +56,19 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
       setLoading(false);
     }
   }, [projectId, version]);
+
+  // Helper function to load project from local storage
+  const loadProjectFromLocalStorage = async (id: string): Promise<Project | null> => {
+    try {
+      // Import the project service dynamically to avoid circular dependencies
+      const { default: projectService } = await import('../services/ProjectService');
+      // Use the project service to get the project from IndexedDB
+      return await projectService.getProject(id);
+    } catch (error) {
+      console.error('Error loading project from local storage:', error);
+      return null;
+    }
+  };
 
   // Create new project
   const createProject = useCallback((name: string, description: string): Project => {

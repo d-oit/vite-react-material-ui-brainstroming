@@ -23,10 +23,9 @@ const TabPanel = (props: TabPanelProps) => {
       hidden={value !== index}
       id={`project-tabpanel-${index}`}
       aria-labelledby={`project-tab-${index}`}
-      style={{ height: 'calc(100% - 48px)', overflow: 'auto' }}
       {...other}
     >
-      {value === index && <Box sx={{ p: 3, height: '100%' }}>{children}</Box>}
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 };
@@ -60,8 +59,17 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
 
   return (
     <AppShell title="Project Dashboard" onThemeToggle={onThemeToggle} isDarkMode={isDarkMode}>
-      <Container maxWidth="lg" sx={{ height: 'calc(100vh - 64px)', py: 4 }}>
-        <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h5" component="h1" gutterBottom>
+            My Projects
+          </Typography>
+          <Typography variant="subtitle2" color="text.secondary">
+            Manage your brainstorming projects and archives
+          </Typography>
+        </Box>
+
+        <Paper sx={{ mb: 4, overflow: 'hidden' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs
               value={tabValue}

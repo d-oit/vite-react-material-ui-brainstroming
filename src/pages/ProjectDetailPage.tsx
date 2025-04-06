@@ -1,8 +1,7 @@
 import {
   Save as SaveIcon,
   Chat as ChatIcon,
-  Close as CloseIcon,
-  Settings as SettingsIcon
+  Close as CloseIcon
 } from '@mui/icons-material';
 import {
   Box,
@@ -10,20 +9,19 @@ import {
   Paper,
   CircularProgress,
   Button,
-  Divider,
-  Grid,
   useMediaQuery,
   useTheme,
   Drawer,
   IconButton,
   Tab,
   Tabs,
+  Container
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { ChatInterface } from '../components/Chat/ChatInterface';
-import { MainLayout } from '../components/Layout/MainLayout';
+import { AppShell } from '../components/Layout/AppShell';
 import ProjectBrainstormingSection from '../components/Project/ProjectBrainstormingSection';
 import ProjectSettingsSection from '../components/Project/ProjectSettingsSection';
 import { useProject } from '../hooks/useProject';
@@ -106,28 +104,32 @@ export const ProjectDetailPage = () => {
 
   if (loading) {
     return (
-      <MainLayout title="Project">
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
-          <CircularProgress />
-        </Box>
-      </MainLayout>
+      <AppShell title="Project" onThemeToggle={() => {}} isDarkMode={theme.palette.mode === 'dark'}>
+        <Container maxWidth="lg">
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+            <CircularProgress />
+          </Box>
+        </Container>
+      </AppShell>
     );
   }
 
   if (error || !project) {
     return (
-      <MainLayout title="Project">
-        <Paper sx={{ p: 3 }}>
-          <Typography color="error" variant="h6">
-            Error: {error || 'Project not found'}
-          </Typography>
-        </Paper>
-      </MainLayout>
+      <AppShell title="Project" onThemeToggle={() => {}} isDarkMode={theme.palette.mode === 'dark'}>
+        <Container maxWidth="lg">
+          <Paper sx={{ p: 3 }}>
+            <Typography color="error" variant="h6">
+              Error: {error || 'Project not found'}
+            </Typography>
+          </Paper>
+        </Container>
+      </AppShell>
     );
   }
 
   return (
-    <MainLayout title={project.name}>
+    <AppShell title={project.name} onThemeToggle={() => {}} isDarkMode={theme.palette.mode === 'dark'}>
       <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box>
           <Typography variant="h5" component="h1">
@@ -215,18 +217,18 @@ export const ProjectDetailPage = () => {
             </Drawer>
           </>
         ) : (
-          <Grid container spacing={2} sx={{ height: 'calc(100vh - 300px)' }}>
-            <Grid item xs={chatOpen ? 8 : 12}>
+          <Box sx={{ display: 'flex', height: 'calc(100vh - 300px)' }}>
+            <Box sx={{ flex: chatOpen ? '0 0 70%' : '1 1 100%', pr: chatOpen ? 2 : 0 }}>
               <ProjectBrainstormingSection
                 project={project}
                 onSave={handleSaveFlow}
                 isSaving={isSaving}
                 error={error}
               />
-            </Grid>
+            </Box>
 
             {chatOpen && (
-              <Grid item xs={4}>
+              <Box sx={{ flex: '0 0 30%', position: 'relative' }}>
                 <Box sx={{ height: '100%', position: 'relative' }}>
                   <IconButton
                     sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}
@@ -236,9 +238,9 @@ export const ProjectDetailPage = () => {
                   </IconButton>
                   <ChatInterface />
                 </Box>
-              </Grid>
+              </Box>
             )}
-          </Grid>
+          </Box>
         )}
       </TabPanel>
 
@@ -300,6 +302,6 @@ export const ProjectDetailPage = () => {
           <SaveIcon />
         </IconButton>
       </Box>
-    </MainLayout>
+    </AppShell>
   );
 };

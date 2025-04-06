@@ -11,7 +11,15 @@ const initS3Client = () => {
   const bucket = import.meta.env.VITE_AWS_S3_BUCKET;
 
   if (!endpoint && !bucket) {
-    throw new Error('S3 not configured. Please set VITE_AWS_S3_ENDPOINT and VITE_AWS_S3_BUCKET in your .env file.');
+    // Instead of throwing an error, log a warning and return null
+    loggerService.warn('S3 not configured. Please set VITE_AWS_S3_ENDPOINT and VITE_AWS_S3_BUCKET in your .env file.');
+    // Return a dummy S3 client that will fail gracefully
+    return {
+      putObject: () => ({ promise: () => Promise.reject(new Error('S3 not configured')) }),
+      getObject: () => ({ promise: () => Promise.reject(new Error('S3 not configured')) }),
+      listObjectsV2: () => ({ promise: () => Promise.reject(new Error('S3 not configured')) }),
+      deleteObjects: () => ({ promise: () => Promise.reject(new Error('S3 not configured')) }),
+    } as AWS.S3;
   }
 
   const config: AWS.S3.ClientConfiguration = {
@@ -32,7 +40,9 @@ const initS3Client = () => {
 const getBucketName = (): string => {
   const bucket = import.meta.env.VITE_AWS_S3_BUCKET;
   if (!bucket) {
-    throw new Error('S3 bucket not configured. Please set VITE_AWS_S3_BUCKET in your .env file.');
+    // Instead of throwing an error, log a warning and return a default value
+    loggerService.warn('S3 bucket not configured. Please set VITE_AWS_S3_BUCKET in your .env file.');
+    return 'do-it-brainstorming-default';
   }
   return bucket;
 };

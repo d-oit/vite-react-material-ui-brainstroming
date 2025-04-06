@@ -21,15 +21,26 @@ export const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
   const handleQuickBrainstorm = async () => {
     try {
       setIsCreating(true);
-      const projectName = `Quick Brainstorm - ${new Date().toLocaleString()}`;
-      const project = await projectService.createProject(
-        projectName,
-        'A quick brainstorming session',
-        ProjectTemplate.CUSTOM
-      );
-      navigate(`/projects/${project.id}`);
+
+      // Check if a Quick Brainstorm project already exists
+      const projects = await projectService.getProjects();
+      const quickBrainstormProject = projects.find(p => p.name.startsWith('Quick Brainstorm'));
+
+      if (quickBrainstormProject) {
+        // If it exists, navigate to it
+        navigate(`/projects/${quickBrainstormProject.id}`);
+      } else {
+        // If not, create a new one
+        const projectName = `Quick Brainstorm - ${new Date().toLocaleString()}`;
+        const project = await projectService.createProject(
+          projectName,
+          'A quick brainstorming session',
+          ProjectTemplate.CUSTOM
+        );
+        navigate(`/projects/${project.id}`);
+      }
     } catch (error) {
-      console.error('Error creating quick brainstorm project:', error);
+      console.error('Error handling quick brainstorm project:', error);
     } finally {
       setIsCreating(false);
     }
@@ -66,6 +77,7 @@ export const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
               onClick={handleQuickBrainstorm}
               startIcon={<DashboardIcon />}
               disabled={isCreating}
+              data-quick-brainstorm
             >
               {isCreating ? (
                 <>

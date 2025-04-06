@@ -11,8 +11,22 @@ import {
   TextField,
   Typography,
   SelectChangeEvent,
+  Divider,
+  Card,
+  CardMedia,
+  CardContent,
+  CircularProgress,
+  useTheme,
+  Tooltip,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
-import { useState } from 'react';
+import { Info as InfoIcon, Close as CloseIcon } from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+import { useI18n } from '../../contexts/I18nContext';
 
 import { projectTemplates } from '../../data/projectTemplates';
 import { ProjectTemplate } from '../../types/project';
@@ -24,10 +38,14 @@ interface ProjectCreateFormProps {
 }
 
 export const ProjectCreateForm = ({ onSubmit, onCancel, loading = false }: ProjectCreateFormProps) => {
+  const { t } = useI18n();
+  const theme = useTheme();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [template, setTemplate] = useState<ProjectTemplate>(ProjectTemplate.CUSTOM);
   const [nameError, setNameError] = useState('');
+  const [templateInfoOpen, setTemplateInfoOpen] = useState(false);
+  const [selectedTemplateInfo, setSelectedTemplateInfo] = useState<ProjectTemplate | null>(null);
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -62,84 +80,213 @@ export const ProjectCreateForm = ({ onSubmit, onCancel, loading = false }: Proje
     return projectTemplates[templateType]?.description || '';
   };
 
+  const openTemplateInfo = (templateType: ProjectTemplate) => {
+    setSelectedTemplateInfo(templateType);
+    setTemplateInfoOpen(true);
+  };
+
+  const closeTemplateInfo = () => {
+    setTemplateInfoOpen(false);
+  };
+
+  // Auto-generate a project name based on template if name is empty
+  useEffect(() => {
+    if (name === '' && template !== ProjectTemplate.CUSTOM) {
+      const templateName = projectTemplates[template]?.name || '';
+      if (templateName) {
+        setName(`${templateName} - ${new Date().toLocaleDateString()}`);
+      }
+    }
+  }, [template, name]);
+
   return (
-    <Paper sx={{ p: 3, maxWidth: 600, mx: 'auto' }}>
-      <Typography variant="h5" component="h2" gutterBottom>
-        Create New Project
-      </Typography>
+    <>
+      <Paper sx={{ p: 3, maxWidth: 600, mx: 'auto', borderRadius: 2, overflow: 'hidden' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h5" component="h2">
+            {t('common.create')} {t('dashboard.newProject')}
+          </Typography>
+          <IconButton onClick={onCancel} size="small" aria-label="close">
+            <CloseIcon />
+          </IconButton>
+        </Box>
 
-      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <TextField
-              required
-              fullWidth
-              id="project-name"
-              label="Project Name"
-              name="name"
-              value={name}
-              onChange={handleNameChange}
-              error={!!nameError}
-              helperText={nameError}
-              disabled={loading}
-              autoFocus
-            />
-          </Grid>
+        <Divider sx={{ mb: 3 }} />
 
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              id="project-description"
-              label="Description"
-              name="description"
-              value={description}
-              onChange={handleDescriptionChange}
-              multiline
-              rows={3}
-              disabled={loading}
-            />
-          </Grid>
+        <Box component="form" onSubmit={handleSubmit} noValidate>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                id="project-name"
+                label={t('project.name')}
+                name="name"
+                value={name}
+                onChange={handleNameChange}
+                error={!!nameError}
+                helperText={nameError || t('project.nameHelper')}
+                disabled={loading}
+                autoFocus
+                InputProps={{
+                  sx: { borderRadius: 1.5 }
+                }}
+              />
+            </Grid>
 
-          <Grid item xs={12}>
-            <FormControl fullWidth disabled={loading}>
-              <InputLabel id="template-label">Template</InputLabel>
-              <Select
-                labelId="template-label"
-                id="template"
-                value={template}
-                label="Template"
-                onChange={handleTemplateChange}
-              >
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                id="project-description"
+                label={t('project.description')}
+                name="description"
+                value={description}
+                onChange={handleDescriptionChange}
+                multiline
+                rows={3}
+                disabled={loading}
+                placeholder={t('project.descriptionPlaceholder')}
+                InputProps={{
+                  sx: { borderRadius: 1.5 }
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'medium', mt: 1 }}>
+                {t('project.selectTemplate')}
+              </Typography>
+
+              <Grid container spacing={2}>
                 {Object.values(ProjectTemplate).map((templateType) => (
-                  <MenuItem key={templateType} value={templateType}>
-                    {projectTemplates[templateType]?.name || templateType}
-                  </MenuItem>
+                  <Grid item xs={12} sm={6} md={4} key={templateType}>
+                    <Card
+                      sx={{
+                        cursor: 'pointer',
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        borderRadius: 2,
+                        border: template === templateType ?
+                          `2px solid ${theme.palette.primary.main}` :
+                          '1px solid rgba(0,0,0,0.12)',
+                        transition: 'all 0.2s ease-in-out',
+                        '&:hover': {
+                          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                          transform: 'translateY(-2px)'
+                        }
+                      }}
+                      onClick={() => setTemplate(templateType)}
+                    >
+                      <CardContent sx={{ flexGrow: 1, p: 2 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <Typography variant="subtitle1" component="div" sx={{ fontWeight: 'bold' }}>
+                            {projectTemplates[templateType]?.name || templateType}
+                          </Typography>
+                          <Tooltip title={t('project.moreInfo')}>
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openTemplateInfo(templateType);
+                              }}
+                            >
+                              <InfoIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: '0.8rem' }}>
+                          {getTemplateDescription(templateType)}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
                 ))}
-              </Select>
-              <FormHelperText>
-                {getTemplateDescription(template)}
-              </FormHelperText>
-            </FormControl>
-          </Grid>
+              </Grid>
+            </Grid>
 
-          <Grid item xs={12}>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-              <Button onClick={onCancel} disabled={loading}>
-                Cancel
-              </Button>
+            <Grid item xs={12}>
+              <Divider sx={{ my: 2 }} />
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+                <Button
+                  onClick={onCancel}
+                  disabled={loading}
+                  sx={{ borderRadius: 1.5 }}
+                >
+                  {t('common.cancel')}
+                </Button>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  disabled={loading || name.trim() === ''}
+                  sx={{
+                    borderRadius: 1.5,
+                    minWidth: 100
+                  }}
+                >
+                  {loading ? (
+                    <>
+                      <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} />
+                      {t('common.creating')}
+                    </>
+                  ) : t('common.create')}
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+      </Paper>
+
+      {/* Template Info Dialog */}
+      <Dialog
+        open={templateInfoOpen}
+        onClose={closeTemplateInfo}
+        maxWidth="sm"
+        fullWidth
+      >
+        {selectedTemplateInfo && (
+          <>
+            <DialogTitle>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                {projectTemplates[selectedTemplateInfo]?.name || selectedTemplateInfo}
+                <IconButton onClick={closeTemplateInfo} size="small">
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+            </DialogTitle>
+            <DialogContent dividers>
+              <Typography variant="body1" paragraph>
+                {projectTemplates[selectedTemplateInfo]?.description}
+              </Typography>
+              <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'medium', mt: 2 }}>
+                {t('project.templateIncludes')}:
+              </Typography>
+              <ul>
+                {projectTemplates[selectedTemplateInfo]?.features?.map((feature, index) => (
+                  <li key={index}>
+                    <Typography variant="body2">{feature}</Typography>
+                  </li>
+                ))}
+              </ul>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={closeTemplateInfo}>{t('common.close')}</Button>
               <Button
-                type="submit"
                 variant="contained"
                 color="primary"
-                disabled={loading || name.trim() === ''}
+                onClick={() => {
+                  setTemplate(selectedTemplateInfo);
+                  closeTemplateInfo();
+                }}
               >
-                {loading ? 'Creating...' : 'Create'}
+                {t('project.useTemplate')}
               </Button>
-            </Box>
-          </Grid>
-        </Grid>
-      </Box>
-    </Paper>
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
+    </>
   );
 };
 

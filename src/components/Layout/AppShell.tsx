@@ -79,8 +79,9 @@ export const AppShell = ({
     setErrorOpen(!!error);
   }, [error]);
 
-  const toggleDrawer = (open: boolean) => () => {
-    setDrawerOpen(open);
+  // Function to toggle drawer state
+  const handleToggleDrawer = () => {
+    setDrawerOpen(!drawerOpen);
   };
 
   const handleNavigation = (path: string) => {
@@ -104,10 +105,19 @@ export const AppShell = ({
       active: location.pathname === '/projects',
     },
     {
-      text: t('nav.brainstorm'),
+      text: t('nav.quickBrainstorm'),
       icon: <BrainstormIcon />,
-      path: '/brainstorm',
-      active: location.pathname === '/brainstorm',
+      path: '#',
+      onClick: () => {
+        // This will be handled in the HomePage component
+        navigate('/');
+        // We'll trigger the quick brainstorm action from the home page
+        const quickBrainstormButton = document.querySelector('[data-quick-brainstorm]');
+        if (quickBrainstormButton) {
+          (quickBrainstormButton as HTMLButtonElement).click();
+        }
+      },
+      active: false,
     },
     {
       text: t('nav.settings'),
@@ -140,18 +150,16 @@ export const AppShell = ({
         <Typography variant="h6" component="div">
           {t('app.title')}
         </Typography>
-        {isMobile && (
-          <IconButton onClick={toggleDrawer(false)} edge="end">
-            <CloseIcon />
-          </IconButton>
-        )}
+        <IconButton onClick={handleToggleDrawer} edge="end">
+          <CloseIcon />
+        </IconButton>
       </Box>
 
       <List sx={{ flexGrow: 1, pt: 0 }}>
         {navigationItems.map(item => (
           <ListItem key={item.text} disablePadding>
             <ListItemButton
-              onClick={() => handleNavigation(item.path)}
+              onClick={() => item.onClick ? item.onClick() : handleNavigation(item.path)}
               selected={item.active}
               sx={{
                 borderRadius: 1,
@@ -214,7 +222,7 @@ export const AppShell = ({
             edge="start"
             color="inherit"
             aria-label="menu"
-            onClick={toggleDrawer(true)}
+            onClick={handleToggleDrawer}
             sx={{ mr: 2 }}
           >
             <MenuIcon />
@@ -249,8 +257,8 @@ export const AppShell = ({
         <SwipeableDrawer
           anchor="left"
           open={drawerOpen}
-          onClose={toggleDrawer(false)}
-          onOpen={toggleDrawer(true)}
+          onClose={handleToggleDrawer}
+          onOpen={handleToggleDrawer}
           disableBackdropTransition={!isTablet}
           disableDiscovery={isTablet}
           sx={{
@@ -263,17 +271,16 @@ export const AppShell = ({
         </SwipeableDrawer>
       ) : (
         <Drawer
-          variant="persistent"
+          variant="temporary"
           anchor="left"
           open={drawerOpen}
+          onClose={handleToggleDrawer}
           sx={{
-            width: drawerOpen ? 280 : 0,
+            width: 280,
             flexShrink: 0,
             '& .MuiDrawer-paper': {
               width: 280,
               boxSizing: 'border-box',
-              top: 64, // AppBar height
-              height: 'calc(100% - 64px)',
             },
           }}
         >
@@ -288,18 +295,7 @@ export const AppShell = ({
           flexGrow: 1,
           p: 0,
           mt: '64px', // AppBar height
-          transition: theme.transitions.create('margin', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-          }),
-          ...(drawerOpen &&
-            !isMobile && {
-              marginLeft: '280px',
-              transition: theme.transitions.create('margin', {
-                easing: theme.transitions.easing.easeOut,
-                duration: theme.transitions.duration.enteringScreen,
-              }),
-            }),
+          // No margin transition needed for temporary drawer
           position: 'relative',
           display: 'flex',
           flexDirection: 'column',

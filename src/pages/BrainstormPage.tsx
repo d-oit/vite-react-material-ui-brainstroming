@@ -18,7 +18,7 @@ import { useParams } from 'react-router-dom';
 
 import { BrainstormFlow } from '@/components/BrainstormFlow/BrainstormFlow';
 import { ChatInterface } from '@/components/Chat/ChatInterface';
-import { MainLayout } from '@/components/Layout/MainLayout';
+import { AppShell } from '@/components/Layout/AppShell';
 import { useProject } from '@/hooks/useProject';
 import type { Node, Edge } from '@/types';
 
@@ -68,30 +68,30 @@ export const BrainstormPage = () => {
 
   if (loading) {
     return (
-      <MainLayout title="Brainstorming">
+      <AppShell title="Brainstorming" onThemeToggle={() => {}} isDarkMode={theme.palette.mode === 'dark'}>
         <Box
           sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}
         >
           <CircularProgress />
         </Box>
-      </MainLayout>
+      </AppShell>
     );
   }
 
   if (error || !project) {
     return (
-      <MainLayout title="Brainstorming">
+      <AppShell title="Brainstorming" onThemeToggle={() => {}} isDarkMode={theme.palette.mode === 'dark'}>
         <Paper sx={{ p: 3 }}>
           <Typography color="error" variant="h6">
             Error: {error || 'Project not found'}
           </Typography>
         </Paper>
-      </MainLayout>
+      </AppShell>
     );
   }
 
   return (
-    <MainLayout title={`Brainstorming: ${project.name}`}>
+    <AppShell title={`Brainstorming: ${project.name}`} onThemeToggle={() => {}} isDarkMode={theme.palette.mode === 'dark'}>
       <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box>
           <Typography variant="h5" component="h1">
@@ -209,6 +209,6 @@ export const BrainstormPage = () => {
           <SaveIcon />
         </Fab>
       </Box>
-    </MainLayout>
+    </AppShell>
   );
 };
