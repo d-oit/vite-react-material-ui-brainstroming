@@ -151,7 +151,7 @@ export const Dashboard = () => {
             </Button>
           </Paper>
         ) : (
-          <Grid container spacing={3}>
+          <Grid container spacing={3} sx={{ width: '100%' }}>
             {projects.map(project => (
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={project.id}>
                 <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>

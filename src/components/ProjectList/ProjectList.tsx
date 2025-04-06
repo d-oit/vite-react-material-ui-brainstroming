@@ -236,9 +236,9 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
           </Button>
         </Box>
       ) : (
-        <Grid container spacing={3}>
+        <Grid container spacing={3} sx={{ width: '100%' }}>
           {projects.map(project => (
-            <Grid item xs={12} sm={6} md={4} key={project.id}>
+            <Grid key={project.id} size={{ xs: 12, sm: 6, md: 4 }}>
               <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Box

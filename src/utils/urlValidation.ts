@@ -26,7 +26,7 @@ export function isValidUrl(url: string, requireProtocol = true): boolean {
     // Use the URL constructor to validate
     new URL(urlToCheck);
     return true;
-  } catch (_error) {
+  } catch (_) {
     return false;
   }
 }
@@ -44,7 +44,7 @@ export function isHttpsUrl(url: string): boolean {
   try {
     const parsedUrl = new URL(url);
     return parsedUrl.protocol === 'https:';
-  } catch (_error) {
+  } catch (_) {
     return false;
   }
 }
@@ -101,7 +101,7 @@ export function sanitizeUrl(
 
     // Reconstruct the URL from its parts to avoid any injection
     return parsedUrl.toString();
-  } catch (_error) {
+  } catch (_) {
     return defaultUrl;
   }
 }
@@ -344,7 +344,7 @@ export function isSameOrigin(url: string): boolean {
   try {
     const parsedUrl = new URL(url, window.location.origin);
     return parsedUrl.origin === window.location.origin;
-  } catch (_error) {
+  } catch (_) {
     return false;
   }
 }

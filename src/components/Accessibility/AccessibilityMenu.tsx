@@ -6,7 +6,6 @@ import {
   Animation as AnimationIcon,
   HighlightAlt as FocusIcon,
   Close as CloseIcon,
-  // KeyboardAlt as KeyboardIcon, // Unused for now
   VolumeUp as ScreenReaderIcon,
   Keyboard as TabNavigationIcon,
 } from '@mui/icons-material';
@@ -22,7 +21,6 @@ import {
   Tooltip,
   IconButton,
   useTheme,
-  // Alert, // Unused for now
   Snackbar,
 } from '@mui/material';
 import { useState, useEffect } from 'react';

@@ -172,13 +172,13 @@ export const BrainstormPage = () => {
           </Drawer>
         </>
       ) : (
-        <Grid container spacing={2} sx={{ height: 'calc(100vh - 200px)' }}>
-          <Grid xs={chatOpen ? 8 : 12}>
+        <Grid container spacing={2} sx={{ height: 'calc(100vh - 200px)', width: '100%' }}>
+          <Grid size={chatOpen ? 8 : 12}>
             <BrainstormFlow initialNodes={nodes} initialEdges={edges} onSave={handleSaveFlow} />
           </Grid>
 
           {chatOpen && (
-            <Grid xs={4}>
+            <Grid size={4}>
               <Box sx={{ height: '100%', position: 'relative' }}>
                 <IconButton
                   sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}

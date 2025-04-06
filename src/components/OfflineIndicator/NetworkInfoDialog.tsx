@@ -26,7 +26,6 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  // useTheme, // Unused for now
   IconButton,
   Tooltip,
   Alert,

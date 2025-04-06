@@ -131,8 +131,8 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
     try {
       // Import the project service dynamically to avoid circular dependencies
       const { default: projectService } = await import('../services/ProjectService');
-      // Use the project service to save the project to IndexedDB
-      await projectService.saveProject(projectToSave);
+      // Use the project service to update the project in IndexedDB
+      await projectService.updateProject(projectToSave);
     } catch (error) {
       console.error('Error saving project to local storage:', error);
       throw error; // Re-throw to be handled by the caller

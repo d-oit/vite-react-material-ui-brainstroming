@@ -23,12 +23,12 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import { useI18n } from '../../contexts/I18nContext';
 import gitService from '../../services/GitService';
 import projectService from '../../services/ProjectService';
-import type { Project } from '../../types';
+import type { GitCommit, Project } from '../../types';
 
 interface GitHistoryPanelProps {
   project: Project;
@@ -37,21 +37,15 @@ interface GitHistoryPanelProps {
 
 export const GitHistoryPanel = ({ project, onProjectUpdate }: GitHistoryPanelProps) => {
   const { t } = useI18n();
-  const [commits, setCommits] = useState<any[]>([]);
+  const [commits, setCommits] = useState<GitCommit[]>([]);
   const [loading, setLoading] = useState(false);
   const [commitDialogOpen, setCommitDialogOpen] = useState(false);
   const [commitMessage, setCommitMessage] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Load commits on mount and when project changes
-  useEffect(() => {
-    if (project?.id) {
-      loadCommits();
-    }
-  }, [project?.id]);
-
-  const loadCommits = () => {
+  // Define loadCommits function with useCallback
+  const loadCommits = useCallback(() => {
     setLoading(true);
     try {
       const projectCommits = gitService.getCommits(project.id);
@@ -62,7 +56,14 @@ export const GitHistoryPanel = ({ project, onProjectUpdate }: GitHistoryPanelPro
     } finally {
       setLoading(false);
     }
-  };
+  }, [project?.id, t]);
+
+  // Load commits on mount and when project changes
+  useEffect(() => {
+    if (project?.id) {
+      loadCommits();
+    }
+  }, [project?.id, loadCommits]);
 
   const handleCommit = async () => {
     if (!commitMessage.trim()) {
@@ -213,7 +214,7 @@ export const GitHistoryPanel = ({ project, onProjectUpdate }: GitHistoryPanelPro
         <DialogTitle>{t('gitHistory.createCommit')}</DialogTitle>
         <DialogContent>
           <TextField
-            autoFocus
+            /* Removed autoFocus for accessibility */
             margin="dense"
             label={t('gitHistory.commitMessage')}
             fullWidth

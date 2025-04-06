@@ -1894,7 +1894,8 @@ export class IndexedDBService {
           timestamp: entry.timestamp || new Date().toISOString(),
         };
 
-        const request = store.add(historyEntry);
+        // Use put instead of add to handle duplicate keys
+        const request = store.put(historyEntry);
 
         request.onsuccess = () => resolve(historyEntry.id);
         request.onerror = (event: Event) => {

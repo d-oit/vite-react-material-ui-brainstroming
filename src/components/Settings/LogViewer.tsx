@@ -1,7 +1,7 @@
 import {
   Refresh as RefreshIcon,
   Delete as DeleteIcon,
-  FilterList as FilterIcon,
+  // FilterList as FilterIcon, // Unused
   Info as InfoIcon,
   Warning as WarningIcon,
   Error as ErrorIcon,
@@ -35,7 +35,7 @@ import {
   Tooltip,
   useTheme,
 } from '@mui/material';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import type { LogEntry } from '../../services/IndexedDBService';
 import loggerService from '../../services/LoggerService';
@@ -56,10 +56,10 @@ export const LogViewer = () => {
   // Load logs on mount and when filter changes
   useEffect(() => {
     loadLogs();
-  }, [filter, page, rowsPerPage]);
+  }, [loadLogs]);
 
   // Load logs from IndexedDB
-  const loadLogs = async () => {
+  const loadLogs = useCallback(async () => {
     setLoading(true);
     try {
       const fetchedLogs = await loggerService.getLogs(
@@ -85,7 +85,7 @@ export const LogViewer = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, page, rowsPerPage, searchTerm]);
 
   // Handle page change
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -264,7 +264,7 @@ export const LogViewer = () => {
                     <Chip
                       icon={getLevelIcon(log.level)}
                       label={log.level.toUpperCase()}
-                      color={getLevelColor(log.level) as any}
+                      color={getLevelColor(log.level)}
                       size="small"
                       variant="outlined"
                     />
@@ -326,7 +326,7 @@ export const LogViewer = () => {
                 <Chip
                   icon={getLevelIcon(selectedLog.level)}
                   label={selectedLog.level.toUpperCase()}
-                  color={getLevelColor(selectedLog.level) as any}
+                  color={getLevelColor(selectedLog.level)}
                   size="small"
                   sx={{ mb: 1 }}
                 />
@@ -355,9 +355,12 @@ export const LogViewer = () => {
                       overflow: 'auto',
                     }}
                   >
-                    <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                    <Box
+                      component="pre"
+                      sx={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                    >
                       {JSON.stringify(selectedLog.context, null, 2)}
-                    </pre>
+                    </Box>
                   </Paper>
                 </Box>
               )}

@@ -280,9 +280,9 @@ export const NodePreferencesManager = () => {
         Customize Sizes
       </Typography>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={3} sx={{ width: '100%' }}>
         {(['small', 'medium', 'large'] as const).map(size => (
-          <Grid item xs={12} md={4} key={size}>
+          <Grid size={{ xs: 12, md: 4 }} key={size}>
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
@@ -330,13 +330,13 @@ export const NodePreferencesManager = () => {
         color for nodes of each type.
       </Typography>
 
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <Grid container spacing={3} sx={{ mb: 4, width: '100%' }}>
         {Object.values(NodeType).map(nodeType => {
           const nodeTypeLabel = nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
           const currentColor = localPreferences.customColors?.[nodeType] || '#e3f2fd';
 
           return (
-            <Grid item xs={12} sm={6} md={3} key={nodeType}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={nodeType}>
               <Card>
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>

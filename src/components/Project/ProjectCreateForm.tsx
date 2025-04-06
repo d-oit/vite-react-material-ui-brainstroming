@@ -118,8 +118,8 @@ export const ProjectCreateForm = ({
         <Divider sx={{ mb: 3 }} />
 
         <Box component="form" onSubmit={handleSubmit} noValidate>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
+          <Grid container spacing={3} sx={{ width: '100%' }}>
+            <Grid size={12}>
               <TextField
                 required
                 fullWidth
@@ -138,7 +138,7 @@ export const ProjectCreateForm = ({
               />
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid size={12}>
               <TextField
                 fullWidth
                 id="project-description"
@@ -156,14 +156,14 @@ export const ProjectCreateForm = ({
               />
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid size={12}>
               <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'medium', mt: 1 }}>
                 {t('project.selectTemplate')}
               </Typography>
 
-              <Grid container spacing={2}>
+              <Grid container spacing={2} sx={{ width: '100%' }}>
                 {Object.values(ProjectTemplate).map(templateType => (
-                  <Grid item xs={12} sm={6} md={4} key={templateType}>
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }} key={templateType}>
                     <Card
                       sx={{
                         cursor: 'pointer',
@@ -224,7 +224,7 @@ export const ProjectCreateForm = ({
               </Grid>
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid size={12}>
               <Divider sx={{ my: 2 }} />
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
                 <Button onClick={onCancel} disabled={loading} sx={{ borderRadius: 1.5 }}>

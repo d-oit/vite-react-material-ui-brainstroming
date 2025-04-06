@@ -67,7 +67,7 @@ export const EnhancedBrainstormPage = () => {
   const theme = useTheme();
   const { t } = useI18n();
   const { settings } = useSettings();
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Used for navigation after actions
   const { projectId } = useParams<{ projectId: string }>();
 
   const [loading, setLoading] = useState(false);
@@ -117,7 +117,7 @@ export const EnhancedBrainstormPage = () => {
 
       return () => clearTimeout(autoSaveTimer);
     }
-  }, [nodes, edges, settings.autoSave, project.id]);
+  }, [nodes, edges, settings.autoSave, project.id, handleSaveProject]);
 
   // Handle nodes change
   const handleNodesChange = useCallback((updatedNodes: Node[]) => {
