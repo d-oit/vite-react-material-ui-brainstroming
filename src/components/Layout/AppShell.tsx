@@ -36,6 +36,7 @@ import {
 } from '@mui/icons-material';
 import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
+import OfflineIndicator from '../OfflineIndicator/OfflineIndicator';
 
 interface AppShellProps {
   children: ReactNode;
@@ -311,6 +312,9 @@ export const AppShell = ({
             </Fab>
           )}
         </Box>
+
+        {/* Offline indicator */}
+        <OfflineIndicator position="bottom-right" showSnackbar={true} />
       </Box>
 
       {/* Loading indicator */}

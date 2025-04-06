@@ -48,11 +48,12 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
   const backgroundColor = getNodeColor(nodeType, data.color);
   const borderColor = getNodeBorderColor(backgroundColor);
 
-  // Calculate node size based on preferences and screen size
+  // Calculate node size based on preferences, node data, and screen size
   const nodeSize = useMemo(() => {
     if (!nodePreferences) return { width: 200, fontSize: 1 };
 
-    const size = nodePreferences.defaultSize;
+    // Use node-specific size if available, otherwise use default
+    const size = data.size || nodePreferences.defaultSize;
     const sizeConfig = nodePreferences.nodeSizes[size];
 
     // Adjust for mobile
@@ -64,7 +65,7 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
     }
 
     return sizeConfig;
-  }, [nodePreferences, isMobile]);
+  }, [nodePreferences, isMobile, data.size]);
 
   return (
     <Card
@@ -77,6 +78,9 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
         boxShadow: 2,
         transition: 'all 0.2s ease',
         fontSize: `${nodeSize.fontSize}rem`,
+        '&:hover': {
+          boxShadow: 4,
+        },
       }}
     >
       <Handle
@@ -141,9 +145,12 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
             display: '-webkit-box',
             WebkitLineClamp: isMobile ? 3 : 5,
             WebkitBoxOrient: 'vertical',
+            transition: 'all 0.3s ease',
           }}
         >
-          {data.content}
+          {isMobile && data.content.length > 100
+            ? `${data.content.substring(0, 100)}...`
+            : data.content}
         </Typography>
 
         {data.tags && data.tags.length > 0 && (

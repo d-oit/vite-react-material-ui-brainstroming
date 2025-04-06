@@ -35,6 +35,7 @@ export interface NodeData {
   content: string;
   color?: string;
   tags?: string[];
+  size?: 'small' | 'medium' | 'large';
 }
 
 // Edge Types
