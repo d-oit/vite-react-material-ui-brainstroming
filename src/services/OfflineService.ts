@@ -5,6 +5,10 @@ export interface NetworkStatus {
   online: boolean;
   type: string; // wifi, cellular, etc.
   effectiveType: string; // slow-2g, 2g, 3g, 4g
+  downlink?: number; // Mbps
+  rtt?: number; // Round trip time in ms
+  saveData?: boolean; // Whether the user has requested reduced data usage
+  signalStrength?: number; // 0-4 signal strength indicator
 }
 
 /**
@@ -26,6 +30,10 @@ export class OfflineService {
     online: navigator.onLine,
     type: 'unknown',
     effectiveType: 'unknown',
+    downlink: undefined,
+    rtt: undefined,
+    saveData: undefined,
+    signalStrength: undefined,
   };
 
   private constructor() {
@@ -251,10 +259,13 @@ export class OfflineService {
     if ('connection' in navigator) {
       const connection = (navigator as any).connection;
 
-      // Update initial network status
+      // Update initial network status with all available properties
       this.updateNetworkStatus({
         type: connection.type,
         effectiveType: connection.effectiveType,
+        downlink: connection.downlink,
+        rtt: connection.rtt,
+        saveData: connection.saveData
       });
 
       // Listen for changes
@@ -262,7 +273,13 @@ export class OfflineService {
         this.updateNetworkStatus({
           type: connection.type,
           effectiveType: connection.effectiveType,
+          downlink: connection.downlink,
+          rtt: connection.rtt,
+          saveData: connection.saveData
         });
+
+        // Log network status change
+        console.log('Network status changed:', this.currentNetworkStatus);
       });
     }
   }
@@ -276,6 +293,12 @@ export class OfflineService {
       ...partialStatus,
     };
 
+    // Calculate signal strength based on effectiveType and downlink
+    this.currentNetworkStatus.signalStrength = this.calculateSignalStrength(
+      this.currentNetworkStatus.effectiveType,
+      this.currentNetworkStatus.downlink
+    );
+
     // Notify network status listeners
     this.networkStatusListeners.forEach(listener => {
       try {
@@ -284,6 +307,35 @@ export class OfflineService {
         console.error('Error in network status listener:', error);
       }
     });
+  }
+
+  /**
+   * Calculate signal strength indicator (0-4) based on connection quality
+   */
+  private calculateSignalStrength(effectiveType: string, downlink?: number): number {
+    // If no data available, return undefined
+    if (effectiveType === 'unknown' && !downlink) return 0;
+
+    // Base signal strength on effective connection type
+    switch (effectiveType) {
+      case 'slow-2g':
+        return 1;
+      case '2g':
+        return 2;
+      case '3g':
+        return 3;
+      case '4g':
+        return 4;
+      default:
+        // Fallback to downlink-based calculation if available
+        if (downlink) {
+          if (downlink < 0.5) return 1; // Very slow
+          if (downlink < 1) return 2; // Slow
+          if (downlink < 5) return 3; // Medium
+          return 4; // Fast
+        }
+        return 0; // Unknown
+    }
   }
 
   /**

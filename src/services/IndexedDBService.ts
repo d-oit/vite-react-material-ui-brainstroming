@@ -36,6 +36,7 @@ export interface NodePreferences {
     medium: { width: number; fontSize: number };
     large: { width: number; fontSize: number };
   };
+  touchOptimized?: boolean;
 }
 
 export interface LogEntry {
@@ -255,6 +256,7 @@ export class IndexedDBService {
           medium: { width: 200, fontSize: 1 },
           large: { width: 250, fontSize: 1.2 },
         },
+        touchOptimized: false,
       };
 
       try {
@@ -454,6 +456,7 @@ export class IndexedDBService {
               medium: { width: 200, fontSize: 1 },
               large: { width: 250, fontSize: 1.2 },
             },
+            touchOptimized: false,
           });
         }
       };

@@ -146,7 +146,9 @@ export const OfflineIndicator = ({
     if (!isOnline) return 'Offline';
 
     const connectionType = networkStatus.type === 'unknown' ? '' : networkStatus.type;
-    const effectiveType = networkStatus.effectiveType === 'unknown' ? '' : networkStatus.effectiveType;
+    const effectiveType = networkStatus.effectiveType === 'unknown'
+      ? ''
+      : networkStatus.effectiveType;
 
     if (connectionType && effectiveType) {
       return `${connectionType.toUpperCase()} (${effectiveType.toUpperCase()})`;
@@ -157,6 +159,40 @@ export const OfflineIndicator = ({
     } else {
       return 'Connected';
     }
+  };
+
+  // Get signal strength icon based on network status
+  const getSignalStrengthIcon = () => {
+    if (!isOnline) return <OfflineIcon />;
+
+    const signalStrength = networkStatus.signalStrength || 0;
+
+    switch (signalStrength) {
+      case 1:
+        return <WeakSignalIcon />;
+      case 2:
+        return <LowSignalIcon />;
+      case 3:
+        return <MediumSignalIcon />;
+      case 4:
+        return <GoodSignalIcon />;
+      default:
+        return networkStatus.type === 'wifi' ? <WifiIcon /> : <CellularIcon />;
+    }
+  };
+
+  // Get connection speed label
+  const getConnectionSpeedLabel = () => {
+    if (!isOnline) return 'No connection';
+    if (!networkStatus.downlink) return 'Unknown speed';
+
+    const downlink = networkStatus.downlink;
+
+    if (downlink < 0.5) return 'Very slow connection';
+    if (downlink < 1) return 'Slow connection';
+    if (downlink < 5) return 'Medium speed connection';
+    if (downlink < 20) return 'Fast connection';
+    return 'Very fast connection';
   };
 
   // Get connection quality color
@@ -284,7 +320,7 @@ export const OfflineIndicator = ({
           <List dense>
             <ListItem>
               <ListItemIcon>
-                <InfoIcon fontSize="small" />
+                {networkStatus.type === 'wifi' ? <WifiIcon fontSize="small" /> : <CellularIcon fontSize="small" />}
               </ListItemIcon>
               <ListItemText
                 primary="Connection Type"
@@ -293,9 +329,10 @@ export const OfflineIndicator = ({
                 }
               />
             </ListItem>
+
             <ListItem>
               <ListItemIcon>
-                <InfoIcon fontSize="small" />
+                {getSignalStrengthIcon()}
               </ListItemIcon>
               <ListItemText
                 primary="Connection Quality"
@@ -306,6 +343,51 @@ export const OfflineIndicator = ({
                 }
               />
             </ListItem>
+
+            {networkStatus.downlink && (
+              <ListItem>
+                <ListItemIcon>
+                  <Chip
+                    size="small"
+                    label={`${networkStatus.downlink.toFixed(1)} Mbps`}
+                    color={networkStatus.downlink < 1 ? 'warning' : 'success'}
+                  />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Download Speed"
+                  secondary={getConnectionSpeedLabel()}
+                />
+              </ListItem>
+            )}
+
+            {networkStatus.rtt && (
+              <ListItem>
+                <ListItemIcon>
+                  <Chip
+                    size="small"
+                    label={`${networkStatus.rtt} ms`}
+                    color={networkStatus.rtt > 100 ? 'warning' : 'success'}
+                  />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Latency (RTT)"
+                  secondary={networkStatus.rtt > 100 ? 'High latency' : 'Good latency'}
+                />
+              </ListItem>
+            )}
+
+            {networkStatus.saveData && (
+              <ListItem>
+                <ListItemIcon>
+                  <InfoIcon color="warning" fontSize="small" />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Data Saver"
+                  secondary="Data saver mode is enabled on your device"
+                />
+              </ListItem>
+            )}
+
             <ListItem>
               <ListItemIcon>
                 <InfoIcon fontSize="small" />
@@ -315,9 +397,10 @@ export const OfflineIndicator = ({
                 secondary={offlineService.isOfflineModeEnabled() ? 'Enabled' : 'Disabled'}
               />
             </ListItem>
+
             <ListItem>
               <ListItemIcon>
-                <InfoIcon fontSize="small" />
+                <SyncIcon fontSize="small" color={pendingOperations > 0 ? 'warning' : 'success'} />
               </ListItemIcon>
               <ListItemText primary="Pending Operations" secondary={pendingOperations} />
             </ListItem>

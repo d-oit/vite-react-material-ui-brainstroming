@@ -15,7 +15,11 @@ import {
   Alert,
   Snackbar,
   useTheme,
+  Switch,
+  Tooltip,
+  useMediaQuery,
 } from '@mui/material';
+import { TouchApp as TouchIcon } from '@mui/icons-material';
 import { useSettings } from '../../contexts/SettingsContext';
 import { NodeType } from '../../types';
 import { NodePreferences } from '../../services/IndexedDBService';
@@ -96,6 +100,11 @@ export const NodePreferencesManager = () => {
   });
 
   const [localPreferences, setLocalPreferences] = useState<NodePreferences | null>(nodePreferences);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [touchOptimized, setTouchOptimized] = useState<boolean>(
+    nodePreferences?.touchOptimized || false
+  );
 
   if (!localPreferences) {
     return (
@@ -135,7 +144,13 @@ export const NodePreferencesManager = () => {
 
   const handleSavePreferences = async () => {
     try {
-      await updateNodePreferences(localPreferences);
+      // Include touch optimization setting
+      const updatedPreferences = {
+        ...localPreferences,
+        touchOptimized,
+      };
+
+      await updateNodePreferences(updatedPreferences);
       setSnackbar({
         open: true,
         message: 'Node preferences saved',
@@ -151,6 +166,10 @@ export const NodePreferencesManager = () => {
     }
   };
 
+  const handleTouchOptimizationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTouchOptimized(event.target.checked);
+  };
+
   const handleResetPreferences = () => {
     const defaultPreferences: NodePreferences = {
       defaultSize: 'medium',
@@ -160,7 +179,10 @@ export const NodePreferencesManager = () => {
         medium: { width: 200, fontSize: 1 },
         large: { width: 250, fontSize: 1.2 },
       },
+      touchOptimized: false,
     };
+
+    setTouchOptimized(false);
 
     setLocalPreferences(defaultPreferences);
     setSnackbar({
@@ -206,6 +228,29 @@ export const NodePreferencesManager = () => {
           <FormControlLabel value="large" control={<Radio />} label="Large" />
         </RadioGroup>
       </FormControl>
+
+      <Box sx={{ mb: 3 }}>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={touchOptimized}
+              onChange={handleTouchOptimizationChange}
+              color="primary"
+            />
+          }
+          label={
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <TouchIcon sx={{ mr: 0.5, fontSize: '1rem' }} />
+              <Typography variant="body2">Touch-optimized nodes</Typography>
+              <Tooltip title="Makes nodes easier to interact with on touch devices">
+                <Box sx={{ ml: 0.5, cursor: 'help', color: 'text.secondary', fontSize: '0.8rem' }}>
+                  ⓘ
+                </Box>
+              </Tooltip>
+            </Box>
+          }
+        />
+      </Box>
 
       <Typography variant="subtitle1" gutterBottom>
         Size Preview

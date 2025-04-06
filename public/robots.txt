@@ -1,0 +1,11 @@
+# Disallow all web crawlers - this is an offline-first PWA
+User-agent: *
+Disallow: /
+
+# Explicitly disallow API endpoints and service worker
+Disallow: /api/
+Disallow: /sw.js
+Disallow: /sw.mjs
+
+# PWA offline-first application
+# No sitemap needed as content is primarily user-generated and stored locally

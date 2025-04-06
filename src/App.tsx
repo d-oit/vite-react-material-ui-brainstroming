@@ -1,35 +1,16 @@
 import { useState, useMemo, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import {
   ThemeProvider,
   CssBaseline,
   createTheme,
   PaletteMode,
-  Box,
-  Typography,
   Button,
-  AppBar,
-  Toolbar,
-  IconButton,
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Divider,
   Snackbar,
   Alert,
 } from '@mui/material';
-import {
-  Brightness4 as DarkIcon,
-  Brightness7 as LightIcon,
-  Dashboard as DashboardIcon,
-  Menu as MenuIcon,
-  BubbleChart as BrainstormIcon,
-  Home as HomeIcon,
-  Settings as SettingsIcon,
-} from '@mui/icons-material';
+// Icons are imported but not used in this file
+// They might be used in child components or for future implementation
 import { registerSW } from 'virtual:pwa-register';
 import { useI18n } from './contexts/I18nContext';
 import { SettingsProvider } from './contexts/SettingsContext';
@@ -125,7 +106,7 @@ const AppWithTheme = () => {
   const [updateSWFunction, setUpdateSWFunction] = useState<
     ((reload?: boolean) => Promise<void>) | null
   >(null);
-  const { t } = useI18n();
+  const { t: _t } = useI18n(); // t is not used in this file but kept for future use
 
   // Update the theme only when the mode changes
   const theme = useMemo(() => createTheme(getDesignTokens(mode)), [mode]);
@@ -134,7 +115,8 @@ const AppWithTheme = () => {
     setMode(prevMode => (prevMode === 'light' ? 'dark' : 'light'));
   };
 
-  const toggleDrawer = () => {
+  // This function is defined but not currently used - kept for future implementation
+  const _toggleDrawer = () => {
     setDrawerOpen(!drawerOpen);
   };
 
@@ -162,6 +144,7 @@ const AppWithTheme = () => {
 
     // Register service worker for PWA
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const updateSW = registerSW({
         onNeedRefresh(updateFn) {
           // Store the update function for later use
