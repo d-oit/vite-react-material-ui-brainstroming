@@ -230,7 +230,11 @@ export const EnhancedBrainstormPage = () => {
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
         onFitView={handleFitView}
+        onAddNode={handleCreateNode}
       />
     </AppShell>
   );
 };
+
+
+

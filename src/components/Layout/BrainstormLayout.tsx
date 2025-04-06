@@ -57,6 +57,7 @@ interface BrainstormLayoutProps {
   onZoomIn?: () => void;
   onZoomOut?: () => void;
   onFitView?: () => void;
+  onAddNode?: () => void;
 }
 
 export const BrainstormLayout = ({
@@ -67,6 +68,7 @@ export const BrainstormLayout = ({
   onZoomIn,
   onZoomOut,
   onFitView,
+  onAddNode,
 }: BrainstormLayoutProps) => {
   const theme = useTheme();
   const { t } = useI18n();
@@ -127,39 +129,32 @@ export const BrainstormLayout = ({
             <Box sx={{ flexGrow: 1, height: '100%', position: 'relative' }}>
               {mainContent}
               
-              {/* Mobile zoom controls */}
-              <Zoom in={showControls}>
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    bottom: 16,
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    display: 'flex',
-                    gap: 1,
-                    backgroundColor: theme.palette.background.paper,
-                    borderRadius: 8,
-                    boxShadow: theme.shadows[3],
-                    p: 0.5,
-                  }}
-                >
-                  <Tooltip title={t('brainstorm.zoomIn')}>
-                    <IconButton onClick={onZoomIn} size="small">
-                      <ZoomInIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title={t('brainstorm.zoomOut')}>
-                    <IconButton onClick={onZoomOut} size="small">
-                      <ZoomOutIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title={t('brainstorm.fitView')}>
-                    <IconButton onClick={onFitView} size="small">
-                      <FitScreenIcon />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-              </Zoom>
+              {/* Mobile controls - more compact and touch-friendly */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  bottom: 16,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  display: 'flex',
+                  gap: 1,
+                  backgroundColor: theme.palette.background.paper,
+                  borderRadius: 20, // More rounded for touch
+                  boxShadow: theme.shadows[3],
+                  p: 0.5,
+                  zIndex: 900,
+                }}
+              >
+                <IconButton onClick={onZoomIn} size="small">
+                  <ZoomInIcon />
+                </IconButton>
+                <IconButton onClick={onZoomOut} size="small">
+                  <ZoomOutIcon />
+                </IconButton>
+                <IconButton onClick={onFitView} size="small">
+                  <FitScreenIcon />
+                </IconButton>
+              </Box>
             </Box>
             
             <Drawer
@@ -225,6 +220,7 @@ export const BrainstormLayout = ({
                     borderRadius: 8,
                     boxShadow: theme.shadows[3],
                     p: 0.5,
+                    zIndex: 900, // Ensure it's below FABs but above the canvas
                   }}
                 >
                   <Tooltip title={t('brainstorm.zoomIn')}>
@@ -287,7 +283,7 @@ export const BrainstormLayout = ({
         )}
       </Paper>
       
-      {/* Floating action buttons - consolidated and properly spaced */}
+      {/* Floating action buttons - repositioned to avoid overlap */}
       <Box
         sx={{
           position: 'fixed',
@@ -300,23 +296,43 @@ export const BrainstormLayout = ({
         }}
       >
         {onSave && (
-          <Fab color="primary" size="medium" onClick={onSave}>
-            <SaveIcon />
-          </Fab>
+          <Tooltip title={t('common.save')}>
+            <Fab color="primary" size="medium" onClick={onSave}>
+              <SaveIcon />
+            </Fab>
+          </Tooltip>
         )}
         
         {!sidebarOpen && (
-          <Fab 
-            color="secondary" 
-            size="medium" 
-            onClick={toggleSidebar}
-            sx={{ mb: 0 }} // Remove any margin that might cause overlap
-          >
-            <ChatIcon />
-          </Fab>
+          <Tooltip title={t('chat.openAssistant')}>
+            <Fab 
+              color="secondary" 
+              size="medium" 
+              onClick={toggleSidebar}
+            >
+              <ChatIcon />
+            </Fab>
+          </Tooltip>
         )}
+        
+        {/* Add button for creating new nodes */}
+        <Tooltip title={t('brainstorm.addNode')}>
+          <Fab 
+            color="default" 
+            size="medium" 
+            onClick={onAddNode}
+          >
+            <AddIcon />
+          </Fab>
+        </Tooltip>
       </Box>
     </Box>
   );
 };
+
+
+
+
+
+
 
