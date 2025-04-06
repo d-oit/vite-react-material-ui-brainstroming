@@ -1,4 +1,4 @@
-import { memo, useMemo, useState } from 'react';
+import { memo, useMemo, useState, useEffect } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
 import {
   Card,

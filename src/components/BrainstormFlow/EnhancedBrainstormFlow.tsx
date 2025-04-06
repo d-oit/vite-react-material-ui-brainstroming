@@ -219,27 +219,6 @@ const FlowContent = ({
   );
 
   // Handle node delete
-  const handleNodeDeleteRequest = useCallback(
-    (nodeId: string, event?: React.MouseEvent) => {
-      event?.stopPropagation(); // Prevent node selection
-
-      // Log the delete request
-      loggerService.info(`Node deletion requested for node ${nodeId}`);
-
-      // Check if skipDeleteConfirmation is enabled in settings
-      const skipConfirmation =
-        process.env.VITE_SKIP_DELETE_CONFIRMATION === 'true' || settings.skipDeleteConfirmation;
-
-      if (skipConfirmation) {
-        handleNodeDelete(nodeId);
-      } else {
-        setNodeToDelete(nodeId);
-        setDeleteConfirmOpen(true);
-      }
-    },
-    [settings]
-  );
-
   const handleNodeDelete = useCallback(
     (nodeId: string) => {
       try {
@@ -297,6 +276,28 @@ const FlowContent = ({
       }
     },
     [nodes, edges, setNodes, setEdges, externalNodesChange, externalEdgesChange, t]
+  );
+
+  // Handle node delete request
+  const handleNodeDeleteRequest = useCallback(
+    (nodeId: string, event?: React.MouseEvent) => {
+      event?.stopPropagation(); // Prevent node selection
+
+      // Log the delete request
+      loggerService.info(`Node deletion requested for node ${nodeId}`);
+
+      // Check if skipDeleteConfirmation is enabled in settings
+      const skipConfirmation =
+        process.env.VITE_SKIP_DELETE_CONFIRMATION === 'true' || settings.skipDeleteConfirmation;
+
+      if (skipConfirmation) {
+        handleNodeDelete(nodeId);
+      } else {
+        setNodeToDelete(nodeId);
+        setDeleteConfirmOpen(true);
+      }
+    },
+    [settings, handleNodeDelete]
   );
 
   // Add a new node
