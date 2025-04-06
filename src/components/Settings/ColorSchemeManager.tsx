@@ -5,7 +5,6 @@ import {
   Button,
   Card,
   CardContent,
-  Grid,
   TextField,
   Dialog,
   DialogTitle,
@@ -17,8 +16,9 @@ import {
   Alert,
   Snackbar,
   useTheme,
+  Stack,
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
+// import { styled } from '@mui/material/styles';
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
@@ -123,11 +123,11 @@ const ColorSchemeCard = ({
         <Typography variant="subtitle2" sx={{ mt: 1, mb: 0.5 }}>
           Node Colors
         </Typography>
-        <MuiGrid container spacing={1} sx={{ mb: 2 }}>
+        <Stack direction="row" flexWrap="wrap" spacing={1} sx={{ mb: 2 }}>
           {Object.entries(scheme.colors)
             .filter(([type]) => Object.values(NodeType).includes(type as NodeType))
             .map(([type, color]) => (
-              <MuiGrid item xs={6} key={type}>
+              <Box key={type} sx={{ width: '50%', p: 0.5 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Box
                     sx={{
@@ -142,9 +142,9 @@ const ColorSchemeCard = ({
                     {type.charAt(0).toUpperCase() + type.slice(1)}
                   </Typography>
                 </Box>
-              </Grid>
+              </Box>
             ))}
-        </Grid>
+        </Stack>
 
         {/* Theme Colors */}
         {(scheme.colors.primary || scheme.colors.secondary || scheme.colors.background) && (
@@ -152,11 +152,11 @@ const ColorSchemeCard = ({
             <Typography variant="subtitle2" sx={{ mt: 1, mb: 0.5 }}>
               Theme Colors
             </Typography>
-            <MuiGrid container spacing={1} sx={{ mb: 2 }}>
+            <Stack direction="row" flexWrap="wrap" spacing={1} sx={{ mb: 2 }}>
               {Object.entries(scheme.colors)
                 .filter(([type]) => !Object.values(NodeType).includes(type as NodeType))
                 .map(([type, color]) => (
-                  <MuiGrid item xs={6} key={type}>
+                  <Box key={type} sx={{ width: '50%', p: 0.5 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Box
                         sx={{
@@ -171,9 +171,9 @@ const ColorSchemeCard = ({
                         {type.charAt(0).toUpperCase() + type.slice(1)}
                       </Typography>
                     </Box>
-                  </Grid>
+                  </Box>
                 ))}
-            </Grid>
+            </Stack>
           </>
         )}
 
@@ -320,11 +320,11 @@ const EditColorSchemeDialog = ({
           Node Colors
         </Typography>
 
-        <MuiGrid container spacing={2}>
+        <Stack direction="row" flexWrap="wrap" spacing={2}>
           {Object.entries(colors)
             .filter(([type]) => Object.values(NodeType).includes(type as NodeType))
             .map(([type, color]) => (
-              <MuiGrid item xs={12} sm={6} key={type}>
+              <Box key={type} sx={{ width: { xs: '100%', sm: '50%' }, p: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography variant="body2" sx={{ width: 80 }}>
                     {type.charAt(0).toUpperCase() + type.slice(1)}:
@@ -339,19 +339,19 @@ const EditColorSchemeDialog = ({
                     }}
                   />
                 </Box>
-              </Grid>
+              </Box>
             ))}
-        </Grid>
+        </Stack>
 
         <Typography variant="subtitle1" sx={{ mt: 3, mb: 1 }}>
           Theme Colors
         </Typography>
 
-        <MuiGrid container spacing={2}>
+        <Stack direction="row" flexWrap="wrap" spacing={2}>
           {Object.entries(colors)
             .filter(([type]) => !Object.values(NodeType).includes(type as NodeType))
             .map(([type, color]) => (
-              <MuiGrid item xs={12} sm={6} key={type}>
+              <Box key={type} sx={{ width: { xs: '100%', sm: '50%' }, p: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography variant="body2" sx={{ width: 80 }}>
                     {type.charAt(0).toUpperCase() + type.slice(1)}:
@@ -366,9 +366,9 @@ const EditColorSchemeDialog = ({
                     }}
                   />
                 </Box>
-              </Grid>
+              </Box>
             ))}
-        </Grid>
+        </Stack>
       </DialogContent>
 
       <DialogActions>
@@ -566,9 +566,15 @@ export const ColorSchemeManager = () => {
 
       <Divider sx={{ mb: 3 }} />
 
-      <MuiGrid container spacing={2}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+          gap: 2,
+        }}
+      >
         {colorSchemes.map(scheme => (
-          <MuiGrid item xs={12} sm={6} md={4} key={scheme.id}>
+          <Box key={scheme.id}>
             <ColorSchemeCard
               scheme={scheme}
               isActive={settings.activeColorSchemeId === scheme.id}
@@ -577,9 +583,9 @@ export const ColorSchemeManager = () => {
               onDelete={() => handleDelete(scheme)}
               onDuplicate={() => handleDuplicate(scheme)}
             />
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
 
       {/* Edit Dialog */}
       <EditColorSchemeDialog

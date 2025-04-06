@@ -35,6 +35,8 @@
 ### Requirements
 - Enable custom color selection for nodes
 - Allow color themes or individual node coloring
+- Support text color customization for better contrast
+- Ensure WCAG 2.1 AA compliance (4.5:1 contrast ratio) for text/background combinations
 - Persist color preferences in IndexedDB
 
 ### Implementation Steps
@@ -140,3 +142,4 @@
 - Include node preferences in settings export/import
 - Add node appearance section to settings page
 - Implement preview functionality
+

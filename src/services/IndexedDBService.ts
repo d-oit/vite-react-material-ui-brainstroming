@@ -44,7 +44,7 @@ export interface NodePreferences {
 export interface LogEntry {
   id: string;
   timestamp: string;
-  level: 'info' | 'warn' | 'error';
+  level: 'debug' | 'info' | 'warn' | 'error' | 'critical';
   message: string;
   context?: Record<string, unknown>;
 }
@@ -641,7 +641,7 @@ export class IndexedDBService {
    * @returns Promise that resolves when the log is saved
    */
   public async log(
-    level: 'info' | 'warn' | 'error',
+    level: 'debug' | 'info' | 'warn' | 'error' | 'critical',
     message: string,
     context?: Record<string, unknown>
   ): Promise<void> {
@@ -684,7 +684,10 @@ export class IndexedDBService {
    * @param limit Maximum number of logs to return
    * @returns Promise that resolves with logs
    */
-  public async getLogs(level?: 'info' | 'warn' | 'error', limit = 100): Promise<LogEntry[]> {
+  public async getLogs(
+    level?: 'debug' | 'info' | 'warn' | 'error' | 'critical',
+    limit = 100
+  ): Promise<LogEntry[]> {
     await this.init();
 
     return new Promise((resolve, reject) => {

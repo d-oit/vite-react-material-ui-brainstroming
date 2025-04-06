@@ -39,7 +39,7 @@ This document outlines the implementation plan for enhancing the d.o.it.brainsto
 
 ### Implementation Steps
 1. Create React error boundaries for UI components
-2. Enhance network request error handling
+2. Enhance network request error handling with NetworkStatusIcon in AppShell header and disable LLM chat and S3 synchronization when offline
 3. Implement offline queue for failed operations
 4. Add visual feedback for error states
 
@@ -164,3 +164,4 @@ This document outlines the implementation plan for enhancing the d.o.it.brainsto
 - WCAG 2.1 AA compliance
 - Support for screen readers
 - Keyboard navigation throughout the application
+

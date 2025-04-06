@@ -1,7 +1,25 @@
 import indexedDBService, { LogEntry } from './IndexedDBService';
 import offlineService from './OfflineService';
 
-export type LogLevel = 'info' | 'warn' | 'error';
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'critical';
+export type LogCategory =
+  | 'app'
+  | 'network'
+  | 'user'
+  | 'performance'
+  | 'security'
+  | 'api'
+  | 'storage'
+  | 'ui';
+
+export interface StructuredLogContext {
+  category?: LogCategory;
+  component?: string;
+  userId?: string;
+  sessionId?: string;
+  requestId?: string;
+  [key: string]: unknown;
+}
 
 /**
  * Service for logging application events and errors
@@ -13,13 +31,29 @@ export class LoggerService {
   private remoteLoggingEndpoint: string | null = null;
   private applicationVersion: string;
   private maxLogAge: number = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+  private minLogLevel: LogLevel = 'info';
+  private sessionId: string;
+  private defaultContext: Partial<StructuredLogContext> = {};
+  private consoleLoggingEnabled: boolean = true;
 
   private constructor() {
     // Get application version from environment
     this.applicationVersion = import.meta.env.VITE_PROJECT_VERSION || '0.1.0';
 
+    // Generate a session ID
+    this.sessionId = crypto.randomUUID();
+
+    // Set default context
+    this.defaultContext = {
+      sessionId: this.sessionId,
+      appVersion: this.applicationVersion,
+    };
+
     // Set up periodic log cleanup
     this.setupLogCleanup();
+
+    // Log application start
+    this.info('Application started', { category: 'app' });
   }
 
   public static getInstance(): LoggerService {
@@ -38,6 +72,9 @@ export class LoggerService {
     syncLogsWhenOnline?: boolean;
     remoteLoggingEndpoint?: string;
     maxLogAge?: number;
+    minLogLevel?: LogLevel;
+    consoleLoggingEnabled?: boolean;
+    defaultContext?: Partial<StructuredLogContext>;
   }): void {
     if (config.enabled !== undefined) {
       this.isEnabled = config.enabled;
@@ -55,6 +92,30 @@ export class LoggerService {
       this.maxLogAge = config.maxLogAge;
       this.setupLogCleanup();
     }
+
+    if (config.minLogLevel !== undefined) {
+      this.minLogLevel = config.minLogLevel;
+    }
+
+    if (config.consoleLoggingEnabled !== undefined) {
+      this.consoleLoggingEnabled = config.consoleLoggingEnabled;
+    }
+
+    if (config.defaultContext) {
+      this.defaultContext = {
+        ...this.defaultContext,
+        ...config.defaultContext,
+      };
+    }
+  }
+
+  /**
+   * Log a debug message
+   * @param message Log message
+   * @param context Additional context
+   */
+  public debug(message: string, context?: Partial<StructuredLogContext>): void {
+    this.log('debug', message, context);
   }
 
   /**
@@ -62,7 +123,7 @@ export class LoggerService {
    * @param message Log message
    * @param context Additional context
    */
-  public info(message: string, context?: Record<string, unknown>): void {
+  public info(message: string, context?: Partial<StructuredLogContext>): void {
     this.log('info', message, context);
   }
 
@@ -71,7 +132,7 @@ export class LoggerService {
    * @param message Log message
    * @param context Additional context
    */
-  public warn(message: string, context?: Record<string, unknown>): void {
+  public warn(message: string, context?: Partial<StructuredLogContext>): void {
     this.log('warn', message, context);
   }
 
@@ -81,7 +142,7 @@ export class LoggerService {
    * @param error Error object
    * @param context Additional context
    */
-  public error(message: string, error?: Error, context?: Record<string, unknown>): void {
+  public error(message: string, error?: Error, context?: Partial<StructuredLogContext>): void {
     const errorContext = error
       ? {
           ...context,
@@ -95,23 +156,54 @@ export class LoggerService {
   }
 
   /**
+   * Log a critical error message
+   * @param message Log message
+   * @param error Error object
+   * @param context Additional context
+   */
+  public critical(message: string, error?: Error, context?: Partial<StructuredLogContext>): void {
+    const errorContext = error
+      ? {
+          ...context,
+          errorMessage: error.message,
+          stack: error.stack,
+          name: error.name,
+        }
+      : context;
+
+    this.log('critical', message, errorContext);
+  }
+
+  /**
    * Log a message with the specified level
    * @param level Log level
    * @param message Log message
    * @param context Additional context
    */
-  public log(level: LogLevel, message: string, context?: Record<string, unknown>): void {
+  public log(level: LogLevel, message: string, context?: Partial<StructuredLogContext>): void {
     if (!this.isEnabled) return;
 
-    // Always log to console
-    this.logToConsole(level, message, context);
+    // Check if we should log this level
+    if (!this.shouldLogLevel(level)) return;
+
+    // Merge with default context
+    const mergedContext = this.mergeContext(context);
+
+    // Log to console if enabled
+    if (this.consoleLoggingEnabled) {
+      this.logToConsole(level, message, mergedContext);
+    }
 
     // Log to IndexedDB
-    this.logToIndexedDB(level, message, context);
+    this.logToIndexedDB(level, message, mergedContext);
 
-    // If we have a remote endpoint and it's an error, try to send it immediately
-    if (this.remoteLoggingEndpoint && level === 'error' && offlineService.getOnlineStatus()) {
-      this.sendLogToRemote(level, message, context);
+    // If we have a remote endpoint and it's an error or critical, try to send it immediately
+    if (
+      this.remoteLoggingEndpoint &&
+      (level === 'error' || level === 'critical') &&
+      offlineService.getOnlineStatus()
+    ) {
+      this.sendLogToRemote(level, message, mergedContext);
     }
   }
 
@@ -191,11 +283,42 @@ export class LoggerService {
    * @param message Log message
    * @param context Additional context
    */
+  /**
+   * Check if a log level should be logged based on the minimum log level
+   * @param level Log level to check
+   * @returns True if the level should be logged
+   */
+  private shouldLogLevel(level: LogLevel): boolean {
+    const levels: LogLevel[] = ['debug', 'info', 'warn', 'error', 'critical'];
+    const minIndex = levels.indexOf(this.minLogLevel);
+    const levelIndex = levels.indexOf(level);
+
+    return levelIndex >= minIndex;
+  }
+
+  /**
+   * Merge context with default context
+   * @param context Context to merge
+   * @returns Merged context
+   */
+  private mergeContext(context?: Partial<StructuredLogContext>): Record<string, unknown> {
+    return {
+      ...this.defaultContext,
+      ...context,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      url: window.location.href,
+    };
+  }
+
   private logToConsole(level: LogLevel, message: string, context?: Record<string, unknown>): void {
     const timestamp = new Date().toISOString();
     const formattedMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
 
     switch (level) {
+      case 'debug':
+        console.debug(formattedMessage, context || '');
+        break;
       case 'info':
         console.info(formattedMessage, context || '');
         break;
@@ -204,6 +327,9 @@ export class LoggerService {
         break;
       case 'error':
         console.error(formattedMessage, context || '');
+        break;
+      case 'critical':
+        console.error(`%c${formattedMessage}`, 'color: red; font-weight: bold', context || '');
         break;
     }
   }

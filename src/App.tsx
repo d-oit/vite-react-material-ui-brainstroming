@@ -19,7 +19,10 @@ import { EnhancedBrainstormPage } from './pages/EnhancedBrainstormPage';
 import { SettingsPage } from './pages/SettingsPage';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import OfflineIndicator from './components/OfflineIndicator/OfflineIndicator';
+import OfflineFallback from './components/OfflineIndicator/OfflineFallback';
+import withOfflineFallback from './components/OfflineIndicator/withOfflineFallback';
 import AccessibilityMenu from './components/Accessibility/AccessibilityMenu';
+import CSPMeta from './components/Security/CSPMeta';
 import indexedDBService from './services/IndexedDBService';
 import loggerService from './services/LoggerService';
 import offlineService from './services/OfflineService';
@@ -176,56 +179,62 @@ const AppWithTheme = () => {
   }, []);
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <ErrorBoundary>
-        <BrowserRouter
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true,
-          }}
-        >
-          <Routes>
-            <Route
-              path="/"
-              element={<HomePage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />}
-            />
-            <Route path="/brainstorm" element={<EnhancedBrainstormPage />} />
-            <Route path="/brainstorm/:projectId" element={<EnhancedBrainstormPage />} />
-            <Route
-              path="/settings"
-              element={
-                <SettingsPage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-
-          {/* Offline indicator */}
-          <OfflineIndicator position="bottom-right" showSnackbar={true} />
-
-          {/* Accessibility menu */}
-          <AccessibilityMenu position="bottom-left" />
-
-          {/* Update notification */}
-          <Snackbar
-            open={updateAvailable}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+    <>
+      <CSPMeta />
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <ErrorBoundary>
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
           >
-            <Alert
-              severity="info"
-              action={
-                <Button color="inherit" size="small" onClick={handleUpdateApp}>
-                  Update
-                </Button>
-              }
+            <Routes>
+              <Route
+                path="/"
+                element={<HomePage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />}
+              />
+              <Route path="/brainstorm" element={withOfflineFallback(EnhancedBrainstormPage)()} />
+              <Route
+                path="/brainstorm/:projectId"
+                element={withOfflineFallback(EnhancedBrainstormPage)()}
+              />
+              <Route
+                path="/settings"
+                element={
+                  <SettingsPage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
+                }
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+
+            {/* Offline indicator */}
+            <OfflineIndicator position="bottom-right" showSnackbar={true} />
+
+            {/* Accessibility menu */}
+            <AccessibilityMenu position="bottom-left" />
+
+            {/* Update notification */}
+            <Snackbar
+              open={updateAvailable}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
-              A new version is available!
-            </Alert>
-          </Snackbar>
-        </BrowserRouter>
-      </ErrorBoundary>
-    </ThemeProvider>
+              <Alert
+                severity="info"
+                action={
+                  <Button color="inherit" size="small" onClick={handleUpdateApp}>
+                    Update
+                  </Button>
+                }
+              >
+                A new version is available!
+              </Alert>
+            </Snackbar>
+          </BrowserRouter>
+        </ErrorBoundary>
+      </ThemeProvider>
+    </>
   );
 };
 

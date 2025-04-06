@@ -10,7 +10,24 @@ import { BackgroundSyncPlugin } from 'workbox-background-sync';
 declare const self: ServiceWorkerGlobalScope;
 
 // Use with precache injection
-precacheAndRoute(self.__WB_MANIFEST);
+const manifestEntries: Array<string | { url: string; revision: string | null }> = self.__WB_MANIFEST;
+
+// Make sure index.html is in the precache manifest
+const indexUrl = 'index.html';
+const hasIndexHtml = manifestEntries.some((entry) => {
+  return typeof entry === 'string'
+    ? entry === indexUrl
+    : entry.url === indexUrl;
+});
+
+if (!hasIndexHtml) {
+  manifestEntries.push({
+    url: indexUrl,
+    revision: new Date().toISOString(),
+  });
+}
+
+precacheAndRoute(manifestEntries);
 
 // Set up App Shell-style routing
 const fileExtensionRegexp = new RegExp('/[^/?]+\\.[^/]+$');
@@ -34,7 +51,7 @@ registerRoute(
 
     return true;
   },
-  createHandlerBoundToURL('/index.html')
+  createHandlerBoundToURL('index.html')
 );
 
 // Cache the Google Fonts stylesheets with a stale-while-revalidate strategy.
@@ -122,65 +139,7 @@ registerRoute(
   })
 );
 
-// Cache static assets with a cache-first strategy
-registerRoute(
-  ({ request }) => {
-    return (
-      // CSS
-      request.destination === 'style' ||
-      // JavaScript
-      request.destination === 'script' ||
-      // Web Workers
-      request.destination === 'worker' ||
-      // Images
-      request.destination === 'image'
-    );
-  },
-  new CacheFirst({
-    cacheName: 'static-assets',
-    plugins: [
-      new CacheableResponsePlugin({
-        statuses: [0, 200],
-      }),
-      new ExpirationPlugin({
-        maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-        maxEntries: 60,
-      }),
-    ],
-  })
-);
-
-// API requests with network-first strategy and background sync for offline
-const apiSyncPlugin2 = new BackgroundSyncPlugin('api-queue-2', {
-  maxRetentionTime: 24 * 60, // Retry for up to 24 hours (specified in minutes)
-});
-
-registerRoute(
-  ({ url }) => url.pathname.startsWith('/api/'),
-  new NetworkFirst({
-    cacheName: 'api-responses-2',
-    plugins: [
-      apiSyncPlugin2,
-      new ExpirationPlugin({
-        maxAgeSeconds: 60 * 60 * 24, // 1 day
-        maxEntries: 50,
-      }),
-    ],
-  })
-);
-
-// Fallback route for document requests - use network-first for HTML documents
-registerRoute(
-  ({ request }) => request.destination === 'document',
-  new NetworkFirst({
-    cacheName: 'documents',
-    plugins: [
-      new CacheableResponsePlugin({
-        statuses: [0, 200],
-      }),
-    ],
-  })
-);
+// Note: Removed duplicate route registrations
 
 // Cache images
 registerRoute(

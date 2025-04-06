@@ -137,7 +137,7 @@ export const OfflineIndicator = ({
       case 'slow-2g':
         return <WeakSignalIcon />;
       default:
-        return networkStatus.type === 'wifi' ? <WifiIcon /> : <CellularIcon />;
+        return networkStatus.type && networkStatus.type === 'wifi' ? <WifiIcon /> : <CellularIcon />;
     }
   };
 
@@ -145,9 +145,9 @@ export const OfflineIndicator = ({
   const getConnectionTypeLabel = () => {
     if (!isOnline) return 'Offline';
 
-    const connectionType = networkStatus.type === 'unknown' ? '' : networkStatus.type;
+    const connectionType = !networkStatus.type || networkStatus.type === 'unknown' ? '' : networkStatus.type;
     const effectiveType =
-      networkStatus.effectiveType === 'unknown' ? '' : networkStatus.effectiveType;
+      !networkStatus.effectiveType || networkStatus.effectiveType === 'unknown' ? '' : networkStatus.effectiveType;
 
     if (connectionType && effectiveType) {
       return `${connectionType.toUpperCase()} (${effectiveType.toUpperCase()})`;
@@ -176,7 +176,7 @@ export const OfflineIndicator = ({
       case 4:
         return <GoodSignalIcon />;
       default:
-        return networkStatus.type === 'wifi' ? <WifiIcon /> : <CellularIcon />;
+        return networkStatus.type && networkStatus.type === 'wifi' ? <WifiIcon /> : <CellularIcon />;
     }
   };
 
@@ -319,7 +319,7 @@ export const OfflineIndicator = ({
           <List dense>
             <ListItem>
               <ListItemIcon>
-                {networkStatus.type === 'wifi' ? (
+                {networkStatus.type && networkStatus.type === 'wifi' ? (
                   <WifiIcon fontSize="small" />
                 ) : (
                   <CellularIcon fontSize="small" />
@@ -328,7 +328,7 @@ export const OfflineIndicator = ({
               <ListItemText
                 primary="Connection Type"
                 secondary={
-                  networkStatus.type !== 'unknown' ? networkStatus.type.toUpperCase() : 'Unknown'
+                  networkStatus.type && networkStatus.type !== 'unknown' ? networkStatus.type.toUpperCase() : 'Unknown'
                 }
               />
             </ListItem>

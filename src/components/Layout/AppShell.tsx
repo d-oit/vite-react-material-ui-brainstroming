@@ -37,6 +37,8 @@ import {
 import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import OfflineIndicator from '../OfflineIndicator/OfflineIndicator';
+import NetworkStatusIcon from '../OfflineIndicator/NetworkStatusIcon';
+import NetworkInfoDialog from '../OfflineIndicator/NetworkInfoDialog';
 
 interface AppShellProps {
   children: ReactNode;
@@ -67,6 +69,7 @@ export const AppShell = ({
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [errorOpen, setErrorOpen] = useState(!!error);
+  const [networkInfoDialogOpen, setNetworkInfoDialogOpen] = useState(false);
 
   // Update error state when prop changes
   useEffect(() => {
@@ -221,6 +224,9 @@ export const AppShell = ({
             {title || t('app.title')}
           </Typography>
 
+          {/* Network status icon in header */}
+          <NetworkStatusIcon onClick={() => setNetworkInfoDialogOpen(true)} />
+
           {!isMobile && (
             <IconButton color="inherit" onClick={onThemeToggle}>
               {isDarkMode ? <LightIcon /> : <DarkIcon />}
@@ -313,8 +319,11 @@ export const AppShell = ({
           )}
         </Box>
 
-        {/* Offline indicator */}
-        <OfflineIndicator position="bottom-right" showSnackbar={true} />
+        {/* Network info dialog */}
+        <NetworkInfoDialog
+          open={networkInfoDialogOpen}
+          onClose={() => setNetworkInfoDialogOpen(false)}
+        />
       </Box>
 
       {/* Loading indicator */}
