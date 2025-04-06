@@ -21,12 +21,17 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Tab,
+  Tabs,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useSettings } from '../contexts/SettingsContext';
 import { useI18n } from '../contexts/I18nContext';
 import { AppShell } from '../components/Layout/AppShell';
 import { ThemeMode, UserPreferences } from '../types';
+import { ColorSchemeManager } from '../components/Settings/ColorSchemeManager';
+import { NodePreferencesManager } from '../components/Settings/NodePreferencesManager';
+import { SettingsExportImport } from '../components/Settings/SettingsExportImport';
 
 // Default user preferences
 const defaultPreferences: UserPreferences = {
@@ -48,6 +53,32 @@ interface AccordionState {
   api: boolean;
 }
 
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`settings-tabpanel-${index}`}
+      aria-labelledby={`settings-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ py: 3 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
+
 export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
   const { settings, updateSettings } = useSettings();
   const [preferences, setPreferences] = useState<UserPreferences>(() => {
@@ -63,7 +94,8 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [s3Endpoint, setS3Endpoint] = useState(settings.awsBucketName || '');
   const [openRouterApiUrl, setOpenRouterApiUrl] = useState(settings.openRouterApiKey || '');
-  
+  const [tabValue, setTabValue] = useState(0);
+
   // Accordion expanded state
   const [expanded, setExpanded] = useState<AccordionState>(() => {
     const savedState = localStorage.getItem('settings_accordion_state');
@@ -127,15 +159,19 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
   const theme = useTheme();
   const { t } = useI18n();
 
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
+
   return (
     <AppShell
       title={t('settings.title')}
       onThemeToggle={onThemeToggle || (() => {})}
       isDarkMode={isDarkMode || theme.palette.mode === 'dark'}
     >
-      <Container 
-        maxWidth="md" 
-        sx={{ 
+      <Container
+        maxWidth="lg"
+        sx={{
           py: 4,
           height: '100%',
           overflow: 'auto',
@@ -165,144 +201,175 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
 
         <Divider sx={{ mb: 3 }} />
 
-        <Box sx={{ mb: 4 }}>
-          <Accordion 
-            expanded={expanded.appearance} 
-            onChange={handleAccordionChange('appearance')}
-            sx={{ mb: 2 }}
-          >
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography variant="h6">Appearance</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <FormControl fullWidth sx={{ mb: 2 }}>
-                <InputLabel id="theme-mode-label">Theme Mode</InputLabel>
-                <Select
-                  labelId="theme-mode-label"
-                  value={preferences.themeMode}
-                  label="Theme Mode"
-                  onChange={handleThemeModeChange}
-                >
-                  <MenuItem value={ThemeMode.LIGHT}>Light</MenuItem>
-                  <MenuItem value={ThemeMode.DARK}>Dark</MenuItem>
-                  <MenuItem value={ThemeMode.SYSTEM}>System</MenuItem>
-                </Select>
-              </FormControl>
-              
-              <Box sx={{ mb: 2 }}>
-                <Typography id="font-size-slider" gutterBottom>
-                  Font Size: {preferences.fontSize}px
-                </Typography>
-                <Slider
-                  value={preferences.fontSize}
-                  onChange={handleFontSizeChange}
-                  aria-labelledby="font-size-slider"
-                  valueLabelDisplay="auto"
-                  step={1}
-                  marks
-                  min={12}
-                  max={20}
-                />
-              </Box>
-              
-              <FormControl fullWidth>
-                <InputLabel id="language-label">Language</InputLabel>
-                <Select
-                  labelId="language-label"
-                  value={preferences.language}
-                  label="Language"
-                  onChange={handleLanguageChange}
-                >
-                  <MenuItem value="en">English</MenuItem>
-                  <MenuItem value="de">German</MenuItem>
-                  <MenuItem value="fr">French</MenuItem>
-                  <MenuItem value="es">Spanish</MenuItem>
-                </Select>
-              </FormControl>
-            </AccordionDetails>
-          </Accordion>
-          
-          <Accordion 
-            expanded={expanded.behavior} 
-            onChange={handleAccordionChange('behavior')}
-            sx={{ mb: 2 }}
-          >
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography variant="h6">Behavior</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={preferences.autoSave}
-                      onChange={handleSwitchChange('autoSave')}
-                    />
-                  }
-                  label="Auto-save projects (every 5 seconds)"
-                />
-                
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={preferences.autoBackup}
-                      onChange={handleSwitchChange('autoBackup')}
-                    />
-                  }
-                  label="Auto-backup to cloud"
-                />
-                
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={preferences.skipDeleteConfirmation}
-                      onChange={handleSwitchChange('skipDeleteConfirmation')}
-                    />
-                  }
-                  label="Skip delete confirmation dialogs"
-                />
-              </FormGroup>
-            </AccordionDetails>
-          </Accordion>
-          
-          <Accordion 
-            expanded={expanded.api} 
-            onChange={handleAccordionChange('api')}
-            sx={{ mb: 2 }}
-          >
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography variant="h6">API Configuration</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <TextField
-                fullWidth
-                label="AWS S3 Endpoint"
-                value={s3Endpoint}
-                onChange={(e) => setS3Endpoint(e.target.value)}
-                margin="normal"
-                helperText="Used for project backups and sync"
-              />
-              
-              <TextField
-                fullWidth
-                label="OpenRouter API URL"
-                value={openRouterApiUrl}
-                onChange={(e) => setOpenRouterApiUrl(e.target.value)}
-                margin="normal"
-                helperText="Used for the AI assistant"
-              />
-            </AccordionDetails>
-          </Accordion>
-        </Box>
+        <Box sx={{ width: '100%' }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs
+              value={tabValue}
+              onChange={handleTabChange}
+              aria-label="settings tabs"
+              variant="scrollable"
+              scrollButtons="auto"
+            >
+              <Tab label="General" id="settings-tab-0" aria-controls="settings-tabpanel-0" />
+              <Tab label="Node Appearance" id="settings-tab-1" aria-controls="settings-tabpanel-1" />
+              <Tab label="Node Size" id="settings-tab-2" aria-controls="settings-tabpanel-2" />
+              <Tab label="Export/Import" id="settings-tab-3" aria-controls="settings-tabpanel-3" />
+            </Tabs>
+          </Box>
 
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSaveSettings}
-          >
-            Save Settings
-          </Button>
+          <TabPanel value={tabValue} index={0}>
+            <Box sx={{ mb: 4 }}>
+              <Accordion
+                expanded={expanded.appearance}
+                onChange={handleAccordionChange('appearance')}
+                sx={{ mb: 2 }}
+              >
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography variant="h6">Appearance</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <FormControl fullWidth sx={{ mb: 2 }}>
+                    <InputLabel id="theme-mode-label">Theme Mode</InputLabel>
+                    <Select
+                      labelId="theme-mode-label"
+                      value={preferences.themeMode}
+                      label="Theme Mode"
+                      onChange={handleThemeModeChange}
+                    >
+                      <MenuItem value={ThemeMode.LIGHT}>Light</MenuItem>
+                      <MenuItem value={ThemeMode.DARK}>Dark</MenuItem>
+                      <MenuItem value={ThemeMode.SYSTEM}>System</MenuItem>
+                    </Select>
+                  </FormControl>
+
+                  <Box sx={{ mb: 2 }}>
+                    <Typography id="font-size-slider" gutterBottom>
+                      Font Size: {preferences.fontSize}px
+                    </Typography>
+                    <Slider
+                      value={preferences.fontSize}
+                      onChange={handleFontSizeChange}
+                      aria-labelledby="font-size-slider"
+                      valueLabelDisplay="auto"
+                      step={1}
+                      marks
+                      min={12}
+                      max={20}
+                    />
+                  </Box>
+
+                  <FormControl fullWidth>
+                    <InputLabel id="language-label">Language</InputLabel>
+                    <Select
+                      labelId="language-label"
+                      value={preferences.language}
+                      label="Language"
+                      onChange={handleLanguageChange}
+                    >
+                      <MenuItem value="en">English</MenuItem>
+                      <MenuItem value="de">German</MenuItem>
+                      <MenuItem value="fr">French</MenuItem>
+                      <MenuItem value="es">Spanish</MenuItem>
+                    </Select>
+                  </FormControl>
+                </AccordionDetails>
+              </Accordion>
+
+              <Accordion
+                expanded={expanded.behavior}
+                onChange={handleAccordionChange('behavior')}
+                sx={{ mb: 2 }}
+              >
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography variant="h6">Behavior</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <FormGroup>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={preferences.autoSave}
+                          onChange={handleSwitchChange('autoSave')}
+                        />
+                      }
+                      label="Auto-save projects (every 5 seconds)"
+                    />
+
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={preferences.autoBackup}
+                          onChange={handleSwitchChange('autoBackup')}
+                        />
+                      }
+                      label="Auto-backup to cloud"
+                    />
+
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={preferences.skipDeleteConfirmation}
+                          onChange={handleSwitchChange('skipDeleteConfirmation')}
+                        />
+                      }
+                      label="Skip delete confirmation dialogs"
+                    />
+                  </FormGroup>
+                </AccordionDetails>
+              </Accordion>
+
+              <Accordion
+                expanded={expanded.api}
+                onChange={handleAccordionChange('api')}
+                sx={{ mb: 2 }}
+              >
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography variant="h6">API Configuration</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <TextField
+                    fullWidth
+                    label="AWS S3 Endpoint"
+                    value={s3Endpoint}
+                    onChange={(e) => setS3Endpoint(e.target.value)}
+                    margin="normal"
+                    helperText="Used for project backups and sync"
+                  />
+
+                  <TextField
+                    fullWidth
+                    label="OpenRouter API URL"
+                    value={openRouterApiUrl}
+                    onChange={(e) => setOpenRouterApiUrl(e.target.value)}
+                    margin="normal"
+                    helperText="Used for the AI assistant"
+                  />
+                </AccordionDetails>
+              </Accordion>
+            </Box>
+
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSaveSettings}
+              >
+                Save Settings
+              </Button>
+            </Box>
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={1}>
+            <ColorSchemeManager />
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={2}>
+            <NodePreferencesManager />
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={3}>
+            <SettingsExportImport />
+          </TabPanel>
         </Box>
 
         <Snackbar

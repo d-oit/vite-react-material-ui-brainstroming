@@ -2,9 +2,22 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
+import type { UserConfig } from 'vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: {
+    chunkSizeWarningLimit: 4000, // Increase the warning limit to 4MB
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          mui: ['@mui/material', '@mui/icons-material'],
+          aws: ['aws-sdk'],
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({
@@ -49,6 +62,7 @@ export default defineConfig({
         ],
       },
       workbox: {
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024, // 4MB
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

@@ -1,8 +1,9 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
-import { Card, CardContent, Typography, Box, IconButton, Chip } from '@mui/material';
+import { Card, CardContent, Typography, Box, IconButton, Chip, useTheme, useMediaQuery } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { NodeData, NodeType } from '../../types';
+import { useSettings } from '../../contexts/SettingsContext';
 
 interface CustomNodeProps extends NodeProps {
   data: NodeData & {
@@ -11,51 +12,64 @@ interface CustomNodeProps extends NodeProps {
   };
 }
 
-const getNodeColor = (type: NodeType, customColor?: string): string => {
-  if (customColor) return customColor;
+// Border colors are derived from the node colors
+const getNodeBorderColor = (backgroundColor: string): string => {
+  // Convert hex to RGB and darken
+  const hex = backgroundColor.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
 
-  switch (type) {
-    case NodeType.IDEA:
-      return '#e3f2fd'; // Light blue
-    case NodeType.TASK:
-      return '#e8f5e9'; // Light green
-    case NodeType.NOTE:
-      return '#fff8e1'; // Light yellow
-    case NodeType.RESOURCE:
-      return '#f3e5f5'; // Light purple
-    default:
-      return '#f5f5f5'; // Light grey
-  }
+  // Darken the color by reducing brightness
+  const darkenFactor = 0.6; // 60% darker
+  const darkerR = Math.floor(r * darkenFactor);
+  const darkerG = Math.floor(g * darkenFactor);
+  const darkerB = Math.floor(b * darkenFactor);
+
+  return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
 };
 
-const getNodeBorderColor = (type: NodeType): string => {
-  switch (type) {
-    case NodeType.IDEA:
-      return '#2196f3'; // Blue
-    case NodeType.TASK:
-      return '#4caf50'; // Green
-    case NodeType.NOTE:
-      return '#ffc107'; // Yellow
-    case NodeType.RESOURCE:
-      return '#9c27b0'; // Purple
-    default:
-      return '#9e9e9e'; // Grey
-  }
-};
+
 
 const CustomNode = ({ data, id, type }: CustomNodeProps) => {
   const nodeType = type as NodeType;
+  const { getNodeColor, nodePreferences } = useSettings();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  // Get node color from settings context
   const backgroundColor = getNodeColor(nodeType, data.color);
-  const borderColor = getNodeBorderColor(nodeType);
+  const borderColor = getNodeBorderColor(backgroundColor);
+
+  // Calculate node size based on preferences and screen size
+  const nodeSize = useMemo(() => {
+    if (!nodePreferences) return { width: 200, fontSize: 1 };
+
+    const size = nodePreferences.defaultSize;
+    const sizeConfig = nodePreferences.nodeSizes[size];
+
+    // Adjust for mobile
+    if (isMobile) {
+      return {
+        width: Math.min(sizeConfig.width, 250), // Cap width on mobile
+        fontSize: sizeConfig.fontSize * 0.9 // Slightly smaller font on mobile
+      };
+    }
+
+    return sizeConfig;
+  }, [nodePreferences, isMobile]);
 
   return (
     <Card
       sx={{
-        minWidth: 200,
-        maxWidth: 300,
+        minWidth: isMobile ? '90%' : nodeSize.width,
+        maxWidth: isMobile ? '95%' : nodeSize.width * 1.5,
+        width: isMobile ? '90%' : nodeSize.width,
         backgroundColor,
         borderLeft: `4px solid ${borderColor}`,
         boxShadow: 2,
+        transition: 'all 0.2s ease',
+        fontSize: `${nodeSize.fontSize}rem`,
       }}
     >
       <Handle
@@ -80,7 +94,17 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
           borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
         }}
       >
-        <Typography variant="subtitle1" fontWeight="bold">
+        <Typography
+          variant="subtitle1"
+          fontWeight="bold"
+          sx={{
+            fontSize: `calc(${nodeSize.fontSize}rem * 1.1)`,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            maxWidth: isMobile ? '150px' : '200px'
+          }}
+        >
           {data.label}
         </Typography>
 
@@ -101,7 +125,17 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
       </Box>
 
       <CardContent sx={{ p: 1.5 }}>
-        <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+        <Typography
+          variant="body2"
+          sx={{
+            whiteSpace: 'pre-wrap',
+            fontSize: `calc(${nodeSize.fontSize}rem * 0.9)`,
+            overflow: 'hidden',
+            display: '-webkit-box',
+            WebkitLineClamp: isMobile ? 3 : 5,
+            WebkitBoxOrient: 'vertical',
+          }}
+        >
           {data.content}
         </Typography>
 
