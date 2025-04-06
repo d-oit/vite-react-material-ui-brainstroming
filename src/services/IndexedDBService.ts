@@ -83,6 +83,8 @@ export class IndexedDBService {
   private initPromise: Promise<boolean> | null = null;
   private encryptionPassword: string | null = null;
   private encryptionAvailable = isEncryptionAvailable();
+  private fallbackStorage: Map<string, any> = new Map();
+  private isIndexedDBSupported = typeof window !== 'undefined' && !!window.indexedDB;
 
   private constructor() {
     // Private constructor for singleton
@@ -110,8 +112,8 @@ export class IndexedDBService {
 
     this.initPromise = new Promise(resolve => {
       try {
-        if (!window.indexedDB) {
-          console.error('IndexedDB is not supported in this browser');
+        if (!this.isIndexedDBSupported) {
+          console.warn('IndexedDB is not supported in this browser, using fallback storage');
           this.isInitialized = false;
           resolve(false);
           return;
@@ -362,13 +364,41 @@ export class IndexedDBService {
    * @returns Promise that resolves with the color scheme
    */
   public async getColorScheme(id: string): Promise<ColorScheme | null> {
-    await this.init();
+    const initialized = await this.init();
+
+    // Use fallback storage if IndexedDB is not available
+    if (!initialized || !this.db) {
+      console.warn(`Using fallback storage for getColorScheme(${id})`);
+
+      // Try to get from fallback storage
+      const colorScheme = this.fallbackStorage.get(`colorScheme_${id}`);
+      if (colorScheme) {
+        return colorScheme;
+      }
+
+      // Return a default color scheme if not found
+      if (id === 'default') {
+        const defaultScheme: ColorScheme = {
+          id: 'default',
+          name: 'Default',
+          colors: {
+            [NodeType.IDEA]: '#e3f2fd', // Light blue
+            [NodeType.TASK]: '#e8f5e9', // Light green
+            [NodeType.NOTE]: '#fff8e1', // Light yellow
+            [NodeType.RESOURCE]: '#f3e5f5', // Light purple
+          },
+          isDefault: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        this.fallbackStorage.set(`colorScheme_${id}`, defaultScheme);
+        return defaultScheme;
+      }
+
+      return null;
+    }
 
     return new Promise((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not initialized'));
-        return;
-      }
 
       const transaction = this.db.transaction(STORES.COLORS, 'readonly');
       const store = transaction.objectStore(STORES.COLORS);
@@ -390,13 +420,38 @@ export class IndexedDBService {
    * @returns Promise that resolves with the default color scheme
    */
   public async getDefaultColorScheme(): Promise<ColorScheme | null> {
-    await this.init();
+    const initialized = await this.init();
+
+    // Use fallback storage if IndexedDB is not available
+    if (!initialized || !this.db) {
+      console.warn('Using fallback storage for getDefaultColorScheme');
+
+      // Try to get from fallback storage
+      const defaultScheme = this.fallbackStorage.get('colorScheme_default');
+      if (defaultScheme) {
+        return defaultScheme;
+      }
+
+      // Create a default color scheme
+      const newDefaultScheme: ColorScheme = {
+        id: 'default',
+        name: 'Default',
+        colors: {
+          [NodeType.IDEA]: '#e3f2fd', // Light blue
+          [NodeType.TASK]: '#e8f5e9', // Light green
+          [NodeType.NOTE]: '#fff8e1', // Light yellow
+          [NodeType.RESOURCE]: '#f3e5f5', // Light purple
+        },
+        isDefault: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      this.fallbackStorage.set('colorScheme_default', newDefaultScheme);
+      return newDefaultScheme;
+    }
 
     return new Promise((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not initialized'));
-        return;
-      }
 
       const transaction = this.db.transaction(STORES.COLORS, 'readonly');
       const store = transaction.objectStore(STORES.COLORS);
@@ -489,13 +544,42 @@ export class IndexedDBService {
    * @returns Promise that resolves with node preferences
    */
   public async getNodePreferences(): Promise<NodePreferences> {
-    await this.init();
+    const initialized = await this.init();
+
+    // Default preferences to use as fallback
+    const defaultPrefs: NodePreferences = {
+      defaultSize: 'medium',
+      defaultColorScheme: 'default',
+      nodeSizes: {
+        small: { width: 150, fontSize: 0.8 },
+        medium: { width: 200, fontSize: 1 },
+        large: { width: 250, fontSize: 1.2 },
+      },
+      touchOptimized: false,
+      customColors: {
+        [NodeType.IDEA]: '#e3f2fd', // Light blue
+        [NodeType.TASK]: '#e8f5e9', // Light green
+        [NodeType.NOTE]: '#fff8e1', // Light yellow
+        [NodeType.RESOURCE]: '#f3e5f5', // Light purple
+      },
+    };
+
+    // Use fallback storage if IndexedDB is not available
+    if (!initialized || !this.db) {
+      console.warn('Using fallback storage for getNodePreferences');
+
+      // Try to get from fallback storage
+      const prefs = this.fallbackStorage.get('nodePreferences');
+      if (prefs) {
+        return prefs;
+      }
+
+      // Store default preferences in fallback storage
+      this.fallbackStorage.set('nodePreferences', defaultPrefs);
+      return defaultPrefs;
+    }
 
     return new Promise((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not initialized'));
-        return;
-      }
 
       const transaction = this.db.transaction(STORES.NODE_PREFERENCES, 'readonly');
       const store = transaction.objectStore(STORES.NODE_PREFERENCES);
@@ -688,13 +772,36 @@ export class IndexedDBService {
    * @returns Promise that resolves with all settings
    */
   public async getAllSettings(): Promise<Record<string, unknown>> {
-    await this.init();
+    const initialized = await this.init();
+
+    // Use fallback storage if IndexedDB is not available
+    if (!initialized || !this.db) {
+      console.warn('Using fallback storage for getAllSettings');
+
+      // Collect all settings from fallback storage
+      const settings: Record<string, unknown> = {};
+      for (const [key, value] of this.fallbackStorage.entries()) {
+        if (key.startsWith('settings_')) {
+          settings[key.replace('settings_', '')] = value;
+        }
+      }
+
+      // Try to get from localStorage as a backup
+      try {
+        const storedSettings = localStorage.getItem('doitBrainstorming_settings');
+        if (storedSettings) {
+          const parsedSettings = JSON.parse(storedSettings);
+          // Merge with settings from fallback storage
+          return { ...parsedSettings, ...settings };
+        }
+      } catch (error) {
+        console.warn('Failed to get settings from localStorage:', error);
+      }
+
+      return settings;
+    }
 
     return new Promise((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not initialized'));
-        return;
-      }
 
       const transaction = this.db.transaction(STORES.SETTINGS, 'readonly');
       const store = transaction.objectStore(STORES.SETTINGS);
@@ -1266,23 +1373,34 @@ export class IndexedDBService {
   public async saveProject(project: Project): Promise<string> {
     const initialized = await this.init();
 
-    return new Promise(resolve => {
-      if (!initialized || !this.db) {
-        console.warn(`Database not initialized, project ${project.id} will not be saved`);
-        // Still return the project ID to prevent cascading errors
-        resolve(project.id);
-        return;
+    // Update the updatedAt timestamp
+    const updatedProject = {
+      ...project,
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Use fallback storage if IndexedDB is not available
+    if (!initialized || !this.db) {
+      console.warn(`Database not initialized, project ${project.id} will be saved to fallback storage`);
+
+      // Store in fallback storage
+      this.fallbackStorage.set(`project_${project.id}`, updatedProject);
+
+      // Also try to save to localStorage as a backup
+      try {
+        localStorage.setItem(`doitBrainstorming_project_${project.id}`, JSON.stringify(updatedProject));
+      } catch (error) {
+        console.warn(`Failed to save project ${project.id} to localStorage:`, error);
       }
+
+      return Promise.resolve(project.id);
+    }
+
+    return new Promise(resolve => {
 
       try {
         const transaction = this.db.transaction(STORES.PROJECTS, 'readwrite');
         const store = transaction.objectStore(STORES.PROJECTS);
-
-        // Update the updatedAt timestamp
-        const updatedProject = {
-          ...project,
-          updatedAt: new Date().toISOString(),
-        };
 
         const request = store.put(updatedProject);
 
@@ -1307,12 +1425,33 @@ export class IndexedDBService {
   public async getProject(id: string): Promise<Project | null> {
     const initialized = await this.init();
 
-    return new Promise(resolve => {
-      if (!initialized || !this.db) {
-        console.warn(`Database not initialized, returning null for project: ${id}`);
-        resolve(null);
-        return;
+    // Use fallback storage if IndexedDB is not available
+    if (!initialized || !this.db) {
+      console.warn(`Using fallback storage for getProject(${id})`);
+
+      // Try to get from fallback storage
+      const project = this.fallbackStorage.get(`project_${id}`);
+      if (project) {
+        return project;
       }
+
+      // Try to get from localStorage as a backup
+      try {
+        const storedProject = localStorage.getItem(`doitBrainstorming_project_${id}`);
+        if (storedProject) {
+          const parsedProject = JSON.parse(storedProject);
+          // Store in fallback for future use
+          this.fallbackStorage.set(`project_${id}`, parsedProject);
+          return parsedProject;
+        }
+      } catch (error) {
+        console.warn(`Failed to get project ${id} from localStorage:`, error);
+      }
+
+      return null;
+    }
+
+    return new Promise(resolve => {
 
       try {
         const transaction = this.db.transaction(STORES.PROJECTS, 'readonly');
