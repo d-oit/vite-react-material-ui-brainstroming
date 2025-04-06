@@ -98,11 +98,11 @@ export class IndexedDBService {
   }
 
   /**
-   * Initialize the database
+   * Initialize the database with improved error handling
    * @returns Promise that resolves when the database is ready
    */
   public async init(): Promise<boolean> {
-    if (this.isInitialized) {
+    if (this.isInitialized && this.db) {
       return true;
     }
 
@@ -110,126 +110,353 @@ export class IndexedDBService {
       return this.initPromise;
     }
 
+    // Check for private browsing mode in Safari which doesn't support IndexedDB
+    if (this.isPrivateBrowsingMode()) {
+      console.warn('Private browsing mode detected, IndexedDB may not be available');
+      this.notifyStorageUnavailable('private_browsing');
+      return false;
+    }
+
     this.initPromise = new Promise(resolve => {
       try {
         if (!this.isIndexedDBSupported) {
           console.warn('IndexedDB is not supported in this browser, using fallback storage');
           this.isInitialized = false;
+          this.notifyStorageUnavailable('not_supported');
           resolve(false);
           return;
         }
 
+        // Set a timeout to detect if IndexedDB is taking too long (might be blocked)
+        const timeoutId = setTimeout(() => {
+          console.warn('IndexedDB initialization timed out, may be blocked');
+          this.notifyStorageUnavailable('timeout');
+          resolve(false);
+        }, 5000); // 5 second timeout
+
         const request = window.indexedDB.open(DB_NAME, DB_VERSION);
 
+        // Handle database upgrades
+        request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
+          this.handleDatabaseUpgrade(event);
+        };
+
         request.onerror = (event: Event) => {
-          console.error('Error opening IndexedDB:', event);
+          clearTimeout(timeoutId);
+          const error = (event.target as IDBOpenDBRequest).error;
+          console.error('Error opening IndexedDB:', error?.name, error?.message);
           this.isInitialized = false;
+
+          // Check for quota exceeded error
+          if (error?.name === 'QuotaExceededError') {
+            this.notifyStorageUnavailable('quota_exceeded');
+          } else {
+            this.notifyStorageUnavailable('error');
+          }
+
           // Don't reject, just resolve with false to prevent cascading errors
           resolve(false);
         };
 
         request.onsuccess = (event: Event) => {
+          clearTimeout(timeoutId);
           this.db = (event.target as IDBOpenDBRequest).result;
           this.isInitialized = true;
           console.log('IndexedDB initialized successfully');
-          resolve(true);
-        };
 
-        request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
-          try {
-            const db = (event.target as IDBOpenDBRequest).result;
-            const oldVersion = event.oldVersion;
-            const transaction = (event.target as IDBOpenDBRequest).transaction;
+          // Set up error handler for database
+          this.db.onerror = event => {
+            console.error('IndexedDB error:', (event.target as IDBDatabase).error);
+          };
 
-            // Handle schema migrations based on version
-            if (oldVersion < 1) {
-              // Create initial stores for version 1
-              if (!db.objectStoreNames.contains(STORES.SETTINGS)) {
-                db.createObjectStore(STORES.SETTINGS, { keyPath: 'key' });
-              }
-
-              if (!db.objectStoreNames.contains(STORES.COLORS)) {
-                const colorStore = db.createObjectStore(STORES.COLORS, { keyPath: 'id' });
-                colorStore.createIndex('name', 'name', { unique: true });
-                colorStore.createIndex('isDefault', 'isDefault', { unique: false });
-              }
-
-              if (!db.objectStoreNames.contains(STORES.NODE_PREFERENCES)) {
-                db.createObjectStore(STORES.NODE_PREFERENCES, { keyPath: 'id' });
-              }
-
-              if (!db.objectStoreNames.contains(STORES.LOGS)) {
-                const logStore = db.createObjectStore(STORES.LOGS, { keyPath: 'id' });
-                logStore.createIndex('timestamp', 'timestamp', { unique: false });
-                logStore.createIndex('level', 'level', { unique: false });
-              }
+          // Test database by writing and reading a small value
+          this.testDatabaseAccess().then(isWorking => {
+            if (!isWorking) {
+              console.error('IndexedDB test failed, database may be corrupted');
+              this.notifyStorageUnavailable('corrupted');
+              this.isInitialized = false;
+              resolve(false);
+              return;
             }
 
-            if (oldVersion < 2) {
-              // Add new stores for version 2
-              if (!db.objectStoreNames.contains(STORES.SECURE_STORE)) {
-                const secureStore = db.createObjectStore(STORES.SECURE_STORE, { keyPath: 'id' });
-                secureStore.createIndex('key', 'key', { unique: true });
-                secureStore.createIndex('updatedAt', 'updatedAt', { unique: false });
-              }
-
-              if (!db.objectStoreNames.contains(STORES.PROJECTS)) {
-                const projectsStore = db.createObjectStore(STORES.PROJECTS, { keyPath: 'id' });
-                projectsStore.createIndex('updatedAt', 'updatedAt', { unique: false });
-              }
-
-              if (!db.objectStoreNames.contains(STORES.OFFLINE_QUEUE)) {
-                const queueStore = db.createObjectStore(STORES.OFFLINE_QUEUE, { keyPath: 'id' });
-                queueStore.createIndex('timestamp', 'timestamp', { unique: false });
-                queueStore.createIndex('priority', 'priority', { unique: false });
-              }
-            }
-
-            if (oldVersion < 3) {
-              // Add new stores for version 3
-              if (!db.objectStoreNames.contains(STORES.PROJECT_HISTORY)) {
-                const historyStore = db.createObjectStore(STORES.PROJECT_HISTORY, {
-                  keyPath: 'id',
-                });
-                historyStore.createIndex('projectId', 'projectId', { unique: false });
-                historyStore.createIndex('timestamp', 'timestamp', { unique: false });
-                historyStore.createIndex('action', 'action', { unique: false });
-              }
-
-              // Update PROJECTS store with new indexes if it exists
-              if (db.objectStoreNames.contains(STORES.PROJECTS)) {
-                const projectsStore = transaction.objectStore(STORES.PROJECTS);
-
-                // Add new indexes if they don't exist
-                if (!projectsStore.indexNames.contains('isArchived')) {
-                  projectsStore.createIndex('isArchived', 'isArchived', { unique: false });
-                }
-
-                if (!projectsStore.indexNames.contains('lastAccessedAt')) {
-                  projectsStore.createIndex('lastAccessedAt', 'lastAccessedAt', { unique: false });
-                }
-
-                if (!projectsStore.indexNames.contains('tags')) {
-                  projectsStore.createIndex('tags', 'tags', { unique: false, multiEntry: true });
-                }
-              }
-            }
-
-            // Initialize with default data using the existing transaction
-            this.initializeDefaultData(db, transaction);
-          } catch (error) {
-            console.error('Error during database upgrade:', error);
-            // Don't throw, as this would abort the transaction
-          }
+            resolve(true);
+          });
         };
       } catch (error) {
         console.error('Error initializing IndexedDB:', error);
         this.isInitialized = false;
+        this.notifyStorageUnavailable('error');
         resolve(false);
       }
     });
 
     return this.initPromise;
+  }
+
+  /**
+   * Test if we're in private browsing mode
+   * @returns True if in private browsing mode
+   */
+  private isPrivateBrowsingMode(): boolean {
+    // This is a best-effort detection, not 100% reliable
+    try {
+      // Safari private mode detection
+      if (window.safari) {
+        const storage = window.localStorage;
+        if (storage) {
+          storage.setItem('test', '1');
+          storage.removeItem('test');
+        } else {
+          return true; // localStorage is null in Safari private mode
+        }
+      }
+
+      // Firefox private mode detection (old method)
+      if (navigator.userAgent.includes('Firefox')) {
+        // In Firefox private mode, indexedDB.open returns null
+        const db = window.indexedDB.open('test');
+        if (!db) {
+          return true;
+        }
+      }
+
+      return false;
+    } catch (e) {
+      // If we get a security exception, we're probably in private mode
+      return true;
+    }
+  }
+
+  /**
+   * Test database access by writing and reading a small value
+   * @returns Promise that resolves with true if test passed
+   */
+  private async testDatabaseAccess(): Promise<boolean> {
+    if (!this.db) return false;
+
+    try {
+      const testKey = '_db_test_' + Date.now();
+      const testValue = { timestamp: Date.now() };
+
+      // Try to write to the settings store
+      const writeResult = await new Promise<boolean>(resolve => {
+        try {
+          const transaction = this.db!.transaction([STORES.SETTINGS], 'readwrite');
+          const store = transaction.objectStore(STORES.SETTINGS);
+
+          const request = store.put({ key: testKey, value: testValue });
+
+          request.onsuccess = () => resolve(true);
+          request.onerror = () => {
+            console.error('Test write failed:', request.error);
+            resolve(false);
+          };
+        } catch (error) {
+          console.error('Error during test write transaction:', error);
+          resolve(false);
+        }
+      });
+
+      if (!writeResult) return false;
+
+      // Try to read it back
+      const readResult = await new Promise<boolean>(resolve => {
+        try {
+          const transaction = this.db!.transaction([STORES.SETTINGS], 'readonly');
+          const store = transaction.objectStore(STORES.SETTINGS);
+
+          const request = store.get(testKey);
+
+          request.onsuccess = () => {
+            const data = request.result;
+            resolve(data && data.value && data.value.timestamp === testValue.timestamp);
+          };
+
+          request.onerror = () => {
+            console.error('Test read failed:', request.error);
+            resolve(false);
+          };
+        } catch (error) {
+          console.error('Error during test read transaction:', error);
+          resolve(false);
+        }
+      });
+
+      // Clean up the test key
+      try {
+        const transaction = this.db!.transaction([STORES.SETTINGS], 'readwrite');
+        const store = transaction.objectStore(STORES.SETTINGS);
+        store.delete(testKey);
+      } catch (e) {
+        // Ignore cleanup errors
+      }
+
+      return readResult;
+    } catch (error) {
+      console.error('Database access test failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Notify the application that storage is unavailable
+   * @param reason Reason why storage is unavailable
+   */
+  private notifyStorageUnavailable(
+    reason:
+      | 'not_supported'
+      | 'private_browsing'
+      | 'quota_exceeded'
+      | 'timeout'
+      | 'corrupted'
+      | 'error'
+  ): void {
+    // Dispatch a custom event that the application can listen for
+    if (typeof window !== 'undefined' && window.dispatchEvent) {
+      const event = new CustomEvent('indexeddb:unavailable', {
+        detail: { reason },
+      });
+      window.dispatchEvent(event);
+    }
+
+    // Log the issue
+    console.warn(`IndexedDB unavailable: ${reason}. Using fallback storage.`);
+  }
+
+  /**
+   * Handle database upgrade
+   */
+  private handleDatabaseUpgrade(event: IDBVersionChangeEvent): void {
+    try {
+      const db = (event.target as IDBOpenDBRequest).result;
+      const oldVersion = event.oldVersion;
+      const transaction = (event.target as IDBOpenDBRequest).transaction;
+
+      // Handle schema migrations based on version
+      this.applyDatabaseMigrations(db, oldVersion, transaction);
+    } catch (error) {
+      console.error('Error during database upgrade:', error);
+      // Don't throw, as this would abort the transaction
+    }
+  }
+
+  /**
+   * Apply database migrations based on version
+   */
+  private applyDatabaseMigrations(
+    db: IDBDatabase,
+    oldVersion: number,
+    transaction: IDBTransaction
+  ): void {
+    // Version 1: Initial schema
+    if (oldVersion < 1) {
+      this.createInitialStores(db);
+    }
+
+    // Version 2: Add secure store and projects
+    if (oldVersion < 2) {
+      this.addVersion2Stores(db);
+    }
+
+    // Version 3: Add project history and offline queue
+    if (oldVersion < 3) {
+      this.addVersion3Stores(db);
+      this.updateProjectsStore(transaction);
+    }
+
+    // Initialize with default data using the existing transaction
+    this.initializeDefaultData(db, transaction);
+  }
+
+  /**
+   * Create initial stores for version 1
+   */
+  private createInitialStores(db: IDBDatabase): void {
+    if (!db.objectStoreNames.contains(STORES.SETTINGS)) {
+      db.createObjectStore(STORES.SETTINGS, { keyPath: 'key' });
+    }
+
+    if (!db.objectStoreNames.contains(STORES.COLORS)) {
+      const colorStore = db.createObjectStore(STORES.COLORS, { keyPath: 'id' });
+      colorStore.createIndex('name', 'name', { unique: true });
+      colorStore.createIndex('isDefault', 'isDefault', { unique: false });
+    }
+
+    if (!db.objectStoreNames.contains(STORES.NODE_PREFERENCES)) {
+      db.createObjectStore(STORES.NODE_PREFERENCES, { keyPath: 'id' });
+    }
+
+    if (!db.objectStoreNames.contains(STORES.LOGS)) {
+      const logStore = db.createObjectStore(STORES.LOGS, { keyPath: 'id' });
+      logStore.createIndex('timestamp', 'timestamp', { unique: false });
+      logStore.createIndex('level', 'level', { unique: false });
+    }
+  }
+
+  /**
+   * Add version 2 stores
+   */
+  private addVersion2Stores(db: IDBDatabase): void {
+    if (!db.objectStoreNames.contains(STORES.SECURE_STORE)) {
+      const secureStore = db.createObjectStore(STORES.SECURE_STORE, { keyPath: 'id' });
+      secureStore.createIndex('key', 'key', { unique: true });
+      secureStore.createIndex('updatedAt', 'updatedAt', { unique: false });
+    }
+
+    if (!db.objectStoreNames.contains(STORES.PROJECTS)) {
+      const projectsStore = db.createObjectStore(STORES.PROJECTS, { keyPath: 'id' });
+      projectsStore.createIndex('updatedAt', 'updatedAt', { unique: false });
+    }
+  }
+
+  /**
+   * Add version 3 stores
+   */
+  private addVersion3Stores(db: IDBDatabase): void {
+    if (!db.objectStoreNames.contains(STORES.PROJECT_HISTORY)) {
+      const historyStore = db.createObjectStore(STORES.PROJECT_HISTORY, {
+        keyPath: ['projectId', 'timestamp'],
+      });
+      historyStore.createIndex('projectId', 'projectId', { unique: false });
+      historyStore.createIndex('timestamp', 'timestamp', { unique: false });
+      historyStore.createIndex('action', 'action', { unique: false });
+    }
+
+    if (!db.objectStoreNames.contains(STORES.OFFLINE_QUEUE)) {
+      const queueStore = db.createObjectStore(STORES.OFFLINE_QUEUE, {
+        keyPath: 'id',
+        autoIncrement: true,
+      });
+      queueStore.createIndex('timestamp', 'timestamp', { unique: false });
+      queueStore.createIndex('type', 'type', { unique: false });
+    }
+  }
+
+  /**
+   * Update projects store with new indexes
+   */
+  private updateProjectsStore(transaction: IDBTransaction): void {
+    try {
+      // Update PROJECTS store with new indexes if it exists
+      if (transaction.objectStoreNames.contains(STORES.PROJECTS)) {
+        const projectsStore = transaction.objectStore(STORES.PROJECTS);
+
+        // Add new indexes if they don't exist
+        if (!projectsStore.indexNames.contains('isArchived')) {
+          projectsStore.createIndex('isArchived', 'isArchived', { unique: false });
+        }
+
+        if (!projectsStore.indexNames.contains('lastAccessedAt')) {
+          projectsStore.createIndex('lastAccessedAt', 'lastAccessedAt', { unique: false });
+        }
+
+        if (!projectsStore.indexNames.contains('tags')) {
+          projectsStore.createIndex('tags', 'tags', { unique: false, multiEntry: true });
+        }
+      }
+    } catch (error) {
+      console.error('Error updating projects store:', error);
+    }
   }
 
   /**

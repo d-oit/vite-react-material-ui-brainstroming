@@ -39,6 +39,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
+import SkipLink from '../Accessibility/SkipLink';
 import NetworkInfoDialog from '../OfflineIndicator/NetworkInfoDialog';
 import NetworkStatusIcon from '../OfflineIndicator/NetworkStatusIcon';
 import _OfflineIndicator from '../OfflineIndicator/OfflineIndicator';
@@ -204,6 +205,9 @@ export const AppShell = ({
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      {/* Skip link for keyboard users */}
+      <SkipLink targetId="main-content" />
+
       <AppBar
         position="fixed"
         elevation={1}
@@ -294,6 +298,9 @@ export const AppShell = ({
       {/* Main content */}
       <Box
         component="main"
+        id="main-content"
+        tabIndex={-1} // Makes it focusable for skip link
+        aria-label="Main content"
         sx={{
           flexGrow: 1,
           p: 0,
@@ -304,6 +311,9 @@ export const AppShell = ({
           flexDirection: 'column',
           height: 'calc(100vh - 64px)', // Full height minus AppBar
           overflow: 'hidden',
+          '&:focus': {
+            outline: 'none', // Remove outline when focused via skip link
+          },
         }}
       >
         {children}

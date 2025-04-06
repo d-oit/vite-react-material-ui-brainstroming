@@ -2,7 +2,7 @@ import AWS from 'aws-sdk';
 
 import loggerService from '../services/LoggerService';
 import type { Project } from '../types';
-import { isValidUrl, sanitizeUrl } from '../utils/urlValidation';
+import { isValidUrl, sanitizeUrl, validateS3Endpoint } from '../utils/urlValidation';
 
 /**
  * Create a dummy S3 client that gracefully fails all operations
@@ -25,25 +25,60 @@ const createDummyS3Client = (errorMessage: string): AWS.S3 => {
   } as AWS.S3;
 };
 
-// Initialize S3 client
+/**
+ * Check if S3 is enabled in the environment
+ * @returns True if S3 is enabled, false otherwise
+ */
+export const isS3Enabled = (): boolean => {
+  return import.meta.env.VITE_S3_ENABLED === 'true';
+};
+
+/**
+ * Initialize S3 client with proper validation and error handling
+ * @returns Configured S3 client or dummy client if configuration is invalid
+ */
 const initS3Client = () => {
+  // First check if S3 is enabled
+  if (!isS3Enabled()) {
+    loggerService.info('S3 integration is disabled by configuration');
+    return createDummyS3Client('S3 integration is disabled');
+  }
+
   // Check if S3 is configured in environment variables
   const endpoint = import.meta.env.VITE_AWS_S3_ENDPOINT;
   const region = import.meta.env.VITE_AWS_REGION || 'us-east-1';
   const bucket = import.meta.env.VITE_AWS_S3_BUCKET;
+  const accessKeyId = import.meta.env.VITE_AWS_ACCESS_KEY_ID;
+  const secretAccessKey = import.meta.env.VITE_AWS_SECRET_ACCESS_KEY;
+
+  // Check for required credentials
+  if (!accessKeyId || !secretAccessKey) {
+    loggerService.warn(
+      'S3 credentials not configured. Please set VITE_AWS_ACCESS_KEY_ID and VITE_AWS_SECRET_ACCESS_KEY in your .env file.'
+    );
+    return createDummyS3Client('S3 credentials not configured');
+  }
 
   // If S3 is not configured at all, return a dummy client
-  if (!endpoint && !bucket) {
+  if (!bucket) {
     loggerService.warn(
-      'S3 not configured. Please set VITE_AWS_S3_ENDPOINT and VITE_AWS_S3_BUCKET in your .env file.'
+      'S3 bucket not configured. Please set VITE_AWS_S3_BUCKET in your .env file.'
     );
-    return createDummyS3Client('S3 not configured');
+    return createDummyS3Client('S3 bucket not configured');
   }
 
   // Validate the endpoint URL if provided
-  if (endpoint && !isValidUrl(endpoint)) {
-    loggerService.error('Invalid S3 endpoint URL:', endpoint);
-    return createDummyS3Client('Invalid S3 endpoint URL');
+  if (endpoint) {
+    const validation = validateS3Endpoint(endpoint);
+    if (!validation.isValid) {
+      loggerService.error(`Invalid S3 endpoint URL: ${validation.message}`);
+      return createDummyS3Client(`Invalid S3 endpoint URL: ${validation.message}`);
+    }
+
+    if (validation.message) {
+      // This is a warning, but we can still proceed
+      loggerService.warn(`S3 endpoint warning: ${validation.message}`);
+    }
   }
 
   const config: AWS.S3.ClientConfiguration = {
@@ -73,38 +108,94 @@ const getBucketName = (): string => {
   return bucket;
 };
 
-// Retry mechanism for S3 operations
-const withRetry = async <T>(operation: () => Promise<T>, maxRetries = 3): Promise<T> => {
+/**
+ * Retry mechanism for S3 operations with exponential backoff
+ * @param operation Function to retry
+ * @param maxRetries Maximum number of retries (default: 3)
+ * @param baseDelay Base delay in ms (default: 1000)
+ * @returns Promise that resolves with the operation result
+ */
+const withRetry = async <T>(
+  operation: () => Promise<T>,
+  maxRetries = 3,
+  baseDelay = 1000
+): Promise<T> => {
   let lastError: Error | null = null;
+  let retryableError = true;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await operation();
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
+
+      // Check if this is a non-retryable error
+      if (error instanceof Error) {
+        // Don't retry client errors (4xx)
+        if (
+          error.name === 'AccessDenied' ||
+          error.name === 'InvalidAccessKeyId' ||
+          error.name === 'InvalidToken' ||
+          error.name === 'MissingSecurityHeader'
+        ) {
+          loggerService.error(`S3 authentication error: ${error.message}`);
+          retryableError = false;
+          break;
+        }
+
+        // Don't retry if the bucket doesn't exist
+        if (error.name === 'NoSuchBucket') {
+          loggerService.error(`S3 bucket does not exist: ${error.message}`);
+          retryableError = false;
+          break;
+        }
+      }
+
       loggerService.warn(
         `S3 operation failed (attempt ${attempt}/${maxRetries}): ${lastError.message}`
       );
 
       if (attempt < maxRetries) {
-        // Exponential backoff: 1s, 2s, 4s, etc.
-        const delay = Math.pow(2, attempt - 1) * 1000;
-        await new Promise(resolve => setTimeout(resolve, delay));
+        // Exponential backoff with jitter: 1-2s, 2-4s, 4-8s, etc.
+        const delay = Math.pow(2, attempt - 1) * baseDelay;
+        const jitter = Math.random() * 0.3 * delay; // Add up to 30% jitter
+        await new Promise(resolve => setTimeout(resolve, delay + jitter));
       }
     }
   }
 
-  throw lastError;
+  if (lastError) {
+    if (!retryableError) {
+      loggerService.error(`S3 operation failed with non-retryable error: ${lastError.message}`);
+    } else {
+      loggerService.error(`S3 operation failed after ${maxRetries} attempts: ${lastError.message}`);
+    }
+    throw lastError;
+  }
+
+  // This should never happen, but TypeScript requires it
+  throw new Error('Unknown error in S3 operation');
 };
 
 // Progress callback type
 export type ProgressCallback = (progress: number) => void;
 
-// Upload project to S3
+/**
+ * Upload a project to S3 with progress tracking and error handling
+ * @param project Project to upload
+ * @param onProgress Optional callback for upload progress
+ * @returns Promise that resolves with the S3 URL of the uploaded project
+ */
 export const uploadProject = async (
   project: Project,
   onProgress?: ProgressCallback
 ): Promise<string> => {
+  // First check if S3 is enabled
+  if (!isS3Enabled()) {
+    loggerService.info('S3 upload skipped - S3 integration is disabled');
+    return Promise.reject(new Error('S3 integration is disabled'));
+  }
+
   return withRetry(async () => {
     const s3 = initS3Client();
     const bucketName = getBucketName();
@@ -123,6 +214,7 @@ export const uploadProject = async (
       updatedAt: project.updatedAt,
       isArchived: project.isArchived,
       template: project.template,
+      syncedAt: new Date().toISOString(),
     };
 
     // Upload the project version
@@ -170,12 +262,24 @@ export const uploadProject = async (
   });
 };
 
-// Download project from S3
+/**
+ * Download a project from S3 with error handling
+ * @param projectId Project ID to download
+ * @param version Optional specific version to download
+ * @param onProgress Optional callback for download progress
+ * @returns Promise that resolves with the downloaded project
+ */
 export const downloadProject = async (
   projectId: string,
   version?: string | number,
   onProgress?: ProgressCallback
 ): Promise<Project> => {
+  // First check if S3 is enabled
+  if (!isS3Enabled()) {
+    loggerService.info('S3 download skipped - S3 integration is disabled');
+    return Promise.reject(new Error('S3 integration is disabled'));
+  }
+
   return withRetry(async () => {
     const s3 = initS3Client();
     const bucketName = getBucketName();
@@ -194,16 +298,40 @@ export const downloadProject = async (
           Key: key,
         };
 
-        const latestResult = await s3.getObject(latestParams).promise();
-        const project = JSON.parse(latestResult.Body?.toString() || '{}');
+        // Log the download attempt
+        loggerService.info(`Attempting to download latest version of project ${projectId} from S3`);
 
-        if (project && project.id === projectId) {
+        const latestResult = await s3.getObject(latestParams).promise();
+
+        // Validate the response
+        if (!latestResult.Body) {
+          throw new Error('Empty response body from S3');
+        }
+
+        // Parse the project data
+        try {
+          const project = JSON.parse(latestResult.Body.toString());
+
+          // Validate the project data
+          if (!project || typeof project !== 'object') {
+            throw new Error('Invalid project data format');
+          }
+
+          if (project.id !== projectId) {
+            throw new Error(`Project ID mismatch: expected ${projectId}, got ${project.id}`);
+          }
+
           loggerService.info(`Downloaded latest version of project ${projectId} from S3`);
           return project;
+        } catch (parseError) {
+          loggerService.error(
+            `Failed to parse project data: ${parseError instanceof Error ? parseError.message : String(parseError)}`
+          );
+          throw new Error('Invalid project data format');
         }
       } catch (error) {
         loggerService.warn(
-          `No latest.json found for project ${projectId}, falling back to listing versions`
+          `No latest.json found for project ${projectId}, falling back to listing versions: ${error instanceof Error ? error.message : String(error)}`
         );
       }
 

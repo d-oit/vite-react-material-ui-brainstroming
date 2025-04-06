@@ -53,8 +53,74 @@ export class LoggerService {
     // Set up periodic log cleanup
     this.setupLogCleanup();
 
+    // Set up global error handlers
+    this.setupGlobalErrorHandlers();
+
     // Log application start
     this.info('Application started', { category: 'app' });
+  }
+
+  /**
+   * Set up global error handlers to catch unhandled errors
+   */
+  private setupGlobalErrorHandlers(): void {
+    if (typeof window !== 'undefined') {
+      // Handle unhandled promise rejections
+      window.addEventListener('unhandledrejection', event => {
+        const error = event.reason;
+        const message = error instanceof Error ? error.message : String(error);
+        const stack = error instanceof Error ? error.stack : undefined;
+
+        this.error('Unhandled promise rejection', {
+          category: 'app',
+          error: message,
+          stack,
+          type: 'unhandledrejection',
+        });
+      });
+
+      // Handle uncaught errors
+      window.addEventListener('error', event => {
+        // Don't log errors from extensions or third-party scripts
+        if (this.isThirdPartyError(event)) {
+          return;
+        }
+
+        this.error('Uncaught error', {
+          category: 'app',
+          error: event.message,
+          filename: event.filename,
+          lineno: event.lineno,
+          colno: event.colno,
+          stack: event.error?.stack,
+          type: 'uncaughterror',
+        });
+      });
+    }
+  }
+
+  /**
+   * Check if an error is from a third-party script
+   * @param event Error event
+   * @returns True if the error is from a third-party script
+   */
+  private isThirdPartyError(event: ErrorEvent): boolean {
+    // If there's no filename, we can't determine if it's third-party
+    if (!event.filename) {
+      return false;
+    }
+
+    // Check if the error is from our own domain
+    try {
+      const errorUrl = new URL(event.filename);
+      const currentUrl = new URL(window.location.href);
+
+      // If the error is from a different origin, it's third-party
+      return errorUrl.origin !== currentUrl.origin;
+    } catch {
+      // If we can't parse the URL, assume it's not third-party
+      return false;
+    }
   }
 
   public static getInstance(): LoggerService {
@@ -378,7 +444,7 @@ export class LoggerService {
   }
 
   /**
-   * Send a log to the remote endpoint
+   * Send a log to the remote endpoint with retry logic
    * @param level Log level
    * @param message Log message
    * @param context Additional context
@@ -390,59 +456,181 @@ export class LoggerService {
   ): Promise<void> {
     if (!this.remoteLoggingEndpoint) return;
 
-    try {
-      const logData = {
-        level,
-        message,
-        timestamp: new Date().toISOString(),
-        context: {
-          ...context,
-          appVersion: this.applicationVersion,
-          userAgent: navigator.userAgent,
-          url: window.location.href,
-        },
-      };
-
-      await fetch(this.remoteLoggingEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(logData),
-      });
-    } catch (error) {
-      console.error('Failed to send log to remote endpoint:', error);
-
-      // If we're configured to sync logs when online, add to sync queue
+    // Don't attempt to send if offline
+    if (!offlineService.getOnlineStatus()) {
+      // Queue for later if configured
       if (this.syncLogsWhenOnline) {
         offlineService.addToSyncQueue(async () => {
           await this.sendLogToRemote(level, message, context);
         });
       }
+      return;
+    }
+
+    const logData = {
+      level,
+      message,
+      timestamp: new Date().toISOString(),
+      context: {
+        ...context,
+        appVersion: this.applicationVersion,
+        userAgent: navigator.userAgent,
+        url: window.location.href,
+      },
+    };
+
+    // Implement retry with exponential backoff
+    const maxRetries = 3;
+    let retryCount = 0;
+    let lastError: Error | null = null;
+
+    while (retryCount <= maxRetries) {
+      try {
+        // Add timeout to the fetch request
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+        const response = await fetch(this.remoteLoggingEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(logData),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        // Check if the response is successful
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+        }
+
+        // Success - exit the retry loop
+        return;
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        retryCount++;
+
+        // If we've reached max retries, give up
+        if (retryCount > maxRetries) {
+          console.error(
+            `Failed to send log to remote endpoint after ${maxRetries} retries:`,
+            lastError
+          );
+
+          // Queue for later if configured
+          if (this.syncLogsWhenOnline) {
+            offlineService.addToSyncQueue(async () => {
+              await this.sendLogToRemote(level, message, context);
+            });
+          }
+          return;
+        }
+
+        // Exponential backoff with jitter
+        const delay = Math.pow(2, retryCount) * 1000; // 2s, 4s, 8s
+        const jitter = Math.random() * 0.3 * delay; // Add up to 30% jitter
+
+        console.warn(
+          `Retrying log send (${retryCount}/${maxRetries}) after ${Math.round((delay + jitter) / 1000)}s`
+        );
+        await new Promise(resolve => setTimeout(resolve, delay + jitter));
+      }
     }
   }
 
   /**
-   * Send multiple logs to the remote endpoint
+   * Send multiple logs to the remote endpoint with batching and retry
    * @param logs Logs to send
    */
   private async sendLogsToRemote(logs: LogEntry[]): Promise<void> {
     if (!this.remoteLoggingEndpoint) return;
 
-    const response = await fetch(this.remoteLoggingEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        logs,
-        appVersion: this.applicationVersion,
-        timestamp: new Date().toISOString(),
-      }),
-    });
+    // Don't attempt to send if offline
+    if (!offlineService.getOnlineStatus()) {
+      // Queue for later if configured
+      if (this.syncLogsWhenOnline) {
+        offlineService.addToSyncQueue(async () => {
+          await this.sendLogsToRemote(logs);
+        });
+      }
+      return;
+    }
 
-    if (!response.ok) {
-      throw new Error(`Failed to send logs to remote: ${response.status} ${response.statusText}`);
+    // Split logs into batches of 50 to avoid large payloads
+    const batchSize = 50;
+    const batches = [];
+
+    for (let i = 0; i < logs.length; i += batchSize) {
+      batches.push(logs.slice(i, i + batchSize));
+    }
+
+    // Process each batch with retry logic
+    for (const batch of batches) {
+      // Implement retry with exponential backoff
+      const maxRetries = 3;
+      let retryCount = 0;
+      let success = false;
+
+      while (retryCount <= maxRetries && !success) {
+        try {
+          // Add timeout to the fetch request
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+          const response = await fetch(this.remoteLoggingEndpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              logs: batch,
+              appVersion: this.applicationVersion,
+              timestamp: new Date().toISOString(),
+            }),
+            signal: controller.signal,
+          });
+
+          clearTimeout(timeoutId);
+
+          // Check if the response is successful
+          if (!response.ok) {
+            throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+          }
+
+          // Success - continue to next batch
+          success = true;
+        } catch (error) {
+          retryCount++;
+
+          // If we've reached max retries, give up on this batch
+          if (retryCount > maxRetries) {
+            console.error(
+              `Failed to send log batch to remote endpoint after ${maxRetries} retries:`,
+              error
+            );
+
+            // Queue for later if configured
+            if (this.syncLogsWhenOnline) {
+              const failedBatch = batch;
+              offlineService.addToSyncQueue(async () => {
+                await this.sendLogsToRemote(failedBatch);
+              });
+            }
+            break;
+          }
+
+          // Exponential backoff with jitter
+          const delay = Math.pow(2, retryCount) * 1000; // 2s, 4s, 8s
+          const jitter = Math.random() * 0.3 * delay; // Add up to 30% jitter
+
+          console.warn(
+            `Retrying log batch send (${retryCount}/${maxRetries}) after ${Math.round((delay + jitter) / 1000)}s`
+          );
+          await new Promise(resolve => setTimeout(resolve, delay + jitter));
+        }
+      }
     }
   }
 

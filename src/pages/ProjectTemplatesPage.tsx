@@ -393,8 +393,8 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
           <DialogTitle>Delete Template</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Are you sure you want to delete the &quot;{selectedTemplate?.name}&quot; template? This action
-              cannot be undone.
+              Are you sure you want to delete the &quot;{selectedTemplate?.name}&quot; template?
+              This action cannot be undone.
             </DialogContentText>
           </DialogContent>
           <DialogActions>

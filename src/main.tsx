@@ -6,6 +6,7 @@ import ReactDOM from 'react-dom/client';
 
 import App from './App';
 import './index.css';
+import './styles/accessibility.css';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import { ErrorNotificationProvider } from './contexts/ErrorNotificationContext';
 import { I18nProvider } from './contexts/I18nContext';
