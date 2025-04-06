@@ -18,8 +18,9 @@ import {
   Switch,
   Tooltip,
   useMediaQuery,
+  TextField,
 } from '@mui/material';
-import { TouchApp as TouchIcon } from '@mui/icons-material';
+import { TouchApp as TouchIcon, ColorLens as ColorLensIcon } from '@mui/icons-material';
 import { useSettings } from '../../contexts/SettingsContext';
 import { NodeType } from '../../types';
 import { NodePreferences } from '../../services/IndexedDBService';
@@ -29,14 +30,12 @@ const NodeSizePreview = ({
   size,
   width,
   fontSize,
-  color,
   isSelected,
   onClick,
 }: {
   size: string;
   width: number;
   fontSize: number;
-  color: string;
   isSelected: boolean;
   onClick: () => void;
 }) => {
@@ -101,7 +100,7 @@ export const NodePreferencesManager = () => {
 
   const [localPreferences, setLocalPreferences] = useState<NodePreferences | null>(nodePreferences);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  useMediaQuery(theme.breakpoints.down('sm'));
   const [touchOptimized, setTouchOptimized] = useState<boolean>(
     nodePreferences?.touchOptimized || false
   );
@@ -180,6 +179,12 @@ export const NodePreferencesManager = () => {
         large: { width: 250, fontSize: 1.2 },
       },
       touchOptimized: false,
+      customColors: {
+        [NodeType.IDEA]: '#e3f2fd', // Light blue
+        [NodeType.TASK]: '#e8f5e9', // Light green
+        [NodeType.NOTE]: '#fff8e1', // Light yellow
+        [NodeType.RESOURCE]: '#f3e5f5', // Light purple
+      },
     };
 
     setTouchOptimized(false);
@@ -263,7 +268,6 @@ export const NodePreferencesManager = () => {
               size={size}
               width={localPreferences.nodeSizes[size].width}
               fontSize={localPreferences.nodeSizes[size].fontSize}
-              color="#e3f2fd"
               isSelected={settings.preferredNodeSize === size}
               onClick={() => handleSizeChange(size)}
             />
@@ -312,6 +316,93 @@ export const NodePreferencesManager = () => {
             </Card>
           </Grid>
         ))}
+      </Grid>
+
+      <Divider sx={{ my: 4 }} />
+
+      <Typography variant="h6" gutterBottom>
+        Node Color Preferences
+      </Typography>
+
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+        Customize the colors for each node type. These colors will be used as the default background
+        color for nodes of each type.
+      </Typography>
+
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {Object.values(NodeType).map(nodeType => {
+          const nodeTypeLabel = nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
+          const currentColor = localPreferences.customColors?.[nodeType] || '#e3f2fd';
+
+          return (
+            <Grid item xs={12} sm={6} md={3} key={nodeType}>
+              <Card>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <ColorLensIcon sx={{ mr: 1, color: currentColor }} />
+                    <Typography variant="subtitle1">{nodeTypeLabel}</Typography>
+                  </Box>
+
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: 40,
+                      backgroundColor: currentColor,
+                      borderRadius: 1,
+                      border: '1px solid rgba(0,0,0,0.1)',
+                      mb: 2,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        boxShadow: 2,
+                      },
+                    }}
+                    onClick={() => {
+                      // Use native color picker
+                      const input = document.createElement('input');
+                      input.type = 'color';
+                      input.value = currentColor;
+                      input.addEventListener('input', e => {
+                        const newColor = (e.target as HTMLInputElement).value;
+                        setLocalPreferences(prev => {
+                          if (!prev) return prev;
+                          return {
+                            ...prev,
+                            customColors: {
+                              ...prev.customColors,
+                              [nodeType]: newColor,
+                            },
+                          };
+                        });
+                      });
+                      input.click();
+                    }}
+                  />
+
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Color code"
+                    value={currentColor}
+                    onChange={e => {
+                      const newColor = e.target.value;
+                      setLocalPreferences(prev => {
+                        if (!prev) return prev;
+                        return {
+                          ...prev,
+                          customColors: {
+                            ...prev.customColors,
+                            [nodeType]: newColor,
+                          },
+                        };
+                      });
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            </Grid>
+          );
+        })}
       </Grid>
 
       {/* Snackbar for notifications */}

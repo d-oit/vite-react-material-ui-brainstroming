@@ -32,7 +32,6 @@ interface NetworkInfoDialogProps {
 }
 
 export const NetworkInfoDialog: React.FC<NetworkInfoDialogProps> = ({ open, onClose }) => {
-  const theme = useTheme();
   const [isOnline, setIsOnline] = useState(offlineService.getOnlineStatus());
   const [networkStatus, setNetworkStatus] = useState<NetworkStatus>(
     offlineService.getNetworkStatus()
@@ -70,7 +69,11 @@ export const NetworkInfoDialog: React.FC<NetworkInfoDialogProps> = ({ open, onCl
       case 'slow-2g':
         return <WeakSignalIcon />;
       default:
-        return networkStatus.type && networkStatus.type === 'wifi' ? <WifiIcon /> : <CellularIcon />;
+        return networkStatus.type && networkStatus.type === 'wifi' ? (
+          <WifiIcon />
+        ) : (
+          <CellularIcon />
+        );
     }
   };
 
@@ -78,9 +81,12 @@ export const NetworkInfoDialog: React.FC<NetworkInfoDialogProps> = ({ open, onCl
   const getConnectionTypeLabel = () => {
     if (!isOnline) return 'Offline';
 
-    const connectionType = !networkStatus.type || networkStatus.type === 'unknown' ? '' : networkStatus.type;
+    const connectionType =
+      !networkStatus.type || networkStatus.type === 'unknown' ? '' : networkStatus.type;
     const effectiveType =
-      !networkStatus.effectiveType || networkStatus.effectiveType === 'unknown' ? '' : networkStatus.effectiveType;
+      !networkStatus.effectiveType || networkStatus.effectiveType === 'unknown'
+        ? ''
+        : networkStatus.effectiveType;
 
     if (connectionType && effectiveType) {
       return `${connectionType.toUpperCase()} (${effectiveType.toUpperCase()})`;
@@ -109,7 +115,11 @@ export const NetworkInfoDialog: React.FC<NetworkInfoDialogProps> = ({ open, onCl
       case 4:
         return <GoodSignalIcon />;
       default:
-        return networkStatus.type && networkStatus.type === 'wifi' ? <WifiIcon /> : <CellularIcon />;
+        return networkStatus.type && networkStatus.type === 'wifi' ? (
+          <WifiIcon />
+        ) : (
+          <CellularIcon />
+        );
     }
   };
 
@@ -178,7 +188,9 @@ export const NetworkInfoDialog: React.FC<NetworkInfoDialogProps> = ({ open, onCl
             <ListItemText
               primary="Connection Type"
               secondary={
-                networkStatus.type && networkStatus.type !== 'unknown' ? networkStatus.type.toUpperCase() : 'Unknown'
+                networkStatus.type && networkStatus.type !== 'unknown'
+                  ? networkStatus.type.toUpperCase()
+                  : 'Unknown'
               }
             />
           </ListItem>
@@ -223,8 +235,8 @@ export const NetworkInfoDialog: React.FC<NetworkInfoDialogProps> = ({ open, onCl
                   networkStatus.rtt < 50
                     ? 'Low latency'
                     : networkStatus.rtt < 100
-                    ? 'Medium latency'
-                    : 'High latency'
+                      ? 'Medium latency'
+                      : 'High latency'
                 }
               />
             </ListItem>

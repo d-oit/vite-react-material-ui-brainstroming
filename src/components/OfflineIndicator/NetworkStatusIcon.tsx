@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  IconButton,
-  Tooltip,
-  useTheme,
-} from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
 import {
   WifiOff as OfflineIcon,
   Wifi as WifiIcon,
@@ -24,7 +20,6 @@ export const NetworkStatusIcon: React.FC<NetworkStatusIconProps> = ({
   onClick,
   showTooltip = true,
 }) => {
-  const theme = useTheme();
   const [isOnline, setIsOnline] = useState(offlineService.getOnlineStatus());
   const [networkStatus, setNetworkStatus] = useState<NetworkStatus>(
     offlineService.getNetworkStatus()
@@ -62,7 +57,11 @@ export const NetworkStatusIcon: React.FC<NetworkStatusIconProps> = ({
       case 'slow-2g':
         return <WeakSignalIcon />;
       default:
-        return networkStatus.type && networkStatus.type === 'wifi' ? <WifiIcon /> : <CellularIcon />;
+        return networkStatus.type && networkStatus.type === 'wifi' ? (
+          <WifiIcon />
+        ) : (
+          <CellularIcon />
+        );
     }
   };
 
@@ -70,9 +69,12 @@ export const NetworkStatusIcon: React.FC<NetworkStatusIconProps> = ({
   const getConnectionTypeLabel = () => {
     if (!isOnline) return 'Offline';
 
-    const connectionType = !networkStatus.type || networkStatus.type === 'unknown' ? '' : networkStatus.type;
+    const connectionType =
+      !networkStatus.type || networkStatus.type === 'unknown' ? '' : networkStatus.type;
     const effectiveType =
-      !networkStatus.effectiveType || networkStatus.effectiveType === 'unknown' ? '' : networkStatus.effectiveType;
+      !networkStatus.effectiveType || networkStatus.effectiveType === 'unknown'
+        ? ''
+        : networkStatus.effectiveType;
 
     if (connectionType && effectiveType) {
       return `${connectionType.toUpperCase()} (${effectiveType.toUpperCase()})`;
@@ -85,40 +87,16 @@ export const NetworkStatusIcon: React.FC<NetworkStatusIconProps> = ({
     }
   };
 
-  // Get connection quality color
-  const getConnectionQualityColor = () => {
-    if (!isOnline) return 'warning';
-
-    switch (networkStatus.effectiveType) {
-      case '4g':
-        return 'success';
-      case '3g':
-        return 'info';
-      case '2g':
-        return 'warning';
-      case 'slow-2g':
-        return 'error';
-      default:
-        return 'primary';
-    }
-  };
+  // Connection quality color not used in this component
 
   const icon = (
-    <IconButton
-      color="inherit"
-      onClick={onClick}
-      size="small"
-    >
+    <IconButton color="inherit" onClick={onClick} size="small">
       {getConnectionQualityIcon()}
     </IconButton>
   );
 
   if (showTooltip) {
-    return (
-      <Tooltip title={`Network: ${getConnectionTypeLabel()}`}>
-        {icon}
-      </Tooltip>
-    );
+    return <Tooltip title={`Network: ${getConnectionTypeLabel()}`}>{icon}</Tooltip>;
   }
 
   return icon;

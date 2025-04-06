@@ -12,7 +12,6 @@ import {
   MenuItem,
   Box,
   Chip,
-  OutlinedInput,
   SelectChangeEvent,
   Typography,
   Divider,
@@ -46,7 +45,7 @@ export const NodeEditDialog = ({
   initialData,
   initialType = NodeType.IDEA,
 }: NodeEditDialogProps) => {
-  const { getNodeColor, settings, colorSchemes, nodePreferences } = useSettings();
+  const { getNodeColor, settings, nodePreferences } = useSettings();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -106,6 +105,15 @@ export const NodeEditDialog = ({
 
   // Get the default color for the current node type
   const defaultNodeColor = getNodeColor(type);
+
+  // Update color when node type changes
+  useEffect(() => {
+    // Only update color if it's not already set by the user
+    if (!color) {
+      // Reset to use the default color for this type
+      setColor(undefined);
+    }
+  }, [type, getNodeColor, color]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>

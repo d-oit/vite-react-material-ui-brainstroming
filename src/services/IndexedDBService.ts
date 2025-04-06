@@ -39,6 +39,12 @@ export interface NodePreferences {
     large: { width: number; fontSize: number };
   };
   touchOptimized?: boolean;
+  customColors?: {
+    [NodeType.IDEA]?: string;
+    [NodeType.TASK]?: string;
+    [NodeType.NOTE]?: string;
+    [NodeType.RESOURCE]?: string;
+  };
 }
 
 export interface LogEntry {
@@ -259,6 +265,12 @@ export class IndexedDBService {
           large: { width: 250, fontSize: 1.2 },
         },
         touchOptimized: false,
+        customColors: {
+          [NodeType.IDEA]: '#e3f2fd', // Light blue
+          [NodeType.TASK]: '#e8f5e9', // Light green
+          [NodeType.NOTE]: '#fff8e1', // Light yellow
+          [NodeType.RESOURCE]: '#f3e5f5', // Light purple
+        },
       };
 
       try {
@@ -459,6 +471,12 @@ export class IndexedDBService {
               large: { width: 250, fontSize: 1.2 },
             },
             touchOptimized: false,
+            customColors: {
+              [NodeType.IDEA]: '#e3f2fd', // Light blue
+              [NodeType.TASK]: '#e8f5e9', // Light green
+              [NodeType.NOTE]: '#fff8e1', // Light yellow
+              [NodeType.RESOURCE]: '#f3e5f5', // Light purple
+            },
           });
         }
       };

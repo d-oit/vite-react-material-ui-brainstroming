@@ -11,7 +11,9 @@ This document outlines the implementation plan for enhancing the d.o.it.brainsto
 
 ### Enhancements Needed
 - Implement comprehensive offline data access strategy
-- Add offline indicator and synchronization status
+- Add offline indicator in header only (remove from layout)
+- Replace LLM chat icon with offline icon and user-friendly explanation
+- Make S3 synchronization only available when online
 - Create fallback UI for offline mode
 
 ```json

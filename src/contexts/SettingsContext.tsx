@@ -216,8 +216,15 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   // Get node color based on type and active color scheme
   const getNodeColor = (type: NodeType, customColor?: string): string => {
+    // If a custom color is provided for this specific node, use it
     if (customColor) return customColor;
 
+    // If node has a custom color in preferences, use it
+    if (nodePreferences?.customColors?.[type]) {
+      return nodePreferences.customColors[type]!;
+    }
+
+    // If active color scheme has a color for this node type, use it
     if (activeColorScheme) {
       return activeColorScheme.colors[type] || '#f5f5f5';
     }

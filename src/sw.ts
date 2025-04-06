@@ -10,14 +10,13 @@ import { BackgroundSyncPlugin } from 'workbox-background-sync';
 declare const self: ServiceWorkerGlobalScope;
 
 // Use with precache injection
-const manifestEntries: Array<string | { url: string; revision: string | null }> = self.__WB_MANIFEST;
+const manifestEntries: Array<string | { url: string; revision: string | null }> =
+  self.__WB_MANIFEST;
 
 // Make sure index.html is in the precache manifest
 const indexUrl = 'index.html';
-const hasIndexHtml = manifestEntries.some((entry) => {
-  return typeof entry === 'string'
-    ? entry === indexUrl
-    : entry.url === indexUrl;
+const hasIndexHtml = manifestEntries.some(entry => {
+  return typeof entry === 'string' ? entry === indexUrl : entry.url === indexUrl;
 });
 
 if (!hasIndexHtml) {
