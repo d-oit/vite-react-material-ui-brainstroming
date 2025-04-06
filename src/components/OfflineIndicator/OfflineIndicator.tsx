@@ -146,9 +146,8 @@ export const OfflineIndicator = ({
     if (!isOnline) return 'Offline';
 
     const connectionType = networkStatus.type === 'unknown' ? '' : networkStatus.type;
-    const effectiveType = networkStatus.effectiveType === 'unknown'
-      ? ''
-      : networkStatus.effectiveType;
+    const effectiveType =
+      networkStatus.effectiveType === 'unknown' ? '' : networkStatus.effectiveType;
 
     if (connectionType && effectiveType) {
       return `${connectionType.toUpperCase()} (${effectiveType.toUpperCase()})`;
@@ -320,7 +319,11 @@ export const OfflineIndicator = ({
           <List dense>
             <ListItem>
               <ListItemIcon>
-                {networkStatus.type === 'wifi' ? <WifiIcon fontSize="small" /> : <CellularIcon fontSize="small" />}
+                {networkStatus.type === 'wifi' ? (
+                  <WifiIcon fontSize="small" />
+                ) : (
+                  <CellularIcon fontSize="small" />
+                )}
               </ListItemIcon>
               <ListItemText
                 primary="Connection Type"
@@ -331,9 +334,7 @@ export const OfflineIndicator = ({
             </ListItem>
 
             <ListItem>
-              <ListItemIcon>
-                {getSignalStrengthIcon()}
-              </ListItemIcon>
+              <ListItemIcon>{getSignalStrengthIcon()}</ListItemIcon>
               <ListItemText
                 primary="Connection Quality"
                 secondary={
@@ -353,10 +354,7 @@ export const OfflineIndicator = ({
                     color={networkStatus.downlink < 1 ? 'warning' : 'success'}
                   />
                 </ListItemIcon>
-                <ListItemText
-                  primary="Download Speed"
-                  secondary={getConnectionSpeedLabel()}
-                />
+                <ListItemText primary="Download Speed" secondary={getConnectionSpeedLabel()} />
               </ListItem>
             )}
 

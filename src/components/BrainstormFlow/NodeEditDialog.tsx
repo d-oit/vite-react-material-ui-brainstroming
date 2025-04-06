@@ -28,7 +28,7 @@ import {
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import { NodeType, NodeData } from '../../types';
-import { useI18n } from '../../contexts/I18nContext';
+// import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
 
 interface NodeEditDialogProps {
@@ -179,7 +179,8 @@ export const NodeEditDialog = ({
                   color="text.secondary"
                   sx={{ display: 'block', mt: 1 }}
                 >
-                  Width: {nodePreferences.nodeSizes[size].width}px, Font: {nodePreferences.nodeSizes[size].fontSize}rem
+                  Width: {nodePreferences.nodeSizes[size].width}px, Font:{' '}
+                  {nodePreferences.nodeSizes[size].fontSize}rem
                 </Typography>
               )}
             </Grid>
@@ -235,13 +236,15 @@ export const NodeEditDialog = ({
 
                 {/* Color presets */}
                 {(showColorPicker || !isMobile) && (
-                  <Box sx={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: 1,
-                    mt: 1,
-                    justifyContent: 'space-between',
-                  }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: 1,
+                      mt: 1,
+                      justifyContent: 'space-between',
+                    }}
+                  >
                     {[
                       '#e3f2fd', // Light blue
                       '#e8f5e9', // Light green
@@ -259,9 +262,10 @@ export const NodeEditDialog = ({
                           height: 24,
                           borderRadius: '50%',
                           bgcolor: presetColor,
-                          border: color === presetColor
-                            ? `2px solid ${theme.palette.primary.main}`
-                            : '1px solid rgba(0, 0, 0, 0.2)',
+                          border:
+                            color === presetColor
+                              ? `2px solid ${theme.palette.primary.main}`
+                              : '1px solid rgba(0, 0, 0, 0.2)',
                           cursor: 'pointer',
                           transition: 'all 0.2s ease',
                           '&:hover': {
@@ -278,28 +282,32 @@ export const NodeEditDialog = ({
           </Grid>
 
           {/* Node preview */}
-          <Box sx={{
-            mb: 2,
-            p: 2,
-            border: '1px dashed rgba(0, 0, 0, 0.2)',
-            borderRadius: 1,
-            bgcolor: 'background.paper',
-            display: isMobile ? 'none' : 'block', // Hide on mobile to save space
-          }}>
+          <Box
+            sx={{
+              mb: 2,
+              p: 2,
+              border: '1px dashed rgba(0, 0, 0, 0.2)',
+              borderRadius: 1,
+              bgcolor: 'background.paper',
+              display: isMobile ? 'none' : 'block', // Hide on mobile to save space
+            }}
+          >
             <Typography variant="caption" color="text.secondary" gutterBottom>
               Preview
             </Typography>
-            <Box sx={{
-              width: nodePreferences ? nodePreferences.nodeSizes[size].width : 200,
-              backgroundColor: color || defaultNodeColor,
-              borderLeft: `4px solid ${theme.palette.primary.main}`,
-              borderRadius: 1,
-              p: 1,
-              boxShadow: 1,
-              fontSize: nodePreferences
-                ? `${nodePreferences.nodeSizes[size].fontSize}rem`
-                : '1rem',
-            }}>
+            <Box
+              sx={{
+                width: nodePreferences ? nodePreferences.nodeSizes[size].width : 200,
+                backgroundColor: color || defaultNodeColor,
+                borderLeft: `4px solid ${theme.palette.primary.main}`,
+                borderRadius: 1,
+                p: 1,
+                boxShadow: 1,
+                fontSize: nodePreferences
+                  ? `${nodePreferences.nodeSizes[size].fontSize}rem`
+                  : '1rem',
+              }}
+            >
               <Typography
                 variant="subtitle2"
                 sx={{
@@ -315,16 +323,16 @@ export const NodeEditDialog = ({
                 variant="body2"
                 sx={{
                   fontSize: nodePreferences
-                  ? `calc(${nodePreferences.nodeSizes[size].fontSize}rem * 0.9)`
-                  : '0.9rem',
+                    ? `calc(${nodePreferences.nodeSizes[size].fontSize}rem * 0.9)`
+                    : '0.9rem',
                   opacity: 0.8,
                 }}
               >
                 {content
-                ? content.length > 50
-                  ? content.substring(0, 50) + '...'
-                  : content
-                : 'Node content preview'}
+                  ? content.length > 50
+                    ? content.substring(0, 50) + '...'
+                    : content
+                  : 'Node content preview'}
               </Typography>
             </Box>
           </Box>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -18,6 +18,7 @@ import {
   Snackbar,
   useTheme,
 } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
@@ -113,26 +114,68 @@ const ColorSchemeCard = ({
           {scheme.name}
         </Typography>
 
-        <Grid container spacing={1} sx={{ mb: 2 }}>
-          {Object.entries(scheme.colors).map(([type, color]) => (
-            <Grid item xs={6} key={type}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box
-                  sx={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: 1,
-                    bgcolor: color,
-                    border: '1px solid rgba(0, 0, 0, 0.2)',
-                  }}
-                />
-                <Typography variant="body2">
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
-                </Typography>
-              </Box>
-            </Grid>
-          ))}
+        {scheme.description && (
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            {scheme.description}
+          </Typography>
+        )}
+
+        <Typography variant="subtitle2" sx={{ mt: 1, mb: 0.5 }}>
+          Node Colors
+        </Typography>
+        <MuiGrid container spacing={1} sx={{ mb: 2 }}>
+          {Object.entries(scheme.colors)
+            .filter(([type]) => Object.values(NodeType).includes(type as NodeType))
+            .map(([type, color]) => (
+              <MuiGrid item xs={6} key={type}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: 1,
+                      bgcolor: color,
+                      border: '1px solid rgba(0, 0, 0, 0.2)',
+                    }}
+                  />
+                  <Typography variant="body2">
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </Typography>
+                </Box>
+              </Grid>
+            ))}
         </Grid>
+
+        {/* Theme Colors */}
+        {(scheme.colors.primary || scheme.colors.secondary || scheme.colors.background) && (
+          <>
+            <Typography variant="subtitle2" sx={{ mt: 1, mb: 0.5 }}>
+              Theme Colors
+            </Typography>
+            <MuiGrid container spacing={1} sx={{ mb: 2 }}>
+              {Object.entries(scheme.colors)
+                .filter(([type]) => !Object.values(NodeType).includes(type as NodeType))
+                .map(([type, color]) => (
+                  <MuiGrid item xs={6} key={type}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: 1,
+                          bgcolor: color,
+                          border: '1px solid rgba(0, 0, 0, 0.2)',
+                        }}
+                      />
+                      <Typography variant="body2">
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                ))}
+            </Grid>
+          </>
+        )}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Button
@@ -182,38 +225,71 @@ const EditColorSchemeDialog = ({
   onSave: (scheme: ColorScheme) => void;
 }) => {
   const [name, setName] = useState('');
-  const [colors, setColors] = useState<Record<NodeType, string>>({
+  const [description, setDescription] = useState('');
+  const [colors, setColors] = useState<Record<string, string>>({
     [NodeType.IDEA]: '#e3f2fd',
     [NodeType.TASK]: '#e8f5e9',
     [NodeType.NOTE]: '#fff8e1',
     [NodeType.RESOURCE]: '#f3e5f5',
-  });
+    primary: '#1976d2',
+    secondary: '#dc004e',
+    background: '#ffffff',
+    text: '#000000',
+    accent: '#f50057',
+  } as Record<string, string>);
 
   // Initialize form when dialog opens
   useEffect(() => {
     if (scheme) {
       setName(scheme.name);
-      setColors(scheme.colors);
+      setDescription(scheme.description || '');
+
+      // Ensure all required color properties exist
+      const defaultColors = {
+        [NodeType.IDEA]: '#e3f2fd',
+        [NodeType.TASK]: '#e8f5e9',
+        [NodeType.NOTE]: '#fff8e1',
+        [NodeType.RESOURCE]: '#f3e5f5',
+        primary: '#1976d2',
+        secondary: '#dc004e',
+        background: '#ffffff',
+        text: '#000000',
+        accent: '#f50057',
+      } as Record<string, string>;
+
+      setColors({
+        ...defaultColors,
+        ...scheme.colors,
+      } as Record<string, string>);
     } else {
       setName('');
+      setDescription('');
       setColors({
         [NodeType.IDEA]: '#e3f2fd',
         [NodeType.TASK]: '#e8f5e9',
         [NodeType.NOTE]: '#fff8e1',
         [NodeType.RESOURCE]: '#f3e5f5',
-      });
+        primary: '#1976d2',
+        secondary: '#dc004e',
+        background: '#ffffff',
+        text: '#000000',
+        accent: '#f50057',
+      } as Record<string, string>);
     }
   }, [scheme]);
 
   const handleSave = () => {
-    if (!scheme) return;
-
-    onSave({
-      ...scheme,
+    const newScheme: ColorScheme = {
+      id: scheme?.id ?? crypto.randomUUID(),
       name,
+      description,
       colors,
+      isCustom: true,
+      isDefault: scheme?.isDefault ?? false,
+      createdAt: scheme?.createdAt ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-    });
+    };
+    onSave(newScheme);
   };
 
   return (
@@ -230,29 +306,68 @@ const EditColorSchemeDialog = ({
           required
         />
 
+        <TextField
+          label="Description"
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+          fullWidth
+          margin="normal"
+          multiline
+          rows={2}
+        />
+
         <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>
           Node Colors
         </Typography>
 
-        <Grid container spacing={2}>
-          {Object.entries(colors).map(([type, color]) => (
-            <Grid item xs={12} sm={6} key={type}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="body2" sx={{ width: 80 }}>
-                  {type.charAt(0).toUpperCase() + type.slice(1)}:
-                </Typography>
-                <ColorPicker
-                  color={color}
-                  onChange={newColor => {
-                    setColors(prev => ({
-                      ...prev,
-                      [type]: newColor,
-                    }));
-                  }}
-                />
-              </Box>
-            </Grid>
-          ))}
+        <MuiGrid container spacing={2}>
+          {Object.entries(colors)
+            .filter(([type]) => Object.values(NodeType).includes(type as NodeType))
+            .map(([type, color]) => (
+              <MuiGrid item xs={12} sm={6} key={type}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="body2" sx={{ width: 80 }}>
+                    {type.charAt(0).toUpperCase() + type.slice(1)}:
+                  </Typography>
+                  <ColorPicker
+                    color={color}
+                    onChange={newColor => {
+                      setColors(prev => ({
+                        ...prev,
+                        [type]: newColor,
+                      }));
+                    }}
+                  />
+                </Box>
+              </Grid>
+            ))}
+        </Grid>
+
+        <Typography variant="subtitle1" sx={{ mt: 3, mb: 1 }}>
+          Theme Colors
+        </Typography>
+
+        <MuiGrid container spacing={2}>
+          {Object.entries(colors)
+            .filter(([type]) => !Object.values(NodeType).includes(type as NodeType))
+            .map(([type, color]) => (
+              <MuiGrid item xs={12} sm={6} key={type}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="body2" sx={{ width: 80 }}>
+                    {type.charAt(0).toUpperCase() + type.slice(1)}:
+                  </Typography>
+                  <ColorPicker
+                    color={color}
+                    onChange={newColor => {
+                      setColors(prev => ({
+                        ...prev,
+                        [type]: newColor,
+                      }));
+                    }}
+                  />
+                </Box>
+              </Grid>
+            ))}
         </Grid>
       </DialogContent>
 
@@ -340,13 +455,20 @@ export const ColorSchemeManager = () => {
     const newScheme: ColorScheme = {
       id: crypto.randomUUID(),
       name: 'New Scheme',
+      description: 'Custom color scheme',
       colors: {
         [NodeType.IDEA]: '#e3f2fd',
         [NodeType.TASK]: '#e8f5e9',
         [NodeType.NOTE]: '#fff8e1',
         [NodeType.RESOURCE]: '#f3e5f5',
+        primary: '#1976d2',
+        secondary: '#dc004e',
+        background: '#ffffff',
+        text: '#000000',
+        accent: '#f50057',
       },
       isDefault: false,
+      isCustom: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -360,7 +482,9 @@ export const ColorSchemeManager = () => {
       ...scheme,
       id: crypto.randomUUID(),
       name: `${scheme.name} (Copy)`,
+      description: scheme.description ? `${scheme.description} (Copy)` : 'Duplicated color scheme',
       isDefault: false,
+      isCustom: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -386,7 +510,12 @@ export const ColorSchemeManager = () => {
         });
       } else {
         // Create new scheme
-        await updateColorScheme(scheme);
+        await createColorScheme(scheme.id, {
+          idea: scheme.colors.idea,
+          task: scheme.colors.task,
+          note: scheme.colors.note,
+          resource: scheme.colors.resource,
+        });
         setSnackbar({
           open: true,
           message: 'Color scheme created',
@@ -437,9 +566,9 @@ export const ColorSchemeManager = () => {
 
       <Divider sx={{ mb: 3 }} />
 
-      <Grid container spacing={2}>
+      <MuiGrid container spacing={2}>
         {colorSchemes.map(scheme => (
-          <Grid item xs={12} sm={6} md={4} key={scheme.id}>
+          <MuiGrid item xs={12} sm={6} md={4} key={scheme.id}>
             <ColorSchemeCard
               scheme={scheme}
               isActive={settings.activeColorSchemeId === scheme.id}

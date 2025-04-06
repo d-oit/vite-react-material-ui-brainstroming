@@ -4,14 +4,14 @@ import ReactFlow, {
   Controls,
   MiniMap,
   Node as FlowNode,
-  Edge as FlowEdge,
+  // Edge as FlowEdge,
   NodeTypes,
-  EdgeTypes,
+  // EdgeTypes,
   Connection,
   useNodesState,
   useEdgesState,
   addEdge,
-  Panel,
+  // Panel,
   ReactFlowInstance,
   useReactFlow,
   XYPosition,
@@ -89,15 +89,17 @@ const FlowContent = ({
   const [nodeToDelete, setNodeToDelete] = useState<string | null>(null);
 
   // Get ReactFlow utility functions - now this is safe because we're inside ReactFlowProvider
-  const { fitView, zoomIn, zoomOut, setViewport } = useReactFlow();
+  const { fitView, zoomIn, zoomOut, _setViewport } = useReactFlow(); // _setViewport is not used currently
 
   // Handle nodes change with external callback
   const handleNodesChange = useCallback(
-    (changes: any) => {
+    (changes: { id: string; type: string; position?: XYPosition }[]) => {
       onNodesChange(changes);
       if (externalNodesChange) {
         const updatedNodes = nodes.map(node => {
-          const change = changes.find((c: any) => c.id === node.id && c.type === 'position');
+          const change = changes.find(
+            (c: { id: string; type: string }) => c.id === node.id && c.type === 'position'
+          );
           if (change) {
             return {
               ...node,
@@ -114,13 +116,13 @@ const FlowContent = ({
 
   // Handle edges change with external callback
   const handleEdgesChange = useCallback(
-    (changes: any) => {
+    (changes: { id: string; type: string }[]) => {
       onEdgesChange(changes);
       if (externalEdgesChange) {
         // Filter out removed edges
         const removedEdgeIds = changes
-          .filter((c: any) => c.type === 'remove')
-          .map((c: any) => c.id);
+          .filter((c: { type: string }) => c.type === 'remove')
+          .map((c: { id: string }) => c.id);
 
         const updatedEdges = edges.filter(edge => !removedEdgeIds.includes(edge.id));
         externalEdgesChange(updatedEdges);

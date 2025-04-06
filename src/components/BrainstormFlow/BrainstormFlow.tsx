@@ -3,10 +3,10 @@ import ReactFlow, {
   Background,
   Controls,
   MiniMap,
-  Node as FlowNode,
-  Edge as FlowEdge,
+  // Node as FlowNode,
+  // Edge as FlowEdge,
   NodeTypes,
-  EdgeTypes,
+  // EdgeTypes,
   Connection,
   useNodesState,
   useEdgesState,
@@ -20,7 +20,7 @@ import { Add as AddIcon, Save as SaveIcon } from '@mui/icons-material';
 import CustomNode from './CustomNode';
 import { NodeEditDialog } from './NodeEditDialog';
 import { NodeType, NodeData, Node, Edge } from '../../types';
-import { useI18n } from '../../contexts/I18nContext';
+// import { useI18n } from '../../contexts/I18nContext';
 
 // Define custom node types
 const nodeTypes: NodeTypes = {
@@ -45,7 +45,7 @@ export const BrainstormFlow = ({
 }: BrainstormFlowProps) => {
   const theme = useTheme();
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
+  const [_reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [isDialogOpen, setIsDialogOpen] = useState(false);

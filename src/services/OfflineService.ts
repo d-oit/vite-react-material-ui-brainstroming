@@ -265,7 +265,7 @@ export class OfflineService {
         effectiveType: connection.effectiveType,
         downlink: connection.downlink,
         rtt: connection.rtt,
-        saveData: connection.saveData
+        saveData: connection.saveData,
       });
 
       // Listen for changes
@@ -275,7 +275,7 @@ export class OfflineService {
           effectiveType: connection.effectiveType,
           downlink: connection.downlink,
           rtt: connection.rtt,
-          saveData: connection.saveData
+          saveData: connection.saveData,
         });
 
         // Log network status change

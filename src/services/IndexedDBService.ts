@@ -20,10 +20,12 @@ const STORES = {
 export interface ColorScheme {
   id: string;
   name: string;
+  description?: string;
   colors: {
-    [key in NodeType]: string;
+    [key: string]: string;
   };
   isDefault?: boolean;
+  isCustom?: boolean;
   createdAt: string;
   updatedAt: string;
 }

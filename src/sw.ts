@@ -18,19 +18,19 @@ registerRoute(
   // Return false to exempt requests from being fulfilled by index.html.
   ({ request, url }: { request: Request; url: URL }) => {
     // If this is an API request, don't use the App Shell
-  if (url.pathname.startsWith('/api/')) {
-    return false;
-  }
+    if (url.pathname.startsWith('/api/')) {
+      return false;
+    }
 
-  // If this is a resource that should be handled by workbox caching strategies, skip the App Shell
-  if (request.mode !== 'navigate') {
-    return false;
-  }
+    // If this is a resource that should be handled by workbox caching strategies, skip the App Shell
+    if (request.mode !== 'navigate') {
+      return false;
+    }
 
-  // If this looks like a URL for a resource, because it contains a file extension, skip the App Shell
-  if (url.pathname.match(fileExtensionRegexp)) {
-    return false;
-  }
+    // If this looks like a URL for a resource, because it contains a file extension, skip the App Shell
+    if (url.pathname.match(fileExtensionRegexp)) {
+      return false;
+    }
 
     return true;
   },
@@ -91,7 +91,7 @@ registerRoute(
 );
 
 // API requests with network-first strategy and background sync for offline
-const bgSyncPlugin = new BackgroundSyncPlugin('api-queue', {
+const apiSyncPlugin = new BackgroundSyncPlugin('api-queue', {
   maxRetentionTime: 24 * 60, // Retry for up to 24 hours (specified in minutes)
 });
 
@@ -100,7 +100,7 @@ registerRoute(
   new NetworkFirst({
     cacheName: 'api-responses',
     plugins: [
-      bgSyncPlugin,
+      apiSyncPlugin,
       new ExpirationPlugin({
         maxAgeSeconds: 60 * 60 * 24, // 1 day
         maxEntries: 50,
@@ -151,16 +151,16 @@ registerRoute(
 );
 
 // API requests with network-first strategy and background sync for offline
-const bgSyncPlugin = new BackgroundSyncPlugin('api-queue', {
+const apiSyncPlugin2 = new BackgroundSyncPlugin('api-queue-2', {
   maxRetentionTime: 24 * 60, // Retry for up to 24 hours (specified in minutes)
 });
 
 registerRoute(
   ({ url }) => url.pathname.startsWith('/api/'),
   new NetworkFirst({
-    cacheName: 'api-responses',
+    cacheName: 'api-responses-2',
     plugins: [
-      bgSyncPlugin,
+      apiSyncPlugin2,
       new ExpirationPlugin({
         maxAgeSeconds: 60 * 60 * 24, // 1 day
         maxEntries: 50,
@@ -205,7 +205,7 @@ registerRoute(
 );
 
 // Background sync for offline operations
-const bgSyncPlugin = new BackgroundSyncPlugin('offline-operations-queue', {
+const offlineOperationsSyncPlugin = new BackgroundSyncPlugin('offline-operations-queue', {
   maxRetentionTime: 24 * 60, // Retry for up to 24 Hours (specified in minutes)
 });
 
@@ -214,7 +214,7 @@ registerRoute(
   /\/api\/sync/,
   new NetworkFirst({
     cacheName: 'api-requests',
-    plugins: [bgSyncPlugin],
+    plugins: [offlineOperationsSyncPlugin],
     networkTimeoutSeconds: 10,
   }),
   'POST'
@@ -229,11 +229,11 @@ self.addEventListener('message', event => {
 });
 
 // Any other custom service worker logic can go here.
-self.addEventListener('install', _event => {
+self.addEventListener('install', () => {
   console.log('Service worker installed');
 });
 
-self.addEventListener('activate', _event => {
+self.addEventListener('activate', () => {
   console.log('Service worker activated');
 });
 

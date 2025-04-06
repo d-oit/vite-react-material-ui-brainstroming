@@ -23,7 +23,7 @@ import {
   Compare as CompareIcon,
 } from '@mui/icons-material';
 import { GitCommit } from '@/types';
-import { getGitHistory, getGitCommitDetails, compareGitCommits } from '@/lib/gitService';
+import { getGitHistory, /* getGitCommitDetails, */ compareGitCommits } from '@/lib/gitService';
 
 interface GitHistoryViewerProps {
   projectId: string;

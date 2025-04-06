@@ -244,6 +244,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         settings,
         colorSchemes,
         nodePreferences,
+        metadata: {
+          exportDate: new Date().toISOString(),
+          version: '1.0.0',
+          appName: 'd.o.it.brainstorming',
+        },
       };
       return JSON.stringify(exportData, null, 2);
     } catch (error) {
@@ -259,7 +264,23 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
       // Validate imported data
       if (!importData.settings) {
-        throw new Error('Invalid settings data');
+        // Try to handle legacy format
+        try {
+          const legacySettings = JSON.parse(jsonData) as Settings;
+          setSettings(prevSettings => ({
+            ...prevSettings,
+            ...legacySettings,
+          }));
+          await indexedDBService.saveSettings(legacySettings);
+          return true;
+        } catch (e) {
+          throw new Error('Invalid settings data');
+        }
+      }
+
+      // Log metadata if available
+      if (importData.metadata) {
+        console.log('Importing settings from:', importData.metadata);
       }
 
       // Import settings
