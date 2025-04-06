@@ -17,6 +17,7 @@ import { SettingsProvider } from './contexts/SettingsContext';
 import { HomePage } from './pages/HomePage';
 import { EnhancedBrainstormPage } from './pages/EnhancedBrainstormPage';
 import { SettingsPage } from './pages/SettingsPage';
+import ProjectDashboard from './pages/ProjectDashboard';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import OfflineIndicator from './components/OfflineIndicator/OfflineIndicator';
 import OfflineFallback from './components/OfflineIndicator/OfflineFallback';
@@ -194,6 +195,12 @@ const AppWithTheme = () => {
               <Route
                 path="/"
                 element={<HomePage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />}
+              />
+              <Route
+                path="/projects"
+                element={
+                  <ProjectDashboard onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
+                }
               />
               <Route path="/brainstorm" element={withOfflineFallback(EnhancedBrainstormPage)()} />
               <Route

@@ -24,7 +24,9 @@ vi.mock('../../services/LoggerService', () => ({
 }));
 
 // Mock AWS SDK
-vi.mock('aws-sdk', () => {
+import { S3 } from 'aws-sdk';
+
+vi.mock('aws-sdk', async () => {
   const mockS3 = {
     putObject: vi.fn().mockReturnValue({
       promise: vi.fn().mockResolvedValue({}),
@@ -50,7 +52,9 @@ vi.mock('aws-sdk', () => {
     }),
   };
 
+  const actual = (await vi.importActual('aws-sdk')) as typeof import('aws-sdk');
   return {
+    ...actual,
     S3: vi.fn(() => mockS3),
   };
 });
@@ -83,12 +87,12 @@ describe('S3Service', () => {
   describe('configure', () => {
     it('should configure the S3 service', async () => {
       // Call the method
-      const result = await s3Service.configure({
-        accessKeyId: 'test-access-key',
-        secretAccessKey: 'test-secret-key',
-        region: 'us-east-1',
-        bucketName: 'test-bucket',
-      });
+      const result = await s3Service.configure(
+        'test-access-key',
+        'test-secret-key',
+        'us-east-1',
+        'test-bucket'
+      );
 
       // Verify the result
       expect(result).toBe(true);
@@ -97,18 +101,18 @@ describe('S3Service', () => {
 
     it('should handle configuration errors', async () => {
       // Mock AWS SDK to throw an error
-      const S3 = require('aws-sdk').S3;
-      S3.mockImplementationOnce(() => {
+      const S3Mock = vi.mocked(S3);
+      S3Mock.mockImplementationOnce(() => {
         throw new Error('Test error');
       });
 
       // Call the method
-      const result = await s3Service.configure({
-        accessKeyId: 'test-access-key',
-        secretAccessKey: 'test-secret-key',
-        region: 'us-east-1',
-        bucketName: 'test-bucket',
-      });
+      const result = await s3Service.configure(
+        'test-access-key',
+        'test-secret-key',
+        'us-east-1',
+        'test-bucket'
+      );
 
       // Verify the result
       expect(result).toBe(false);
@@ -122,17 +126,13 @@ describe('S3Service', () => {
       (offlineService.getOnlineStatus as any).mockReturnValue(true);
 
       // Configure the service
-      await s3Service.configure({
-        accessKeyId: 'test-access-key',
-        secretAccessKey: 'test-secret-key',
-        region: 'us-east-1',
-        bucketName: 'test-bucket',
-      });
+      await s3Service.configure('test-access-key', 'test-secret-key', 'us-east-1', 'test-bucket');
 
       // Create a test project
       const project: Project = {
         id: 'test-project',
         name: 'Test Project',
+        description: 'A test project',
         version: '1.0.0',
         nodes: [],
         edges: [],
@@ -153,17 +153,13 @@ describe('S3Service', () => {
       (offlineService.getOnlineStatus as any).mockReturnValue(false);
 
       // Configure the service
-      await s3Service.configure({
-        accessKeyId: 'test-access-key',
-        secretAccessKey: 'test-secret-key',
-        region: 'us-east-1',
-        bucketName: 'test-bucket',
-      });
+      await s3Service.configure('test-access-key', 'test-secret-key', 'us-east-1', 'test-bucket');
 
       // Create a test project
       const project: Project = {
         id: 'test-project',
         name: 'Test Project',
+        description: 'A test project',
         version: '1.0.0',
         nodes: [],
         edges: [],
@@ -184,16 +180,11 @@ describe('S3Service', () => {
       (offlineService.getOnlineStatus as any).mockReturnValue(true);
 
       // Configure the service
-      await s3Service.configure({
-        accessKeyId: 'test-access-key',
-        secretAccessKey: 'test-secret-key',
-        region: 'us-east-1',
-        bucketName: 'test-bucket',
-      });
+      await s3Service.configure('test-access-key', 'test-secret-key', 'us-east-1', 'test-bucket');
 
-      // Mock AWS SDK to throw an error
-      const S3 = require('aws-sdk').S3;
-      const mockS3Instance = S3.mock.results[0].value;
+      // Get mocked S3 instance
+      const S3Mock = vi.mocked(S3);
+      const mockS3Instance = S3Mock.mock.results[0].value;
       mockS3Instance.putObject.mockReturnValueOnce({
         promise: vi.fn().mockRejectedValue(new Error('Test error')),
       });
@@ -202,6 +193,7 @@ describe('S3Service', () => {
       const project: Project = {
         id: 'test-project',
         name: 'Test Project',
+        description: 'A test project',
         version: '1.0.0',
         nodes: [],
         edges: [],
@@ -224,12 +216,7 @@ describe('S3Service', () => {
       (offlineService.getOnlineStatus as any).mockReturnValue(true);
 
       // Configure the service
-      await s3Service.configure({
-        accessKeyId: 'test-access-key',
-        secretAccessKey: 'test-secret-key',
-        region: 'us-east-1',
-        bucketName: 'test-bucket',
-      });
+      await s3Service.configure('test-access-key', 'test-secret-key', 'us-east-1', 'test-bucket');
 
       // Call the method
       const result = await s3Service.downloadProject('test-project', '1.0.0');
@@ -248,12 +235,7 @@ describe('S3Service', () => {
       (offlineService.getOnlineStatus as any).mockReturnValue(false);
 
       // Configure the service
-      await s3Service.configure({
-        accessKeyId: 'test-access-key',
-        secretAccessKey: 'test-secret-key',
-        region: 'us-east-1',
-        bucketName: 'test-bucket',
-      });
+      await s3Service.configure('test-access-key', 'test-secret-key', 'us-east-1', 'test-bucket');
 
       // Call the method
       const result = await s3Service.downloadProject('test-project', '1.0.0');
@@ -268,16 +250,11 @@ describe('S3Service', () => {
       (offlineService.getOnlineStatus as any).mockReturnValue(true);
 
       // Configure the service
-      await s3Service.configure({
-        accessKeyId: 'test-access-key',
-        secretAccessKey: 'test-secret-key',
-        region: 'us-east-1',
-        bucketName: 'test-bucket',
-      });
+      await s3Service.configure('test-access-key', 'test-secret-key', 'us-east-1', 'test-bucket');
 
-      // Mock AWS SDK to throw an error
-      const S3 = require('aws-sdk').S3;
-      const mockS3Instance = S3.mock.results[0].value;
+      // Get mocked S3 instance
+      const S3Mock = vi.mocked(S3);
+      const mockS3Instance = S3Mock.mock.results[0].value;
       mockS3Instance.getObject.mockReturnValueOnce({
         promise: vi.fn().mockRejectedValue(new Error('Test error')),
       });

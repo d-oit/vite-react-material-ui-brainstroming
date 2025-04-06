@@ -5,9 +5,27 @@ export interface Project {
   description: string;
   createdAt: string;
   updatedAt: string;
+  lastAccessedAt?: string;
   version: string;
   nodes: Node[];
   edges: Edge[];
+  isArchived?: boolean;
+  archivedAt?: string;
+  tags?: string[];
+}
+
+// Project History Types
+export interface ProjectHistoryEntry {
+  id: string;
+  projectId: string;
+  action: 'create' | 'update' | 'archive' | 'unarchive' | 'delete' | 'view' | 'export' | 'share';
+  timestamp: string;
+  details?: {
+    version?: string;
+    commitId?: string;
+    changes?: string[];
+    [key: string]: any;
+  };
 }
 
 // Node Types

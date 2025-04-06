@@ -3,7 +3,7 @@ import { encrypt, decrypt, isEncryptionAvailable } from '../utils/encryption';
 
 // Database configuration
 const DB_NAME = 'doitBrainstorming';
-const DB_VERSION = 2; // Increased for schema migration
+const DB_VERSION = 3; // Increased for schema migration
 
 // Store names
 const STORES = {
@@ -13,6 +13,7 @@ const STORES = {
   LOGS: 'logs',
   SECURE_STORE: 'secureStore',
   PROJECTS: 'projects',
+  PROJECT_HISTORY: 'projectHistory',
   OFFLINE_QUEUE: 'offlineQueue',
 };
 
@@ -174,6 +175,34 @@ export class IndexedDBService {
             const queueStore = db.createObjectStore(STORES.OFFLINE_QUEUE, { keyPath: 'id' });
             queueStore.createIndex('timestamp', 'timestamp', { unique: false });
             queueStore.createIndex('priority', 'priority', { unique: false });
+          }
+        }
+
+        if (oldVersion < 3) {
+          // Add new stores for version 3
+          if (!db.objectStoreNames.contains(STORES.PROJECT_HISTORY)) {
+            const historyStore = db.createObjectStore(STORES.PROJECT_HISTORY, { keyPath: 'id' });
+            historyStore.createIndex('projectId', 'projectId', { unique: false });
+            historyStore.createIndex('timestamp', 'timestamp', { unique: false });
+            historyStore.createIndex('action', 'action', { unique: false });
+          }
+
+          // Update PROJECTS store with new indexes if it exists
+          if (db.objectStoreNames.contains(STORES.PROJECTS)) {
+            const projectsStore = transaction.objectStore(STORES.PROJECTS);
+
+            // Add new indexes if they don't exist
+            if (!projectsStore.indexNames.contains('isArchived')) {
+              projectsStore.createIndex('isArchived', 'isArchived', { unique: false });
+            }
+
+            if (!projectsStore.indexNames.contains('lastAccessedAt')) {
+              projectsStore.createIndex('lastAccessedAt', 'lastAccessedAt', { unique: false });
+            }
+
+            if (!projectsStore.indexNames.contains('tags')) {
+              projectsStore.createIndex('tags', 'tags', { unique: false, multiEntry: true });
+            }
           }
         }
 
@@ -1184,6 +1213,276 @@ export class IndexedDBService {
     if (data.nodePreferences && typeof data.nodePreferences === 'object') {
       await this.saveNodePreferences(data.nodePreferences as NodePreferences);
     }
+  }
+
+  /**
+   * Save a project to IndexedDB
+   * @param project Project to save
+   * @returns Promise that resolves with the project ID
+   */
+  public async saveProject(project: Project): Promise<string> {
+    await this.init();
+
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+
+      const transaction = this.db.transaction(STORES.PROJECTS, 'readwrite');
+      const store = transaction.objectStore(STORES.PROJECTS);
+
+      // Update the updatedAt timestamp
+      const updatedProject = {
+        ...project,
+        updatedAt: new Date().toISOString(),
+      };
+
+      const request = store.put(updatedProject);
+
+      request.onsuccess = () => resolve(project.id);
+      request.onerror = event => {
+        console.error('Error saving project:', event);
+        reject(new Error('Failed to save project'));
+      };
+    });
+  }
+
+  /**
+   * Get a project by ID
+   * @param id Project ID
+   * @returns Promise that resolves with the project or null if not found
+   */
+  public async getProject(id: string): Promise<Project | null> {
+    await this.init();
+
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+
+      const transaction = this.db.transaction(STORES.PROJECTS, 'readonly');
+      const store = transaction.objectStore(STORES.PROJECTS);
+      const request = store.get(id);
+
+      request.onsuccess = () => {
+        const project = request.result || null;
+
+        // Update lastAccessedAt if project exists
+        if (project) {
+          this.updateProjectLastAccessed(id);
+        }
+
+        resolve(project);
+      };
+      request.onerror = event => {
+        console.error('Error getting project:', event);
+        reject(new Error('Failed to get project'));
+      };
+    });
+  }
+
+  /**
+   * Get all projects
+   * @param includeArchived Whether to include archived projects
+   * @returns Promise that resolves with an array of projects
+   */
+  public async getAllProjects(includeArchived: boolean = false): Promise<Project[]> {
+    await this.init();
+
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+
+      const transaction = this.db.transaction(STORES.PROJECTS, 'readonly');
+      const store = transaction.objectStore(STORES.PROJECTS);
+      const request = store.getAll();
+
+      request.onsuccess = () => {
+        let projects = request.result || [];
+
+        // Filter out archived projects if not requested
+        if (!includeArchived) {
+          projects = projects.filter(p => !p.isArchived);
+        }
+
+        // Sort by updatedAt (newest first)
+        projects.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+
+        resolve(projects);
+      };
+      request.onerror = event => {
+        console.error('Error getting projects:', event);
+        reject(new Error('Failed to get projects'));
+      };
+    });
+  }
+
+  /**
+   * Delete a project
+   * @param id Project ID
+   * @returns Promise that resolves when the project is deleted
+   */
+  public async deleteProject(id: string): Promise<void> {
+    await this.init();
+
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+
+      const transaction = this.db.transaction(STORES.PROJECTS, 'readwrite');
+      const store = transaction.objectStore(STORES.PROJECTS);
+      const request = store.delete(id);
+
+      request.onsuccess = () => resolve();
+      request.onerror = event => {
+        console.error('Error deleting project:', event);
+        reject(new Error('Failed to delete project'));
+      };
+    });
+  }
+
+  /**
+   * Archive or unarchive a project
+   * @param id Project ID
+   * @param archive Whether to archive (true) or unarchive (false)
+   * @returns Promise that resolves with the updated project
+   */
+  public async archiveProject(id: string, archive: boolean): Promise<Project> {
+    await this.init();
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        const project = await this.getProject(id);
+
+        if (!project) {
+          reject(new Error(`Project with ID ${id} not found`));
+          return;
+        }
+
+        const updatedProject = {
+          ...project,
+          isArchived: archive,
+          archivedAt: archive ? new Date().toISOString() : undefined,
+          updatedAt: new Date().toISOString(),
+        };
+
+        await this.saveProject(updatedProject);
+        resolve(updatedProject);
+      } catch (error) {
+        console.error('Error archiving project:', error);
+        reject(new Error('Failed to archive project'));
+      }
+    });
+  }
+
+  /**
+   * Update the lastAccessedAt timestamp for a project
+   * @param id Project ID
+   * @returns Promise that resolves when the timestamp is updated
+   */
+  private async updateProjectLastAccessed(id: string): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        if (!this.db) {
+          reject(new Error('Database not initialized'));
+          return;
+        }
+
+        const transaction = this.db.transaction(STORES.PROJECTS, 'readwrite');
+        const store = transaction.objectStore(STORES.PROJECTS);
+        const request = store.get(id);
+
+        request.onsuccess = () => {
+          const project = request.result;
+          if (project) {
+            project.lastAccessedAt = new Date().toISOString();
+            store.put(project);
+          }
+          resolve();
+        };
+
+        request.onerror = event => {
+          console.error('Error updating project access time:', event);
+          resolve(); // Don't reject to prevent cascading errors
+        };
+      } catch (error) {
+        console.error('Error updating project access time:', error);
+        resolve(); // Don't reject to prevent cascading errors
+      }
+    });
+  }
+
+  /**
+   * Add a project history entry
+   * @param entry Project history entry
+   * @returns Promise that resolves with the entry ID
+   */
+  public async addProjectHistoryEntry(entry: Omit<ProjectHistoryEntry, 'id'>): Promise<string> {
+    await this.init();
+
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+
+      const transaction = this.db.transaction(STORES.PROJECT_HISTORY, 'readwrite');
+      const store = transaction.objectStore(STORES.PROJECT_HISTORY);
+
+      const historyEntry: ProjectHistoryEntry = {
+        id: crypto.randomUUID(),
+        ...entry,
+        timestamp: entry.timestamp || new Date().toISOString(),
+      };
+
+      const request = store.add(historyEntry);
+
+      request.onsuccess = () => resolve(historyEntry.id);
+      request.onerror = event => {
+        console.error('Error adding project history entry:', event);
+        reject(new Error('Failed to add project history entry'));
+      };
+    });
+  }
+
+  /**
+   * Get project history entries
+   * @param projectId Project ID
+   * @param limit Maximum number of entries to return
+   * @returns Promise that resolves with an array of history entries
+   */
+  public async getProjectHistory(projectId: string, limit = 100): Promise<ProjectHistoryEntry[]> {
+    await this.init();
+
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+
+      const transaction = this.db.transaction(STORES.PROJECT_HISTORY, 'readonly');
+      const store = transaction.objectStore(STORES.PROJECT_HISTORY);
+      const index = store.index('projectId');
+      const request = index.getAll(projectId, limit);
+
+      request.onsuccess = () => {
+        // Sort by timestamp descending (newest first)
+        const history = request.result.sort(
+          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+        resolve(history);
+      };
+      request.onerror = event => {
+        console.error('Error getting project history:', event);
+        reject(new Error('Failed to get project history'));
+      };
+    });
   }
 }
 

@@ -67,7 +67,14 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
     if (!sizeConfig) {
       console.error('Invalid size configuration for node:', { size, validSize, nodePreferences });
       // Fallback to medium if sizeConfig is undefined
-      return { width: 200, fontSize: 1, padding: 1, iconSize: 'small', chipSize: 'small', maxContentLines: 4 };
+      return {
+        width: 200,
+        fontSize: 1,
+        padding: 1,
+        iconSize: 'small',
+        chipSize: 'small',
+        maxContentLines: 4,
+      };
     }
 
     // Get viewport width for responsive sizing
@@ -114,7 +121,7 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
         nodeType,
         id,
         dataSize: data.size,
-        defaultSize: nodePreferences?.defaultSize
+        defaultSize: nodePreferences?.defaultSize,
       });
     }
   }, [nodeSize, isMobile, nodeType, id, data.size, nodePreferences]);

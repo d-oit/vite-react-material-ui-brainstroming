@@ -33,6 +33,7 @@ import {
   History as HistoryIcon,
   Chat as ChatIcon,
   Close as CloseIcon,
+  FolderOpen as ProjectsIcon,
 } from '@mui/icons-material';
 import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -93,6 +94,12 @@ export const AppShell = ({
       icon: <HomeIcon />,
       path: '/',
       active: location.pathname === '/',
+    },
+    {
+      text: t('nav.projects'),
+      icon: <ProjectsIcon />,
+      path: '/projects',
+      active: location.pathname === '/projects',
     },
     {
       text: t('nav.brainstorm'),

@@ -1,6 +1,6 @@
-import { Box, Typography, Button, Container } from '@mui/material';
+import { Box, Typography, Button, Container, Stack } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { Dashboard as DashboardIcon } from '@mui/icons-material';
+import { Dashboard as DashboardIcon, FolderOpen as ProjectsIcon } from '@mui/icons-material';
 import { useI18n } from '../contexts/I18nContext';
 import { AppShell } from '../components/Layout/AppShell';
 
@@ -25,18 +25,28 @@ export const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
           <Typography variant="body1" paragraph>
             Welcome to the d.o.it.brainstorming app!
           </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+          <Stack direction="row" spacing={2} justifyContent="center">
             <Button
               variant="contained"
+              color="primary"
+              size="large"
+              component={Link}
+              to="/projects"
+              startIcon={<ProjectsIcon />}
+            >
+              My Projects
+            </Button>
+            <Button
+              variant="outlined"
               color="primary"
               size="large"
               component={Link}
               to="/brainstorm"
               startIcon={<DashboardIcon />}
             >
-              Start Brainstorming
+              Quick Brainstorm
             </Button>
-          </Box>
+          </Stack>
         </Box>
       </Container>
     </AppShell>
