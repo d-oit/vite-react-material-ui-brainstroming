@@ -24,7 +24,7 @@ import {
   CloudUpload as ExportIcon,
   History as HistoryIcon,
 } from '@mui/icons-material';
-import { ProjectHistoryEntry, Project } from '../../types';
+import { ProjectHistoryEntry } from '../../types';
 import projectService from '../../services/ProjectService';
 
 interface ProjectHistoryPanelProps {

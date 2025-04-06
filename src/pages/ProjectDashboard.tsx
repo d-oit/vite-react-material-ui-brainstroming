@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Container, Paper, Tabs, Tab, Typography, Divider } from '@mui/material';
+import { Box, Container, Paper, Tabs, Tab } from '@mui/material';
 import { Dashboard as DashboardIcon, Archive as ArchiveIcon } from '@mui/icons-material';
 import { AppShell } from '../components/Layout/AppShell';
 import ProjectList from '../components/ProjectList/ProjectList';
@@ -49,9 +49,9 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
     setRefreshKey(prev => prev + 1);
   };
 
-  const handleCreateProject = (project: Project) => {
+  const handleCreateProject = (_project: Project) => {
     // Optionally navigate to the new project
-    // navigate(`/brainstorm/${project.id}`);
+    // navigate(`/brainstorm/${_project.id}`);
   };
 
   return (

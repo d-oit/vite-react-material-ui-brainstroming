@@ -38,7 +38,7 @@ describe('IndexedDBService', () => {
 
       const result = await initPromise;
       expect(result).toBe(true);
-      expect(mockIDB.open).toHaveBeenCalledWith('doitBrainstorming', 2);
+      expect(mockIDB.open).toHaveBeenCalledWith('doitBrainstorming', 3);
     });
 
     it('should handle initialization errors', async () => {

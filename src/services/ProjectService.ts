@@ -1,4 +1,4 @@
-import { Project, Node, Edge, ProjectHistoryEntry } from '../types';
+import { Project, ProjectHistoryEntry } from '../types';
 import gitService from './GitService';
 import s3Service from './S3Service';
 import indexedDBService from './IndexedDBService';

@@ -487,6 +487,7 @@ export class IndexedDBService {
 
       request.onsuccess = () => {
         if (request.result) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { id, ...preferences } = request.result;
           resolve(preferences as NodePreferences);
         } else {
@@ -1356,29 +1357,26 @@ export class IndexedDBService {
   public async archiveProject(id: string, archive: boolean): Promise<Project> {
     await this.init();
 
-    return new Promise(async (resolve, reject) => {
-      try {
-        const project = await this.getProject(id);
+    try {
+      const project = await this.getProject(id);
 
-        if (!project) {
-          reject(new Error(`Project with ID ${id} not found`));
-          return;
-        }
-
-        const updatedProject = {
-          ...project,
-          isArchived: archive,
-          archivedAt: archive ? new Date().toISOString() : undefined,
-          updatedAt: new Date().toISOString(),
-        };
-
-        await this.saveProject(updatedProject);
-        resolve(updatedProject);
-      } catch (error) {
-        console.error('Error archiving project:', error);
-        reject(new Error('Failed to archive project'));
+      if (!project) {
+        throw new Error(`Project with ID ${id} not found`);
       }
-    });
+
+      const updatedProject = {
+        ...project,
+        isArchived: archive,
+        archivedAt: archive ? new Date().toISOString() : undefined,
+        updatedAt: new Date().toISOString(),
+      };
+
+      await this.saveProject(updatedProject);
+      return updatedProject;
+    } catch (error) {
+      console.error('Error archiving project:', error);
+      throw new Error('Failed to archive project');
+    }
   }
 
   /**
@@ -1387,13 +1385,15 @@ export class IndexedDBService {
    * @returns Promise that resolves when the timestamp is updated
    */
   private async updateProjectLastAccessed(id: string): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        if (!this.db) {
-          reject(new Error('Database not initialized'));
-          return;
-        }
+    await this.init();
 
+    if (!this.db) {
+      console.error('Database not initialized');
+      return;
+    }
+
+    try {
+      return new Promise(resolve => {
         const transaction = this.db.transaction(STORES.PROJECTS, 'readwrite');
         const store = transaction.objectStore(STORES.PROJECTS);
         const request = store.get(id);
@@ -1411,11 +1411,11 @@ export class IndexedDBService {
           console.error('Error updating project access time:', event);
           resolve(); // Don't reject to prevent cascading errors
         };
-      } catch (error) {
-        console.error('Error updating project access time:', error);
-        resolve(); // Don't reject to prevent cascading errors
-      }
-    });
+      });
+    } catch (error) {
+      console.error('Error updating project access time:', error);
+      // Don't throw to prevent cascading errors
+    }
   }
 
   /**

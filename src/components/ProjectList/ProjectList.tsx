@@ -31,7 +31,6 @@ import {
   MoreVert as MoreVertIcon,
   History as HistoryIcon,
   CloudUpload as CloudUploadIcon,
-  Share as ShareIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { Project } from '../../types';

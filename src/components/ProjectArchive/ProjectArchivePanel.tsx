@@ -24,7 +24,6 @@ import {
   Unarchive as UnarchiveIcon,
   Delete as DeleteIcon,
   Visibility as ViewIcon,
-  History as HistoryIcon,
 } from '@mui/icons-material';
 import { Project } from '../../types';
 import projectService from '../../services/ProjectService';

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Project, ProjectHistoryEntry } from '../../types';
 import projectService from '../../services/ProjectService';
 import indexedDBService from '../../services/IndexedDBService';
