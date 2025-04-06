@@ -287,38 +287,36 @@ export const BrainstormLayout = ({
         )}
       </Paper>
       
-      {/* Floating action buttons */}
+      {/* Floating action buttons - consolidated and properly spaced */}
       <Box
         sx={{
-          position: 'absolute',
+          position: 'fixed',
           bottom: 16,
           right: 16,
           display: 'flex',
           flexDirection: 'column',
-          gap: 1,
+          gap: 2,
           zIndex: 1000,
         }}
       >
         {onSave && (
-          <Tooltip title={t('common.save')}>
-            <Fab color="primary" size="medium" onClick={onSave}>
-              <SaveIcon />
-            </Fab>
-          </Tooltip>
+          <Fab color="primary" size="medium" onClick={onSave}>
+            <SaveIcon />
+          </Fab>
         )}
         
         {!sidebarOpen && (
-          <Tooltip title={t('common.openSidebar')}>
-            <Fab 
-              color="secondary" 
-              size="medium" 
-              onClick={toggleSidebar}
-            >
-              <ChatIcon />
-            </Fab>
-          </Tooltip>
+          <Fab 
+            color="secondary" 
+            size="medium" 
+            onClick={toggleSidebar}
+            sx={{ mb: 0 }} // Remove any margin that might cause overlap
+          >
+            <ChatIcon />
+          </Fab>
         )}
       </Box>
     </Box>
   );
 };
+

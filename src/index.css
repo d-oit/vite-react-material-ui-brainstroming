@@ -44,10 +44,41 @@ html, body, #root {
   width: 8px;
   height: 8px;
   background-color: #2196f3;
+  cursor: crosshair;
+  transition: transform 0.2s ease;
+}
+
+.react-flow__handle:hover {
+  transform: scale(1.5);
+}
+
+.react-flow__handle-custom {
+  opacity: 0.8;
+}
+
+.react-flow__handle-custom:hover {
+  opacity: 1;
+  transform: scale(1.3);
 }
 
 .react-flow__edge-path {
   stroke-width: 2;
+}
+
+.react-flow__connection-path {
+  stroke: #2196f3;
+  stroke-width: 3;
+}
+
+.react-flow__edge.animated path {
+  stroke-dasharray: 5;
+  animation: dashdraw 0.5s linear infinite;
+}
+
+@keyframes dashdraw {
+  from {
+    stroke-dashoffset: 10;
+  }
 }
 
 .react-flow__controls {
@@ -59,3 +90,4 @@ html, body, #root {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+

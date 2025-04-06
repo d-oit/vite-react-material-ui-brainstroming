@@ -7,7 +7,7 @@ import { Node, Edge, Project, NodeType } from '../types';
 import { AppShell } from '../components/Layout/AppShell';
 import { BrainstormLayout } from '../components/Layout/BrainstormLayout';
 import { EnhancedBrainstormFlow } from '../components/BrainstormFlow/EnhancedBrainstormFlow';
-import { ReactFlowWrapper } from '../components/BrainstormFlow/ReactFlowWrapper';
+// EnhancedBrainstormFlow now includes its own ReactFlowProvider
 import { ChatPanel } from '../components/Chat/ChatPanel';
 import { GitHistoryPanel } from '../components/GitHistory/GitHistoryPanel';
 import projectService from '../services/ProjectService';
@@ -206,15 +206,13 @@ export const EnhancedBrainstormPage = () => {
     >
       <BrainstormLayout
         mainContent={
-          <ReactFlowWrapper>
-            <EnhancedBrainstormFlow
-              initialNodes={nodes}
-              initialEdges={edges}
-              onSave={handleSaveProject}
-              onNodesChange={handleNodesChange}
-              onEdgesChange={handleEdgesChange}
-            />
-          </ReactFlowWrapper>
+          <EnhancedBrainstormFlow
+            initialNodes={nodes}
+            initialEdges={edges}
+            onSave={handleSaveProject}
+            onNodesChange={handleNodesChange}
+            onEdgesChange={handleEdgesChange}
+          />
         }
         chatPanel={
           <ChatPanel

@@ -12,6 +12,7 @@ import {
   useTheme,
   Drawer,
   IconButton,
+  Fab,
 } from '@mui/material';
 import {
   Save as SaveIcon,
@@ -197,17 +198,40 @@ export const BrainstormPage = () => {
         </Grid>
       )}
       
-      {!chatOpen && !isMobile && (
-        <Button
-          variant="contained"
-          color="secondary"
-          startIcon={<ChatIcon />}
-          onClick={toggleChat}
-          sx={{ position: 'fixed', bottom: 16, right: 16 }}
+      {/* Floating action buttons - stacked vertically with proper spacing */}
+      <Box 
+        sx={{ 
+          position: 'fixed', 
+          bottom: 16, 
+          right: 16,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          zIndex: 1000,
+        }}
+      >
+        {!chatOpen && !isMobile && (
+          <Fab
+            color="secondary"
+            aria-label="chat"
+            onClick={toggleChat}
+            size="medium"
+          >
+            <ChatIcon />
+          </Fab>
+        )}
+        
+        <Fab
+          color="primary"
+          aria-label="save"
+          onClick={() => saveProject()}
+          disabled={isSaving}
+          size="medium"
         >
-          Open Assistant
-        </Button>
-      )}
+          <SaveIcon />
+        </Fab>
+      </Box>
     </MainLayout>
   );
 };
+

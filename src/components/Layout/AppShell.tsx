@@ -291,22 +291,28 @@ export const AppShell = ({
       >
         {children}
         
-        {/* Floating action button for creating new items */}
-        {onCreateNew && (
-          <Fab
-            color="primary"
-            aria-label="add"
-            sx={{
-              position: 'fixed',
-              bottom: 16,
-              right: 16,
-              zIndex: 1000,
-            }}
-            onClick={onCreateNew}
-          >
-            <AddIcon />
-          </Fab>
-        )}
+        {/* Floating action buttons - grouped in a single container */}
+        <Box
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            right: 16,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            zIndex: 1000,
+          }}
+        >
+          {onCreateNew && (
+            <Fab
+              color="primary"
+              aria-label="add"
+              onClick={onCreateNew}
+            >
+              <AddIcon />
+            </Fab>
+          )}
+        </Box>
       </Box>
       
       {/* Loading indicator */}
@@ -340,3 +346,4 @@ export const AppShell = ({
     </Box>
   );
 };
+

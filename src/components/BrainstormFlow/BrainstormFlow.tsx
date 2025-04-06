@@ -54,9 +54,33 @@ export const BrainstormFlow = ({
   // Handle connection between nodes
   const onConnect = useCallback(
     (connection: Connection) => {
-      setEdges((eds) => addEdge({ ...connection, animated: true }, eds));
+      // Validate connection
+      if (!connection.source || !connection.target) {
+        console.warn('Invalid connection attempt:', connection);
+        return;
+      }
+
+      // Check if connection already exists
+      const connectionExists = edges.some(
+        edge => edge.source === connection.source && edge.target === connection.target
+      );
+
+      if (connectionExists) {
+        return;
+      }
+
+      // Create new edge with unique ID and animation
+      const newEdge = {
+        ...connection,
+        id: `edge-${connection.source}-${connection.target}-${Date.now()}`,
+        type: 'smoothstep',
+        animated: true, // Add animation to make it more visible
+        style: { stroke: '#2196f3', strokeWidth: 2 }, // Add styling
+      };
+
+      setEdges((eds) => addEdge(newEdge, eds));
     },
-    [setEdges]
+    [edges, setEdges]
   );
 
   // Handle node edit
@@ -166,6 +190,11 @@ export const BrainstormFlow = ({
         onInit={onInit}
         fitView
         attributionPosition="bottom-right"
+        connectionMode="loose"
+        connectionLineStyle={{ stroke: '#2196f3', strokeWidth: 3 }}
+        connectionLineType="smoothstep"
+        zoomOnScroll={true}
+        panOnScroll={true}
       >
         <Background />
         <Controls />

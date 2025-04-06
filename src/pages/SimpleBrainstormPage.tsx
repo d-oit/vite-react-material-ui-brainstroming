@@ -14,6 +14,7 @@ import {
   Toolbar,
   Tabs,
   Tab,
+  Fab,
 } from '@mui/material';
 import {
   Save as SaveIcon,
@@ -302,18 +303,19 @@ export const SimpleBrainstormPage = () => {
           )}
         </Paper>
 
+        {/* Consistent button placement with other pages */}
         {!sidebarOpen && !isMobile && (
-          <Button
-            variant="contained"
+          <Fab
             color="secondary"
-            startIcon={<ChatIcon />}
+            aria-label="chat"
             onClick={toggleSidebar}
             sx={{ position: 'fixed', bottom: 16, right: 16 }}
           >
-            {t('chat.title')}
-          </Button>
+            <ChatIcon />
+          </Fab>
         )}
       </Box>
     </Box>
   );
 };
+

@@ -7,7 +7,7 @@ import { NodeData, NodeType } from '../../types';
 interface CustomNodeProps extends NodeProps {
   data: NodeData & {
     onEdit?: (id: string) => void;
-    onDelete?: (id: string) => void;
+    onDelete?: (id: string, event: React.MouseEvent) => void;
   };
 }
 
@@ -58,7 +58,18 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
         boxShadow: 2,
       }}
     >
-      <Handle type="target" position={Position.Top} />
+      <Handle
+        type="target"
+        position={Position.Top}
+        style={{
+          width: 10,
+          height: 10,
+          background: borderColor,
+          border: '2px solid white',
+          zIndex: 10
+        }}
+        className="react-flow__handle-custom"
+      />
 
       <Box
         sx={{
@@ -77,7 +88,13 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
           <IconButton size="small" onClick={() => data.onEdit?.(id)}>
             <EditIcon fontSize="small" />
           </IconButton>
-          <IconButton size="small" onClick={() => data.onDelete?.(id)}>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent node selection
+              data.onDelete?.(id, e);
+            }}
+          >
             <DeleteIcon fontSize="small" />
           </IconButton>
         </Box>
@@ -97,9 +114,22 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
         )}
       </CardContent>
 
-      <Handle type="source" position={Position.Bottom} />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        style={{
+          width: 10,
+          height: 10,
+          background: borderColor,
+          border: '2px solid white',
+          zIndex: 10
+        }}
+        className="react-flow__handle-custom"
+      />
     </Card>
   );
 };
 
 export default memo(CustomNode);
+
+

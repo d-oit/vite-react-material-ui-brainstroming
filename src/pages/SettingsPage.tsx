@@ -194,6 +194,16 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
               }
               label="Auto-backup to cloud"
             />
+            
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={preferences.skipDeleteConfirmation}
+                  onChange={handleSwitchChange('skipDeleteConfirmation')}
+                />
+              }
+              label="Skip delete confirmation dialogs"
+            />
           </FormGroup>
         </Paper>
 
@@ -249,3 +259,4 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
     </AppShell>
   );
 };
+

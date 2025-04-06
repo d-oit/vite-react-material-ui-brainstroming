@@ -24,6 +24,12 @@ import {
   useMediaQuery,
   Snackbar,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
 } from '@mui/material';
 import CustomNode from './CustomNode';
 import { NodeEditDialog } from './NodeEditDialog';
@@ -48,7 +54,17 @@ interface EnhancedBrainstormFlowProps {
   onEdgesChange?: (edges: Edge[]) => void;
 }
 
-export const EnhancedBrainstormFlow = ({
+// This is the main component that will be exported
+export const EnhancedBrainstormFlow = (props: EnhancedBrainstormFlowProps) => {
+  return (
+    <ReactFlowProvider>
+      <FlowContent {...props} />
+    </ReactFlowProvider>
+  );
+};
+
+// This is the inner component that uses the ReactFlow hooks
+const FlowContent = ({
   initialNodes = [],
   initialEdges = [],
   onSave,
@@ -69,8 +85,11 @@ export const EnhancedBrainstormFlow = ({
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'info'>('info');
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [nodeToDelete, setNodeToDelete] = useState<string | null>(null);
 
-  // We'll use these functions from the useReactFlow hook
+  // Get ReactFlow utility functions - now this is safe because we're inside ReactFlowProvider
+  const { fitView, zoomIn, zoomOut, setViewport } = useReactFlow();
 
   // Handle nodes change with external callback
   const handleNodesChange = useCallback((changes: any) => {
@@ -107,11 +126,31 @@ export const EnhancedBrainstormFlow = ({
   // Connect nodes
   const onConnect = useCallback(
     (connection: Connection) => {
+      // Validate connection
+      if (!connection.source || !connection.target) {
+        console.warn('Invalid connection attempt:', connection);
+        return;
+      }
+
+      // Check if connection already exists
+      const connectionExists = edges.some(
+        edge => edge.source === connection.source && edge.target === connection.target
+      );
+
+      if (connectionExists) {
+        showSnackbar(t('brainstorm.edgeAlreadyExists') || 'Connection already exists', 'info');
+        return;
+      }
+
+      // Create new edge with unique ID and animation
       const newEdge = {
         ...connection,
-        id: `edge-${connection.source}-${connection.target}`,
+        id: `edge-${connection.source}-${connection.target}-${Date.now()}`,
         type: 'smoothstep',
+        animated: true, // Add animation to make it more visible
+        style: { stroke: '#2196f3', strokeWidth: 2 }, // Add styling
       };
+
       const updatedEdges = addEdge(newEdge, edges);
       setEdges(updatedEdges);
 
@@ -119,7 +158,7 @@ export const EnhancedBrainstormFlow = ({
         externalEdgesChange(updatedEdges);
       }
 
-      showSnackbar(t('brainstorm.edgeCreated'), 'success');
+      showSnackbar(t('brainstorm.edgeCreated') || 'Connection created', 'success');
     },
     [edges, setEdges, externalEdgesChange, t]
   );
@@ -169,6 +208,24 @@ export const EnhancedBrainstormFlow = ({
   );
 
   // Handle node delete
+  const handleNodeDeleteRequest = useCallback(
+    (nodeId: string, event?: React.MouseEvent) => {
+      event?.stopPropagation(); // Prevent node selection
+
+      // Check if skipDeleteConfirmation is enabled in settings
+      const skipConfirmation = process.env.VITE_SKIP_DELETE_CONFIRMATION === 'true' ||
+                              settings.skipDeleteConfirmation;
+
+      if (skipConfirmation) {
+        handleNodeDelete(nodeId);
+      } else {
+        setNodeToDelete(nodeId);
+        setDeleteConfirmOpen(true);
+      }
+    },
+    [settings]
+  );
+
   const handleNodeDelete = useCallback(
     (nodeId: string) => {
       const updatedNodes = nodes.filter(node => node.id !== nodeId);
@@ -256,32 +313,20 @@ export const EnhancedBrainstormFlow = ({
     setSnackbarOpen(true);
   };
 
-  // Auto-fit view and handle window resize will be handled in the FlowContent component
-  // since that's where we have access to the ReactFlow context
-
-  // Expose zoom functions to parent - we'll set this up after the component mounts
+  // Expose zoom functions to parent
   useEffect(() => {
-    // Wait for the next tick to ensure the functions are assigned
-    const timer = setTimeout(() => {
-      if (fitView && zoomIn && zoomOut) {
-        window.brainstormFlowApi = {
-          zoomIn,
-          zoomOut,
-          fitView: () => fitView({ padding: 0.2 }),
-          addNode,
-          saveFlow,
-        };
-      }
-    }, 100);
+    window.brainstormFlowApi = {
+      zoomIn,
+      zoomOut,
+      fitView: () => fitView({ padding: 0.2 }),
+      addNode,
+      saveFlow,
+    };
 
     return () => {
-      clearTimeout(timer);
       window.brainstormFlowApi = undefined;
     };
-  }, [addNode, saveFlow]);
-
-  // Get ReactFlow utility functions
-  const { fitView, zoomIn, zoomOut, setViewport } = useReactFlow();
+  }, [zoomIn, zoomOut, fitView, addNode, saveFlow]);
 
   // Auto-fit view on initial load
   useEffect(() => {
@@ -309,15 +354,15 @@ export const EnhancedBrainstormFlow = ({
   }, [reactFlowInstance, fitView, nodes.length]);
 
   return (
-        <Box
-          ref={reactFlowWrapper}
-          sx={{
-            height: '100%',
-            width: '100%',
-            position: 'relative',
-          }}
-        >
-          <ReactFlow
+    <Box
+      ref={reactFlowWrapper}
+      sx={{
+        height: '100%',
+        width: '100%',
+        position: 'relative',
+      }}
+    >
+      <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={handleNodesChange}
@@ -337,6 +382,12 @@ export const EnhancedBrainstormFlow = ({
         deleteKeyCode={['Backspace', 'Delete']}
         multiSelectionKeyCode={['Control', 'Meta']}
         selectionKeyCode={['Shift']}
+        connectionMode="loose"
+        connectionLineStyle={{ stroke: '#2196f3', strokeWidth: 3 }}
+        connectionLineType="smoothstep"
+        zoomOnScroll={true}
+        panOnScroll={true}
+        panOnDrag={!isMobile}
       >
         <Background
           color={theme.palette.mode === 'dark' ? '#555' : '#aaa'}
@@ -374,6 +425,36 @@ export const EnhancedBrainstormFlow = ({
         )}
       </ReactFlow>
 
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+      >
+        <DialogTitle>{t('brainstorm.confirmDelete')}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {t('brainstorm.confirmDeleteMessage')}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteConfirmOpen(false)}>
+            {t('common.cancel')}
+          </Button>
+          <Button
+            onClick={() => {
+              if (nodeToDelete) {
+                handleNodeDelete(nodeToDelete);
+                setNodeToDelete(null);
+              }
+              setDeleteConfirmOpen(false);
+            }}
+            color="error"
+          >
+            {t('common.delete')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Node edit dialog */}
       {selectedNode && (
         <NodeEditDialog
@@ -384,7 +465,7 @@ export const EnhancedBrainstormFlow = ({
           }}
           node={selectedNode}
           onSave={handleNodeEdit}
-          onDelete={() => handleNodeDelete(selectedNode.id)}
+          onDelete={() => handleNodeDeleteRequest(selectedNode.id)}
         />
       )}
 
@@ -405,6 +486,7 @@ export const EnhancedBrainstormFlow = ({
         </Alert>
       </Snackbar>
     </Box>
+  );
 };
 
 // Add type definition for the global API
@@ -419,3 +501,4 @@ declare global {
     };
   }
 }
+

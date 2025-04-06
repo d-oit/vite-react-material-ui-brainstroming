@@ -15,6 +15,7 @@ interface Settings {
   autoSave: boolean;
   autoBackup: boolean;
   fontSize: number;
+  skipDeleteConfirmation: boolean;
 }
 
 interface SettingsContextType {
@@ -35,6 +36,7 @@ const defaultSettings: Settings = {
   autoSave: true,
   autoBackup: false,
   fontSize: 16,
+  skipDeleteConfirmation: false,
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -125,3 +127,4 @@ export const useSettings = (): SettingsContextType => {
   }
   return context;
 };
+
