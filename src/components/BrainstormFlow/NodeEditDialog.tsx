@@ -177,91 +177,169 @@ export const NodeEditDialog = ({
           <Divider sx={{ my: 2 }} />
 
           <Typography variant="subtitle1" gutterBottom>
+            Tags
+          </Typography>
+
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+            <TextField
+              label="Add Tag"
+              value={newTag}
+              onChange={e => setNewTag(e.target.value)}
+              onKeyPress={e => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddTag();
+                }
+              }}
+              fullWidth
+            />
+            <Button variant="outlined" onClick={handleAddTag}>
+              Add
+            </Button>
+          </Box>
+
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1, mb: 2 }}>
+            {tags.map(tag => (
+              <Chip key={tag} label={tag} onDelete={() => handleDeleteTag(tag)} />
+            ))}
+          </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Typography variant="subtitle1" gutterBottom>
             Appearance
           </Typography>
 
-          <Grid container spacing={2} sx={{ mb: 2 }}>
-            {/* Size selection */}
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <FormatSizeIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                <Typography variant="body2">Size</Typography>
-              </Box>
+          <Paper sx={{ p: 2, mb: 2 }} elevation={0} variant="outlined">
+            <Grid container spacing={2}>
+              {/* Size selection */}
+              <Grid item xs={12} sm={6}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <FormatSizeIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                  <Typography variant="body2" fontWeight="medium">Size</Typography>
+                  <Tooltip title="Toggle size options">
+                    <IconButton
+                      size="small"
+                      onClick={() => setShowSizeSelector(!showSizeSelector)}
+                      aria-label="Toggle size options"
+                      color={showSizeSelector ? 'primary' : 'default'}
+                      sx={{ ml: 'auto' }}
+                    >
+                      <FormatSizeIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
 
-              <FormControl fullWidth>
-                <InputLabel id="node-size-label">Size</InputLabel>
-                <Select
-                  labelId="node-size-label"
-                  value={size}
-                  label="Size"
-                  onChange={e => setSize(e.target.value as 'small' | 'medium' | 'large')}
-                >
-                  <MenuItem value="small">Small</MenuItem>
-                  <MenuItem value="medium">Medium</MenuItem>
-                  <MenuItem value="large">Large</MenuItem>
-                </Select>
-              </FormControl>
-
-              {nodePreferences && (
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ display: 'block', mt: 1 }}
-                >
-                  Width: {nodePreferences.nodeSizes[size].width}px, Font:{' '}
-                  {nodePreferences.nodeSizes[size].fontSize}rem
-                </Typography>
-              )}
-            </Grid>
-
-            {/* Color selection */}
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <PaletteIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                <Typography variant="body2">Color</Typography>
-                <Tooltip title="Reset to default color">
-                  <IconButton
-                    size="small"
-                    onClick={() => setColor(undefined)}
-                    disabled={!color}
-                    sx={{ ml: 'auto' }}
+                {showSizeSelector ? (
+                  <ToggleButtonGroup
+                    value={size}
+                    exclusive
+                    onChange={(e, newSize) => {
+                      if (newSize) setSize(newSize);
+                    }}
+                    aria-label="Node size"
+                    fullWidth
+                    size={isMobile ? 'small' : 'medium'}
                   >
-                    <RefreshIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              </Box>
+                    <ToggleButton value="small" aria-label="Small size">
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <SmartphoneIcon fontSize="small" />
+                        <Typography variant="caption">Small</Typography>
+                      </Box>
+                    </ToggleButton>
+                    <ToggleButton value="medium" aria-label="Medium size">
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <SmartButtonIcon />
+                        <Typography variant="caption">Medium</Typography>
+                      </Box>
+                    </ToggleButton>
+                    <ToggleButton value="large" aria-label="Large size">
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <LaptopIcon />
+                        <Typography variant="caption">Large</Typography>
+                      </Box>
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                ) : (
+                  <FormControl fullWidth>
+                    <InputLabel id="node-size-label">Size</InputLabel>
+                    <Select
+                      labelId="node-size-label"
+                      value={size}
+                      label="Size"
+                      onChange={e => setSize(e.target.value as 'small' | 'medium' | 'large')}
+                    >
+                      <MenuItem value="small">Small</MenuItem>
+                      <MenuItem value="medium">Medium</MenuItem>
+                      <MenuItem value="large">Large</MenuItem>
+                    </Select>
+                  </FormControl>
+                )}
 
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                {/* Current color preview */}
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: 36,
-                    borderRadius: 1,
-                    bgcolor: color || defaultNodeColor,
-                    border: '1px solid rgba(0, 0, 0, 0.2)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                      boxShadow: 2,
-                    },
-                  }}
-                  onClick={() => {
-                    if (isMobile) {
-                      // Toggle color picker panel on mobile
-                      setShowColorPicker(!showColorPicker);
-                    } else {
-                      // Use native color picker on desktop
-                      const input = document.createElement('input');
-                      input.type = 'color';
-                      input.value = color || defaultNodeColor;
-                      input.addEventListener('input', e => {
-                        setColor((e.target as HTMLInputElement).value);
-                      });
-                      input.click();
-                    }
-                  }}
-                />
+                {nodePreferences && (
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: 'block', mt: 1 }}
+                  >
+                    Width: {nodePreferences.nodeSizes[size].width}px, Font:{' '}
+                    {nodePreferences.nodeSizes[size].fontSize}rem
+                  </Typography>
+                )}
+              </Grid>
+
+              {/* Color selection */}
+              <Grid item xs={12} sm={6}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <PaletteIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                  <Typography variant="body2" fontWeight="medium">Color</Typography>
+                  <Tooltip title="Reset to default color">
+                    <IconButton
+                      size="small"
+                      onClick={() => setColor(undefined)}
+                      disabled={!color}
+                      sx={{ ml: 'auto' }}
+                      aria-label="Reset to default color"
+                    >
+                      <RefreshIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  {/* Current color preview */}
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: 36,
+                      borderRadius: 1,
+                      bgcolor: color || defaultNodeColor,
+                      border: '1px solid rgba(0, 0, 0, 0.2)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        boxShadow: 2,
+                      },
+                    }}
+                    onClick={() => {
+                      if (isMobile) {
+                        // Toggle color picker panel on mobile
+                        setShowColorPicker(!showColorPicker);
+                      } else {
+                        // Use native color picker on desktop
+                        const input = document.createElement('input');
+                        input.type = 'color';
+                        input.value = color || defaultNodeColor;
+                        input.addEventListener('input', e => {
+                          setColor((e.target as HTMLInputElement).value);
+                        });
+                        input.click();
+                      }
+                    }}
+                    role="button"
+                    aria-label="Select color"
+                    tabIndex={0}
+                  />
 
                 {/* Color presets */}
                 {(showColorPicker || !isMobile) && (
@@ -284,98 +362,36 @@ export const NodeEditDialog = ({
                       '#f57f17', // Dark yellow
                       '#4a148c', // Dark purple
                     ].map(presetColor => (
-                      <Box
-                        key={presetColor}
-                        sx={{
-                          width: 24,
-                          height: 24,
-                          borderRadius: '50%',
-                          bgcolor: presetColor,
-                          border:
-                            color === presetColor
-                              ? `2px solid ${theme.palette.primary.main}`
-                              : '1px solid rgba(0, 0, 0, 0.2)',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          '&:hover': {
-                            transform: 'scale(1.1)',
-                          },
-                        }}
-                        onClick={() => setColor(presetColor)}
-                      />
+                      <Tooltip key={presetColor} title={presetColor}>
+                        <Box
+                          sx={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: '50%',
+                            bgcolor: presetColor,
+                            border:
+                              color === presetColor
+                                ? `2px solid ${theme.palette.primary.main}`
+                                : '1px solid rgba(0, 0, 0, 0.2)',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                              transform: 'scale(1.1)',
+                            },
+                          }}
+                          onClick={() => setColor(presetColor)}
+                          role="button"
+                          aria-label={`Use color ${presetColor}`}
+                          tabIndex={0}
+                        />
+                      </Tooltip>
                     ))}
                   </Box>
                 )}
               </Box>
             </Grid>
           </Grid>
-
-          {/* Size selector */}
-          <Box sx={{ mb: 2, mt: 2 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="subtitle2">Node Size</Typography>
-              <Tooltip title="Toggle size options">
-                <IconButton
-                  size="small"
-                  onClick={() => setShowSizeSelector(!showSizeSelector)}
-                  aria-label="Toggle size options"
-                  color={showSizeSelector ? 'primary' : 'default'}
-                >
-                  <FormatSizeIcon />
-                </IconButton>
-              </Tooltip>
-            </Box>
-
-            {showSizeSelector && (
-              <Paper sx={{ p: 2, mt: 1, mb: 2 }} elevation={1}>
-                <ToggleButtonGroup
-                  value={size}
-                  exclusive
-                  onChange={(e, newSize) => {
-                    if (newSize) setSize(newSize);
-                  }}
-                  aria-label="Node size"
-                  fullWidth
-                  size={isMobile ? 'small' : 'medium'}
-                >
-                  <ToggleButton value="small" aria-label="Small size">
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <SmartphoneIcon fontSize="small" />
-                      <Typography variant="caption">Small</Typography>
-                    </Box>
-                  </ToggleButton>
-                  <ToggleButton value="medium" aria-label="Medium size">
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <SmartButtonIcon />
-                      <Typography variant="caption">Medium</Typography>
-                    </Box>
-                  </ToggleButton>
-                  <ToggleButton value="large" aria-label="Large size">
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <LaptopIcon />
-                      <Typography variant="caption">Large</Typography>
-                    </Box>
-                  </ToggleButton>
-                </ToggleButtonGroup>
-
-                <Box
-                  sx={{
-                    mt: 1,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Typography variant="caption" color="text.secondary">
-                    Width: {nodePreferences ? nodePreferences.nodeSizes[size].width : 200}px
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Font: {nodePreferences ? nodePreferences.nodeSizes[size].fontSize : 1}rem
-                  </Typography>
-                </Box>
-              </Paper>
-            )}
-          </Box>
+          </Paper>
 
           {/* Node preview */}
           <Box
@@ -450,36 +466,6 @@ export const NodeEditDialog = ({
                   : 'Node content preview'}
               </Typography>
             </Box>
-          </Box>
-
-          <Divider sx={{ my: 2 }} />
-
-          <Typography variant="subtitle1" gutterBottom>
-            Tags
-          </Typography>
-
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-            <TextField
-              label="Add Tag"
-              value={newTag}
-              onChange={e => setNewTag(e.target.value)}
-              onKeyPress={e => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  handleAddTag();
-                }
-              }}
-              fullWidth
-            />
-            <Button variant="outlined" onClick={handleAddTag}>
-              Add
-            </Button>
-          </Box>
-
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
-            {tags.map(tag => (
-              <Chip key={tag} label={tag} onDelete={() => handleDeleteTag(tag)} />
-            ))}
           </Box>
         </Box>
       </DialogContent>
