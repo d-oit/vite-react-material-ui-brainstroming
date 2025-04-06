@@ -1,3 +1,5 @@
+import { Info as InfoIcon, Close as CloseIcon } from '@mui/icons-material';
+import type { SelectChangeEvent } from '@mui/material';
 import {
   Box,
   Button,
@@ -10,7 +12,6 @@ import {
   Select,
   TextField,
   Typography,
-  SelectChangeEvent,
   Divider,
   Card,
   CardMedia,
@@ -24,10 +25,9 @@ import {
   DialogContent,
   DialogActions,
 } from '@mui/material';
-import { Info as InfoIcon, Close as CloseIcon } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
-import { useI18n } from '../../contexts/I18nContext';
 
+import { useI18n } from '../../contexts/I18nContext';
 import { projectTemplates } from '../../data/projectTemplates';
 import { ProjectTemplate } from '../../types/project';
 
@@ -37,7 +37,11 @@ interface ProjectCreateFormProps {
   loading?: boolean;
 }
 
-export const ProjectCreateForm = ({ onSubmit, onCancel, loading = false }: ProjectCreateFormProps) => {
+export const ProjectCreateForm = ({
+  onSubmit,
+  onCancel,
+  loading = false,
+}: ProjectCreateFormProps) => {
   const { t } = useI18n();
   const theme = useTheme();
   const [name, setName] = useState('');
@@ -129,7 +133,7 @@ export const ProjectCreateForm = ({ onSubmit, onCancel, loading = false }: Proje
                 disabled={loading}
                 autoFocus
                 InputProps={{
-                  sx: { borderRadius: 1.5 }
+                  sx: { borderRadius: 1.5 },
                 }}
               />
             </Grid>
@@ -147,7 +151,7 @@ export const ProjectCreateForm = ({ onSubmit, onCancel, loading = false }: Proje
                 disabled={loading}
                 placeholder={t('project.descriptionPlaceholder')}
                 InputProps={{
-                  sx: { borderRadius: 1.5 }
+                  sx: { borderRadius: 1.5 },
                 }}
               />
             </Grid>
@@ -158,7 +162,7 @@ export const ProjectCreateForm = ({ onSubmit, onCancel, loading = false }: Proje
               </Typography>
 
               <Grid container spacing={2}>
-                {Object.values(ProjectTemplate).map((templateType) => (
+                {Object.values(ProjectTemplate).map(templateType => (
                   <Grid item xs={12} sm={6} md={4} key={templateType}>
                     <Card
                       sx={{
@@ -167,26 +171,37 @@ export const ProjectCreateForm = ({ onSubmit, onCancel, loading = false }: Proje
                         display: 'flex',
                         flexDirection: 'column',
                         borderRadius: 2,
-                        border: template === templateType ?
-                          `2px solid ${theme.palette.primary.main}` :
-                          '1px solid rgba(0,0,0,0.12)',
+                        border:
+                          template === templateType
+                            ? `2px solid ${theme.palette.primary.main}`
+                            : '1px solid rgba(0,0,0,0.12)',
                         transition: 'all 0.2s ease-in-out',
                         '&:hover': {
                           boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                          transform: 'translateY(-2px)'
-                        }
+                          transform: 'translateY(-2px)',
+                        },
                       }}
                       onClick={() => setTemplate(templateType)}
                     >
                       <CardContent sx={{ flexGrow: 1, p: 2 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <Typography variant="subtitle1" component="div" sx={{ fontWeight: 'bold' }}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-start',
+                          }}
+                        >
+                          <Typography
+                            variant="subtitle1"
+                            component="div"
+                            sx={{ fontWeight: 'bold' }}
+                          >
                             {projectTemplates[templateType]?.name || templateType}
                           </Typography>
                           <Tooltip title={t('project.moreInfo')}>
                             <IconButton
                               size="small"
-                              onClick={(e) => {
+                              onClick={e => {
                                 e.stopPropagation();
                                 openTemplateInfo(templateType);
                               }}
@@ -195,7 +210,11 @@ export const ProjectCreateForm = ({ onSubmit, onCancel, loading = false }: Proje
                             </IconButton>
                           </Tooltip>
                         </Box>
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: '0.8rem' }}>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mt: 1, fontSize: '0.8rem' }}
+                        >
                           {getTemplateDescription(templateType)}
                         </Typography>
                       </CardContent>
@@ -208,11 +227,7 @@ export const ProjectCreateForm = ({ onSubmit, onCancel, loading = false }: Proje
             <Grid item xs={12}>
               <Divider sx={{ my: 2 }} />
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-                <Button
-                  onClick={onCancel}
-                  disabled={loading}
-                  sx={{ borderRadius: 1.5 }}
-                >
+                <Button onClick={onCancel} disabled={loading} sx={{ borderRadius: 1.5 }}>
                   {t('common.cancel')}
                 </Button>
                 <Button
@@ -222,7 +237,7 @@ export const ProjectCreateForm = ({ onSubmit, onCancel, loading = false }: Proje
                   disabled={loading || name.trim() === ''}
                   sx={{
                     borderRadius: 1.5,
-                    minWidth: 100
+                    minWidth: 100,
                   }}
                 >
                   {loading ? (
@@ -230,7 +245,9 @@ export const ProjectCreateForm = ({ onSubmit, onCancel, loading = false }: Proje
                       <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} />
                       {t('common.creating')}
                     </>
-                  ) : t('common.create')}
+                  ) : (
+                    t('common.create')
+                  )}
                 </Button>
               </Box>
             </Grid>
@@ -239,12 +256,7 @@ export const ProjectCreateForm = ({ onSubmit, onCancel, loading = false }: Proje
       </Paper>
 
       {/* Template Info Dialog */}
-      <Dialog
-        open={templateInfoOpen}
-        onClose={closeTemplateInfo}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={templateInfoOpen} onClose={closeTemplateInfo} maxWidth="sm" fullWidth>
         {selectedTemplateInfo && (
           <>
             <DialogTitle>

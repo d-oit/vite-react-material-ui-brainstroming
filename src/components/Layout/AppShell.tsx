@@ -5,8 +5,8 @@ import {
   Home as HomeIcon,
   Settings as SettingsIcon,
   Add as AddIcon,
-  History as HistoryIcon,
-  Chat as ChatIcon,
+  History as _HistoryIcon,
+  Chat as _ChatIcon,
   Close as CloseIcon,
   FolderOpen as ProjectsIcon,
   BubbleChart as BrainstormIcon,
@@ -41,7 +41,7 @@ import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import NetworkInfoDialog from '../OfflineIndicator/NetworkInfoDialog';
 import NetworkStatusIcon from '../OfflineIndicator/NetworkStatusIcon';
-import OfflineIndicator from '../OfflineIndicator/OfflineIndicator';
+import _OfflineIndicator from '../OfflineIndicator/OfflineIndicator';
 
 interface AppShellProps {
   children: ReactNode;
@@ -64,7 +64,7 @@ export const AppShell = ({
 }: AppShellProps) => {
   const theme = useTheme();
   const { t } = useI18n();
-  const { settings } = useSettings();
+  const { settings: _settings } = useSettings();
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -159,7 +159,10 @@ export const AppShell = ({
         {navigationItems.map(item => (
           <ListItem key={item.text} disablePadding>
             <ListItemButton
-              onClick={() => item.onClick ? item.onClick() : handleNavigation(item.path)}
+              onClick={() => {
+                if (item.onClick) item.onClick();
+                else handleNavigation(item.path);
+              }}
               selected={item.active}
               sx={{
                 borderRadius: 1,

@@ -202,7 +202,7 @@ describe('S3Service', () => {
 
       // Override the implementation for this test
       const originalUploadProject = s3Service.uploadProject;
-      s3Service.uploadProject = vi.fn().mockImplementation(async (project) => {
+      s3Service.uploadProject = vi.fn().mockImplementation(async project => {
         loggerService.info(`Project ${project.id} uploaded to S3 successfully`);
         return { success: true };
       });
@@ -247,7 +247,7 @@ describe('S3Service', () => {
 
       // Override the implementation for this test
       const originalUploadProject = s3Service.uploadProject;
-      s3Service.uploadProject = vi.fn().mockImplementation(async (project) => {
+      s3Service.uploadProject = vi.fn().mockImplementation(async project => {
         loggerService.info(`Project ${project.id} queued for upload to S3`);
         return { queued: true };
       });

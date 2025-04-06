@@ -1,10 +1,10 @@
 import { Box, Paper, Typography, CircularProgress, Alert } from '@mui/material';
 import { useState, useEffect, useCallback } from 'react';
 
-import { EnhancedBrainstormFlow } from '../BrainstormFlow/EnhancedBrainstormFlow';
 import { useErrorNotification } from '../../contexts/ErrorNotificationContext';
 import loggerService from '../../services/LoggerService';
 import type { Node, Edge, Project } from '../../types';
+import { EnhancedBrainstormFlow } from '../BrainstormFlow/EnhancedBrainstormFlow';
 
 interface ProjectBrainstormingSectionProps {
   project: Project;

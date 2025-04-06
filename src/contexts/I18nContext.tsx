@@ -45,7 +45,8 @@ const translations: Record<string, Translations> = {
     'dashboard.createFirst': 'Create your first brainstorming project to get started.',
     'brainstorm.title': 'Brainstorming',
     'brainstorm.quickBrainstorm': 'Quick Brainstorm',
-    'brainstorm.quickBrainstormDescription': 'Create a quick brainstorming session without project setup.',
+    'brainstorm.quickBrainstormDescription':
+      'Create a quick brainstorming session without project setup.',
     'brainstorm.addNode': 'Add Node',
     'brainstorm.saveFlow': 'Save Flow',
     'brainstorm.newVersion': 'New Version',
@@ -115,7 +116,8 @@ const translations: Record<string, Translations> = {
     'dashboard.createFirst': 'Erstellen Sie Ihr erstes Brainstorming-Projekt, um zu beginnen.',
     'brainstorm.title': 'Brainstorming',
     'brainstorm.quickBrainstorm': 'Schnelles Brainstorming',
-    'brainstorm.quickBrainstormDescription': 'Erstellen Sie eine schnelle Brainstorming-Sitzung ohne Projekteinrichtung.',
+    'brainstorm.quickBrainstormDescription':
+      'Erstellen Sie eine schnelle Brainstorming-Sitzung ohne Projekteinrichtung.',
     'brainstorm.addNode': 'Knoten hinzufügen',
     'brainstorm.saveFlow': 'Flow speichern',
     'brainstorm.newVersion': 'Neue Version',

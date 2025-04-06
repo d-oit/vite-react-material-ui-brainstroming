@@ -1,4 +1,12 @@
 import {
+  Save as SaveIcon,
+  CloudUpload as CloudUploadIcon,
+  CloudDownload as CloudDownloadIcon,
+  Download as DownloadIcon,
+  Upload as UploadIcon,
+} from '@mui/icons-material';
+import type { SelectChangeEvent } from '@mui/material';
+import {
   Box,
   Paper,
   Typography,
@@ -14,20 +22,12 @@ import {
   Alert,
   CircularProgress,
   Grid,
-  SelectChangeEvent,
 } from '@mui/material';
-import {
-  Save as SaveIcon,
-  CloudUpload as CloudUploadIcon,
-  CloudDownload as CloudDownloadIcon,
-  Download as DownloadIcon,
-  Upload as UploadIcon,
-} from '@mui/icons-material';
 import { useState, useEffect, useCallback } from 'react';
 
 import { useErrorNotification } from '../../contexts/ErrorNotificationContext';
-import loggerService from '../../services/LoggerService';
 import { uploadProject, downloadProject } from '../../lib/s3Service';
+import loggerService from '../../services/LoggerService';
 import type { Project, SyncSettings } from '../../types';
 
 interface ProjectSettingsSectionProps {
@@ -68,8 +68,7 @@ export const ProjectSettingsSection = ({
     const checkS3Config = async () => {
       try {
         // Check if AWS credentials are configured in .env
-        const isConfigured = process.env.VITE_AWS_S3_BUCKET && 
-                            process.env.VITE_AWS_REGION;
+        const isConfigured = process.env.VITE_AWS_S3_BUCKET && process.env.VITE_AWS_REGION;
         setIsS3Available(!!isConfigured);
       } catch (err) {
         loggerService.error(
@@ -111,7 +110,9 @@ export const ProjectSettingsSection = ({
   // Handle sync frequency change
   const handleSyncFrequencyChange = useCallback(
     (event: SelectChangeEvent<string>) => {
-      handleSyncSettingsChange({ syncFrequency: event.target.value as 'manual' | 'onSave' | 'interval' });
+      handleSyncSettingsChange({
+        syncFrequency: event.target.value as 'manual' | 'onSave' | 'interval',
+      });
     },
     [handleSyncSettingsChange]
   );
@@ -156,7 +157,7 @@ export const ProjectSettingsSection = ({
     try {
       // Create a JSON string from the project
       const projectJson = JSON.stringify(project, null, 2);
-      
+
       // Create a blob and download link
       const blob = new Blob([projectJson], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -165,13 +166,13 @@ export const ProjectSettingsSection = ({
       a.download = `${project.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
       a.click();
-      
+
       // Clean up
       setTimeout(() => {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }, 100);
-      
+
       loggerService.info('Project exported to file', { projectId: project.id });
     } catch (err) {
       const errorMessage = 'Failed to export project';
@@ -190,25 +191,25 @@ export const ProjectSettingsSection = ({
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'application/json';
-      
-      input.onchange = (event) => {
+
+      input.onchange = event => {
         const file = (event.target as HTMLInputElement).files?.[0];
         if (!file) {
           setImportLoading(false);
           return;
         }
-        
+
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = e => {
           try {
             const content = e.target?.result as string;
             const importedProject = JSON.parse(content) as Project;
-            
+
             // Validate the imported project
             if (!importedProject.id || !importedProject.name) {
               throw new Error('Invalid project file');
             }
-            
+
             // Update the current project with imported data
             // but keep the current project ID and metadata
             const updatedProject = {
@@ -219,7 +220,7 @@ export const ProjectSettingsSection = ({
               edges: importedProject.edges || [],
               updatedAt: new Date().toISOString(),
             };
-            
+
             onSave(updatedProject);
             loggerService.info('Project imported from file', { projectId: project.id });
           } catch (err) {
@@ -230,15 +231,15 @@ export const ProjectSettingsSection = ({
             setImportLoading(false);
           }
         };
-        
+
         reader.onerror = () => {
           showError('Failed to read file');
           setImportLoading(false);
         };
-        
+
         reader.readAsText(file);
       };
-      
+
       // Trigger the file input click
       input.click();
     } catch (err) {
@@ -273,7 +274,7 @@ export const ProjectSettingsSection = ({
             lastSyncedAt: new Date().toISOString(),
           },
         };
-        
+
         onSave(updatedProject);
         setLastSyncTime(updatedProject.syncSettings.lastSyncedAt);
         loggerService.info('Project imported from S3', { projectId: project.id });
@@ -301,13 +302,14 @@ export const ProjectSettingsSection = ({
         <Typography variant="h6" gutterBottom>
           S3 Synchronization
         </Typography>
-        
+
         {!isS3Available && (
           <Alert severity="info" sx={{ mb: 2 }}>
-            S3 integration is not configured. To enable S3 synchronization, please set the required environment variables.
+            S3 integration is not configured. To enable S3 synchronization, please set the required
+            environment variables.
           </Alert>
         )}
-        
+
         <FormControlLabel
           control={
             <Switch
@@ -318,7 +320,7 @@ export const ProjectSettingsSection = ({
           }
           label="Enable S3 Synchronization"
         />
-        
+
         {syncSettings.enableS3Sync && (
           <Box sx={{ mt: 2 }}>
             <FormControl fullWidth sx={{ mb: 2 }}>
@@ -335,7 +337,7 @@ export const ProjectSettingsSection = ({
                 <MenuItem value="interval">Interval</MenuItem>
               </Select>
             </FormControl>
-            
+
             {syncSettings.syncFrequency === 'interval' && (
               <TextField
                 label="Interval (minutes)"
@@ -348,7 +350,7 @@ export const ProjectSettingsSection = ({
                 InputProps={{ inputProps: { min: 1 } }}
               />
             )}
-            
+
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <Button
                 variant="contained"
@@ -359,7 +361,7 @@ export const ProjectSettingsSection = ({
               >
                 {isSyncing ? 'Syncing...' : 'Sync Now'}
               </Button>
-              
+
               {lastSyncTime && (
                 <Typography variant="body2" color="text.secondary">
                   Last synced: {new Date(lastSyncTime).toLocaleString()}
@@ -369,12 +371,12 @@ export const ProjectSettingsSection = ({
           </Box>
         )}
       </Paper>
-      
+
       <Paper sx={{ p: 3 }}>
         <Typography variant="h6" gutterBottom>
           Import/Export
         </Typography>
-        
+
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
             <Typography variant="subtitle1" gutterBottom>
@@ -399,7 +401,7 @@ export const ProjectSettingsSection = ({
               </Button>
             </Box>
           </Grid>
-          
+
           <Grid item xs={12} sm={6}>
             <Typography variant="subtitle1" gutterBottom>
               S3 Storage

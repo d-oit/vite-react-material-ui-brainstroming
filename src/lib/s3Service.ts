@@ -1,7 +1,29 @@
 import AWS from 'aws-sdk';
 
-import type { Project } from '../types';
 import loggerService from '../services/LoggerService';
+import type { Project } from '../types';
+import { isValidUrl, sanitizeUrl } from '../utils/urlValidation';
+
+/**
+ * Create a dummy S3 client that gracefully fails all operations
+ * @param errorMessage Error message to use for rejections
+ * @returns Dummy S3 client
+ */
+const createDummyS3Client = (errorMessage: string): AWS.S3 => {
+  return {
+    putObject: () => ({ promise: () => Promise.reject(new Error(errorMessage)) }),
+    getObject: () => ({ promise: () => Promise.reject(new Error(errorMessage)) }),
+    listObjectsV2: () => ({ promise: () => Promise.reject(new Error(errorMessage)) }),
+    deleteObjects: () => ({ promise: () => Promise.reject(new Error(errorMessage)) }),
+    upload: () => ({
+      promise: () => Promise.reject(new Error(errorMessage)),
+      on: (event: string, _callback: any) => {
+        // Mock the progress event but don't call the callback since we're failing anyway
+        return {};
+      },
+    }),
+  } as AWS.S3;
+};
 
 // Initialize S3 client
 const initS3Client = () => {
@@ -10,16 +32,18 @@ const initS3Client = () => {
   const region = import.meta.env.VITE_AWS_REGION || 'us-east-1';
   const bucket = import.meta.env.VITE_AWS_S3_BUCKET;
 
+  // If S3 is not configured at all, return a dummy client
   if (!endpoint && !bucket) {
-    // Instead of throwing an error, log a warning and return null
-    loggerService.warn('S3 not configured. Please set VITE_AWS_S3_ENDPOINT and VITE_AWS_S3_BUCKET in your .env file.');
-    // Return a dummy S3 client that will fail gracefully
-    return {
-      putObject: () => ({ promise: () => Promise.reject(new Error('S3 not configured')) }),
-      getObject: () => ({ promise: () => Promise.reject(new Error('S3 not configured')) }),
-      listObjectsV2: () => ({ promise: () => Promise.reject(new Error('S3 not configured')) }),
-      deleteObjects: () => ({ promise: () => Promise.reject(new Error('S3 not configured')) }),
-    } as AWS.S3;
+    loggerService.warn(
+      'S3 not configured. Please set VITE_AWS_S3_ENDPOINT and VITE_AWS_S3_BUCKET in your .env file.'
+    );
+    return createDummyS3Client('S3 not configured');
+  }
+
+  // Validate the endpoint URL if provided
+  if (endpoint && !isValidUrl(endpoint)) {
+    loggerService.error('Invalid S3 endpoint URL:', endpoint);
+    return createDummyS3Client('Invalid S3 endpoint URL');
   }
 
   const config: AWS.S3.ClientConfiguration = {
@@ -41,7 +65,9 @@ const getBucketName = (): string => {
   const bucket = import.meta.env.VITE_AWS_S3_BUCKET;
   if (!bucket) {
     // Instead of throwing an error, log a warning and return a default value
-    loggerService.warn('S3 bucket not configured. Please set VITE_AWS_S3_BUCKET in your .env file.');
+    loggerService.warn(
+      'S3 bucket not configured. Please set VITE_AWS_S3_BUCKET in your .env file.'
+    );
     return 'do-it-brainstorming-default';
   }
   return bucket;
@@ -56,7 +82,9 @@ const withRetry = async <T>(operation: () => Promise<T>, maxRetries = 3): Promis
       return await operation();
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
-      loggerService.warn(`S3 operation failed (attempt ${attempt}/${maxRetries}): ${lastError.message}`);
+      loggerService.warn(
+        `S3 operation failed (attempt ${attempt}/${maxRetries}): ${lastError.message}`
+      );
 
       if (attempt < maxRetries) {
         // Exponential backoff: 1s, 2s, 4s, etc.
@@ -109,7 +137,7 @@ export const uploadProject = async (
     const managedUpload = s3.upload(params);
 
     if (onProgress) {
-      managedUpload.on('httpUploadProgress', (progress) => {
+      managedUpload.on('httpUploadProgress', progress => {
         const percentage = Math.round((progress.loaded / progress.total) * 100);
         onProgress(percentage);
       });
@@ -118,20 +146,24 @@ export const uploadProject = async (
     const result = await managedUpload.promise();
 
     // Upload latest version reference
-    await s3.putObject({
-      Bucket: bucketName,
-      Key: latestKey,
-      Body: JSON.stringify(project),
-      ContentType: 'application/json',
-    }).promise();
+    await s3
+      .putObject({
+        Bucket: bucketName,
+        Key: latestKey,
+        Body: JSON.stringify(project),
+        ContentType: 'application/json',
+      })
+      .promise();
 
     // Upload metadata
-    await s3.putObject({
-      Bucket: bucketName,
-      Key: metadataKey,
-      Body: JSON.stringify(metadata),
-      ContentType: 'application/json',
-    }).promise();
+    await s3
+      .putObject({
+        Bucket: bucketName,
+        Key: metadataKey,
+        Body: JSON.stringify(metadata),
+        ContentType: 'application/json',
+      })
+      .promise();
 
     loggerService.info(`Project ${project.id} (v${project.version}) uploaded to S3 successfully`);
     return result.Location;
@@ -170,7 +202,9 @@ export const downloadProject = async (
           return project;
         }
       } catch (error) {
-        loggerService.warn(`No latest.json found for project ${projectId}, falling back to listing versions`);
+        loggerService.warn(
+          `No latest.json found for project ${projectId}, falling back to listing versions`
+        );
       }
 
       // Fall back to listing all versions
@@ -203,7 +237,7 @@ export const downloadProject = async (
     if (onProgress) {
       const request = s3.getObject(params);
 
-      request.on('httpDownloadProgress', (progress) => {
+      request.on('httpDownloadProgress', progress => {
         const percentage = Math.round((progress.loaded / progress.total) * 100);
         onProgress(percentage);
       });
@@ -222,16 +256,18 @@ export const downloadProject = async (
 };
 
 // List all projects in S3
-export const listProjects = async (): Promise<{
-  id: string;
-  name: string;
-  description: string;
-  version: number;
-  updatedAt: string;
-  isArchived?: boolean;
-  template?: string;
-  versions: string[];
-}[]> => {
+export const listProjects = async (): Promise<
+  {
+    id: string;
+    name: string;
+    description: string;
+    version: number;
+    updatedAt: string;
+    isArchived?: boolean;
+    template?: string;
+    versions: string[];
+  }[]
+> => {
   return withRetry(async () => {
     const s3 = initS3Client();
     const bucketName = getBucketName();
@@ -279,18 +315,21 @@ export const listProjects = async (): Promise<{
         };
 
         const versionResult = await s3.listObjectsV2(versionParams).promise();
-        const versions = versionResult.Contents?.filter(obj => {
-          const key = obj.Key || '';
-          return key.endsWith('.json') &&
-                 !key.endsWith('latest.json') &&
-                 !key.endsWith('metadata.json');
-        })
-          .map(obj => {
+        const versions =
+          versionResult.Contents?.filter(obj => {
             const key = obj.Key || '';
-            const version = key.split('/').pop()?.replace('.json', '') || '';
-            return version;
+            return (
+              key.endsWith('.json') &&
+              !key.endsWith('latest.json') &&
+              !key.endsWith('metadata.json')
+            );
           })
-          .filter(version => version !== '') || [];
+            .map(obj => {
+              const key = obj.Key || '';
+              const version = key.split('/').pop()?.replace('.json', '') || '';
+              return version;
+            })
+            .filter(version => version !== '') || [];
 
         return {
           ...metadata,
@@ -336,13 +375,64 @@ export const deleteProject = async (projectId: string): Promise<void> => {
   });
 };
 
-// Check if S3 is configured
+// Check if S3 is configured and valid
 export const isS3Configured = (): boolean => {
   try {
+    const endpoint = import.meta.env.VITE_AWS_S3_ENDPOINT;
     const bucket = import.meta.env.VITE_AWS_S3_BUCKET;
     const region = import.meta.env.VITE_AWS_REGION;
-    return !!bucket && !!region;
+
+    // Basic configuration check
+    if (!bucket || !region) {
+      return false;
+    }
+
+    // If endpoint is provided, validate it
+    if (endpoint && !isValidUrl(endpoint)) {
+      loggerService.warn('Invalid S3 endpoint URL:', endpoint);
+      return false;
+    }
+
+    return true;
   } catch (error) {
     return false;
+  }
+};
+
+/**
+ * Get S3 configuration status with detailed information
+ * @returns Object with configuration status and details
+ */
+export const getS3ConfigStatus = (): {
+  isConfigured: boolean;
+  missingConfig: string[];
+  invalidUrls: string[];
+} => {
+  const result = {
+    isConfigured: false,
+    missingConfig: [] as string[],
+    invalidUrls: [] as string[],
+  };
+
+  try {
+    const endpoint = import.meta.env.VITE_AWS_S3_ENDPOINT;
+    const bucket = import.meta.env.VITE_AWS_S3_BUCKET;
+    const region = import.meta.env.VITE_AWS_REGION;
+
+    // Check for missing configuration
+    if (!bucket) result.missingConfig.push('S3 Bucket');
+    if (!region) result.missingConfig.push('AWS Region');
+
+    // Validate endpoint URL if provided
+    if (endpoint && !isValidUrl(endpoint)) {
+      result.invalidUrls.push('S3 Endpoint');
+    }
+
+    // Set overall configuration status
+    result.isConfigured = result.missingConfig.length === 0 && result.invalidUrls.length === 0;
+
+    return result;
+  } catch (error) {
+    return result;
   }
 };

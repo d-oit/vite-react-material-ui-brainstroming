@@ -2,8 +2,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
 import ProjectSettingsSection from '../../components/Project/ProjectSettingsSection';
-import { ProjectTemplate } from '../../types/project';
 import { NodeType } from '../../types/enums';
+import { ProjectTemplate } from '../../types/project';
 
 // Mock the ErrorNotificationContext
 vi.mock('../../contexts/ErrorNotificationContext', () => ({
@@ -78,36 +78,20 @@ describe('ProjectSettingsSection', () => {
   });
 
   it('renders error state correctly', () => {
-    render(
-      <ProjectSettingsSection
-        project={mockProject}
-        onSave={mockSave}
-        error="Test error"
-      />
-    );
+    render(<ProjectSettingsSection project={mockProject} onSave={mockSave} error="Test error" />);
 
     expect(screen.getByText('Test error')).toBeInTheDocument();
   });
 
   it('renders S3 synchronization section', () => {
-    render(
-      <ProjectSettingsSection
-        project={mockProject}
-        onSave={mockSave}
-      />
-    );
+    render(<ProjectSettingsSection project={mockProject} onSave={mockSave} />);
 
     expect(screen.getByText('S3 Synchronization')).toBeInTheDocument();
     expect(screen.getByText('Enable S3 Synchronization')).toBeInTheDocument();
   });
 
   it('renders import/export section', () => {
-    render(
-      <ProjectSettingsSection
-        project={mockProject}
-        onSave={mockSave}
-      />
-    );
+    render(<ProjectSettingsSection project={mockProject} onSave={mockSave} />);
 
     expect(screen.getByText('Import/Export')).toBeInTheDocument();
     expect(screen.getByText('Local File')).toBeInTheDocument();
@@ -115,12 +99,7 @@ describe('ProjectSettingsSection', () => {
   });
 
   it('toggles S3 sync when switch is clicked', async () => {
-    render(
-      <ProjectSettingsSection
-        project={mockProject}
-        onSave={mockSave}
-      />
-    );
+    render(<ProjectSettingsSection project={mockProject} onSave={mockSave} />);
 
     const switchElement = screen.getByRole('checkbox');
     fireEvent.click(switchElement);
@@ -145,12 +124,7 @@ describe('ProjectSettingsSection', () => {
       },
     };
 
-    render(
-      <ProjectSettingsSection
-        project={projectWithSyncEnabled}
-        onSave={mockSave}
-      />
-    );
+    render(<ProjectSettingsSection project={projectWithSyncEnabled} onSave={mockSave} />);
 
     expect(screen.getByLabelText('Sync Frequency')).toBeInTheDocument();
   });
@@ -165,24 +139,13 @@ describe('ProjectSettingsSection', () => {
       },
     };
 
-    render(
-      <ProjectSettingsSection
-        project={projectWithIntervalSync}
-        onSave={mockSave}
-      />
-    );
+    render(<ProjectSettingsSection project={projectWithIntervalSync} onSave={mockSave} />);
 
     expect(screen.getByLabelText('Interval (minutes)')).toBeInTheDocument();
   });
 
   it('disables buttons when isSaving is true', () => {
-    render(
-      <ProjectSettingsSection
-        project={mockProject}
-        onSave={mockSave}
-        isSaving={true}
-      />
-    );
+    render(<ProjectSettingsSection project={mockProject} onSave={mockSave} isSaving={true} />);
 
     const exportButton = screen.getByText('Export to File');
     expect(exportButton).toBeDisabled();

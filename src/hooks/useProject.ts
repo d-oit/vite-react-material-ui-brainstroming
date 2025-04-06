@@ -99,7 +99,22 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
         updatedAt: new Date().toISOString(),
       };
 
-      await uploadProject(updatedProject);
+      // Try to save to S3, but don't fail if S3 is not configured
+      try {
+        await uploadProject(updatedProject);
+      } catch (s3Error) {
+        // If the error is about S3 not being configured, just log it
+        if (s3Error instanceof Error && s3Error.message.includes('S3 not configured')) {
+          console.log('S3 not configured, saving only to local storage');
+        } else {
+          // For other errors, log them but don't fail the operation
+          console.warn('Error uploading to S3:', s3Error);
+        }
+      }
+
+      // Always save to local storage
+      await saveProjectToLocalStorage(updatedProject);
+
       setProject(updatedProject);
       return true;
     } catch (err) {
@@ -110,6 +125,19 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
       setIsSaving(false);
     }
   }, [project]);
+
+  // Helper function to save project to local storage
+  const saveProjectToLocalStorage = async (projectToSave: Project): Promise<void> => {
+    try {
+      // Import the project service dynamically to avoid circular dependencies
+      const { default: projectService } = await import('../services/ProjectService');
+      // Use the project service to save the project to IndexedDB
+      await projectService.saveProject(projectToSave);
+    } catch (error) {
+      console.error('Error saving project to local storage:', error);
+      throw error; // Re-throw to be handled by the caller
+    }
+  };
 
   // Create new version
   const createNewVersion = useCallback(async (): Promise<boolean> => {
@@ -128,7 +156,22 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
         updatedAt: new Date().toISOString(),
       };
 
-      await uploadProject(updatedProject);
+      // Try to save to S3, but don't fail if S3 is not configured
+      try {
+        await uploadProject(updatedProject);
+      } catch (s3Error) {
+        // If the error is about S3 not being configured, just log it
+        if (s3Error instanceof Error && s3Error.message.includes('S3 not configured')) {
+          console.log('S3 not configured, saving only to local storage');
+        } else {
+          // For other errors, log them but don't fail the operation
+          console.warn('Error uploading to S3:', s3Error);
+        }
+      }
+
+      // Always save to local storage
+      await saveProjectToLocalStorage(updatedProject);
+
       setProject(updatedProject);
       return true;
     } catch (err) {

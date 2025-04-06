@@ -4,8 +4,35 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Offline - d.o.it.brainstorming</title>
-  <link rel="icon" href="/favicon.ico" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="theme-color" content="#2196f3" />
   <style>
+    :root {
+      --primary-color: #2196f3;
+      --primary-dark: #1976d2;
+      --primary-light: #90caf9;
+      --text-color: #333;
+      --text-secondary: #555;
+      --background-color: #f5f5f5;
+      --card-background: #fff;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --border-color: #e0e0e0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --primary-color: #90caf9;
+        --primary-dark: #64b5f6;
+        --primary-light: #bbdefb;
+        --text-color: #f5f5f5;
+        --text-secondary: #bdbdbd;
+        --background-color: #121212;
+        --card-background: #1e1e1e;
+        --shadow-color: rgba(0, 0, 0, 0.3);
+        --border-color: #333;
+      }
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
       margin: 0;
@@ -15,19 +42,19 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      background-color: #f5f5f5;
-      color: #333;
+      background-color: var(--background-color);
+      color: var(--text-color);
       text-align: center;
     }
     .container {
       max-width: 600px;
       padding: 2rem;
-      background-color: white;
+      background-color: var(--card-background);
       border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px var(--shadow-color);
     }
     h1 {
-      color: #1976d2;
+      color: var(--primary-color);
       margin-bottom: 1rem;
     }
     p {
@@ -37,29 +64,31 @@
     .icon {
       font-size: 4rem;
       margin-bottom: 1rem;
-      color: #1976d2;
+      color: var(--primary-color);
     }
     .button {
       display: inline-block;
-      background-color: #1976d2;
+      background-color: var(--primary-color);
       color: white;
       padding: 0.75rem 1.5rem;
       border-radius: 4px;
       text-decoration: none;
       font-weight: 500;
       transition: background-color 0.3s;
+      border: none;
+      cursor: pointer;
     }
     .button:hover {
-      background-color: #1565c0;
+      background-color: var(--primary-dark);
     }
     .tips {
       margin-top: 2rem;
       padding-top: 1rem;
-      border-top: 1px solid #e0e0e0;
+      border-top: 1px solid var(--border-color);
     }
     .tips h2 {
       font-size: 1.2rem;
-      color: #555;
+      color: var(--text-secondary);
     }
     .tips ul {
       text-align: left;
@@ -74,16 +103,15 @@
         padding: 1.5rem;
       }
     }
-  </style>
 </head>
 <body>
   <div class="container">
     <div class="icon">📡</div>
     <h1>You're Offline</h1>
     <p>It looks like you've lost your internet connection. Don't worry - d.o.it.brainstorming works offline, and you can still access your previously loaded projects.</p>
-    
-    <a href="/" class="button">Try Again</a>
-    
+
+    <button class="button" onclick="window.location.href='/'">Go to Home Page</button>
+
     <div class="tips">
       <h2>While you're offline, you can still:</h2>
       <ul>
@@ -101,13 +129,40 @@
     window.addEventListener('online', () => {
       window.location.reload();
     });
-    
-    // Try to reload periodically
+
+    // Try to reload periodically but less aggressively
     setInterval(() => {
       if (navigator.onLine) {
         window.location.reload();
       }
-    }, 10000); // Check every 10 seconds
+    }, 30000); // Check every 30 seconds
+
+    // Add a connection status indicator
+    const updateConnectionStatus = () => {
+      const statusElement = document.getElementById('connection-status');
+      if (statusElement) {
+        if (navigator.onLine) {
+          statusElement.textContent = 'You are back online! Reloading...';
+          statusElement.style.color = '#4caf50';
+          setTimeout(() => window.location.reload(), 1000);
+        } else {
+          statusElement.textContent = 'You are currently offline';
+          statusElement.style.color = '';
+        }
+      }
+    };
+
+    // Create status element
+    const statusElement = document.createElement('p');
+    statusElement.id = 'connection-status';
+    statusElement.style.fontSize = '0.9rem';
+    statusElement.style.marginTop = '1rem';
+    document.querySelector('.container').appendChild(statusElement);
+
+    // Update status initially and on connection changes
+    updateConnectionStatus();
+    window.addEventListener('online', updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
   </script>
 </body>
 </html>

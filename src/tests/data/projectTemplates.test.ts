@@ -55,7 +55,9 @@ describe('Project Templates', () => {
 
     it('should include all templates in the projectTemplates map', () => {
       expect(Object.keys(projectTemplates)).toHaveLength(5);
-      expect(projectTemplates[ProjectTemplate.SOFTWARE_DEVELOPMENT]).toBe(softwareDevelopmentTemplate);
+      expect(projectTemplates[ProjectTemplate.SOFTWARE_DEVELOPMENT]).toBe(
+        softwareDevelopmentTemplate
+      );
       expect(projectTemplates[ProjectTemplate.MARKETING_CAMPAIGN]).toBe(marketingCampaignTemplate);
       expect(projectTemplates[ProjectTemplate.RESEARCH_PROJECT]).toBe(researchProjectTemplate);
       expect(projectTemplates[ProjectTemplate.BUSINESS_PLAN]).toBe(businessPlanTemplate);
@@ -67,7 +69,11 @@ describe('Project Templates', () => {
     it('should create a project from a template with custom name and description', () => {
       const name = 'My Custom Project';
       const description = 'My custom description';
-      const project = createProjectFromTemplate(ProjectTemplate.SOFTWARE_DEVELOPMENT, name, description);
+      const project = createProjectFromTemplate(
+        ProjectTemplate.SOFTWARE_DEVELOPMENT,
+        name,
+        description
+      );
 
       expect(project.id).toBeDefined();
       expect(project.name).toBe(name);
@@ -86,7 +92,11 @@ describe('Project Templates', () => {
     });
 
     it('should create a project from a custom template with empty nodes and edges', () => {
-      const project = createProjectFromTemplate(ProjectTemplate.CUSTOM, 'Custom Project', 'Custom Description');
+      const project = createProjectFromTemplate(
+        ProjectTemplate.CUSTOM,
+        'Custom Project',
+        'Custom Description'
+      );
 
       expect(project.id).toBeDefined();
       expect(project.name).toBe('Custom Project');

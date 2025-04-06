@@ -1,8 +1,8 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import InfoIcon from '@mui/icons-material/Info';
 import {
   Box,
   Typography,
-  Paper,
   Divider,
   FormControl,
   FormControlLabel,
@@ -23,6 +23,7 @@ import {
   AccordionDetails,
   Tab,
   Tabs,
+  Tooltip,
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 
@@ -35,6 +36,7 @@ import { useI18n } from '../contexts/I18nContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { ThemeMode } from '../types';
 import type { UserPreferences } from '../types';
+import { validateApiEndpoint, validateS3Endpoint, sanitizeUrl } from '../utils/urlValidation';
 
 // Default user preferences
 const defaultPreferences: UserPreferences = {
@@ -91,8 +93,19 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
     };
   });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'warning'>(
+    'success'
+  );
+
+  // API configuration with validation
   const [s3Endpoint, setS3Endpoint] = useState(settings.awsBucketName || '');
+  const [s3EndpointError, setS3EndpointError] = useState('');
+  const [s3EndpointWarning, setS3EndpointWarning] = useState('');
+
   const [openRouterApiUrl, setOpenRouterApiUrl] = useState(settings.openRouterApiKey || '');
+  const [openRouterApiUrlError, setOpenRouterApiUrlError] = useState('');
+
   const [tabValue, setTabValue] = useState(0);
 
   // Accordion expanded state
@@ -140,7 +153,50 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
     updateSettings({ language });
   };
 
+  // Validate S3 endpoint when it changes
+  const validateS3 = (url: string) => {
+    const result = validateS3Endpoint(url);
+    setS3EndpointError(result.isValid ? '' : result.message);
+    setS3EndpointWarning(result.isValid && result.message ? result.message : '');
+    return result.isValid;
+  };
+
+  // Validate OpenRouter API URL when it changes
+  const validateOpenRouterApi = (url: string) => {
+    const result = validateApiEndpoint(url);
+    setOpenRouterApiUrlError(result.isValid ? '' : result.message);
+    return result.isValid;
+  };
+
+  // Handle S3 endpoint change
+  const handleS3EndpointChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setS3Endpoint(value);
+    validateS3(value);
+  };
+
+  // Handle OpenRouter API URL change
+  const handleOpenRouterApiUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setOpenRouterApiUrl(value);
+    validateOpenRouterApi(value);
+  };
+
   const handleSaveSettings = () => {
+    // Validate URLs before saving
+    const isS3Valid = validateS3(s3Endpoint);
+    const isOpenRouterValid = validateOpenRouterApi(openRouterApiUrl);
+
+    if (!isOpenRouterValid) {
+      setSnackbarSeverity('error');
+      setSnackbarMessage('Please fix the OpenRouter API URL errors before saving.');
+      setSnackbarOpen(true);
+      return;
+    }
+
+    // S3 is optional, so we can save even if it's invalid, but we'll sanitize it
+    const sanitizedS3Endpoint = isS3Valid ? sanitizeUrl(s3Endpoint) : '';
+
     // Update all settings at once
     updateSettings({
       themeMode: preferences.themeMode,
@@ -148,11 +204,13 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
       autoBackup: preferences.autoBackup,
       fontSize: preferences.fontSize,
       language: preferences.language,
-      awsBucketName: s3Endpoint,
-      openRouterApiKey: openRouterApiUrl,
+      awsBucketName: sanitizedS3Endpoint,
+      openRouterApiKey: sanitizeUrl(openRouterApiUrl),
     });
 
     // Show success message
+    setSnackbarSeverity('success');
+    setSnackbarMessage('Settings saved successfully!');
     setSnackbarOpen(true);
   };
 
@@ -339,18 +397,32 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
                     fullWidth
                     label="AWS S3 Endpoint"
                     value={s3Endpoint}
-                    onChange={e => setS3Endpoint(e.target.value)}
+                    onChange={handleS3EndpointChange}
                     margin="normal"
-                    helperText="Used for project backups and sync"
+                    helperText={
+                      s3EndpointError ||
+                      s3EndpointWarning ||
+                      'Used for project backups and sync (optional)'
+                    }
+                    error={!!s3EndpointError}
+                    InputProps={{
+                      endAdornment: s3EndpointWarning ? (
+                        <Tooltip title={s3EndpointWarning}>
+                          <InfoIcon color="warning" fontSize="small" />
+                        </Tooltip>
+                      ) : null,
+                    }}
                   />
 
                   <TextField
                     fullWidth
                     label="OpenRouter API URL"
                     value={openRouterApiUrl}
-                    onChange={e => setOpenRouterApiUrl(e.target.value)}
+                    onChange={handleOpenRouterApiUrlChange}
                     margin="normal"
-                    helperText="Used for the AI assistant"
+                    helperText={openRouterApiUrlError || 'Used for the AI assistant'}
+                    error={!!openRouterApiUrlError}
+                    required
                   />
                 </AccordionDetails>
               </Accordion>
@@ -385,8 +457,8 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
           autoHideDuration={6000}
           onClose={() => setSnackbarOpen(false)}
         >
-          <Alert onClose={() => setSnackbarOpen(false)} severity="success">
-            Settings saved successfully!
+          <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity}>
+            {snackbarMessage}
           </Alert>
         </Snackbar>
       </Container>

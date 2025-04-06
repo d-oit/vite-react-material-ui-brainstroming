@@ -2,17 +2,14 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
 import ProjectBrainstormingSection from '../../components/Project/ProjectBrainstormingSection';
-import { ProjectTemplate } from '../../types/project';
 import { NodeType } from '../../types/enums';
+import { ProjectTemplate } from '../../types/project';
 
 // Mock the EnhancedBrainstormFlow component
 vi.mock('../../components/BrainstormFlow/EnhancedBrainstormFlow', () => ({
   EnhancedBrainstormFlow: vi.fn(({ onSave }) => (
     <div data-testid="mock-enhanced-brainstorm-flow">
-      <button
-        type="button"
-        onClick={() => onSave([{ id: 'test-node' }], [{ id: 'test-edge' }])}
-      >
+      <button type="button" onClick={() => onSave([{ id: 'test-node' }], [{ id: 'test-edge' }])}>
         Save Flow
       </button>
     </div>
@@ -69,13 +66,7 @@ describe('ProjectBrainstormingSection', () => {
 
   it('renders loading state correctly', () => {
     // We'll check for the loading container instead of a progressbar
-    render(
-      <ProjectBrainstormingSection
-        project={mockProject}
-        onSave={mockSave}
-        loading={true}
-      />
-    );
+    render(<ProjectBrainstormingSection project={mockProject} onSave={mockSave} loading={true} />);
 
     // Check for loading container
     const loadingContainer = screen.getByTestId('mock-enhanced-brainstorm-flow');
@@ -86,11 +77,7 @@ describe('ProjectBrainstormingSection', () => {
 
   it('renders error state correctly', () => {
     render(
-      <ProjectBrainstormingSection
-        project={mockProject}
-        onSave={mockSave}
-        error="Test error"
-      />
+      <ProjectBrainstormingSection project={mockProject} onSave={mockSave} error="Test error" />
     );
 
     expect(screen.getByText('Test error')).toBeInTheDocument();
@@ -98,54 +85,30 @@ describe('ProjectBrainstormingSection', () => {
 
   it('renders empty state correctly when no nodes', () => {
     const emptyProject = { ...mockProject, nodes: [] };
-    render(
-      <ProjectBrainstormingSection
-        project={emptyProject}
-        onSave={mockSave}
-      />
-    );
+    render(<ProjectBrainstormingSection project={emptyProject} onSave={mockSave} />);
 
     expect(screen.getByText('Start Brainstorming')).toBeInTheDocument();
     expect(screen.getByText(/Use the \+ button to add your first node/)).toBeInTheDocument();
   });
 
   it('renders EnhancedBrainstormFlow when project has nodes', () => {
-    render(
-      <ProjectBrainstormingSection
-        project={mockProject}
-        onSave={mockSave}
-      />
-    );
+    render(<ProjectBrainstormingSection project={mockProject} onSave={mockSave} />);
 
     expect(screen.getByTestId('mock-enhanced-brainstorm-flow')).toBeInTheDocument();
   });
 
   it('calls onSave when save button is clicked', async () => {
-    render(
-      <ProjectBrainstormingSection
-        project={mockProject}
-        onSave={mockSave}
-      />
-    );
+    render(<ProjectBrainstormingSection project={mockProject} onSave={mockSave} />);
 
     fireEvent.click(screen.getByText('Save Flow'));
 
     await waitFor(() => {
-      expect(mockSave).toHaveBeenCalledWith(
-        [{ id: 'test-node' }],
-        [{ id: 'test-edge' }]
-      );
+      expect(mockSave).toHaveBeenCalledWith([{ id: 'test-node' }], [{ id: 'test-edge' }]);
     });
   });
 
   it('disables EnhancedBrainstormFlow when isSaving is true', () => {
-    render(
-      <ProjectBrainstormingSection
-        project={mockProject}
-        onSave={mockSave}
-        isSaving={true}
-      />
-    );
+    render(<ProjectBrainstormingSection project={mockProject} onSave={mockSave} isSaving={true} />);
 
     expect(screen.getByTestId('mock-enhanced-brainstorm-flow')).toBeInTheDocument();
     // In a real test, we would check if the component is disabled

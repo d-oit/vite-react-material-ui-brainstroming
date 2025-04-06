@@ -1,6 +1,6 @@
+import type { Project, Node, Edge } from '../types';
 import { NodeType } from '../types/enums';
 import { ProjectTemplate } from '../types/project';
-import type { Project, Node, Edge } from '../types';
 
 // Define a type for template metadata
 interface TemplateMetadata extends Partial<Project> {

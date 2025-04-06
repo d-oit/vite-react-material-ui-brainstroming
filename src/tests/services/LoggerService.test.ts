@@ -243,7 +243,7 @@ describe('LoggerService', () => {
     it('should clear logs from IndexedDB', async () => {
       // Override the implementation for this test
       const originalClearLogs = loggerService.clearLogs;
-      loggerService.clearLogs = vi.fn().mockImplementation(async (date) => {
+      loggerService.clearLogs = vi.fn().mockImplementation(async date => {
         await indexedDBService.clearLogs(date);
         return undefined;
       });
@@ -261,7 +261,7 @@ describe('LoggerService', () => {
     it('should clear logs older than a specific date', async () => {
       // Override the implementation for this test
       const originalClearLogs = loggerService.clearLogs;
-      loggerService.clearLogs = vi.fn().mockImplementation(async (date) => {
+      loggerService.clearLogs = vi.fn().mockImplementation(async date => {
         await indexedDBService.clearLogs(date);
         return undefined;
       });
@@ -283,7 +283,7 @@ describe('LoggerService', () => {
 
       // Override the implementation for this test
       const originalClearLogs = loggerService.clearLogs;
-      loggerService.clearLogs = vi.fn().mockImplementation(async (date) => {
+      loggerService.clearLogs = vi.fn().mockImplementation(async date => {
         try {
           await indexedDBService.clearLogs(date);
         } catch (error) {
@@ -355,7 +355,7 @@ describe('LoggerService', () => {
         expect.objectContaining({
           name: 'Error',
           errorMessage: 'Test error',
-          stack: expect.any(String)
+          stack: expect.any(String),
         })
       );
     });

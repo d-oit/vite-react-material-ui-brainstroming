@@ -27,8 +27,7 @@ module.exports = {
     },
     ecmaVersion: 'latest',
     sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
+    projectService: true, // Use projectService instead of project to fix TypeScript project references issue
   },
   plugins: [
     'react',
@@ -100,7 +99,6 @@ module.exports = {
     },
     'import/resolver': {
       typescript: {
-        project: ['./tsconfig.json', './tsconfig.node.json'],
         alwaysTryTypes: true
       },
       node: {
@@ -118,7 +116,10 @@ module.exports = {
     'dist',
     'node_modules',
     'coverage',
-    '.eslintrc.cjs'
+    '.eslintrc.cjs',
+    'public',
+    'vite.config.ts',
+    'pwa-assets.config.ts'
   ],
   overrides: [
     // React Testing Library test files

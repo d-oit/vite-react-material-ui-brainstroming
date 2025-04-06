@@ -68,7 +68,11 @@ export const BrainstormPage = () => {
 
   if (loading) {
     return (
-      <AppShell title="Brainstorming" onThemeToggle={() => {}} isDarkMode={theme.palette.mode === 'dark'}>
+      <AppShell
+        title="Brainstorming"
+        onThemeToggle={() => {}}
+        isDarkMode={theme.palette.mode === 'dark'}
+      >
         <Box
           sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}
         >
@@ -80,7 +84,11 @@ export const BrainstormPage = () => {
 
   if (error || !project) {
     return (
-      <AppShell title="Brainstorming" onThemeToggle={() => {}} isDarkMode={theme.palette.mode === 'dark'}>
+      <AppShell
+        title="Brainstorming"
+        onThemeToggle={() => {}}
+        isDarkMode={theme.palette.mode === 'dark'}
+      >
         <Paper sx={{ p: 3 }}>
           <Typography color="error" variant="h6">
             Error: {error || 'Project not found'}
@@ -91,7 +99,11 @@ export const BrainstormPage = () => {
   }
 
   return (
-    <AppShell title={`Brainstorming: ${project.name}`} onThemeToggle={() => {}} isDarkMode={theme.palette.mode === 'dark'}>
+    <AppShell
+      title={`Brainstorming: ${project.name}`}
+      onThemeToggle={() => {}}
+      isDarkMode={theme.palette.mode === 'dark'}
+    >
       <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box>
           <Typography variant="h5" component="h1">

@@ -8,8 +8,6 @@ import {
   CloudUpload as CloudUploadIcon,
   Share as ShareIcon,
 } from '@mui/icons-material';
-
-import ProjectCreateForm from '../Project/ProjectCreateForm';
 import {
   Box,
   Typography,
@@ -39,7 +37,8 @@ import { useNavigate } from 'react-router-dom';
 
 import projectService from '../../services/ProjectService';
 import type { Project } from '../../types';
-import { ProjectTemplate } from '../../types/project';
+import type { ProjectTemplate } from '../../types/project';
+import ProjectCreateForm from '../Project/ProjectCreateForm';
 
 interface ProjectListProps {
   onCreateProject?: (project: Project) => void;
@@ -79,7 +78,11 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
     loadProjects();
   }, []);
 
-  const handleCreateProject = async (name: string, description: string, template: ProjectTemplate) => {
+  const handleCreateProject = async (
+    name: string,
+    description: string,
+    template: ProjectTemplate
+  ) => {
     try {
       setLoading(true);
       const newProject = await projectService.createProject(name, description, template);

@@ -6,13 +6,17 @@ if (typeof window !== 'undefined' && !window.global) {
 }
 
 // Other Node.js globals that might be needed
-if (typeof global === 'undefined') {
-  global = window;
+// Use window.global instead of directly assigning to global
+if (typeof window !== 'undefined' && typeof window.global === 'undefined') {
+  window.global = window;
 }
 
 // Buffer polyfill
-if (typeof Buffer === 'undefined') {
-  window.Buffer = require('buffer/').Buffer;
+if (typeof window !== 'undefined' && typeof Buffer === 'undefined') {
+  // Use dynamic import instead of require
+  import('buffer/').then(buffer => {
+    window.Buffer = buffer.Buffer;
+  });
 }
 
 // Process polyfill

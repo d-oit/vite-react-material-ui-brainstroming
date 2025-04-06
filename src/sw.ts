@@ -1,17 +1,58 @@
 // Service Worker with Workbox
 import { BackgroundSyncPlugin } from 'workbox-background-sync';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
-import { clientsClaim } from 'workbox-core';
+import { clientsClaim, setCacheNameDetails } from 'workbox-core';
 import { ExpirationPlugin } from 'workbox-expiration';
-import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
+import {
+  precacheAndRoute,
+  createHandlerBoundToURL,
+  cleanupOutdatedCaches,
+} from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
 import { CacheFirst, NetworkFirst, StaleWhileRevalidate } from 'workbox-strategies';
 
 declare const self: ServiceWorkerGlobalScope;
 
+// Cache version - increment this when making significant changes
+const CACHE_VERSION = '1';
+
+// Configure cache names with versioning
+setCacheNameDetails({
+  prefix: 'doit-brainstorming',
+  suffix: CACHE_VERSION,
+  precache: 'precache',
+  runtime: 'runtime',
+});
+
+// Clean up outdated caches
+cleanupOutdatedCaches();
+
 // Use with precache injection
 const manifestEntries: Array<string | { url: string; revision: string | null }> =
   self.__WB_MANIFEST;
+
+/**
+ * Validate a URL for security
+ * @param url URL to validate
+ * @returns True if URL is valid and safe, false otherwise
+ */
+const isValidAndSafeUrl = (url: string): boolean => {
+  try {
+    const parsedUrl = new URL(url);
+
+    // Only allow http: and https: protocols
+    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+      return false;
+    }
+
+    // Additional security checks could be added here
+    // For example, whitelist domains, check for suspicious patterns, etc.
+
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
 
 // Make sure index.html is in the precache manifest
 const indexUrl = 'index.html';
@@ -200,16 +241,36 @@ clientsClaim();
 
 // Listen for push notifications
 self.addEventListener('push', event => {
-  const data = event.data?.json() ?? {};
-  const title = data.title || 'd.o.it.brainstorming';
-  const options = {
-    body: data.body || 'New notification from d.o.it.brainstorming',
-    icon: '/pwa-192x192.png',
-    badge: '/pwa-64x64.png',
-    data: data.data || {},
-  };
+  try {
+    const data = event.data?.json() ?? {};
+    const title = data.title || 'd.o.it.brainstorming';
+    const options = {
+      body: data.body || 'New notification from d.o.it.brainstorming',
+      icon: '/pwa-192x192.png',
+      badge: '/pwa-64x64.png',
+      data: data.data || {},
+    };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+    // Validate data for security
+    if (data.data?.url && !isValidAndSafeUrl(data.data.url)) {
+      console.error('Invalid or unsafe URL in push notification:', data.data.url);
+      // Remove the unsafe URL
+      options.data = { ...data.data };
+      delete options.data.url;
+    }
+
+    event.waitUntil(self.registration.showNotification(title, options));
+  } catch (error) {
+    console.error('Error processing push notification:', error);
+    // Show a generic notification instead
+    event.waitUntil(
+      self.registration.showNotification('New Notification', {
+        body: 'You have a new notification',
+        icon: '/pwa-192x192.png',
+        badge: '/pwa-64x64.png',
+      })
+    );
+  }
 });
 
 // Handle notification clicks
@@ -218,18 +279,49 @@ self.addEventListener('notificationclick', event => {
 
   // This looks to see if the current is already open and focuses if it is
   event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-      const hadWindowToFocus = clientList.some(client => {
-        return client.url.includes(self.location.origin) && 'focus' in client
-          ? (client.focus(), true)
-          : false;
-      });
+    self.clients
+      .matchAll({ type: 'window', includeUncontrolled: true })
+      .then(clientList => {
+        const hadWindowToFocus = clientList.some(client => {
+          return client.url.includes(self.location.origin) && 'focus' in client
+            ? (client.focus(), true)
+            : false;
+        });
 
-      // If no window is already open, open a new one
-      if (!hadWindowToFocus) {
-        const urlToOpen = event.notification.data?.url || '/';
-        return self.clients.openWindow(urlToOpen);
-      }
-    })
+        // If no window is already open, open a new one
+        if (!hadWindowToFocus) {
+          // Validate URL before opening
+          const urlToOpen = event.notification.data?.url || '/';
+
+          // For absolute URLs, validate them
+          if (urlToOpen.startsWith('http')) {
+            if (!isValidAndSafeUrl(urlToOpen)) {
+              console.error('Invalid or unsafe URL in notification click:', urlToOpen);
+              return self.clients.openWindow('/');
+            }
+          }
+
+          return self.clients.openWindow(urlToOpen);
+        }
+      })
+      .catch(error => {
+        console.error('Error handling notification click:', error);
+        return self.clients.openWindow('/');
+      })
   );
+});
+
+// Handle fetch errors
+self.addEventListener('fetch', event => {
+  // Let Workbox handle most fetches, but add some error handling
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        // If offline and navigating, serve the offline fallback
+        return caches.match('offline.html').then(response => {
+          return response || new Response('You are offline and the offline page is not cached.');
+        });
+      })
+    );
+  }
 });

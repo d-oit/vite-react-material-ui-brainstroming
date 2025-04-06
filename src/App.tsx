@@ -8,8 +8,8 @@ import { registerSW } from 'virtual:pwa-register';
 
 import AccessibilityMenu from './components/Accessibility/AccessibilityMenu';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
-import OfflineFallback from './components/OfflineIndicator/OfflineFallback';
-import OfflineIndicator from './components/OfflineIndicator/OfflineIndicator';
+import _OfflineFallback from './components/OfflineIndicator/OfflineFallback';
+import _OfflineIndicator from './components/OfflineIndicator/OfflineIndicator';
 import withOfflineFallback from './components/OfflineIndicator/withOfflineFallback';
 import CSPMeta from './components/Security/CSPMeta';
 import { useI18n } from './contexts/I18nContext';

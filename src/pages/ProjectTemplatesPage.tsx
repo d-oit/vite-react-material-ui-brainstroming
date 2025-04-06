@@ -111,7 +111,7 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
   const { t } = useI18n();
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
   const [templates, setTemplates] = useState<Project[]>(sampleTemplates);
   const [selectedTemplate, setSelectedTemplate] = useState<Project | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -168,7 +168,7 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
 
   const confirmDeleteTemplate = () => {
     if (!selectedTemplate) return;
-    
+
     // Remove the template from the list
     setTemplates(templates.filter(t => t.id !== selectedTemplate.id));
     setDeleteDialogOpen(false);
@@ -177,14 +177,19 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
 
   const confirmEditTemplate = () => {
     if (!selectedTemplate || !newProjectName.trim()) return;
-    
+
     // Update the template
-    const updatedTemplates = templates.map(t => 
-      t.id === selectedTemplate.id 
-        ? { ...t, name: newProjectName, description: newProjectDescription, updatedAt: new Date().toISOString() } 
+    const updatedTemplates = templates.map(t =>
+      t.id === selectedTemplate.id
+        ? {
+            ...t,
+            name: newProjectName,
+            description: newProjectDescription,
+            updatedAt: new Date().toISOString(),
+          }
         : t
     );
-    
+
     setTemplates(updatedTemplates);
     setEditDialogOpen(false);
     setSelectedTemplate(null);
@@ -201,7 +206,7 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
 
   const confirmCreateNewTemplate = () => {
     if (!newProjectName.trim()) return;
-    
+
     // Create a new template
     const newTemplate: Project = {
       id: `template-${Date.now()}`,
@@ -214,7 +219,7 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
       edges: [],
       isTemplate: true,
     };
-    
+
     setTemplates([...templates, newTemplate]);
     setEditDialogOpen(false);
     setNewProjectName('');
@@ -222,42 +227,40 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
   };
 
   return (
-    <AppShell 
-      title="Project Templates" 
-      onThemeToggle={onThemeToggle} 
+    <AppShell
+      title="Project Templates"
+      onThemeToggle={onThemeToggle}
       isDarkMode={isDarkMode}
       onCreateNew={handleCreateNewTemplate}
     >
       <Container maxWidth="lg">
         <Box sx={{ my: 4 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
+          >
             <Typography variant="h4" component="h1">
               Project Templates
             </Typography>
-            <Button 
-              variant="contained" 
-              startIcon={<AddIcon />}
-              onClick={handleCreateNewTemplate}
-            >
+            <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateNewTemplate}>
               Create Template
             </Button>
           </Box>
-          
+
           <Divider sx={{ mb: 4 }} />
-          
+
           <Grid container spacing={3}>
             {templates.map((template, index) => (
               <Grid item xs={12} sm={6} md={4} key={template.id}>
-                <Card 
-                  sx={{ 
-                    height: '100%', 
-                    display: 'flex', 
+                <Card
+                  sx={{
+                    height: '100%',
+                    display: 'flex',
                     flexDirection: 'column',
                     transition: 'transform 0.2s, box-shadow 0.2s',
                     '&:hover': {
                       transform: 'translateY(-4px)',
                       boxShadow: 6,
-                    }
+                    },
                   }}
                 >
                   <CardMedia
@@ -275,23 +278,23 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
                     </Typography>
                   </CardContent>
                   <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
-                    <Button 
-                      size="small" 
+                    <Button
+                      size="small"
                       variant="contained"
                       onClick={() => handleUseTemplate(template)}
                     >
                       Use Template
                     </Button>
                     <Box>
-                      <IconButton 
-                        size="small" 
+                      <IconButton
+                        size="small"
                         onClick={() => handleEditTemplate(template)}
                         aria-label="Edit template"
                       >
                         <EditIcon fontSize="small" />
                       </IconButton>
-                      <IconButton 
-                        size="small" 
+                      <IconButton
+                        size="small"
                         onClick={() => handleDeleteTemplate(template)}
                         aria-label="Delete template"
                         color="error"
@@ -305,22 +308,23 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
             ))}
           </Grid>
         </Box>
-        
+
         {/* Create Project from Template Dialog */}
         <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)}>
           <DialogTitle>Create Project from Template</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Create a new project based on the "{selectedTemplate?.name}" template.
+              Create a new project based on the &quot;{selectedTemplate?.name}&quot; template.
             </DialogContentText>
             <TextField
-              autoFocus
+              // autoFocus removed for accessibility
+              // autoFocus
               margin="dense"
               label="Project Name"
               fullWidth
               variant="outlined"
               value={newProjectName}
-              onChange={(e) => setNewProjectName(e.target.value)}
+              onChange={e => setNewProjectName(e.target.value)}
               sx={{ mt: 2 }}
             />
             <TextField
@@ -331,13 +335,13 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
               rows={3}
               variant="outlined"
               value={newProjectDescription}
-              onChange={(e) => setNewProjectDescription(e.target.value)}
+              onChange={e => setNewProjectDescription(e.target.value)}
             />
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
-            <Button 
-              onClick={handleCreateFromTemplate} 
+            <Button
+              onClick={handleCreateFromTemplate}
               variant="contained"
               disabled={!newProjectName.trim() || loading}
             >
@@ -345,21 +349,20 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
             </Button>
           </DialogActions>
         </Dialog>
-        
+
         {/* Edit Template Dialog */}
         <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
-          <DialogTitle>
-            {selectedTemplate ? 'Edit Template' : 'Create New Template'}
-          </DialogTitle>
+          <DialogTitle>{selectedTemplate ? 'Edit Template' : 'Create New Template'}</DialogTitle>
           <DialogContent>
             <TextField
-              autoFocus
+              // autoFocus removed for accessibility
+              // autoFocus
               margin="dense"
               label="Template Name"
               fullWidth
               variant="outlined"
               value={newProjectName}
-              onChange={(e) => setNewProjectName(e.target.value)}
+              onChange={e => setNewProjectName(e.target.value)}
               sx={{ mt: 2 }}
             />
             <TextField
@@ -370,13 +373,13 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
               rows={3}
               variant="outlined"
               value={newProjectDescription}
-              onChange={(e) => setNewProjectDescription(e.target.value)}
+              onChange={e => setNewProjectDescription(e.target.value)}
             />
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setEditDialogOpen(false)}>Cancel</Button>
-            <Button 
-              onClick={selectedTemplate ? confirmEditTemplate : confirmCreateNewTemplate} 
+            <Button
+              onClick={selectedTemplate ? confirmEditTemplate : confirmCreateNewTemplate}
               variant="contained"
               disabled={!newProjectName.trim()}
             >
@@ -384,13 +387,14 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
             </Button>
           </DialogActions>
         </Dialog>
-        
+
         {/* Delete Template Confirmation Dialog */}
         <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
           <DialogTitle>Delete Template</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Are you sure you want to delete the "{selectedTemplate?.name}" template? This action cannot be undone.
+              Are you sure you want to delete the &quot;{selectedTemplate?.name}&quot; template? This action
+              cannot be undone.
             </DialogContentText>
           </DialogContent>
           <DialogActions>

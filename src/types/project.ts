@@ -5,7 +5,7 @@ export enum ProjectTemplate {
   MARKETING_CAMPAIGN = 'marketing_campaign',
   RESEARCH_PROJECT = 'research_project',
   BUSINESS_PLAN = 'business_plan',
-  CUSTOM = 'custom'
+  CUSTOM = 'custom',
 }
 
 export interface SyncSettings {
@@ -72,7 +72,7 @@ export function createEmptyProject(id: string): Project {
 }
 
 export function isValidProject(project: unknown): project is Project {
-  const basicValidation = (
+  const basicValidation =
     typeof project === 'object' &&
     project !== null &&
     'id' in project &&
@@ -80,8 +80,7 @@ export function isValidProject(project: unknown): project is Project {
     'nodes' in project &&
     'edges' in project &&
     'version' in project &&
-    typeof (project as Project).version === 'number'
-  );
+    typeof (project as Project).version === 'number';
 
   if (!basicValidation) return false;
 

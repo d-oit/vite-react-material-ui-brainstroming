@@ -1,8 +1,4 @@
-import {
-  Save as SaveIcon,
-  Chat as ChatIcon,
-  Close as CloseIcon
-} from '@mui/icons-material';
+import { Save as SaveIcon, Chat as ChatIcon, Close as CloseIcon } from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -15,7 +11,7 @@ import {
   IconButton,
   Tab,
   Tabs,
-  Container
+  Container,
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
@@ -80,7 +76,7 @@ export const ProjectDetailPage = () => {
         ...project,
         nodes: updatedNodes,
         edges: updatedEdges,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       // Save project
@@ -106,7 +102,9 @@ export const ProjectDetailPage = () => {
     return (
       <AppShell title="Project" onThemeToggle={() => {}} isDarkMode={theme.palette.mode === 'dark'}>
         <Container maxWidth="lg">
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}
+          >
             <CircularProgress />
           </Box>
         </Container>
@@ -129,7 +127,11 @@ export const ProjectDetailPage = () => {
   }
 
   return (
-    <AppShell title={project.name} onThemeToggle={() => {}} isDarkMode={theme.palette.mode === 'dark'}>
+    <AppShell
+      title={project.name}
+      onThemeToggle={() => {}}
+      isDarkMode={theme.palette.mode === 'dark'}
+    >
       <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box>
           <Typography variant="h5" component="h1">
@@ -180,7 +182,9 @@ export const ProjectDetailPage = () => {
           <Typography variant="h6" gutterBottom>
             Project Details
           </Typography>
-          <Typography variant="body1">{project.description || 'No description provided.'}</Typography>
+          <Typography variant="body1">
+            {project.description || 'No description provided.'}
+          </Typography>
         </Paper>
       </TabPanel>
 
@@ -254,7 +258,7 @@ export const ProjectDetailPage = () => {
               const mergedProject = {
                 ...project,
                 ...updatedProject,
-                updatedAt: new Date().toISOString()
+                updatedAt: new Date().toISOString(),
               };
 
               // Update local state

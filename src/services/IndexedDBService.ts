@@ -399,7 +399,6 @@ export class IndexedDBService {
     }
 
     return new Promise((resolve, reject) => {
-
       const transaction = this.db.transaction(STORES.COLORS, 'readonly');
       const store = transaction.objectStore(STORES.COLORS);
       const request = store.get(id);
@@ -452,7 +451,6 @@ export class IndexedDBService {
     }
 
     return new Promise((resolve, reject) => {
-
       const transaction = this.db.transaction(STORES.COLORS, 'readonly');
       const store = transaction.objectStore(STORES.COLORS);
       const index = store.index('isDefault');
@@ -580,7 +578,6 @@ export class IndexedDBService {
     }
 
     return new Promise((resolve, reject) => {
-
       const transaction = this.db.transaction(STORES.NODE_PREFERENCES, 'readonly');
       const store = transaction.objectStore(STORES.NODE_PREFERENCES);
       const request = store.get('default');
@@ -802,7 +799,6 @@ export class IndexedDBService {
     }
 
     return new Promise((resolve, reject) => {
-
       const transaction = this.db.transaction(STORES.SETTINGS, 'readonly');
       const store = transaction.objectStore(STORES.SETTINGS);
       const request = store.getAll();
@@ -1381,14 +1377,19 @@ export class IndexedDBService {
 
     // Use fallback storage if IndexedDB is not available
     if (!initialized || !this.db) {
-      console.warn(`Database not initialized, project ${project.id} will be saved to fallback storage`);
+      console.warn(
+        `Database not initialized, project ${project.id} will be saved to fallback storage`
+      );
 
       // Store in fallback storage
       this.fallbackStorage.set(`project_${project.id}`, updatedProject);
 
       // Also try to save to localStorage as a backup
       try {
-        localStorage.setItem(`doitBrainstorming_project_${project.id}`, JSON.stringify(updatedProject));
+        localStorage.setItem(
+          `doitBrainstorming_project_${project.id}`,
+          JSON.stringify(updatedProject)
+        );
       } catch (error) {
         console.warn(`Failed to save project ${project.id} to localStorage:`, error);
       }
@@ -1397,7 +1398,6 @@ export class IndexedDBService {
     }
 
     return new Promise(resolve => {
-
       try {
         const transaction = this.db.transaction(STORES.PROJECTS, 'readwrite');
         const store = transaction.objectStore(STORES.PROJECTS);
@@ -1452,7 +1452,6 @@ export class IndexedDBService {
     }
 
     return new Promise(resolve => {
-
       try {
         const transaction = this.db.transaction(STORES.PROJECTS, 'readonly');
         const store = transaction.objectStore(STORES.PROJECTS);
