@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 
 import { ErrorNotificationProvider } from '../contexts/ErrorNotificationContext';
+import { I18nProvider } from '../contexts/I18nContext';
 import { SettingsProvider } from '../contexts/SettingsContext';
 
 // Map is used instead of object literal to avoid object injection warnings
@@ -106,6 +107,8 @@ export function mockLocalStorage() {
     value: mockStorage,
     writable: true,
   });
+
+  return mockStorage;
 }
 
 // Custom render with providers
@@ -117,9 +120,11 @@ const customRender = (
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <BrowserRouter>
-      <ErrorNotificationProvider>
-        <SettingsProvider>{children}</SettingsProvider>
-      </ErrorNotificationProvider>
+      <I18nProvider defaultLocale="en">
+        <ErrorNotificationProvider>
+          <SettingsProvider>{children}</SettingsProvider>
+        </ErrorNotificationProvider>
+      </I18nProvider>
     </BrowserRouter>
   );
 
