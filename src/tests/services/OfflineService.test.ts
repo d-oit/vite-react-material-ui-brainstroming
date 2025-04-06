@@ -6,6 +6,7 @@ import { mockLocalStorage, mockOnlineStatus } from '../test-utils';
 const offlineService = mockOfflineService;
 
 describe('OfflineService', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockStorage: any;
 
   beforeEach(() => {

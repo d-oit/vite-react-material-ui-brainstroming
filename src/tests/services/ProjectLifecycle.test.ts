@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Project, ProjectHistoryEntry } from '../../types';
 import projectService from '../../services/ProjectService';
 import indexedDBService from '../../services/IndexedDBService';
@@ -64,6 +64,10 @@ describe('Project Lifecycle Management', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
   });
 
   describe('createProject', () => {

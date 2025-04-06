@@ -1,4 +1,4 @@
-import { Project, ProjectHistoryEntry } from '../types';
+import { Project, ProjectHistoryEntry, Node, Edge } from '../types';
 import gitService from './GitService';
 import s3Service from './S3Service';
 import indexedDBService from './IndexedDBService';
@@ -13,7 +13,15 @@ export class ProjectService {
 
   private constructor() {
     // Initialize IndexedDB
-    indexedDBService.init().catch(error => {
+    indexedDBService.init().then(initialized => {
+      if (!initialized) {
+        console.warn('IndexedDB initialization failed, some features may not work properly');
+        loggerService.warn('IndexedDB initialization failed, some features may not work properly');
+      } else {
+        console.log('IndexedDB initialized successfully');
+        loggerService.info('IndexedDB initialized successfully');
+      }
+    }).catch(error => {
       console.error('Failed to initialize IndexedDB:', error);
       loggerService.error(
         'Failed to initialize IndexedDB',

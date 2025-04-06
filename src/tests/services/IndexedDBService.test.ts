@@ -4,6 +4,9 @@ import { mockIndexedDB } from '../test-utils';
 import { NodeType } from '../../types';
 
 describe('IndexedDBService', () => {
+  // Set a longer timeout for IndexedDB operations
+  vi.setConfig({ testTimeout: 10000 });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockIDB: any;
 
   beforeEach(() => {

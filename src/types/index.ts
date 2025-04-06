@@ -1,98 +1,100 @@
-// Project Types
-export interface Project {
-  id: string;
-  name: string;
-  description: string;
-  createdAt: string;
-  updatedAt: string;
-  lastAccessedAt?: string;
-  version: string;
-  nodes: Node[];
-  edges: Edge[];
-  isArchived?: boolean;
-  archivedAt?: string;
-  tags?: string[];
-}
+// Base types
+export type {
+  NodeData,
+  Node,
+  Edge,
+  Settings,
+  LogEntry,
+  NetworkStatus,
+  NodePreferences,
+  UserPreferences
+} from './models';
 
-// Project History Types
-export interface ProjectHistoryEntry {
-  id: string;
-  projectId: string;
-  action: 'create' | 'update' | 'archive' | 'unarchive' | 'delete' | 'view' | 'export' | 'share';
-  timestamp: string;
-  details?: {
-    version?: string;
-    commitId?: string;
-    changes?: string[];
-    [key: string]: any;
-  };
-}
+// Project types
+export type {
+  Project,
+  GitCommit,
+  ProjectHistoryEntry
+} from './project';
 
-// Node Types
-export interface Node {
-  id: string;
-  type: NodeType;
-  position: Position;
-  data: NodeData;
-}
+export {
+  createEmptyProject,
+  isValidProject,
+  normalizeProjectVersion,
+  DEFAULT_PROJECT_VERSION
+} from './project';
 
-export enum NodeType {
-  IDEA = 'idea',
-  TASK = 'task',
-  NOTE = 'note',
-  RESOURCE = 'resource',
-}
+// Flow types
+export type {
+  NodeChange,
+  EdgeChange,
+  Connection,
+  OnConnectStartParams,
+  ReactFlowInstance,
+  FlowCallbacks,
+  FlowProps,
+  FlowPanelProps
+} from './flow';
 
-export interface Position {
-  x: number;
-  y: number;
-}
+// Test utilities
+export type {
+  MockResizeObserver,
+  MockStorage,
+  MockNetworkStatus,
+  TestNodeData,
+  TestNode,
+  TestProject
+} from './test-utils';
 
-export interface NodeData {
-  label: string;
-  content: string;
-  color?: string;
-  tags?: string[];
-  size?: 'small' | 'medium' | 'large';
-}
+export {
+  createTestNode,
+  createTestEdge,
+  createTestProject,
+  createMockResizeObserver,
+  createMockStorage,
+  createMockNetworkStatus
+} from './test-utils';
 
-// Edge Types
-export interface Edge {
-  id: string;
-  source: string;
-  target: string;
-  type?: EdgeType;
-  label?: string;
-}
+// Version utilities
+export {
+  normalizeVersion,
+  formatVersion,
+  isValidVersion,
+  DEFAULT_VERSION
+} from '../utils/version';
 
-export enum EdgeType {
-  DEFAULT = 'default',
-  STRAIGHT = 'straight',
-  STEP = 'step',
-  SMOOTHSTEP = 'smoothstep',
-  BEZIER = 'bezier',
-}
+// Enums
+export {
+  NodeType,
+  EdgeType,
+  ThemeMode,
+  LogLevel,
+  LogCategory,
+  NodeSize,
+  ConnectionMode,
+  PanelPosition
+} from './enums';
 
-// Theme Types
-export enum ThemeMode {
-  LIGHT = 'light',
-  DARK = 'dark',
-  SYSTEM = 'system',
-}
+// Constants
+export const NodeColors: Record<NodeType, string> = {
+  [NodeType.IDEA]: '#e3f2fd',
+  [NodeType.TASK]: '#e8f5e9',
+  [NodeType.NOTE]: '#fff8e1',
+  [NodeType.RESOURCE]: '#f3e5f5'
+} as const;
 
-// Chat Types
-export interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: string;
-}
+export const NodeSizeConfig = {
+  [NodeSize.SMALL]: { width: 150, fontSize: 12, chipSize: 'small' as const },
+  [NodeSize.MEDIUM]: { width: 200, fontSize: 14, chipSize: 'medium' as const },
+  [NodeSize.LARGE]: { width: 300, fontSize: 16, chipSize: 'medium' as const }
+} as const;
 
-// User Preferences
-export interface UserPreferences {
-  themeMode: ThemeMode;
-  autoSave: boolean;
-  autoBackup: boolean;
-  fontSize: number;
-  language: string;
-}
+export const FlowConfig = {
+  connectionMode: ConnectionMode.LOOSE,
+  panelPosition: PanelPosition.CENTER,
+  snapToGrid: true,
+  snapGrid: [15, 15],
+  defaultZoom: 1,
+  minZoom: 0.5,
+  maxZoom: 2,
+} as const;

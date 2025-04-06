@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Container, Paper, Tabs, Tab } from '@mui/material';
+import { Box, Container, Paper, Tabs, Tab, Typography, Divider } from '@mui/material';
 import { Dashboard as DashboardIcon, Archive as ArchiveIcon } from '@mui/icons-material';
 import { AppShell } from '../components/Layout/AppShell';
 import ProjectList from '../components/ProjectList/ProjectList';
@@ -49,9 +49,10 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
     setRefreshKey(prev => prev + 1);
   };
 
-  const handleCreateProject = (_project: Project) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleCreateProject = (project: Project) => {
     // Optionally navigate to the new project
-    // navigate(`/brainstorm/${_project.id}`);
+    // navigate(`/brainstorm/${project.id}`);
   };
 
   return (

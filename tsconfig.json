@@ -2,9 +2,16 @@
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2020", "DOM", "DOM.Iterable", "WebWorker"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "types": [
+      "vitest/globals",
+      "@testing-library/jest-dom",
+      "vite/client",
+      "node"
+    ],
+    "types": ["vitest/globals", "@testing-library/jest-dom", "vite/client"],
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
@@ -32,9 +39,24 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["d.o.it.brainstorming/src/src/*"]
+      "@/*": ["src/*"]
     }
   },
-  "include": ["d.o.it.brainstorming/src/src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": [
+    "src/**/*",
+    "e2e/**/*",
+    "src/types/*.d.ts",
+    "src/tests/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    ".eslintrc.cjs"
+  ],
+  "references": [
+    { 
+      "path": "./tsconfig.node.json"
+    }
+  ]
 }

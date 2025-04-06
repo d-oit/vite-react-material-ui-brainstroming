@@ -64,10 +64,36 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   // Initialize IndexedDB and load data
   useEffect(() => {
+    // Function to fall back to localStorage when IndexedDB is not available
+    const fallbackToLocalStorage = () => {
+      const storedSettings = localStorage.getItem('app_settings');
+      if (storedSettings) {
+        try {
+          const parsedSettings = JSON.parse(storedSettings);
+          const mergedSettings = { ...defaultSettings, ...parsedSettings };
+          setSettings(mergedSettings);
+          configureServices(mergedSettings);
+        } catch (error) {
+          console.error('Error parsing settings from localStorage:', error);
+          setSettings(defaultSettings);
+          configureServices(defaultSettings);
+        }
+      } else {
+        setSettings(defaultSettings);
+        configureServices(defaultSettings);
+      }
+    };
+
     const initializeData = async () => {
       try {
         // Initialize IndexedDB
-        await indexedDBService.init();
+        const initialized = await indexedDBService.init();
+
+        if (!initialized) {
+          console.warn('IndexedDB not available, falling back to localStorage');
+          fallbackToLocalStorage();
+          return;
+        }
 
         // Load color schemes
         const schemes = await indexedDBService.getColorSchemes();
@@ -111,12 +137,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       } catch (error) {
         console.error('Failed to initialize settings:', error);
         // Fallback to localStorage if IndexedDB fails
-        const storedSettings = localStorage.getItem('app_settings');
-        if (storedSettings) {
-          const parsedSettings = JSON.parse(storedSettings);
-          setSettings(parsedSettings);
-          configureServices(parsedSettings);
-        }
+        fallbackToLocalStorage();
       }
     };
 

@@ -215,7 +215,13 @@ export class LoggerService {
    */
   public async getLogs(level?: LogLevel, limit = 100): Promise<LogEntry[]> {
     try {
-      return await indexedDBService.getLogs(level, limit);
+      const initialized = await indexedDBService.init();
+      if (initialized) {
+        return await indexedDBService.getLogs(level, limit);
+      } else {
+        console.warn('IndexedDB not available, returning empty logs array');
+        return [];
+      }
     } catch (error) {
       console.error('Failed to get logs from IndexedDB:', error);
       return [];
@@ -229,7 +235,12 @@ export class LoggerService {
    */
   public async clearLogs(olderThan?: Date): Promise<void> {
     try {
-      await indexedDBService.clearLogs(olderThan);
+      const initialized = await indexedDBService.init();
+      if (initialized) {
+        await indexedDBService.clearLogs(olderThan);
+      } else {
+        console.warn('IndexedDB not available, skipping log cleanup');
+      }
     } catch (error) {
       console.error('Failed to clear logs from IndexedDB:', error);
     }
@@ -346,12 +357,20 @@ export class LoggerService {
     context?: Record<string, unknown>
   ): Promise<void> {
     try {
-      await indexedDBService.log(level, message, {
-        ...context,
-        appVersion: this.applicationVersion,
-        userAgent: navigator.userAgent,
-        url: window.location.href,
-      });
+      const initialized = await indexedDBService.init();
+      if (initialized) {
+        await indexedDBService.log(level, message, {
+          ...context,
+          appVersion: this.applicationVersion,
+          userAgent: navigator.userAgent,
+          url: window.location.href,
+        });
+      } else {
+        // If IndexedDB is not available, just log to console
+        if (level === 'error' || level === 'warn') {
+          console.warn('IndexedDB not available, log entry not saved to database');
+        }
+      }
     } catch (error) {
       console.error('Failed to log to IndexedDB:', error);
     }

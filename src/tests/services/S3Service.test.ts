@@ -24,42 +24,45 @@ vi.mock('../../services/LoggerService', () => ({
 }));
 
 // Mock AWS SDK
-import { S3 } from 'aws-sdk';
+import AWS, { S3 } from 'aws-sdk';
 
-vi.mock('aws-sdk', async () => {
-  const mockS3 = {
-    putObject: vi.fn().mockReturnValue({
-      promise: vi.fn().mockResolvedValue({}),
-    }),
-    getObject: vi.fn().mockReturnValue({
-      promise: vi.fn().mockResolvedValue({
-        Body: JSON.stringify({
-          id: 'test-project',
-          name: 'Test Project',
-          version: '1.0.0',
-        }),
+// Create a mock S3 instance
+const mockS3Instance = {
+  putObject: vi.fn().mockReturnValue({
+    promise: vi.fn().mockResolvedValue({}),
+  }),
+  getObject: vi.fn().mockReturnValue({
+    promise: vi.fn().mockResolvedValue({
+      Body: JSON.stringify({
+        id: 'test-project',
+        name: 'Test Project',
+        version: '1.0.0',
       }),
     }),
-    listObjectsV2: vi.fn().mockReturnValue({
-      promise: vi.fn().mockResolvedValue({
-        Contents: [
-          {
-            Key: 'projects/test-project/1.0.0.json',
-            LastModified: new Date(),
-          },
-        ],
-      }),
+  }),
+  listObjectsV2: vi.fn().mockReturnValue({
+    promise: vi.fn().mockResolvedValue({
+      Contents: [
+        {
+          Key: 'projects/test-project/1.0.0.json',
+          LastModified: new Date(),
+        },
+      ],
     }),
-  };
+  }),
+};
 
-  const actual = (await vi.importActual('aws-sdk')) as typeof import('aws-sdk');
+vi.mock('aws-sdk', () => {
   return {
-    ...actual,
-    S3: vi.fn(() => mockS3),
+    S3: vi.fn(() => mockS3Instance),
+    config: {
+      update: vi.fn(),
+    },
   };
 });
 
 describe('S3Service', () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
   let mockStorage: any;
 
   beforeEach(() => {
@@ -86,13 +89,18 @@ describe('S3Service', () => {
 
   describe('configure', () => {
     it('should configure the S3 service', async () => {
+      // Setup
+      const accessKeyId = 'test-access-key';
+      const secretAccessKey = 'test-secret-key';
+      const region = 'us-east-1';
+      const bucketName = 'test-bucket';
+
+      // Mock the AWS config update
+      const configUpdateSpy = vi.fn();
+      vi.spyOn(AWS.config, 'update').mockImplementation(configUpdateSpy);
+
       // Call the method
-      const result = await s3Service.configure(
-        'test-access-key',
-        'test-secret-key',
-        'us-east-1',
-        'test-bucket'
-      );
+      const result = await s3Service.configure(accessKeyId, secretAccessKey, region, bucketName);
 
       // Verify the result
       expect(result).toBe(true);
@@ -140,11 +148,19 @@ describe('S3Service', () => {
         updatedAt: new Date().toISOString(),
       };
 
+      // Mock S3 putObject
+      const putObjectSpy = vi.fn().mockResolvedValue({});
+      mockS3Instance.putObject.mockReturnValue({ promise: putObjectSpy });
+
+      // Mock logger
+      const loggerInfoSpy = vi.spyOn(loggerService, 'info');
+
       // Call the method
       const result = await s3Service.uploadProject(project);
 
       // Verify the result
       expect(result).toBeDefined();
+      expect(loggerInfoSpy).toHaveBeenCalled();
       expect(loggerService.info).toHaveBeenCalled();
     });
 
@@ -167,11 +183,16 @@ describe('S3Service', () => {
         updatedAt: new Date().toISOString(),
       };
 
+      // Mock addToSyncQueue
+      const addToSyncQueueSpy = vi.spyOn(offlineService, 'addToSyncQueue');
+      addToSyncQueueSpy.mockImplementation(() => {});
+
       // Call the method
       const result = await s3Service.uploadProject(project);
 
       // Verify the result
       expect(result).toEqual({ queued: true });
+      expect(offlineService.addToSyncQueue).toHaveBeenCalled();
       expect(loggerService.info).toHaveBeenCalled();
     });
 
@@ -182,12 +203,14 @@ describe('S3Service', () => {
       // Configure the service
       await s3Service.configure('test-access-key', 'test-secret-key', 'us-east-1', 'test-bucket');
 
-      // Get mocked S3 instance
-      const S3Mock = vi.mocked(S3);
-      const mockS3Instance = S3Mock.mock.results[0].value;
+      // Mock S3 putObject to throw an error
+      const putObjectPromiseSpy = vi.fn().mockRejectedValue(new Error('Upload failed'));
       mockS3Instance.putObject.mockReturnValueOnce({
-        promise: vi.fn().mockRejectedValue(new Error('Test error')),
+        promise: putObjectPromiseSpy,
       });
+
+      // Mock logger
+      const loggerErrorSpy = vi.spyOn(loggerService, 'error');
 
       // Create a test project
       const project: Project = {
@@ -206,7 +229,7 @@ describe('S3Service', () => {
 
       // Verify the result
       expect(result).toBeNull();
-      expect(loggerService.error).toHaveBeenCalled();
+      expect(loggerErrorSpy).toHaveBeenCalled();
     });
   });
 

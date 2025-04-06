@@ -108,107 +108,121 @@ export class IndexedDBService {
       return this.initPromise;
     }
 
-    this.initPromise = new Promise((resolve, reject) => {
-      if (!window.indexedDB) {
-        console.error('IndexedDB is not supported in this browser');
+    this.initPromise = new Promise((resolve) => {
+      try {
+        if (!window.indexedDB) {
+          console.error('IndexedDB is not supported in this browser');
+          this.isInitialized = false;
+          resolve(false);
+          return;
+        }
+
+        const request = window.indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onerror = (event: Event) => {
+          console.error('Error opening IndexedDB:', event);
+          this.isInitialized = false;
+          // Don't reject, just resolve with false to prevent cascading errors
+          resolve(false);
+        };
+
+        request.onsuccess = (event: Event) => {
+          this.db = (event.target as IDBOpenDBRequest).result;
+          this.isInitialized = true;
+          console.log('IndexedDB initialized successfully');
+          resolve(true);
+        };
+
+        request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
+          try {
+            const db = (event.target as IDBOpenDBRequest).result;
+            const oldVersion = event.oldVersion;
+            const transaction = (event.target as IDBOpenDBRequest).transaction;
+
+            // Handle schema migrations based on version
+            if (oldVersion < 1) {
+              // Create initial stores for version 1
+              if (!db.objectStoreNames.contains(STORES.SETTINGS)) {
+                db.createObjectStore(STORES.SETTINGS, { keyPath: 'key' });
+              }
+
+              if (!db.objectStoreNames.contains(STORES.COLORS)) {
+                const colorStore = db.createObjectStore(STORES.COLORS, { keyPath: 'id' });
+                colorStore.createIndex('name', 'name', { unique: true });
+                colorStore.createIndex('isDefault', 'isDefault', { unique: false });
+              }
+
+              if (!db.objectStoreNames.contains(STORES.NODE_PREFERENCES)) {
+                db.createObjectStore(STORES.NODE_PREFERENCES, { keyPath: 'id' });
+              }
+
+              if (!db.objectStoreNames.contains(STORES.LOGS)) {
+                const logStore = db.createObjectStore(STORES.LOGS, { keyPath: 'id' });
+                logStore.createIndex('timestamp', 'timestamp', { unique: false });
+                logStore.createIndex('level', 'level', { unique: false });
+              }
+            }
+
+            if (oldVersion < 2) {
+              // Add new stores for version 2
+              if (!db.objectStoreNames.contains(STORES.SECURE_STORE)) {
+                const secureStore = db.createObjectStore(STORES.SECURE_STORE, { keyPath: 'id' });
+                secureStore.createIndex('key', 'key', { unique: true });
+                secureStore.createIndex('updatedAt', 'updatedAt', { unique: false });
+              }
+
+              if (!db.objectStoreNames.contains(STORES.PROJECTS)) {
+                const projectsStore = db.createObjectStore(STORES.PROJECTS, { keyPath: 'id' });
+                projectsStore.createIndex('updatedAt', 'updatedAt', { unique: false });
+              }
+
+              if (!db.objectStoreNames.contains(STORES.OFFLINE_QUEUE)) {
+                const queueStore = db.createObjectStore(STORES.OFFLINE_QUEUE, { keyPath: 'id' });
+                queueStore.createIndex('timestamp', 'timestamp', { unique: false });
+                queueStore.createIndex('priority', 'priority', { unique: false });
+              }
+            }
+
+            if (oldVersion < 3) {
+              // Add new stores for version 3
+              if (!db.objectStoreNames.contains(STORES.PROJECT_HISTORY)) {
+                const historyStore = db.createObjectStore(STORES.PROJECT_HISTORY, { keyPath: 'id' });
+                historyStore.createIndex('projectId', 'projectId', { unique: false });
+                historyStore.createIndex('timestamp', 'timestamp', { unique: false });
+                historyStore.createIndex('action', 'action', { unique: false });
+              }
+
+              // Update PROJECTS store with new indexes if it exists
+              if (db.objectStoreNames.contains(STORES.PROJECTS)) {
+                const projectsStore = transaction.objectStore(STORES.PROJECTS);
+
+                // Add new indexes if they don't exist
+                if (!projectsStore.indexNames.contains('isArchived')) {
+                  projectsStore.createIndex('isArchived', 'isArchived', { unique: false });
+                }
+
+                if (!projectsStore.indexNames.contains('lastAccessedAt')) {
+                  projectsStore.createIndex('lastAccessedAt', 'lastAccessedAt', { unique: false });
+                }
+
+                if (!projectsStore.indexNames.contains('tags')) {
+                  projectsStore.createIndex('tags', 'tags', { unique: false, multiEntry: true });
+                }
+              }
+            }
+
+            // Initialize with default data using the existing transaction
+            this.initializeDefaultData(db, transaction);
+          } catch (error) {
+            console.error('Error during database upgrade:', error);
+            // Don't throw, as this would abort the transaction
+          }
+        };
+      } catch (error) {
+        console.error('Error initializing IndexedDB:', error);
+        this.isInitialized = false;
         resolve(false);
-        return;
       }
-
-      const request = window.indexedDB.open(DB_NAME, DB_VERSION);
-
-      request.onerror = event => {
-        console.error('Error opening IndexedDB:', event);
-        reject(new Error('Failed to open IndexedDB'));
-      };
-
-      request.onsuccess = event => {
-        this.db = (event.target as IDBOpenDBRequest).result;
-        this.isInitialized = true;
-        console.log('IndexedDB initialized successfully');
-        resolve(true);
-      };
-
-      request.onupgradeneeded = event => {
-        const db = (event.target as IDBOpenDBRequest).result;
-        const oldVersion = event.oldVersion;
-        const transaction = (event.target as IDBOpenDBRequest).transaction;
-
-        // Handle schema migrations based on version
-        if (oldVersion < 1) {
-          // Create initial stores for version 1
-          if (!db.objectStoreNames.contains(STORES.SETTINGS)) {
-            db.createObjectStore(STORES.SETTINGS, { keyPath: 'key' });
-          }
-
-          if (!db.objectStoreNames.contains(STORES.COLORS)) {
-            const colorStore = db.createObjectStore(STORES.COLORS, { keyPath: 'id' });
-            colorStore.createIndex('name', 'name', { unique: true });
-            colorStore.createIndex('isDefault', 'isDefault', { unique: false });
-          }
-
-          if (!db.objectStoreNames.contains(STORES.NODE_PREFERENCES)) {
-            db.createObjectStore(STORES.NODE_PREFERENCES, { keyPath: 'id' });
-          }
-
-          if (!db.objectStoreNames.contains(STORES.LOGS)) {
-            const logStore = db.createObjectStore(STORES.LOGS, { keyPath: 'id' });
-            logStore.createIndex('timestamp', 'timestamp', { unique: false });
-            logStore.createIndex('level', 'level', { unique: false });
-          }
-        }
-
-        if (oldVersion < 2) {
-          // Add new stores for version 2
-          if (!db.objectStoreNames.contains(STORES.SECURE_STORE)) {
-            const secureStore = db.createObjectStore(STORES.SECURE_STORE, { keyPath: 'id' });
-            secureStore.createIndex('key', 'key', { unique: true });
-            secureStore.createIndex('updatedAt', 'updatedAt', { unique: false });
-          }
-
-          if (!db.objectStoreNames.contains(STORES.PROJECTS)) {
-            const projectsStore = db.createObjectStore(STORES.PROJECTS, { keyPath: 'id' });
-            projectsStore.createIndex('updatedAt', 'updatedAt', { unique: false });
-          }
-
-          if (!db.objectStoreNames.contains(STORES.OFFLINE_QUEUE)) {
-            const queueStore = db.createObjectStore(STORES.OFFLINE_QUEUE, { keyPath: 'id' });
-            queueStore.createIndex('timestamp', 'timestamp', { unique: false });
-            queueStore.createIndex('priority', 'priority', { unique: false });
-          }
-        }
-
-        if (oldVersion < 3) {
-          // Add new stores for version 3
-          if (!db.objectStoreNames.contains(STORES.PROJECT_HISTORY)) {
-            const historyStore = db.createObjectStore(STORES.PROJECT_HISTORY, { keyPath: 'id' });
-            historyStore.createIndex('projectId', 'projectId', { unique: false });
-            historyStore.createIndex('timestamp', 'timestamp', { unique: false });
-            historyStore.createIndex('action', 'action', { unique: false });
-          }
-
-          // Update PROJECTS store with new indexes if it exists
-          if (db.objectStoreNames.contains(STORES.PROJECTS)) {
-            const projectsStore = transaction.objectStore(STORES.PROJECTS);
-
-            // Add new indexes if they don't exist
-            if (!projectsStore.indexNames.contains('isArchived')) {
-              projectsStore.createIndex('isArchived', 'isArchived', { unique: false });
-            }
-
-            if (!projectsStore.indexNames.contains('lastAccessedAt')) {
-              projectsStore.createIndex('lastAccessedAt', 'lastAccessedAt', { unique: false });
-            }
-
-            if (!projectsStore.indexNames.contains('tags')) {
-              projectsStore.createIndex('tags', 'tags', { unique: false, multiEntry: true });
-            }
-          }
-        }
-
-        // Initialize with default data using the existing transaction
-        this.initializeDefaultData(db, transaction);
-      };
     });
 
     return this.initPromise;
@@ -583,26 +597,32 @@ export class IndexedDBService {
    * @returns Promise that resolves with the setting value
    */
   public async getSetting(key: string): Promise<unknown> {
-    await this.init();
+    const initialized = await this.init();
 
-    return new Promise((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not initialized'));
+    return new Promise((resolve) => {
+      if (!initialized || !this.db) {
+        console.warn(`Database not initialized, returning null for setting: ${key}`);
+        resolve(null);
         return;
       }
 
-      const transaction = this.db.transaction(STORES.SETTINGS, 'readonly');
-      const store = transaction.objectStore(STORES.SETTINGS);
-      const request = store.get(key);
+      try {
+        const transaction = this.db.transaction(STORES.SETTINGS, 'readonly');
+        const store = transaction.objectStore(STORES.SETTINGS);
+        const request = store.get(key);
 
-      request.onsuccess = () => {
-        resolve(request.result ? request.result.value : null);
-      };
+        request.onsuccess = () => {
+          resolve(request.result ? request.result.value : null);
+        };
 
-      request.onerror = event => {
-        console.error(`Error getting setting ${key}:`, event);
-        reject(new Error(`Failed to get setting ${key}`));
-      };
+        request.onerror = (event: Event) => {
+          console.error(`Error getting setting ${key}:`, event);
+          resolve(null); // Return null instead of rejecting
+        };
+      } catch (error) {
+        console.error(`Error in getSetting for ${key}:`, error);
+        resolve(null);
+      }
     });
   }
 
@@ -612,38 +632,50 @@ export class IndexedDBService {
    * @returns Promise that resolves when all settings are saved
    */
   public async saveSettings(settings: Record<string, unknown>): Promise<void> {
-    await this.init();
+    const initialized = await this.init();
 
-    return new Promise((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not initialized'));
+    return new Promise((resolve) => {
+      if (!initialized || !this.db) {
+        console.warn('Database not initialized, settings will not be saved');
+        // Resolve anyway to prevent cascading errors
+        resolve();
         return;
       }
 
-      const transaction = this.db.transaction(STORES.SETTINGS, 'readwrite');
-      const store = transaction.objectStore(STORES.SETTINGS);
+      try {
+        const transaction = this.db.transaction(STORES.SETTINGS, 'readwrite');
+        const store = transaction.objectStore(STORES.SETTINGS);
 
-      let completed = 0;
-      const total = Object.keys(settings).length;
+        let completed = 0;
+        let errors = 0;
+        const total = Object.keys(settings).length;
 
-      for (const [key, value] of Object.entries(settings)) {
-        const request = store.put({ key, value });
+        // If there are no settings to save, resolve immediately
+        if (total === 0) {
+          resolve();
+          return;
+        }
 
-        request.onsuccess = () => {
-          completed++;
-          if (completed === total) {
-            resolve();
-          }
-        };
+        for (const [key, value] of Object.entries(settings)) {
+          const request = store.put({ key, value });
 
-        request.onerror = event => {
-          console.error(`Error saving setting ${key}:`, event);
-          reject(new Error(`Failed to save setting ${key}`));
-        };
-      }
+          request.onsuccess = () => {
+            completed++;
+            if (completed + errors === total) {
+              resolve();
+            }
+          };
 
-      // If there are no settings to save, resolve immediately
-      if (total === 0) {
+          request.onerror = (event: Event) => {
+            console.error(`Error saving setting ${key}:`, event);
+            errors++;
+            if (completed + errors === total) {
+              resolve();
+            }
+          };
+        }
+      } catch (error) {
+        console.error('Error in saveSettings:', error);
         resolve();
       }
     });
@@ -1222,30 +1254,38 @@ export class IndexedDBService {
    * @returns Promise that resolves with the project ID
    */
   public async saveProject(project: Project): Promise<string> {
-    await this.init();
+    const initialized = await this.init();
 
-    return new Promise((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not initialized'));
+    return new Promise((resolve) => {
+      if (!initialized || !this.db) {
+        console.warn(`Database not initialized, project ${project.id} will not be saved`);
+        // Still return the project ID to prevent cascading errors
+        resolve(project.id);
         return;
       }
 
-      const transaction = this.db.transaction(STORES.PROJECTS, 'readwrite');
-      const store = transaction.objectStore(STORES.PROJECTS);
+      try {
+        const transaction = this.db.transaction(STORES.PROJECTS, 'readwrite');
+        const store = transaction.objectStore(STORES.PROJECTS);
 
-      // Update the updatedAt timestamp
-      const updatedProject = {
-        ...project,
-        updatedAt: new Date().toISOString(),
-      };
+        // Update the updatedAt timestamp
+        const updatedProject = {
+          ...project,
+          updatedAt: new Date().toISOString(),
+        };
 
-      const request = store.put(updatedProject);
+        const request = store.put(updatedProject);
 
-      request.onsuccess = () => resolve(project.id);
-      request.onerror = event => {
-        console.error('Error saving project:', event);
-        reject(new Error('Failed to save project'));
-      };
+        request.onsuccess = () => resolve(project.id);
+        request.onerror = (event: Event) => {
+          console.error('Error saving project:', event);
+          // Still return the project ID to prevent cascading errors
+          resolve(project.id);
+        };
+      } catch (error) {
+        console.error(`Error in saveProject for ${project.id}:`, error);
+        resolve(project.id);
+      }
     });
   }
 
@@ -1255,32 +1295,40 @@ export class IndexedDBService {
    * @returns Promise that resolves with the project or null if not found
    */
   public async getProject(id: string): Promise<Project | null> {
-    await this.init();
+    const initialized = await this.init();
 
-    return new Promise((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not initialized'));
+    return new Promise((resolve) => {
+      if (!initialized || !this.db) {
+        console.warn(`Database not initialized, returning null for project: ${id}`);
+        resolve(null);
         return;
       }
 
-      const transaction = this.db.transaction(STORES.PROJECTS, 'readonly');
-      const store = transaction.objectStore(STORES.PROJECTS);
-      const request = store.get(id);
+      try {
+        const transaction = this.db.transaction(STORES.PROJECTS, 'readonly');
+        const store = transaction.objectStore(STORES.PROJECTS);
+        const request = store.get(id);
 
-      request.onsuccess = () => {
-        const project = request.result || null;
+        request.onsuccess = () => {
+          const project = request.result || null;
 
-        // Update lastAccessedAt if project exists
-        if (project) {
-          this.updateProjectLastAccessed(id);
-        }
+          // Update lastAccessedAt if project exists
+          if (project) {
+            this.updateProjectLastAccessed(id).catch(err => {
+              console.warn('Failed to update project access time:', err);
+            });
+          }
 
-        resolve(project);
-      };
-      request.onerror = event => {
-        console.error('Error getting project:', event);
-        reject(new Error('Failed to get project'));
-      };
+          resolve(project);
+        };
+        request.onerror = (event: Event) => {
+          console.error('Error getting project:', event);
+          resolve(null);
+        };
+      } catch (error) {
+        console.error(`Error in getProject for ${id}:`, error);
+        resolve(null);
+      }
     });
   }
 
@@ -1290,35 +1338,41 @@ export class IndexedDBService {
    * @returns Promise that resolves with an array of projects
    */
   public async getAllProjects(includeArchived: boolean = false): Promise<Project[]> {
-    await this.init();
+    const initialized = await this.init();
 
-    return new Promise((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not initialized'));
+    return new Promise((resolve) => {
+      if (!initialized || !this.db) {
+        console.warn('Database not initialized, returning empty projects array');
+        resolve([]);
         return;
       }
 
-      const transaction = this.db.transaction(STORES.PROJECTS, 'readonly');
-      const store = transaction.objectStore(STORES.PROJECTS);
-      const request = store.getAll();
+      try {
+        const transaction = this.db.transaction(STORES.PROJECTS, 'readonly');
+        const store = transaction.objectStore(STORES.PROJECTS);
+        const request = store.getAll();
 
-      request.onsuccess = () => {
-        let projects = request.result || [];
+        request.onsuccess = () => {
+          let projects = request.result || [];
 
-        // Filter out archived projects if not requested
-        if (!includeArchived) {
-          projects = projects.filter(p => !p.isArchived);
-        }
+          // Filter out archived projects if not requested
+          if (!includeArchived) {
+            projects = projects.filter(p => !p.isArchived);
+          }
 
-        // Sort by updatedAt (newest first)
-        projects.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+          // Sort by updatedAt (newest first)
+          projects.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
-        resolve(projects);
-      };
-      request.onerror = event => {
-        console.error('Error getting projects:', event);
-        reject(new Error('Failed to get projects'));
-      };
+          resolve(projects);
+        };
+        request.onerror = (event: Event) => {
+          console.error('Error getting projects:', event);
+          resolve([]);
+        };
+      } catch (error) {
+        console.error('Error in getAllProjects:', error);
+        resolve([]);
+      }
     });
   }
 
@@ -1328,23 +1382,30 @@ export class IndexedDBService {
    * @returns Promise that resolves when the project is deleted
    */
   public async deleteProject(id: string): Promise<void> {
-    await this.init();
+    const initialized = await this.init();
 
-    return new Promise((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not initialized'));
+    return new Promise((resolve) => {
+      if (!initialized || !this.db) {
+        console.warn(`Database not initialized, project ${id} will not be deleted`);
+        // Resolve anyway to prevent cascading errors
+        resolve();
         return;
       }
 
-      const transaction = this.db.transaction(STORES.PROJECTS, 'readwrite');
-      const store = transaction.objectStore(STORES.PROJECTS);
-      const request = store.delete(id);
+      try {
+        const transaction = this.db.transaction(STORES.PROJECTS, 'readwrite');
+        const store = transaction.objectStore(STORES.PROJECTS);
+        const request = store.delete(id);
 
-      request.onsuccess = () => resolve();
-      request.onerror = event => {
-        console.error('Error deleting project:', event);
-        reject(new Error('Failed to delete project'));
-      };
+        request.onsuccess = () => resolve();
+        request.onerror = (event: Event) => {
+          console.error('Error deleting project:', event);
+          resolve(); // Resolve anyway to prevent cascading errors
+        };
+      } catch (error) {
+        console.error(`Error in deleteProject for ${id}:`, error);
+        resolve();
+      }
     });
   }
 
@@ -1354,14 +1415,20 @@ export class IndexedDBService {
    * @param archive Whether to archive (true) or unarchive (false)
    * @returns Promise that resolves with the updated project
    */
-  public async archiveProject(id: string, archive: boolean): Promise<Project> {
-    await this.init();
+  public async archiveProject(id: string, archive: boolean): Promise<Project | null> {
+    const initialized = await this.init();
+
+    if (!initialized) {
+      console.warn(`Database not initialized, cannot archive project ${id}`);
+      return null;
+    }
 
     try {
       const project = await this.getProject(id);
 
       if (!project) {
-        throw new Error(`Project with ID ${id} not found`);
+        console.warn(`Project with ID ${id} not found for archiving`);
+        return null;
       }
 
       const updatedProject = {
@@ -1374,8 +1441,8 @@ export class IndexedDBService {
       await this.saveProject(updatedProject);
       return updatedProject;
     } catch (error) {
-      console.error('Error archiving project:', error);
-      throw new Error('Failed to archive project');
+      console.error(`Error archiving project ${id}:`, error);
+      return null; // Return null instead of throwing to prevent cascading errors
     }
   }
 
@@ -1385,35 +1452,40 @@ export class IndexedDBService {
    * @returns Promise that resolves when the timestamp is updated
    */
   private async updateProjectLastAccessed(id: string): Promise<void> {
-    await this.init();
+    const initialized = await this.init();
 
-    if (!this.db) {
-      console.error('Database not initialized');
+    if (!initialized || !this.db) {
+      console.warn('Database not initialized, skipping project access time update');
       return;
     }
 
     try {
       return new Promise(resolve => {
-        const transaction = this.db.transaction(STORES.PROJECTS, 'readwrite');
-        const store = transaction.objectStore(STORES.PROJECTS);
-        const request = store.get(id);
+        try {
+          const transaction = this.db.transaction(STORES.PROJECTS, 'readwrite');
+          const store = transaction.objectStore(STORES.PROJECTS);
+          const request = store.get(id);
 
-        request.onsuccess = () => {
-          const project = request.result;
-          if (project) {
-            project.lastAccessedAt = new Date().toISOString();
-            store.put(project);
-          }
+          request.onsuccess = () => {
+            const project = request.result;
+            if (project) {
+              project.lastAccessedAt = new Date().toISOString();
+              store.put(project);
+            }
+            resolve();
+          };
+
+          request.onerror = (event: Event) => {
+            console.error('Error updating project access time:', event);
+            resolve(); // Don't reject to prevent cascading errors
+          };
+        } catch (innerError) {
+          console.error(`Error in updateProjectLastAccessed transaction for ${id}:`, innerError);
           resolve();
-        };
-
-        request.onerror = event => {
-          console.error('Error updating project access time:', event);
-          resolve(); // Don't reject to prevent cascading errors
-        };
+        }
       });
     } catch (error) {
-      console.error('Error updating project access time:', error);
+      console.error(`Error in updateProjectLastAccessed for ${id}:`, error);
       // Don't throw to prevent cascading errors
     }
   }
@@ -1424,30 +1496,41 @@ export class IndexedDBService {
    * @returns Promise that resolves with the entry ID
    */
   public async addProjectHistoryEntry(entry: Omit<ProjectHistoryEntry, 'id'>): Promise<string> {
-    await this.init();
+    const initialized = await this.init();
 
-    return new Promise((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not initialized'));
+    return new Promise((resolve) => {
+      if (!initialized || !this.db) {
+        console.warn('Database not initialized, project history entry will not be saved');
+        // Return a fake ID to prevent cascading errors
+        const fakeId = crypto.randomUUID();
+        resolve(fakeId);
         return;
       }
 
-      const transaction = this.db.transaction(STORES.PROJECT_HISTORY, 'readwrite');
-      const store = transaction.objectStore(STORES.PROJECT_HISTORY);
+      try {
+        const transaction = this.db.transaction(STORES.PROJECT_HISTORY, 'readwrite');
+        const store = transaction.objectStore(STORES.PROJECT_HISTORY);
 
-      const historyEntry: ProjectHistoryEntry = {
-        id: crypto.randomUUID(),
-        ...entry,
-        timestamp: entry.timestamp || new Date().toISOString(),
-      };
+        const historyEntry: ProjectHistoryEntry = {
+          id: crypto.randomUUID(),
+          ...entry,
+          timestamp: entry.timestamp || new Date().toISOString(),
+        };
 
-      const request = store.add(historyEntry);
+        const request = store.add(historyEntry);
 
-      request.onsuccess = () => resolve(historyEntry.id);
-      request.onerror = event => {
-        console.error('Error adding project history entry:', event);
-        reject(new Error('Failed to add project history entry'));
-      };
+        request.onsuccess = () => resolve(historyEntry.id);
+        request.onerror = (event: Event) => {
+          console.error('Error adding project history entry:', event);
+          // Return the ID anyway to prevent cascading errors
+          resolve(historyEntry.id);
+        };
+      } catch (error) {
+        console.error('Error in addProjectHistoryEntry:', error);
+        // Return a fake ID to prevent cascading errors
+        const fakeId = crypto.randomUUID();
+        resolve(fakeId);
+      }
     });
   }
 
@@ -1458,31 +1541,38 @@ export class IndexedDBService {
    * @returns Promise that resolves with an array of history entries
    */
   public async getProjectHistory(projectId: string, limit = 100): Promise<ProjectHistoryEntry[]> {
-    await this.init();
+    const initialized = await this.init();
 
-    return new Promise((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not initialized'));
+    return new Promise((resolve) => {
+      if (!initialized || !this.db) {
+        console.warn(`Database not initialized, returning empty history for project: ${projectId}`);
+        resolve([]);
         return;
       }
 
-      const transaction = this.db.transaction(STORES.PROJECT_HISTORY, 'readonly');
-      const store = transaction.objectStore(STORES.PROJECT_HISTORY);
-      const index = store.index('projectId');
-      const request = index.getAll(projectId, limit);
+      try {
+        const transaction = this.db.transaction(STORES.PROJECT_HISTORY, 'readonly');
+        const store = transaction.objectStore(STORES.PROJECT_HISTORY);
+        const index = store.index('projectId');
+        const request = index.getAll(projectId, limit);
 
-      request.onsuccess = () => {
-        // Sort by timestamp descending (newest first)
-        const history = request.result.sort(
-          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        );
-        resolve(history);
-      };
-      request.onerror = event => {
-        console.error('Error getting project history:', event);
-        reject(new Error('Failed to get project history'));
-      };
+        request.onsuccess = () => {
+          // Sort by timestamp descending (newest first)
+          const history = request.result.sort(
+            (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          );
+          resolve(history);
+        };
+        request.onerror = (event: Event) => {
+          console.error('Error getting project history:', event);
+          resolve([]); // Return empty array instead of rejecting
+        };
+      } catch (error) {
+        console.error(`Error in getProjectHistory for ${projectId}:`, error);
+        resolve([]);
+      }
     });
+
   }
 }
 

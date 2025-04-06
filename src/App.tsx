@@ -133,7 +133,15 @@ const AppWithTheme = () => {
   // Initialize services
   useEffect(() => {
     // Initialize IndexedDB
-    indexedDBService.init().catch(error => {
+    indexedDBService.init().then(initialized => {
+      if (!initialized) {
+        console.warn('IndexedDB initialization failed, some features may not work properly');
+        loggerService.warn('IndexedDB initialization failed, some features may not work properly');
+      } else {
+        console.log('IndexedDB initialized successfully in App');
+        loggerService.info('IndexedDB initialized successfully in App');
+      }
+    }).catch(error => {
       console.error('Failed to initialize IndexedDB:', error);
       loggerService.error('Failed to initialize IndexedDB', error);
     });
