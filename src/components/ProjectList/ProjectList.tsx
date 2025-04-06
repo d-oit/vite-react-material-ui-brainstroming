@@ -8,6 +8,8 @@ import {
   CloudUpload as CloudUploadIcon,
   Share as ShareIcon,
 } from '@mui/icons-material';
+
+import ProjectCreateForm from '../Project/ProjectCreateForm';
 import {
   Box,
   Typography,
@@ -37,6 +39,7 @@ import { useNavigate } from 'react-router-dom';
 
 import projectService from '../../services/ProjectService';
 import type { Project } from '../../types';
+import { ProjectTemplate } from '../../types/project';
 
 interface ProjectListProps {
   onCreateProject?: (project: Project) => void;
@@ -76,17 +79,13 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
     loadProjects();
   }, []);
 
-  const handleCreateProject = async () => {
-    if (!newProjectName.trim()) return;
-
+  const handleCreateProject = async (name: string, description: string, template: ProjectTemplate) => {
     try {
       setLoading(true);
-      const newProject = await projectService.createProject(newProjectName, newProjectDescription);
+      const newProject = await projectService.createProject(name, description, template);
 
       setProjects([newProject, ...projects]);
       setCreateDialogOpen(false);
-      setNewProjectName('');
-      setNewProjectDescription('');
 
       if (onCreateProject) {
         onCreateProject(newProject);
@@ -299,48 +298,19 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
       )}
 
       {/* Create Project Dialog */}
-      <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)}>
-        <DialogTitle>Create New Project</DialogTitle>
+      <Dialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogContent>
-          <DialogContentText>
-            Enter the details for your new brainstorming project.
-          </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="name"
-            label="Project Name"
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={newProjectName}
-            onChange={e => setNewProjectName(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            margin="dense"
-            id="description"
-            label="Description"
-            type="text"
-            fullWidth
-            variant="outlined"
-            multiline
-            rows={3}
-            value={newProjectDescription}
-            onChange={e => setNewProjectDescription(e.target.value)}
+          <ProjectCreateForm
+            onSubmit={handleCreateProject}
+            onCancel={() => setCreateDialogOpen(false)}
+            loading={loading}
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
-          <Button
-            onClick={handleCreateProject}
-            variant="contained"
-            color="primary"
-            disabled={!newProjectName.trim()}
-          >
-            Create
-          </Button>
-        </DialogActions>
       </Dialog>
 
       {/* Confirmation Dialog */}

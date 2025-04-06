@@ -1,5 +1,21 @@
 import type { Node, Edge } from './models';
 
+export enum ProjectTemplate {
+  SOFTWARE_DEVELOPMENT = 'software_development',
+  MARKETING_CAMPAIGN = 'marketing_campaign',
+  RESEARCH_PROJECT = 'research_project',
+  BUSINESS_PLAN = 'business_plan',
+  CUSTOM = 'custom'
+}
+
+export interface SyncSettings {
+  enableS3Sync: boolean;
+  syncFrequency: 'manual' | 'onSave' | 'interval';
+  intervalMinutes?: number;
+  lastSyncedAt?: string;
+  s3Path?: string;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -12,6 +28,9 @@ export interface Project {
   isArchived?: boolean;
   currentCommitId?: string;
   commits?: GitCommit[];
+  template?: ProjectTemplate;
+  syncSettings?: SyncSettings;
+  isTemplate?: boolean;
 }
 
 export interface GitCommit {
@@ -44,11 +63,16 @@ export function createEmptyProject(id: string): Project {
     updatedAt: new Date().toISOString(),
     version: DEFAULT_PROJECT_VERSION,
     isArchived: false,
+    template: ProjectTemplate.CUSTOM,
+    syncSettings: {
+      enableS3Sync: false,
+      syncFrequency: 'manual',
+    },
   };
 }
 
 export function isValidProject(project: unknown): project is Project {
-  return (
+  const basicValidation = (
     typeof project === 'object' &&
     project !== null &&
     'id' in project &&
@@ -58,6 +82,36 @@ export function isValidProject(project: unknown): project is Project {
     'version' in project &&
     typeof (project as Project).version === 'number'
   );
+
+  if (!basicValidation) return false;
+
+  // Validate template if present
+  if ('template' in project && project.template !== undefined) {
+    const templateValue = (project as Project).template;
+    if (templateValue !== undefined) {
+      const validTemplates = Object.values(ProjectTemplate);
+      if (!validTemplates.includes(templateValue)) {
+        return false;
+      }
+    }
+  }
+
+  // Validate syncSettings if present
+  if ('syncSettings' in project && project.syncSettings !== undefined) {
+    const syncSettings = (project as Project).syncSettings;
+    if (
+      typeof syncSettings !== 'object' ||
+      syncSettings === null ||
+      !('enableS3Sync' in syncSettings) ||
+      !('syncFrequency' in syncSettings) ||
+      typeof syncSettings.enableS3Sync !== 'boolean' ||
+      !['manual', 'onSave', 'interval'].includes(syncSettings.syncFrequency)
+    ) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 export function normalizeProjectVersion(version: string | number): number {

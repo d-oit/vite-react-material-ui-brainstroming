@@ -222,6 +222,7 @@ const AppWithTheme = () => {
                   <SettingsPage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
                 }
               />
+              {/* Removed standalone brainstorming route - now using quick project creation */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
 

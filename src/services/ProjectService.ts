@@ -1,4 +1,6 @@
+import { createProjectFromTemplate, projectTemplates } from '../data/projectTemplates';
 import type { Project, ProjectHistoryEntry } from '../types';
+import { ProjectTemplate } from '../types/project';
 // These types are used in the Project type
 // import { Node, Edge } from '../types';
 
@@ -49,22 +51,17 @@ export class ProjectService {
    * Create a new project
    * @param name Project name
    * @param description Project description
+   * @param template Optional template to use
    * @returns Promise that resolves with the newly created project
    */
-  public async createProject(name: string, description: string): Promise<Project> {
-    const now = new Date().toISOString();
-    const project: Project = {
-      id: crypto.randomUUID(),
-      name,
-      description,
-      createdAt: now,
-      updatedAt: now,
-      lastAccessedAt: now,
-      version: '0.1.0',
-      nodes: [],
-      edges: [],
-      isArchived: false,
-    };
+  public async createProject(
+    name: string,
+    description: string,
+    template: ProjectTemplate = ProjectTemplate.CUSTOM
+  ): Promise<Project> {
+    // Create project from template
+    const project = createProjectFromTemplate(template, name, description);
+    const now = project.createdAt;
 
     try {
       // Save to IndexedDB
@@ -95,11 +92,22 @@ export class ProjectService {
   /**
    * Get all projects
    * @param includeArchived Whether to include archived projects
+   * @param includeTemplates Whether to include template projects
    * @returns Promise that resolves with an array of projects
    */
-  public async getProjects(includeArchived: boolean = false): Promise<Project[]> {
+  public async getProjects(
+    includeArchived: boolean = false,
+    includeTemplates: boolean = false
+  ): Promise<Project[]> {
     try {
-      return await indexedDBService.getAllProjects(includeArchived);
+      const projects = await indexedDBService.getAllProjects(includeArchived);
+
+      // Filter out templates if not requested
+      if (!includeTemplates) {
+        return projects.filter(project => !project.isTemplate);
+      }
+
+      return projects;
     } catch (error) {
       loggerService.error(
         'Error getting projects',
@@ -333,6 +341,21 @@ export class ProjectService {
   }
 
   /**
+   * Get available project templates
+   * @returns Array of project templates
+   */
+  public getProjectTemplates(): Project[] {
+    return Object.values(projectTemplates).map(template => ({
+      ...template,
+      id: `template-${template.template}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      version: 1,
+      isTemplate: true,
+    })) as Project[];
+  }
+
+  /**
    * Get project history
    * @param id Project ID
    * @param limit Maximum number of entries to return
@@ -354,15 +377,17 @@ export class ProjectService {
    * Create a project with offline support
    * @param name Project name
    * @param description Project description
+   * @param template Optional template to use
    * @returns Promise that resolves with the newly created project
    */
   public async createProjectWithOfflineSupport(
     name: string,
-    description: string
+    description: string,
+    template: ProjectTemplate = ProjectTemplate.CUSTOM
   ): Promise<Project> {
     try {
       // Create the project locally
-      const project = await this.createProject(name, description);
+      const project = await this.createProject(name, description, template);
 
       // If offline, queue for sync when back online
       if (!offlineService.getOnlineStatus()) {

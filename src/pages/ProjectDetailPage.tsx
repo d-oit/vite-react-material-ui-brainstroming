@@ -1,4 +1,9 @@
-import { Save as SaveIcon, Chat as ChatIcon, Close as CloseIcon } from '@mui/icons-material';
+import {
+  Save as SaveIcon,
+  Chat as ChatIcon,
+  Close as CloseIcon,
+  Settings as SettingsIcon
+} from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -17,11 +22,12 @@ import {
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { BrainstormFlow } from '@/components/BrainstormFlow/BrainstormFlow';
-import { ChatInterface } from '@/components/Chat/ChatInterface';
-import { MainLayout } from '@/components/Layout/MainLayout';
-import { useProject } from '@/hooks/useProject';
-import type { Node, Edge } from '@/types';
+import { ChatInterface } from '../components/Chat/ChatInterface';
+import { MainLayout } from '../components/Layout/MainLayout';
+import ProjectBrainstormingSection from '../components/Project/ProjectBrainstormingSection';
+import ProjectSettingsSection from '../components/Project/ProjectSettingsSection';
+import { useProject } from '../hooks/useProject';
+import type { Node, Edge, Project } from '../types';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -71,9 +77,13 @@ export const ProjectDetailPage = () => {
       setNodes(updatedNodes);
       setEdges(updatedEdges);
 
-      // Update project with new nodes and edges
-      project.nodes = updatedNodes;
-      project.edges = updatedEdges;
+      // Create updated project with new nodes and edges
+      const updatedProject = {
+        ...project,
+        nodes: updatedNodes,
+        edges: updatedEdges,
+        updatedAt: new Date().toISOString()
+      };
 
       // Save project
       saveProject();
@@ -159,6 +169,7 @@ export const ProjectDetailPage = () => {
         <Tabs value={tabValue} onChange={handleTabChange} aria-label="project tabs">
           <Tab label="Overview" id="project-tab-0" />
           <Tab label="Brainstorm" id="project-tab-1" />
+          <Tab label="Settings" id="project-tab-2" />
         </Tabs>
       </Box>
 
@@ -174,9 +185,12 @@ export const ProjectDetailPage = () => {
       <TabPanel value={tabValue} index={1}>
         {isMobile ? (
           <>
-            <Box sx={{ height: 'calc(100vh - 300px)' }}>
-              <BrainstormFlow initialNodes={nodes} initialEdges={edges} onSave={handleSaveFlow} />
-            </Box>
+            <ProjectBrainstormingSection
+              project={project}
+              onSave={handleSaveFlow}
+              isSaving={isSaving}
+              error={error}
+            />
 
             <Drawer
               anchor="right"
@@ -203,7 +217,12 @@ export const ProjectDetailPage = () => {
         ) : (
           <Grid container spacing={2} sx={{ height: 'calc(100vh - 300px)' }}>
             <Grid item xs={chatOpen ? 8 : 12}>
-              <BrainstormFlow initialNodes={nodes} initialEdges={edges} onSave={handleSaveFlow} />
+              <ProjectBrainstormingSection
+                project={project}
+                onSave={handleSaveFlow}
+                isSaving={isSaving}
+                error={error}
+              />
             </Grid>
 
             {chatOpen && (
@@ -221,6 +240,32 @@ export const ProjectDetailPage = () => {
             )}
           </Grid>
         )}
+      </TabPanel>
+
+      <TabPanel value={tabValue} index={2}>
+        <ProjectSettingsSection
+          project={project}
+          onSave={(updatedProject: Project) => {
+            // Update the project in state
+            if (project) {
+              // Create a merged project with the updates
+              const mergedProject = {
+                ...project,
+                ...updatedProject,
+                updatedAt: new Date().toISOString()
+              };
+
+              // Update local state
+              setNodes(mergedProject.nodes);
+              setEdges(mergedProject.edges);
+
+              // Save project
+              saveProject();
+            }
+          }}
+          isSaving={isSaving}
+          error={error}
+        />
       </TabPanel>
 
       <Box

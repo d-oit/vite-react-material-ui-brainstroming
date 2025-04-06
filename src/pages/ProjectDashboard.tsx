@@ -1,6 +1,7 @@
 import { Dashboard as DashboardIcon, Archive as ArchiveIcon } from '@mui/icons-material';
 import { Box, Container, Paper, Tabs, Tab, Typography, Divider } from '@mui/material';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { AppShell } from '../components/Layout/AppShell';
 import ProjectArchivePanel from '../components/ProjectArchive/ProjectArchivePanel';

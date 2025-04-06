@@ -1,9 +1,12 @@
 import { Dashboard as DashboardIcon, FolderOpen as ProjectsIcon } from '@mui/icons-material';
-import { Box, Typography, Button, Container, Stack } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Box, Typography, Button, Container, Stack, CircularProgress } from '@mui/material';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { AppShell } from '../components/Layout/AppShell';
 import { useI18n } from '../contexts/I18nContext';
+import projectService from '../services/ProjectService';
+import { ProjectTemplate } from '../types/project';
 
 interface HomePageProps {
   onThemeToggle: () => void;
@@ -12,6 +15,25 @@ interface HomePageProps {
 
 export const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
   const { t } = useI18n();
+  const navigate = useNavigate();
+  const [isCreating, setIsCreating] = useState(false);
+
+  const handleQuickBrainstorm = async () => {
+    try {
+      setIsCreating(true);
+      const projectName = `Quick Brainstorm - ${new Date().toLocaleString()}`;
+      const project = await projectService.createProject(
+        projectName,
+        'A quick brainstorming session',
+        ProjectTemplate.CUSTOM
+      );
+      navigate(`/projects/${project.id}`);
+    } catch (error) {
+      console.error('Error creating quick brainstorm project:', error);
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   return (
     <AppShell title={t('app.title')} onThemeToggle={onThemeToggle} isDarkMode={isDarkMode}>
@@ -41,11 +63,18 @@ export const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
               variant="outlined"
               color="primary"
               size="large"
-              component={Link}
-              to="/brainstorm"
+              onClick={handleQuickBrainstorm}
               startIcon={<DashboardIcon />}
+              disabled={isCreating}
             >
-              Quick Brainstorm
+              {isCreating ? (
+                <>
+                  <CircularProgress size={24} color="inherit" sx={{ mr: 1 }} />
+                  Creating...
+                </>
+              ) : (
+                'Quick Brainstorm'
+              )}
             </Button>
           </Stack>
         </Box>
