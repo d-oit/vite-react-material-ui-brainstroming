@@ -57,7 +57,18 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
 
     // Use node-specific size if available, otherwise use default
     const size = data.size || nodePreferences.defaultSize;
-    const sizeConfig = nodePreferences.nodeSizes[size];
+
+    // Ensure we have a valid size value
+    const validSize = ['small', 'medium', 'large'].includes(size) ? size : 'medium';
+
+    // Get the size configuration from node preferences
+    const sizeConfig = nodePreferences.nodeSizes[validSize];
+
+    if (!sizeConfig) {
+      console.error('Invalid size configuration for node:', { size, validSize, nodePreferences });
+      // Fallback to medium if sizeConfig is undefined
+      return { width: 200, fontSize: 1, padding: 1, iconSize: 'small', chipSize: 'small', maxContentLines: 4 };
+    }
 
     // Get viewport width for responsive sizing
     const viewportWidth = window.innerWidth;
@@ -97,9 +108,16 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
   // Log node size calculation for debugging
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
-      console.debug('Node size calculated:', { nodeSize, isMobile, nodeType, id });
+      console.debug('Node size calculated:', {
+        nodeSize,
+        isMobile,
+        nodeType,
+        id,
+        dataSize: data.size,
+        defaultSize: nodePreferences?.defaultSize
+      });
     }
-  }, [nodeSize, isMobile, nodeType, id]);
+  }, [nodeSize, isMobile, nodeType, id, data.size, nodePreferences]);
 
   // Determine if content should be collapsed based on screen size and content length
   const shouldCollapseContent = useMemo(() => {

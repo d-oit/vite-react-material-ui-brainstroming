@@ -537,9 +537,9 @@ const FlowContent = ({
             setNodeEditOpen(false);
             setSelectedNode(null);
           }}
-          node={selectedNode}
+          initialData={selectedNode.data}
+          initialType={selectedNode.type as NodeType}
           onSave={handleNodeEdit}
-          onDelete={() => handleNodeDeleteRequest(selectedNode.id)}
         />
       )}
 
