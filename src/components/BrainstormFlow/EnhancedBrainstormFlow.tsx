@@ -55,14 +55,19 @@ import { MemoizedChatPanel } from '../Chat/ChatPanel';
 import CustomNode from './CustomNode';
 import { MemoizedNodeEditDialog } from './NodeEditDialog';
 
-// Lazy load React Flow components
-const ReactFlowModule = lazy(() =>
-  import('reactflow').then(module => {
-    // Also import the CSS
-    import('reactflow/dist/style.css');
-    return { default: module.default };
-  })
-);
+// Lazy load React Flow components and CSS with preloading hints
+const ReactFlowModule = lazy(() => {
+  // Add preload hints for better performance
+  const cssLink = document.createElement('link');
+  cssLink.rel = 'preload';
+  cssLink.as = 'style';
+  cssLink.href = 'reactflow/dist/style.css';
+  document.head.appendChild(cssLink);
+
+  return Promise.all([import('reactflow'), import('reactflow/dist/style.css')]).then(
+    ([module]) => ({ default: module.default })
+  );
+});
 
 // Lazy load the ReactFlow components
 const ReactFlowComponentsLoader = lazy(() =>
@@ -134,6 +139,11 @@ const EnhancedBrainstormFlow = (props: EnhancedBrainstormFlowProps) => {
 export { EnhancedBrainstormFlow };
 
 // This is the inner component that uses the ReactFlow hooks
+// Split into smaller components for better maintainability
+const FlowToolbar = lazy(() => import('./FlowToolbar'));
+const FlowControls = lazy(() => import('./FlowControls'));
+const FlowChat = lazy(() => import('./FlowChat'));
+
 const FlowContent = ({
   initialNodes = [],
   initialEdges = [],
@@ -149,17 +159,26 @@ const FlowContent = ({
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const isInitialized = useRef(false);
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
-  // Initialize state variables
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [edges, setEdges] = useState<any[]>(initialEdges || []);
-  const [nodeEditOpen, setNodeEditOpen] = useState(false);
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'info'>('info');
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [nodeToDelete, setNodeToDelete] = useState<string | null>(null);
-  const [showChat, setShowChat] = useState(false);
+
+  // Use reducers for complex state management
+  const [flowState, dispatch] = useReducer(flowReducer, {
+    nodes: [],
+    edges: initialEdges || [],
+    nodeEditOpen: false,
+    selectedNode: null,
+    snackbarOpen: false,
+    snackbarMessage: '',
+    snackbarSeverity: 'info' as 'success' | 'error' | 'info',
+    deleteConfirmOpen: false,
+    nodeToDelete: null,
+    showChat: false,
+  });
+
+  // Use virtualization for large node lists
+  const virtualizedNodes = useVirtualization(flowState.nodes, {
+    itemHeight: 100,
+    overscan: 5,
+  });
 
   // These will be initialized when ReactFlow is loaded
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

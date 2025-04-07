@@ -1,4 +1,7 @@
-import type { Node, Edge } from './models';
+import { z } from 'zod';
+
+import type { Node, Edge } from '.';
+
 
 export enum ProjectTemplate {
   SOFTWARE_DEVELOPMENT = 'software_development',
@@ -8,118 +11,110 @@ export enum ProjectTemplate {
   CUSTOM = 'custom',
 }
 
-export interface SyncSettings {
-  enableS3Sync: boolean;
-  syncFrequency: 'manual' | 'onSave' | 'interval';
-  intervalMinutes?: number;
-  lastSyncedAt?: string;
-  s3Path?: string;
+export const SyncSettingsSchema = z.object({
+  enableS3Sync: z.boolean(),
+  syncFrequency: z.enum(['manual', 'onSave', 'interval']),
+  intervalMinutes: z.number().optional(),
+  lastSyncedAt: z.string().optional(),
+  s3Path: z.string().optional(),
+});
+
+export type SyncSettings = z.infer<typeof SyncSettingsSchema>;
+
+export const ProjectSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  version: z.string(),
+  template: z.nativeEnum(ProjectTemplate),
+  nodes: z.array(z.custom<Node>()),
+  edges: z.array(z.custom<Edge>()),
+  syncSettings: SyncSettingsSchema,
+});
+
+export type Project = z.infer<typeof ProjectSchema>;
+
+export interface TemplateConfig {
+  nodeTypes: string[];
+  defaultNodes: Node[];
+  defaultEdges: Edge[];
+  suggestedWorkflow: string[];
+  guidance: string[];
 }
 
-export interface Project {
-  id: string;
-  name: string;
-  description: string;
-  nodes: Node[];
-  edges: Edge[];
-  createdAt: string;
-  updatedAt: string;
-  version: number;
-  isArchived?: boolean;
-  isPinned?: boolean;
-  currentCommitId?: string;
-  commits?: GitCommit[];
-  template?: ProjectTemplate;
-  syncSettings?: SyncSettings;
-  isTemplate?: boolean;
-}
-
-export interface GitCommit {
-  id: string;
-  message: string;
-  timestamp: string;
-  nodes: Node[];
-  edges: Edge[];
-  parentId?: string;
-}
-
-export interface ProjectHistoryEntry {
-  id: string;
-  projectId: string;
-  action: 'create' | 'update' | 'delete' | 'archive' | 'restore';
-  timestamp: string;
-  details: Record<string, unknown>;
-}
-
-export const DEFAULT_PROJECT_VERSION = 1;
-
-export function createEmptyProject(id: string): Project {
-  return {
-    id,
-    name: 'New Project',
-    description: '',
-    nodes: [],
-    edges: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    version: DEFAULT_PROJECT_VERSION,
-    isArchived: false,
-    isPinned: false,
-    template: ProjectTemplate.CUSTOM,
-    syncSettings: {
-      enableS3Sync: false,
-      syncFrequency: 'manual',
-    },
-  };
-}
-
-export function isValidProject(project: unknown): project is Project {
-  const basicValidation =
-    typeof project === 'object' &&
-    project !== null &&
-    'id' in project &&
-    'name' in project &&
-    'nodes' in project &&
-    'edges' in project &&
-    'version' in project &&
-    typeof (project as Project).version === 'number';
-
-  if (!basicValidation) return false;
-
-  // Validate template if present
-  if ('template' in project && project.template !== undefined) {
-    const templateValue = (project as Project).template;
-    if (templateValue !== undefined) {
-      const validTemplates = Object.values(ProjectTemplate);
-      if (!validTemplates.includes(templateValue)) {
-        return false;
-      }
-    }
-  }
-
-  // Validate syncSettings if present
-  if ('syncSettings' in project && project.syncSettings !== undefined) {
-    const syncSettings = (project as Project).syncSettings;
-    if (
-      typeof syncSettings !== 'object' ||
-      syncSettings === null ||
-      !('enableS3Sync' in syncSettings) ||
-      !('syncFrequency' in syncSettings) ||
-      typeof syncSettings.enableS3Sync !== 'boolean' ||
-      !['manual', 'onSave', 'interval'].includes(syncSettings.syncFrequency)
-    ) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-export function normalizeProjectVersion(version: string | number): number {
-  if (typeof version === 'string') {
-    // Convert semantic version to number (e.g., "1.0.0" -> 1)
-    const match = /^(\d+)/.exec(version);
-    return match ? Number(match[1]) : DEFAULT_PROJECT_VERSION;
-  }
-  return version;
-}
+export const templateConfigs: Record<ProjectTemplate, TemplateConfig> = {
+  [ProjectTemplate.SOFTWARE_DEVELOPMENT]: {
+    nodeTypes: ['requirement', 'feature', 'task', 'bug', 'test'],
+    defaultNodes: [],
+    defaultEdges: [],
+    suggestedWorkflow: [
+      'Define requirements',
+      'Break down into features',
+      'Create tasks',
+      'Add test cases',
+    ],
+    guidance: [
+      'Start with high-level requirements',
+      'Use color coding for priority',
+      'Link related features',
+    ],
+  },
+  // Add other template configurations...
+  [ProjectTemplate.MARKETING_CAMPAIGN]: {
+    nodeTypes: ['goal', 'strategy', 'tactic', 'metric'],
+    defaultNodes: [],
+    defaultEdges: [],
+    suggestedWorkflow: [
+      'Set campaign goals',
+      'Define strategies',
+      'Plan tactics',
+      'Establish metrics',
+    ],
+    guidance: [
+      'Focus on measurable objectives',
+      'Connect strategies to goals',
+      'Include timeline considerations',
+    ],
+  },
+  [ProjectTemplate.RESEARCH_PROJECT]: {
+    nodeTypes: ['hypothesis', 'method', 'data', 'conclusion'],
+    defaultNodes: [],
+    defaultEdges: [],
+    suggestedWorkflow: [
+      'Form hypothesis',
+      'Design methodology',
+      'Plan data collection',
+      'Draft analysis approach',
+    ],
+    guidance: [
+      'Start with clear research questions',
+      'Consider variables carefully',
+      'Plan for data validation',
+    ],
+  },
+  [ProjectTemplate.BUSINESS_PLAN]: {
+    nodeTypes: ['objective', 'strategy', 'resource', 'milestone'],
+    defaultNodes: [],
+    defaultEdges: [],
+    suggestedWorkflow: [
+      'Define business objectives',
+      'Outline strategies',
+      'Identify resources',
+      'Set milestones',
+    ],
+    guidance: [
+      'Include market analysis',
+      'Consider financial projections',
+      'Plan for contingencies',
+    ],
+  },
+  [ProjectTemplate.CUSTOM]: {
+    nodeTypes: ['custom'],
+    defaultNodes: [],
+    defaultEdges: [],
+    suggestedWorkflow: ['Define custom workflow'],
+    guidance: ['Customize as needed'],
+  },
+};

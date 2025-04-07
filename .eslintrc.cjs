@@ -1,3 +1,4 @@
+
 /** @type {import('eslint').Linter.Config} */
 module.exports = {
   root: true,
@@ -16,7 +17,6 @@ module.exports = {
     'plugin:import/typescript',
     'plugin:security/recommended',
     'plugin:testing-library/react',
-    'plugin:jest-dom/recommended',
     'prettier',
   ],
 
@@ -37,8 +37,7 @@ module.exports = {
     'import',
     'security',
     'prettier',
-    'testing-library',
-    'jest-dom'
+    'testing-library'
   ],
   rules: {
     // React
@@ -62,6 +61,10 @@ module.exports = {
       argsIgnorePattern: '^_',
       varsIgnorePattern: '^_',
     }],
+    '@typescript-eslint/strict-boolean-expressions': 'error',
+    '@typescript-eslint/no-floating-promises': 'error',
+    '@typescript-eslint/await-thenable': 'error',
+    '@typescript-eslint/no-misused-promises': 'error',
     '@typescript-eslint/explicit-function-return-type': ['off', {
       allowExpressions: true,
       allowTypedFunctionExpressions: true,
@@ -87,11 +90,14 @@ module.exports = {
     // Security
     'security/detect-object-injection': 'warn',
     'security/detect-unsafe-regex': 'warn',
+    'security/detect-possible-timing-attacks': 'warn',
+    'security/detect-non-literal-regexp': 'warn',
 
     // Prettier
     'prettier/prettier': ['error', {
-      endOfLine: 'lf'
+      endOfLine: 'auto'
     }],
+    'linebreak-style': ['error', 'unix'],
   },
   settings: {
     react: {
@@ -126,7 +132,7 @@ module.exports = {
     {
       files: ['**/__tests__/**/*', '**/*.{test,spec}.{ts,tsx}'],
       excludedFiles: ['e2e/**/*.{ts,tsx}'],
-      extends: ['plugin:testing-library/react', 'plugin:jest-dom/recommended'],
+      extends: ['plugin:testing-library/react'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',

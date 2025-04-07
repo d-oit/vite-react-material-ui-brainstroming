@@ -83,7 +83,8 @@ class PerformanceMonitoringService {
    * @param additionalMetadata Additional metadata to add
    * @returns The duration of the metric in milliseconds
    */
-  public endMeasure(id: string,
+  public endMeasure(
+    id: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     additionalMetadata?: Record<string, any>
   ): number {

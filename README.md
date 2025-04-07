@@ -6,6 +6,7 @@ A fully responsive PWA for structured brainstorming with offline-first capabilit
 
 ## Features
 
+- **Project-Based Brainstorming**: Organize your ideas within project contexts with customizable templates
 - **React Flow Integration**: Visualize brainstorming workflows with draggable and editable nodes
 - **Material UI v7**: Modern UI components with dark/light mode support
 - **Git History Viewer**: Track changes and versions of your projects
@@ -19,11 +20,12 @@ A fully responsive PWA for structured brainstorming with offline-first capabilit
 
 ## Tech Stack
 
-- Vite + React 18 + TypeScript
+- Vite 6 + React 18 + TypeScript
 - Material UI v7
-- React Flow
+- React Flow for node-based visualization
+- Framer Motion for smooth animations
 - AWS SDK for S3 integration
-- OpenRouter API for LLM chat
+- OpenAI/OpenRouter API for LLM chat
 - Workbox for PWA and offline support
 - Vitest for unit testing
 - Playwright for E2E testing
@@ -32,7 +34,7 @@ A fully responsive PWA for structured brainstorming with offline-first capabilit
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js (v20 or higher)
 - npm or yarn
 
 ### Installation
@@ -40,8 +42,8 @@ A fully responsive PWA for structured brainstorming with offline-first capabilit
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/d.o.it.brainstorming.git
-   cd d.o.it.brainstorming
+   git clone https://github.com/d-oit/vite-react-material-ui-brainstroming.git
+   cd vite-react-material-ui-brainstroming
    ```
 
 2. Install dependencies:
@@ -50,11 +52,11 @@ A fully responsive PWA for structured brainstorming with offline-first capabilit
    npm install
    ```
 
-3. Create a `.env` file in the root directory with the following variables:
+3. Create a `.env` file in the root directory with the following variables (or copy from `.env.example`):
 
    ```env
    VITE_S3_ENDPOINT=your_s3_endpoint_here
-   VITE_OPENROUTER_API_URL=your_openrouter_api_url_here
+   VITE_OPENROUTER_API_URL=https://openrouter.ai/api/v1
    VITE_PROJECT_VERSION=0.1.0
    VITE_SKIP_DELETE_CONFIRMATION=false
    ```
@@ -135,25 +137,34 @@ npm run format:check
 
 This project uses Husky and lint-staged to automatically lint and format code before commits. This ensures that all committed code meets the project's quality standards.
 
+## Project Structure
+
+- **Project-Based Organization**: All brainstorming activities are organized within projects
+- **Template System**: Choose from predefined templates or create custom ones
+- **Version Control**: Track changes to your projects with built-in history
+- **Import/Export**: Share your projects or back them up locally
+
 ## PWA Features
 
 - Installable on desktop and mobile devices
 - Works offline with cached data
 - Background sync for updates when online
-- Push notifications (coming soon)
+- Optimized caching strategies for assets and API responses
+- Responsive design for all screen sizes
 
 ## Accessibility Features
 
-- Keyboard navigation support
+- Keyboard navigation support with shortcuts
 - ARIA attributes for screen readers
-- Focus management
-- Color contrast compliance
-- Skip links for keyboard users
+- Focus management and skip links
+- Color contrast compliance (WCAG 2.2 AA)
+- Screen reader announcements for dynamic content
 
 ## Performance Optimizations
 
 - Code splitting and lazy loading
 - React.memo for performance-critical components
-- Optimized React Flow rendering
+- Optimized React Flow rendering with virtualization
 - Efficient state management
 - Responsive image loading
+- Browser caching strategies

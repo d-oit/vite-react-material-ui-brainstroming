@@ -18,7 +18,7 @@ import { useParams } from 'react-router-dom';
 
 import { ChatInterface } from '../components/Chat/ChatInterface';
 import { AppShell } from '../components/Layout/AppShell';
-import ProjectBrainstormingSection from '../components/Project/ProjectBrainstormingSection';
+import { ProjectBrainstormingSection } from '../components/Project/ProjectBrainstormingSection';
 import ProjectSettingsSection from '../components/Project/ProjectSettingsSection';
 import { useProject } from '../hooks/useProject';
 import type { Node, Edge, Project } from '../types';
@@ -60,17 +60,17 @@ const ProjectDetailPage = () => {
   });
 
   useEffect(() => {
-    if (project) {
+    if (project !== null && project !== undefined) {
       setNodes(project.nodes);
       setEdges(project.edges);
     }
   }, [project]);
 
   const handleSaveFlow = (updatedNodes: Node[], updatedEdges: Edge[]) => {
-    if (project) {
+    if (project !== null && project !== undefined) {
       setNodes(updatedNodes);
       setEdges(updatedEdges);
-
+  
       // Create updated project with new nodes and edges
       const _updatedProject = {
         ...project,
@@ -80,12 +80,12 @@ const ProjectDetailPage = () => {
       };
 
       // Save project
-      saveProject();
+      void saveProject();
     }
   };
 
   const handleCreateNewVersion = async () => {
-    if (project) {
+    if (project !== null && project !== undefined) {
       await createNewVersion();
     }
   };
@@ -112,13 +112,17 @@ const ProjectDetailPage = () => {
     );
   }
 
-  if (error || !project) {
+  if (
+    (error !== null && error !== undefined && error !== '') ||
+    project === null ||
+    project === undefined
+  ) {
     return (
       <AppShell title="Project" onThemeToggle={() => {}} isDarkMode={theme.palette.mode === 'dark'}>
         <Container maxWidth="lg">
           <Paper sx={{ p: 3 }}>
             <Typography color="error" variant="h6">
-              Error: {error || 'Project not found'}
+              Error: {error !== null && error !== undefined && error !== '' ? error : 'Project not found'}
             </Typography>
           </Paper>
         </Container>
@@ -146,13 +150,21 @@ const ProjectDetailPage = () => {
           <Button
             variant="outlined"
             startIcon={<SaveIcon />}
-            onClick={() => saveProject()}
+            onClick={() => {
+              void saveProject();
+            }}
             disabled={isSaving}
           >
             {isSaving ? 'Saving...' : 'Save'}
           </Button>
 
-          <Button variant="outlined" onClick={handleCreateNewVersion} disabled={isSaving}>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              void handleCreateNewVersion();
+            }}
+            disabled={isSaving}
+          >
             New Version
           </Button>
 
@@ -183,7 +195,11 @@ const ProjectDetailPage = () => {
             Project Details
           </Typography>
           <Typography variant="body1">
-            {project.description || 'No description provided.'}
+            {project.description !== null &&
+            project.description !== undefined &&
+            project.description !== ''
+              ? project.description
+              : 'No description provided.'}
           </Typography>
         </Paper>
       </TabPanel>
@@ -192,10 +208,12 @@ const ProjectDetailPage = () => {
         {isMobile ? (
           <>
             <ProjectBrainstormingSection
-              project={project}
-              onSave={handleSaveFlow}
-              isSaving={isSaving}
-              error={error}
+              projectId={project.id}
+              template={project.template}
+              initialNodes={project.nodes}
+              initialEdges={project.edges}
+              syncSettings={project.syncSettings}
+              readOnly={isSaving}
             />
 
             <Drawer
@@ -224,10 +242,12 @@ const ProjectDetailPage = () => {
           <Box sx={{ display: 'flex', height: 'calc(100vh - 300px)' }}>
             <Box sx={{ flex: chatOpen ? '0 0 70%' : '1 1 100%', pr: chatOpen ? 2 : 0 }}>
               <ProjectBrainstormingSection
-                project={project}
-                onSave={handleSaveFlow}
-                isSaving={isSaving}
-                error={error}
+                projectId={project.id}
+                template={project.template}
+                initialNodes={project.nodes}
+                initialEdges={project.edges}
+                syncSettings={project.syncSettings}
+                readOnly={isSaving}
               />
             </Box>
 
@@ -253,20 +273,20 @@ const ProjectDetailPage = () => {
           project={project}
           onSave={(updatedProject: Project) => {
             // Update the project in state
-            if (project) {
+            if (project !== null && project !== undefined) {
               // Create a merged project with the updates
               const mergedProject = {
                 ...project,
                 ...updatedProject,
                 updatedAt: new Date().toISOString(),
               };
-
+  
               // Update local state
               setNodes(mergedProject.nodes);
               setEdges(mergedProject.edges);
 
               // Save project
-              saveProject();
+              void saveProject();
             }
           }}
           isSaving={isSaving}
@@ -299,7 +319,9 @@ const ProjectDetailPage = () => {
         <IconButton
           color="primary"
           aria-label="save"
-          onClick={() => saveProject()}
+          onClick={() => {
+            void saveProject();
+          }}
           disabled={isSaving}
           sx={{ bgcolor: 'background.paper' }}
         >
