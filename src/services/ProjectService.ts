@@ -9,6 +9,7 @@ import indexedDBService from './IndexedDBService';
 import loggerService from './LoggerService';
 import offlineService from './OfflineService';
 import s3Service from './S3Service';
+import performanceMonitoring, { PerformanceCategory } from '../utils/performanceMonitoring';
 
 /**
  * Service for managing projects
@@ -59,6 +60,11 @@ export class ProjectService {
     description: string,
     template: ProjectTemplate = ProjectTemplate.CUSTOM
   ): Promise<Project> {
+    const metricId = performanceMonitoring.startMeasure(
+      'ProjectService.createProject',
+      PerformanceCategory.DATA_LOADING,
+      { projectName: name, template }
+    );
     // Create project from template
     const project = createProjectFromTemplate(template, name, description);
     const now = project.createdAt;
@@ -86,6 +92,8 @@ export class ProjectService {
         error instanceof Error ? error : new Error(String(error))
       );
       throw new Error('Failed to create project');
+    } finally {
+      performanceMonitoring.endMeasure(metricId);
     }
   }
 
@@ -99,6 +107,11 @@ export class ProjectService {
     includeArchived: boolean = false,
     includeTemplates: boolean = false
   ): Promise<Project[]> {
+    const metricId = performanceMonitoring.startMeasure(
+      'ProjectService.getProjects',
+      PerformanceCategory.DATA_LOADING,
+      { includeArchived, includeTemplates }
+    );
     try {
       const projects = await indexedDBService.getAllProjects(includeArchived);
 
@@ -114,6 +127,8 @@ export class ProjectService {
         error instanceof Error ? error : new Error(String(error))
       );
       return [];
+    } finally {
+      performanceMonitoring.endMeasure(metricId);
     }
   }
 
@@ -123,6 +138,11 @@ export class ProjectService {
    * @returns Promise that resolves with the project or null if not found
    */
   public async getProject(id: string): Promise<Project | null> {
+    const metricId = performanceMonitoring.startMeasure(
+      'ProjectService.getProject',
+      PerformanceCategory.DATA_LOADING,
+      { projectId: id }
+    );
     try {
       const project = await indexedDBService.getProject(id);
 
@@ -142,6 +162,8 @@ export class ProjectService {
         error instanceof Error ? error : new Error(String(error))
       );
       return null;
+    } finally {
+      performanceMonitoring.endMeasure(metricId);
     }
   }
 
@@ -151,6 +173,11 @@ export class ProjectService {
    * @returns Promise that resolves with the updated project
    */
   public async updateProject(project: Project): Promise<Project> {
+    const metricId = performanceMonitoring.startMeasure(
+      'ProjectService.updateProject',
+      PerformanceCategory.DATA_LOADING,
+      { projectId: project.id, projectName: project.name }
+    );
     try {
       const existingProject = await indexedDBService.getProject(project.id);
 
@@ -182,6 +209,8 @@ export class ProjectService {
         error instanceof Error ? error : new Error(String(error))
       );
       throw new Error('Failed to update project');
+    } finally {
+      performanceMonitoring.endMeasure(metricId);
     }
   }
 
@@ -191,6 +220,11 @@ export class ProjectService {
    * @returns Promise that resolves when the project is deleted
    */
   public async deleteProject(id: string): Promise<void> {
+    const metricId = performanceMonitoring.startMeasure(
+      'ProjectService.deleteProject',
+      PerformanceCategory.DATA_LOADING,
+      { projectId: id }
+    );
     try {
       // Get the project first for history logging
       const project = await indexedDBService.getProject(id);
@@ -220,6 +254,8 @@ export class ProjectService {
         error instanceof Error ? error : new Error(String(error))
       );
       throw new Error('Failed to delete project');
+    } finally {
+      performanceMonitoring.endMeasure(metricId);
     }
   }
 
@@ -230,6 +266,11 @@ export class ProjectService {
    * @returns Promise that resolves with the updated project
    */
   public async archiveProject(id: string, archive: boolean): Promise<Project> {
+    const metricId = performanceMonitoring.startMeasure(
+      'ProjectService.archiveProject',
+      PerformanceCategory.DATA_LOADING,
+      { projectId: id, archive }
+    );
     try {
       const updatedProject = await indexedDBService.archiveProject(id, archive);
 
@@ -370,6 +411,8 @@ export class ProjectService {
         error instanceof Error ? error : new Error(String(error))
       );
       return [];
+    } finally {
+      performanceMonitoring.endMeasure(metricId);
     }
   }
 

@@ -11,13 +11,16 @@ import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import _OfflineFallback from './components/OfflineIndicator/OfflineFallback';
 import _OfflineIndicator from './components/OfflineIndicator/OfflineIndicator';
 import withOfflineFallback from './components/OfflineIndicator/withOfflineFallback';
+import PerformanceProfiler from './components/PerformanceProfiler';
 import CSPMeta from './components/Security/CSPMeta';
 import LoadingFallback from './components/UI/LoadingFallback';
 import { useI18n } from './contexts/I18nContext';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { ActionFeedbackProvider } from './contexts/ActionFeedbackContext';
 import indexedDBService from './services/IndexedDBService';
 import loggerService from './services/LoggerService';
 import offlineService from './services/OfflineService';
+import performanceMonitoring, { PerformanceCategory } from './utils/performanceMonitoring';
 
 // Lazy load pages for better performance
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -130,6 +133,12 @@ const AppWithTheme = () => {
 
   // Initialize services
   useEffect(() => {
+    // Initialize performance monitoring
+    performanceMonitoring.setEnabled(true);
+    const initMetricId = performanceMonitoring.startMeasure(
+      'App.initialization',
+      PerformanceCategory.RENDERING
+    );
     // Initialize IndexedDB
     indexedDBService
       .init()
@@ -184,6 +193,9 @@ const AppWithTheme = () => {
       );
     }
 
+    // End the initialization metric
+    performanceMonitoring.endMeasure(initMetricId);
+
     // Clean up on unmount
     return () => {
       offlineService.stopAutoSync();
@@ -195,7 +207,8 @@ const AppWithTheme = () => {
       <CSPMeta />
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <ErrorBoundary>
+        <ActionFeedbackProvider>
+          <ErrorBoundary>
           <BrowserRouter
             future={{
               v7_startTransition: true,
@@ -242,6 +255,9 @@ const AppWithTheme = () => {
             {/* Accessibility menu */}
             <AccessibilityMenu position="bottom-left" />
 
+            {/* Performance profiler */}
+            <PerformanceProfiler />
+
             {/* Update notification */}
             <Snackbar
               open={updateAvailable}
@@ -259,7 +275,8 @@ const AppWithTheme = () => {
               </Alert>
             </Snackbar>
           </BrowserRouter>
-        </ErrorBoundary>
+          </ErrorBoundary>
+        </ActionFeedbackProvider>
       </ThemeProvider>
     </>
   );

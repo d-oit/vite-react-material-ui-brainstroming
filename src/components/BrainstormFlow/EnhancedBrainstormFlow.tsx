@@ -48,6 +48,7 @@ import 'reactflow/dist/style.css';
 
 import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
+import performanceMonitoring, { PerformanceCategory, useRenderPerformance } from '../../utils/performanceMonitoring';
 import loggerService from '../../services/LoggerService';
 import type { NodeData, Node, Edge } from '../../types';
 import { NodeType } from '../../types';
@@ -767,3 +768,6 @@ declare global {
     };
   }
 }
+
+// Export the component with performance monitoring
+export default EnhancedBrainstormFlow;

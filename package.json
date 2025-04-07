@@ -30,6 +30,7 @@
     "@mui/material": "^7.0.1",
     "aws-sdk": "^2.1584.0",
     "buffer": "^6.0.3",
+    "framer-motion": "^12.6.3",
     "openai": "^4.35.0",
     "process": "^0.11.10",
     "react": "^18.2.0",

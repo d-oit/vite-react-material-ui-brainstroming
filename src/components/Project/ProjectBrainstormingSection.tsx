@@ -3,8 +3,10 @@ import { useState, useEffect, useCallback } from 'react';
 
 import { useErrorNotification } from '../../contexts/ErrorNotificationContext';
 import loggerService from '../../services/LoggerService';
+import performanceMonitoring, { PerformanceCategory } from '../../utils/performanceMonitoring';
 import type { Node, Edge, Project } from '../../types';
-import { EnhancedBrainstormFlow } from '../BrainstormFlow/EnhancedBrainstormFlow';
+import EnhancedBrainstormFlow from '../BrainstormFlow/EnhancedBrainstormFlow';
+import withPerformanceMonitoring from '../BrainstormFlow/withPerformanceMonitoring';
 
 interface ProjectBrainstormingSectionProps {
   project: Project;
@@ -12,6 +14,9 @@ interface ProjectBrainstormingSectionProps {
   isSaving?: boolean;
   error?: string | null;
 }
+
+// Wrap EnhancedBrainstormFlow with performance monitoring
+const PerformanceMonitoredBrainstormFlow = withPerformanceMonitoring(EnhancedBrainstormFlow, 'EnhancedBrainstormFlow');
 
 const ProjectBrainstormingSection = ({
   project,
@@ -24,8 +29,12 @@ const ProjectBrainstormingSection = ({
   const [edges, setEdges] = useState<Edge[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Initialize nodes and edges from project
+  // Use performance monitoring
   useEffect(() => {
+    const metricId = performanceMonitoring.startMeasure(
+      'ProjectBrainstormingSection.initialization',
+      PerformanceCategory.RENDERING
+    );
     try {
       if (project) {
         setNodes(project.nodes || []);
@@ -38,6 +47,10 @@ const ProjectBrainstormingSection = ({
     } finally {
       setLoading(false);
     }
+
+    return () => {
+      performanceMonitoring.endMeasure(metricId);
+    };
   }, [project, showError]);
 
   // Handle nodes change
@@ -106,7 +119,7 @@ const ProjectBrainstormingSection = ({
         </Paper>
       ) : null}
 
-      <EnhancedBrainstormFlow
+      <PerformanceMonitoredBrainstormFlow
         initialNodes={nodes}
         initialEdges={edges}
         onSave={handleSave}
@@ -118,4 +131,5 @@ const ProjectBrainstormingSection = ({
   );
 };
 
-export default ProjectBrainstormingSection;
+// Export with performance monitoring
+export default withPerformanceMonitoring(ProjectBrainstormingSection, 'ProjectBrainstormingSection');
