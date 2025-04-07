@@ -89,7 +89,7 @@ const NavigationContainer = ({ open, onClose, ariaLabelledby }: NavigationContai
 
   return (
     <MuiDrawer
-      variant={drawerVariant as any}
+      variant={drawerVariant as 'permanent' | 'persistent' | 'temporary'}
       open={open}
       onClose={onClose}
       sx={{

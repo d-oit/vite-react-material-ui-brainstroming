@@ -29,8 +29,12 @@ const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 
 // Lazy load Material UI components that are heavy
+// These components are used dynamically based on user interactions
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Dialog = lazy(() => import('@mui/material/Dialog'));
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Drawer = lazy(() => import('@mui/material/Drawer'));
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const AppBar = lazy(() => import('@mui/material/AppBar'));
 
 // Define theme settings

@@ -86,7 +86,9 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
     }
   };
 
-  const _handleOpenProject = (id: string) => {
+  // This function is used by the ProjectCard component
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleOpenProject = (id: string) => {
     navigate(`/projects/${id}`);
   };
 

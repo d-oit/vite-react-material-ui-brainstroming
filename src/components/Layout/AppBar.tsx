@@ -159,6 +159,8 @@ export const AppBar = ({ title, onMenuClick }: AppBarProps) => {
                 },
               }}
               inputProps={{ 'aria-label': 'search' }}
+              // We want the search to be focused when it appears
+              // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
             />
           </Box>

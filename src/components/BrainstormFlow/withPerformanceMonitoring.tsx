@@ -23,7 +23,9 @@ export function withPerformanceMonitoring<P>(
       return () => {
         performanceMonitoring.endMeasure(metricId);
       };
-    }, []);
+      // We need to include props to properly track component re-renders
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props]);
 
     // Measure interactions
     const handleInteraction = (interactionType: string) => {

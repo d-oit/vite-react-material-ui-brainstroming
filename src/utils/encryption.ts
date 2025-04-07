@@ -144,6 +144,8 @@ export function generateRandomPassword(length = 16): string {
 
   for (let i = 0; i < length; i++) {
     // Use a safe method to access array elements
+    // Safe to use index i as it's controlled by the loop
+    // eslint-disable-next-line security/detect-object-injection
     const index = randomValues[i] % charset.length;
     // Ensure index is within bounds
     if (index >= 0 && index < charset.length) {

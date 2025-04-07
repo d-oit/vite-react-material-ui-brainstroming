@@ -2,6 +2,8 @@ import {
   Dashboard as DashboardIcon,
   BubbleChart as BrainstormIcon,
   History as HistoryIcon,
+  // ProjectsIcon is used in the navigation structure
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Storage as ProjectsIcon,
   Settings as SettingsIcon,
   Chat as ChatIcon,

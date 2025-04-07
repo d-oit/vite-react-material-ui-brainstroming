@@ -94,14 +94,15 @@ export const ProjectCard = ({ project, onDelete, onArchive, onSync, onPin }: Pro
   };
 
   // Calculate node count by type
-  const nodeTypes = project.nodes.reduce(
-    (acc, node) => {
-      const type = node.type || 'unknown';
-      acc[type] = (acc[type] || 0) + 1;
-      return acc;
-    },
-    {} as Record<string, number>
-  );
+  const nodeTypes = project.nodes.reduce<Record<string, number>>((acc, node) => {
+    const type = node.type || 'unknown';
+    // Create a new object to avoid mutation
+    return {
+      ...acc,
+      // eslint-disable-next-line security/detect-object-injection
+      [type]: (acc[type] || 0) + 1,
+    };
+  }, {});
 
   // Get total node count
   const totalNodes = project.nodes.length;

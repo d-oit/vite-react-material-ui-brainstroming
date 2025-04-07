@@ -165,12 +165,14 @@ export const I18nProvider = ({ children, initialLocale = 'en' }: I18nProviderPro
   const t = useCallback(
     (key: string, params?: Record<string, string | number>): string => {
       const keys = key.split('.');
-      let value: any = translations;
+      let value: unknown = translations;
 
       // Navigate through the nested translations object
       for (const k of keys) {
         if (value && typeof value === 'object' && k in value) {
-          value = value[k];
+          // Safe to access property as we've checked it exists
+          // eslint-disable-next-line security/detect-object-injection
+          value = (value as Record<string, unknown>)[k];
         } else {
           // Key not found, return the key itself
           return key;
@@ -185,7 +187,10 @@ export const I18nProvider = ({ children, initialLocale = 'en' }: I18nProviderPro
       // Replace parameters in the translation string
       if (params) {
         return Object.entries(params).reduce((acc, [paramKey, paramValue]) => {
-          return acc.replace(new RegExp(`{{${paramKey}}}`, 'g'), String(paramValue));
+          // Create a safe pattern for replacement
+          const pattern = '{{' + paramKey + '}}';
+          // Use a string replace instead of RegExp for safety
+          return acc.split(pattern).join(String(paramValue));
         }, value);
       }
 

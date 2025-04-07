@@ -81,6 +81,8 @@ export function getCSPDirectives(): CSPDirectives {
     Object.entries(developmentDirectives).forEach(([key, values]) => {
       // Use type assertion to ensure type safety
       const directiveKey = key as keyof typeof directives;
+      // Safe to use directiveKey as it's validated through type assertion
+      // eslint-disable-next-line security/detect-object-injection
       directives[directiveKey] = [...(directives[directiveKey] || []), ...values];
     });
   } else {
@@ -88,6 +90,8 @@ export function getCSPDirectives(): CSPDirectives {
     Object.entries(productionDirectives).forEach(([key, values]) => {
       // Use type assertion to ensure type safety
       const directiveKey = key as keyof typeof directives;
+      // Safe to use directiveKey as it's validated through type assertion
+      // eslint-disable-next-line security/detect-object-injection
       directives[directiveKey] = [...(directives[directiveKey] || []), ...values];
     });
   }

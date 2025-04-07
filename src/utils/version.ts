@@ -33,6 +33,8 @@ export function isValidVersion(version: unknown): version is number {
     // Use a safer regex with explicit limits
     // This regex matches version strings like '1', '1.0', '1.0.0', etc.
     // with a maximum of 5 version segments and each segment limited to 5 digits
+    // This is a safe regex with explicit limits
+    // eslint-disable-next-line security/detect-unsafe-regex
     return /^\d{1,5}(\.\d{1,5}){0,4}$/.test(version);
   }
   return false;

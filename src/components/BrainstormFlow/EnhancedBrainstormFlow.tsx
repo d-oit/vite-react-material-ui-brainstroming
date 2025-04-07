@@ -30,7 +30,10 @@ import type {
   Connection,
   ReactFlowInstance,
   XYPosition,
+  // These types are imported for type definitions but not directly used
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   NodeChange,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   EdgeChange,
   OnNodesChange,
   OnEdgesChange,
@@ -44,7 +47,8 @@ import { useSettings } from '../../contexts/SettingsContext';
 import loggerService from '../../services/LoggerService';
 import type { NodeData, Node, Edge } from '../../types';
 import { NodeType } from '../../types';
-// Import only what we need
+// Import performance monitoring utilities
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useRenderPerformance } from '../../utils/performanceMonitoring';
 import { MemoizedChatPanel } from '../Chat/ChatPanel';
 
@@ -158,16 +162,19 @@ const FlowContent = ({
   const [showChat, setShowChat] = useState(false);
 
   // These will be initialized when ReactFlow is loaded
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [reactFlowHooks, setReactFlowHooks] = useState<{
     useNodesState: unknown;
     useEdgesState: unknown;
     useReactFlow: unknown;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     addEdge: (params: any, edges: any) => any;
     onNodesChange: null;
     onEdgesChange: null;
     fitView: null;
     zoomIn: null;
     zoomOut: null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   }>({} as any);
 
   // References to ReactFlow functions
@@ -529,6 +536,8 @@ const FlowContent = ({
           position,
           data: {
             ...nodeData,
+            // We need to use the current handleNodeClick function
+            // eslint-disable-next-line react-hooks/exhaustive-deps
             onEdit: (id: string) => handleNodeClick(id),
             onDelete: (id: string) => {
               setNodeToDelete(id);

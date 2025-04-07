@@ -25,6 +25,8 @@ interface NavigationProviderProps {
 
 export const NavigationProvider = ({ children, initialItems }: NavigationProviderProps) => {
   const location = useLocation();
+  // We're using initialItems directly and don't need to update items
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [items, setItems] = useState<NavigationItem[]>(initialItems);
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
@@ -98,7 +100,7 @@ export const NavigationProvider = ({ children, initialItems }: NavigationProvide
 
     try {
       await error.retry();
-    } catch (err) {
+    } catch (_) {
       setError({
         type: 'load',
         severity: 'error',
