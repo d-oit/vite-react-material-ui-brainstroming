@@ -1,30 +1,20 @@
 import { Box, Paper, Typography } from '@mui/material';
-import { useState } from 'react';
 
 import { ChatPanel } from './ChatPanel';
+import type { NodeData } from '../../types';
 
 interface ChatInterfaceProps {
   projectId?: string;
 }
 
 export function ChatInterface({ projectId }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
+  // Create a simple project context object
+  const projectContext = projectId ? { projectId } : undefined;
 
-  const handleSendMessage = (message: string) => {
-    // Add user message
-    const newMessages = [...messages, { role: 'user', content: message }];
-    setMessages(newMessages);
-
-    // Simulate AI response
-    setTimeout(() => {
-      setMessages([
-        ...newMessages,
-        {
-          role: 'assistant',
-          content: `I received your message about "${message}" related to project ${projectId || 'unknown'}. This is a placeholder response.`,
-        },
-      ]);
-    }, 1000);
+  // Optional handler for adding nodes (not used in standalone chat)
+  const handleAddNodes = (nodes: NodeData[]) => {
+    console.log('Nodes added:', nodes);
+    // In a standalone chat, we don't actually add nodes anywhere
   };
 
   return (
@@ -36,7 +26,11 @@ export function ChatInterface({ projectId }: ChatInterfaceProps) {
         <Typography variant="h6" gutterBottom>
           Chat Assistant
         </Typography>
-        <ChatPanel messages={messages} onSendMessage={handleSendMessage} projectId={projectId} />
+        <ChatPanel
+          projectId={projectId}
+          projectContext={projectContext}
+          onAddNodes={handleAddNodes}
+        />
       </Paper>
     </Box>
   );

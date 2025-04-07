@@ -481,7 +481,7 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
             variant="text"
             color="inherit"
             startIcon={<ClearIcon />}
-            onClick={handleClearChat}
+            onClick={clearChat}
             disabled={messages.length === 0 || isLoading || isGeneratingNodes}
             size="small"
             sx={{ flexGrow: 0 }}

@@ -26,7 +26,9 @@ export default defineConfig({
     },
   },
   plugins: [
-    react(),
+    react({
+      jsxRuntime: 'automatic'
+    }),
     nodePolyfills({
       // Whether to polyfill `node:` protocol imports.
       protocolImports: true,
@@ -205,7 +207,7 @@ export default defineConfig({
       filename: 'sw.ts',
       injectRegister: 'auto',
       devOptions: {
-        enabled: true,
+        enabled: false, // Disable service worker in development to avoid errors
         type: 'module',
       },
       injectManifest: {

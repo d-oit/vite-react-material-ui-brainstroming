@@ -1,7 +1,6 @@
 import {
   Refresh as RefreshIcon,
   Delete as DeleteIcon,
-  // FilterList as FilterIcon, // Unused
   Info as InfoIcon,
   Warning as WarningIcon,
   Error as ErrorIcon,
@@ -29,6 +28,7 @@ import {
   FormControl,
   InputLabel,
   Select,
+  SelectChangeEvent,
   MenuItem,
   TextField,
   IconButton,
@@ -40,23 +40,20 @@ import { useState, useEffect, useCallback } from 'react';
 import type { LogEntry } from '../../services/IndexedDBService';
 import loggerService from '../../services/LoggerService';
 
+// Define log level type
+type LogLevel = 'info' | 'warn' | 'error' | 'debug' | 'critical';
 export const LogViewer = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalLogs, setTotalLogs] = useState(0);
-  const [filter, setFilter] = useState<'info' | 'warn' | 'error' | ''>('');
+  const [filter, setFilter] = useState<LogLevel | ''>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
   const theme = useTheme();
-
-  // Load logs on mount and when filter changes
-  useEffect(() => {
-    loadLogs();
-  }, [loadLogs]);
 
   // Load logs from IndexedDB
   const loadLogs = useCallback(async () => {
@@ -87,6 +84,11 @@ export const LogViewer = () => {
     }
   }, [filter, page, rowsPerPage, searchTerm]);
 
+  // Load logs on mount and when filter changes
+  useEffect(() => {
+    loadLogs();
+  }, [loadLogs]);
+
   // Handle page change
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
@@ -99,8 +101,8 @@ export const LogViewer = () => {
   };
 
   // Handle filter change
-  const handleFilterChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setFilter(event.target.value as 'info' | 'warn' | 'error' | '');
+  const handleFilterChange = (event: SelectChangeEvent<LogLevel | ''>, _child: React.ReactNode) => {
+    setFilter(event.target.value as LogLevel | '');
     setPage(0);
   };
 
@@ -136,7 +138,7 @@ export const LogViewer = () => {
   };
 
   // Get icon for log level
-  const getLevelIcon = (level: 'info' | 'warn' | 'error') => {
+  const getLevelIcon = (level: LogLevel) => {
     switch (level) {
       case 'info':
         return <InfoIcon color="info" />;
@@ -144,20 +146,27 @@ export const LogViewer = () => {
         return <WarningIcon color="warning" />;
       case 'error':
         return <ErrorIcon color="error" />;
+      case 'debug':
+        return <InfoIcon color="action" />;
+      case 'critical':
+        return <ErrorIcon color="error" />;
       default:
         return <InfoIcon />;
     }
   };
 
   // Get color for log level
-  const getLevelColor = (level: 'info' | 'warn' | 'error') => {
+  const getLevelColor = (level: LogLevel) => {
     switch (level) {
       case 'info':
         return 'info';
       case 'warn':
         return 'warning';
       case 'error':
+      case 'critical':
         return 'error';
+      case 'debug':
+        return 'default';
       default:
         return 'default';
     }
@@ -206,9 +215,11 @@ export const LogViewer = () => {
             onChange={handleFilterChange}
           >
             <MenuItem value="">All</MenuItem>
+            <MenuItem value="debug">Debug</MenuItem>
             <MenuItem value="info">Info</MenuItem>
             <MenuItem value="warn">Warning</MenuItem>
             <MenuItem value="error">Error</MenuItem>
+            <MenuItem value="critical">Critical</MenuItem>
           </Select>
         </FormControl>
 

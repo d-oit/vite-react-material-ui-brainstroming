@@ -59,22 +59,32 @@ const ReactFlowModule = lazy(() =>
   })
 );
 
-const ReactFlowComponents = lazy(() =>
-  import('reactflow').then(module => {
-    return {
-      default: {
-        Background: module.Background,
-        Controls: module.Controls,
-        MiniMap: module.MiniMap,
-        useNodesState: module.useNodesState,
-        useEdgesState: module.useEdgesState,
-        addEdge: module.addEdge,
-        useReactFlow: module.useReactFlow,
-        ReactFlowProvider: module.ReactFlowProvider,
-      },
-    };
-  })
+// Lazy load the ReactFlow components
+const ReactFlowComponentsLoader = lazy(() =>
+  import('reactflow').then(module => ({
+    default: (props: { children: (components: any) => React.ReactNode }) => {
+      const { children } = props;
+      const components = {
+        default: {
+          Background: module.Background,
+          Controls: module.Controls,
+          MiniMap: module.MiniMap,
+          useNodesState: module.useNodesState,
+          useEdgesState: module.useEdgesState,
+          addEdge: module.addEdge,
+          useReactFlow: module.useReactFlow,
+          ReactFlowProvider: module.ReactFlowProvider,
+        },
+      };
+      return <>{children(components)}</>;
+    }
+  }))
 );
+
+// Create a component that will render the children function with the ReactFlow components
+const ReactFlowComponents = ({ children }: { children: (components: any) => React.ReactNode }) => {
+  return <ReactFlowComponentsLoader children={children} />;
+};
 
 // Define custom node types
 const nodeTypes: NodeTypes = {
