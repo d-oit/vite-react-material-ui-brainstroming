@@ -25,3 +25,11 @@ dist-ssr
 .eslintcache
 playwright-report.txt
 
+debug-after-click.png
+debug-before-click.png
+debug-output.txt
+debug-quick-brainstorm.txt
+
+debug-screenshot.png
+playwright-report/
+test-results/
