@@ -33,8 +33,11 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
         }
       } catch (s3Error) {
         // If the error is about S3 not being configured, just log it and continue
-        if (s3Error instanceof Error && s3Error.message.includes('S3 not configured')) {
-          console.log('S3 not configured, skipping cloud sync');
+        if (s3Error instanceof Error && s3Error.message.includes('S3 integration is disabled')) {
+          // This is expected when S3 is not configured, so just log at info level
+          console.info('S3 integration is disabled, skipping cloud sync');
+        } else if (s3Error instanceof Error && s3Error.message.includes('S3 not configured')) {
+          console.info('S3 not configured, skipping cloud sync');
         } else {
           // For other errors, log them but don't fail the operation
           console.warn('Error downloading from S3:', s3Error);
@@ -104,8 +107,11 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
         await uploadProject(updatedProject);
       } catch (s3Error) {
         // If the error is about S3 not being configured, just log it
-        if (s3Error instanceof Error && s3Error.message.includes('S3 not configured')) {
-          console.log('S3 not configured, saving only to local storage');
+        if (s3Error instanceof Error && s3Error.message.includes('S3 integration is disabled')) {
+          // This is expected when S3 is not configured, so just log at info level
+          console.info('S3 integration is disabled, saving only to local storage');
+        } else if (s3Error instanceof Error && s3Error.message.includes('S3 not configured')) {
+          console.info('S3 not configured, saving only to local storage');
         } else {
           // For other errors, log them but don't fail the operation
           console.warn('Error uploading to S3:', s3Error);

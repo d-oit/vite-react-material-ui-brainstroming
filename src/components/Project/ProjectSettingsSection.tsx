@@ -378,7 +378,7 @@ export const ProjectSettingsSection = ({
         </Typography>
 
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
+          <Grid lg={6} md={6} sm={12} xs={12}>
             <Typography variant="subtitle1" gutterBottom>
               Local File
             </Typography>
@@ -402,7 +402,7 @@ export const ProjectSettingsSection = ({
             </Box>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid lg={6} md={6} sm={12} xs={12}>
             <Typography variant="subtitle1" gutterBottom>
               S3 Storage
             </Typography>

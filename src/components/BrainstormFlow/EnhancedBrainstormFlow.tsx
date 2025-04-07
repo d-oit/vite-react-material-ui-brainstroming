@@ -41,10 +41,8 @@ import { useSettings } from '../../contexts/SettingsContext';
 import loggerService from '../../services/LoggerService';
 import type { NodeData, Node, Edge } from '../../types';
 import { NodeType } from '../../types';
-import performanceMonitoring, {
-  PerformanceCategory,
-  useRenderPerformance,
-} from '../../utils/performanceMonitoring';
+// Import only what we need
+import { useRenderPerformance } from '../../utils/performanceMonitoring';
 import { MemoizedChatPanel } from '../Chat/ChatPanel';
 
 import CustomNode from './CustomNode';
@@ -82,8 +80,19 @@ const ReactFlowComponentsLoader = lazy(() =>
 );
 
 // Create a component that will render the children function with the ReactFlow components
-const ReactFlowComponents = ({ children }: { children: (components: any) => React.ReactNode }) => {
-  return <ReactFlowComponentsLoader children={children} />;
+const ReactFlowComponents = ({ children }: { children: (components: unknown) => React.ReactNode }) => {
+  // Use a ref to store the components to avoid re-renders
+  const componentsRef = useRef<unknown>(null);
+
+  return (
+    <ReactFlowComponentsLoader>
+      {(components) => {
+        // Store the components in the ref
+        componentsRef.current = components;
+        return children(components);
+      }}
+    </ReactFlowComponentsLoader>
+  );
 };
 
 // Define custom node types
@@ -144,55 +153,63 @@ const FlowContent = ({
 
   // These will be initialized when ReactFlow is loaded
   const [reactFlowHooks, setReactFlowHooks] = useState<{
-    useNodesState: any;
-    useEdgesState: any;
-    useReactFlow: any;
-    addEdge: any;
-    onNodesChange: any;
-    onEdgesChange: any;
-    fitView: any;
-    zoomIn: any;
-    zoomOut: any;
+    useNodesState: unknown;
+    useEdgesState: unknown;
+    useReactFlow: unknown;
+    addEdge: (params: any, edges: any) => any;
+    onNodesChange: null;
+    onEdgesChange: null;
+    fitView: null;
+    zoomIn: null;
+    zoomOut: null;
   }>({} as any);
+
+  // References to ReactFlow functions
+  const [fitView, setFitView] = useState<((params?: { padding?: number, includeHiddenNodes?: boolean }) => void) | null>(null);
+  const [zoomIn, setZoomIn] = useState<(() => void) | null>(null);
+  const [zoomOut, setZoomOut] = useState<(() => void) | null>(null);
 
   // Handle nodes change with external callback
   const handleNodesChange = useCallback(
     (changes: { id: string; type: string; position?: XYPosition }[]) => {
-      onNodesChange(changes);
+      // Update internal nodes state based on changes
+      const updatedNodes = nodes.map(node => {
+        const change = changes.find(
+          (c: { id: string; type: string }) => c.id === node.id && c.type === 'position'
+        );
+        if (change) {
+          return {
+            ...node,
+            position: change.position || node.position,
+          };
+        }
+        return node;
+      });
+
+      // Notify parent component about changes if callback is provided
       if (externalNodesChange) {
-        const updatedNodes = nodes.map(node => {
-          const change = changes.find(
-            (c: { id: string; type: string }) => c.id === node.id && c.type === 'position'
-          );
-          if (change) {
-            return {
-              ...node,
-              position: change.position || node.position,
-            };
-          }
-          return node;
-        });
         externalNodesChange(updatedNodes);
       }
     },
-    [nodes, onNodesChange, externalNodesChange]
+    [nodes, externalNodesChange]
   );
 
   // Handle edges change with external callback
   const handleEdgesChange = useCallback(
     (changes: { id: string; type: string }[]) => {
-      onEdgesChange(changes);
-      if (externalEdgesChange) {
-        // Filter out removed edges
-        const removedEdgeIds = changes
-          .filter((c: { type: string }) => c.type === 'remove')
-          .map((c: { id: string }) => c.id);
+      // Filter out removed edges
+      const removedEdgeIds = changes
+        .filter((c: { type: string }) => c.type === 'remove')
+        .map((c: { id: string }) => c.id);
 
-        const updatedEdges = edges.filter(edge => !removedEdgeIds.includes(edge.id));
+      const updatedEdges = edges.filter(edge => !removedEdgeIds.includes(edge.id));
+
+      // Notify parent component about changes if callback is provided
+      if (externalEdgesChange) {
         externalEdgesChange(updatedEdges);
       }
     },
-    [edges, onEdgesChange, externalEdgesChange]
+    [edges, externalEdgesChange]
   );
 
   // Connect nodes
@@ -260,6 +277,20 @@ const FlowContent = ({
     [nodes, readOnly]
   );
 
+  // Handle node click from data (used in node data)
+  const handleNodeClick = useCallback(
+    (id: string) => {
+      if (readOnly) return;
+
+      const selectedNode = nodes.find(n => n.id === id);
+      if (selectedNode) {
+        setSelectedNode(selectedNode);
+        setNodeEditOpen(true);
+      }
+    },
+    [nodes, readOnly]
+  );
+
   // Handle node edit
   const handleNodeEdit = useCallback(
     (nodeData: NodeData) => {
@@ -284,7 +315,7 @@ const FlowContent = ({
       setSelectedNode(null);
 
       if (externalNodesChange) {
-        externalNodesChange(updatedNodes);
+        externalNodesChange(updatedNodes as Node[]);
       }
 
       showSnackbar(t('brainstorm.nodeUpdated'), 'success');
@@ -326,17 +357,17 @@ const FlowContent = ({
 
         // Notify external handlers
         if (externalNodesChange) {
-          externalNodesChange(updatedNodes);
+          externalNodesChange(updatedNodes as Node[]);
         }
 
         if (externalEdgesChange) {
-          externalEdgesChange(updatedEdges);
+          externalEdgesChange(updatedEdges as Edge[]);
         }
 
         // Show success message
         showSnackbar(
           connectedEdgeIds.length > 0
-            ? t('brainstorm.nodeAndEdgesDeleted', { count: connectedEdgeIds.length })
+            ? t('brainstorm.nodeAndEdgesDeleted', { count: connectedEdgeIds.length.toString() })
             : t('brainstorm.nodeDeleted'),
           'info'
         );
@@ -420,9 +451,13 @@ const FlowContent = ({
         type,
         position,
         data: {
+          id: `data-${Date.now()}`,
           label: t(`brainstorm.defaultLabels.${type}`),
           content: '',
           tags: [],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          title: '',
         },
       };
 
@@ -432,11 +467,11 @@ const FlowContent = ({
       setNodes(updatedNodes);
 
       if (externalNodesChange) {
-        externalNodesChange(updatedNodes);
+        externalNodesChange(updatedNodes as Node[]);
       }
 
       // Select the new node for editing
-      setSelectedNode(processedNode);
+      setSelectedNode(processedNode as Node);
       setNodeEditOpen(true);
 
       showSnackbar(t('brainstorm.nodeCreated'), 'success');
@@ -447,7 +482,7 @@ const FlowContent = ({
   // Save the flow
   const saveFlow = useCallback(() => {
     if (onSave) {
-      onSave(nodes, edges);
+      onSave(nodes as Node[], edges as Edge[]);
       showSnackbar(t('brainstorm.flowSaved'), 'success');
     }
   }, [nodes, edges, onSave, t]);
@@ -490,7 +525,7 @@ const FlowContent = ({
           position,
           data: {
             ...nodeData,
-            onEdit: handleNodeClick,
+            onEdit: (id: string) => handleNodeClick(id),
             onDelete: (id: string) => {
               setNodeToDelete(id);
               setDeleteConfirmOpen(true);
@@ -520,13 +555,15 @@ const FlowContent = ({
 
   // Expose zoom functions to parent
   useEffect(() => {
-    window.brainstormFlowApi = {
-      zoomIn,
-      zoomOut,
-      fitView: () => fitView({ padding: 0.2 }),
-      addNode,
-      saveFlow,
-    };
+    if (zoomIn && zoomOut && fitView) {
+      window.brainstormFlowApi = {
+        zoomIn: zoomIn,
+        zoomOut: zoomOut,
+        fitView: () => fitView({ padding: 0.2 }),
+        addNode,
+        saveFlow,
+      };
+    }
 
     return () => {
       window.brainstormFlowApi = undefined;
@@ -543,7 +580,7 @@ const FlowContent = ({
 
   // Auto-fit view on initial load
   useEffect(() => {
-    if (reactFlowInstance && nodes.length > 0) {
+    if (reactFlowInstance && nodes.length > 0 && fitView) {
       setTimeout(() => {
         fitView({ padding: 0.2 });
       }, 200);
@@ -553,7 +590,7 @@ const FlowContent = ({
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
-      if (reactFlowInstance && nodes.length > 0) {
+      if (reactFlowInstance && nodes.length > 0 && fitView) {
         setTimeout(() => {
           fitView({ padding: 0.2 });
         }, 200);
@@ -606,18 +643,35 @@ const FlowContent = ({
 
             // Initialize the hooks if they haven't been initialized yet
             if (!reactFlowHooks.addEdge && !isInitialized.current) {
+              // Mark as initialized to prevent multiple initializations
               isInitialized.current = true;
-              setReactFlowHooks({
-                useNodesState,
-                useEdgesState,
-                useReactFlow,
-                addEdge,
-                onNodesChange: null,
-                onEdgesChange: null,
-                fitView: null,
-                zoomIn: null,
-                zoomOut: null,
-              });
+
+              // Schedule the state updates for the next render cycle
+              setTimeout(() => {
+                setReactFlowHooks({
+                  useNodesState,
+                  useEdgesState,
+                  useReactFlow,
+                  addEdge,
+                  onNodesChange: null,
+                  onEdgesChange: null,
+                  fitView: null,
+                  zoomIn: null,
+                  zoomOut: null,
+                });
+
+                // Get the ReactFlow instance methods from the useReactFlow hook
+                try {
+                  const reactFlowAPI = useReactFlow();
+                  if (reactFlowAPI) {
+                    setFitView(() => reactFlowAPI.fitView);
+                    setZoomIn(() => reactFlowAPI.zoomIn);
+                    setZoomOut(() => reactFlowAPI.zoomOut);
+                  }
+                } catch (error) {
+                  console.warn('Failed to initialize ReactFlow hooks:', error);
+                }
+              }, 0);
             }
 
             return (
@@ -642,9 +696,9 @@ const FlowContent = ({
                   deleteKeyCode={['Backspace', 'Delete']}
                   multiSelectionKeyCode={['Control', 'Meta']}
                   selectionKeyCode={['Shift']}
-                  connectionMode="loose"
+                  connectionMode={"loose" as any}
                   connectionLineStyle={{ stroke: '#2196f3', strokeWidth: 3 }}
-                  connectionLineType="smoothstep"
+                  connectionLineType={"smoothstep" as any}
                   zoomOnScroll={true}
                   panOnScroll={true}
                   panOnDrag={!isMobile}
