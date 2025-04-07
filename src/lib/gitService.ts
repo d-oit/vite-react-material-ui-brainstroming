@@ -35,7 +35,7 @@ const mockGitHistory: GitCommit[] = [
 ];
 
 // Get Git history for a project
-export const getGitHistory = async (projectId: string): Promise<GitCommit[]> => {
+export const getGitHistory = async (_projectId: string): Promise<GitCommit[]> => {
   // In a real app, this would fetch from a backend API
   // For now, we'll return mock data with a delay to simulate an API call
   return new Promise(resolve => {
@@ -59,8 +59,8 @@ export const getGitCommitDetails = async (commitHash: string): Promise<GitCommit
 
 // Compare two Git commits
 export const compareGitCommits = async (
-  baseCommitHash: string,
-  compareCommitHash: string
+  _baseCommitHash: string,
+  _compareCommitHash: string
 ): Promise<{ added: string[]; removed: string[]; modified: string[] }> => {
   // In a real app, this would fetch from a backend API
   // For now, we'll return mock data

@@ -3,18 +3,18 @@ import type { SelectChangeEvent } from '@mui/material';
 import {
   Box,
   Button,
-  FormControl,
-  FormHelperText,
+  // FormControl, // Unused
+  // FormHelperText, // Unused
   Grid,
-  InputLabel,
-  MenuItem,
+  // InputLabel, // Unused
+  // MenuItem, // Unused
   Paper,
-  Select,
+  // Select, // Unused
   TextField,
   Typography,
   Divider,
   Card,
-  CardMedia,
+  // CardMedia, // Unused
   CardContent,
   CircularProgress,
   useTheme,
@@ -65,9 +65,10 @@ export const ProjectCreateForm = ({
     setDescription(event.target.value);
   };
 
-  const handleTemplateChange = (event: SelectChangeEvent<string>) => {
-    setTemplate(event.target.value as ProjectTemplate);
-  };
+  // Unused handler
+  // const handleTemplateChange = (event: SelectChangeEvent<string>) => {
+  //   setTemplate(event.target.value as ProjectTemplate);
+  // };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -131,7 +132,7 @@ export const ProjectCreateForm = ({
                 error={!!nameError}
                 helperText={nameError || t('project.nameHelper')}
                 disabled={loading}
-                autoFocus
+                // Removed autoFocus for accessibility
                 InputProps={{
                   sx: { borderRadius: 1.5 },
                 }}

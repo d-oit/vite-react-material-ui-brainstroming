@@ -3,7 +3,7 @@ import {
   Unarchive as UnarchiveIcon,
   Delete as DeleteIcon,
   Visibility as ViewIcon,
-  History as HistoryIcon,
+  // History as HistoryIcon, // Unused
 } from '@mui/icons-material';
 import {
   Box,
@@ -223,7 +223,7 @@ export const ProjectArchivePanel: React.FC<ProjectArchivePanelProps> = ({ onRefr
           <Button
             onClick={handleConfirmAction}
             color={actionType === 'delete' ? 'error' : 'primary'}
-            autoFocus
+            // Removed autoFocus for accessibility
           >
             {actionType === 'unarchive' ? 'Unarchive' : 'Delete Permanently'}
           </Button>

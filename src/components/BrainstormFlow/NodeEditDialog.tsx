@@ -5,7 +5,7 @@ import {
   SmartButton as SmartButtonIcon,
   Smartphone as SmartphoneIcon,
   Laptop as LaptopIcon,
-  AccessibilityNew as AccessibilityIcon,
+  // AccessibilityNew as AccessibilityIcon, // Unused
 } from '@mui/icons-material';
 import type { SelectChangeEvent } from '@mui/material';
 import {
@@ -31,9 +31,9 @@ import {
   ToggleButtonGroup,
   ToggleButton,
   Paper,
-  Alert,
+  // Alert, // Unused
 } from '@mui/material';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, /* useMemo */ } from 'react';
 
 import { useSettings } from '../../contexts/SettingsContext';
 import loggerService from '../../services/LoggerService';
@@ -69,7 +69,8 @@ export const NodeEditDialog = ({
   const [size, setSize] = useState<'small' | 'medium' | 'large'>(settings.preferredNodeSize);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showSizeSelector, setShowSizeSelector] = useState(false);
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  // Unused state variables
+  // const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
   useEffect(() => {
     if (initialData) {

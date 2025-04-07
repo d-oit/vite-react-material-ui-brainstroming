@@ -3,7 +3,7 @@ import {
   Person as PersonIcon,
   SmartToy as BotIcon,
   WifiOff as OfflineIcon,
-  Info as InfoIcon,
+  // Info as InfoIcon, // Unused
 } from '@mui/icons-material';
 import {
   Box,
@@ -13,7 +13,7 @@ import {
   Paper,
   Divider,
   CircularProgress,
-  IconButton,
+  // IconButton, // Unused
   Avatar,
   Alert,
   Tooltip,
@@ -28,7 +28,7 @@ import type { ChatMessage } from '../../types';
 
 interface ChatPanelProps {
   projectId?: string;
-  projectContext?: any;
+  projectContext?: Record<string, unknown>;
 }
 
 export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {

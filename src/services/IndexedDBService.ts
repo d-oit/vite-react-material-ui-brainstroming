@@ -221,7 +221,7 @@ export class IndexedDBService {
       }
 
       return false;
-    } catch (e) {
+    } catch (_) {
       // If we get a security exception, we're probably in private mode
       return true;
     }
@@ -241,7 +241,11 @@ export class IndexedDBService {
       // Try to write to the settings store
       const writeResult = await new Promise<boolean>(resolve => {
         try {
-          const transaction = this.db!.transaction([STORES.SETTINGS], 'readwrite');
+          if (!this.db) {
+            resolve(false);
+            return;
+          }
+          const transaction = this.db.transaction([STORES.SETTINGS], 'readwrite');
           const store = transaction.objectStore(STORES.SETTINGS);
 
           const request = store.put({ key: testKey, value: testValue });
@@ -262,7 +266,11 @@ export class IndexedDBService {
       // Try to read it back
       const readResult = await new Promise<boolean>(resolve => {
         try {
-          const transaction = this.db!.transaction([STORES.SETTINGS], 'readonly');
+          if (!this.db) {
+            resolve(false);
+            return;
+          }
+          const transaction = this.db.transaction([STORES.SETTINGS], 'readonly');
           const store = transaction.objectStore(STORES.SETTINGS);
 
           const request = store.get(testKey);
@@ -284,10 +292,13 @@ export class IndexedDBService {
 
       // Clean up the test key
       try {
-        const transaction = this.db!.transaction([STORES.SETTINGS], 'readwrite');
+        if (!this.db) {
+          return readResult;
+        }
+        const transaction = this.db.transaction([STORES.SETTINGS], 'readwrite');
         const store = transaction.objectStore(STORES.SETTINGS);
         store.delete(testKey);
-      } catch (e) {
+      } catch (_) {
         // Ignore cleanup errors
       }
 

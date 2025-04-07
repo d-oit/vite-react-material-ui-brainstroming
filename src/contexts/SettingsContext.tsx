@@ -145,7 +145,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     };
 
     initializeData();
-  }, []);
+  }, [settings.activeColorSchemeId]);
 
   // Configure services with settings
   const configureServices = (settingsToUse: Settings) => {
@@ -304,7 +304,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
           }));
           await indexedDBService.saveSettings(legacySettings);
           return true;
-        } catch (e) {
+        } catch (_) {
           throw new Error('Invalid settings data');
         }
       }

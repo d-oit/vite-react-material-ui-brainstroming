@@ -182,7 +182,8 @@ export class OfflineService {
       return isOnline;
     } catch (error) {
       // If the request was aborted due to timeout, mark as unreliable
-      const isTimeout = error instanceof DOMException && error.name === 'AbortError';
+      // Check if it's a timeout error
+      // const isTimeout = error instanceof DOMException && error.name === 'AbortError';
 
       this.updateNetworkStatus({
         ...this.currentNetworkStatus,
@@ -487,7 +488,7 @@ export class OfflineService {
     );
 
     // Determine if the connection is metered
-    if ('connection' in navigator && (navigator as any).connection.saveData) {
+    if ('connection' in navigator && 'saveData' in (navigator as { connection: { saveData?: boolean } }).connection) {
       this.currentNetworkStatus.isMetered = true;
     }
 

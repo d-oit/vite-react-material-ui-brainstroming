@@ -6,7 +6,7 @@ import {
   MoreVert as MoreVertIcon,
   History as HistoryIcon,
   CloudUpload as CloudUploadIcon,
-  Share as ShareIcon,
+  // Share as ShareIcon, // Unused
 } from '@mui/icons-material';
 import {
   Box,
@@ -18,7 +18,7 @@ import {
   Button,
   IconButton,
   Divider,
-  TextField,
+  // TextField, // Unused
   Dialog,
   DialogTitle,
   DialogContent,
@@ -54,8 +54,9 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
   const [confirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
   const [actionType, setActionType] = useState<'delete' | 'archive' | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-  const [newProjectName, setNewProjectName] = useState<string>('');
-  const [newProjectDescription, setNewProjectDescription] = useState<string>('');
+  // Unused state variables
+  // const [newProjectName, setNewProjectName] = useState<string>('');
+  // const [newProjectDescription, setNewProjectDescription] = useState<string>('');
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [menuProjectId, setMenuProjectId] = useState<string | null>(null);
 
@@ -331,7 +332,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
           <Button
             onClick={handleConfirmAction}
             color={actionType === 'delete' ? 'error' : 'primary'}
-            autoFocus
+            // Removed autoFocus for accessibility
           >
             {actionType === 'archive' ? 'Archive' : 'Delete'}
           </Button>

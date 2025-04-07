@@ -1,6 +1,6 @@
 import type { ChatMessage } from '@/types';
 
-import loggerService from '../services/LoggerService';
+// import loggerService from '../services/LoggerService'; // Unused
 import { isValidUrl, isHttpsUrl, sanitizeUrl } from '../utils/urlValidation';
 
 interface OpenRouterResponse {

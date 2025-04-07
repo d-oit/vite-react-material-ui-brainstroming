@@ -2,8 +2,8 @@ import {
   FileDownload as DownloadIcon,
   FileUpload as UploadIcon,
   WifiOff as OfflineIcon,
-  Info as InfoIcon,
-  Warning as WarningIcon,
+  // Info as InfoIcon, // Unused
+  // Warning as WarningIcon, // Unused
 } from '@mui/icons-material';
 import {
   Box,
@@ -187,7 +187,7 @@ export const SettingsExportImport = () => {
       }
 
       return { isValid, warnings, errors };
-    } catch (error) {
+    } catch (_) {
       errors.push('Invalid JSON format');
       return { isValid: false, warnings, errors };
     }

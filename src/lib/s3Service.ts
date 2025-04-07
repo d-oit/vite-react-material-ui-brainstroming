@@ -2,7 +2,7 @@ import AWS from 'aws-sdk';
 
 import loggerService from '../services/LoggerService';
 import type { Project } from '../types';
-import { isValidUrl, sanitizeUrl, validateS3Endpoint } from '../utils/urlValidation';
+import { isValidUrl, /* sanitizeUrl, */ validateS3Endpoint } from '../utils/urlValidation';
 
 /**
  * Create a dummy S3 client that gracefully fails all operations
@@ -17,7 +17,7 @@ const createDummyS3Client = (errorMessage: string): AWS.S3 => {
     deleteObjects: () => ({ promise: () => Promise.reject(new Error(errorMessage)) }),
     upload: () => ({
       promise: () => Promise.reject(new Error(errorMessage)),
-      on: (event: string, _callback: any) => {
+      on: (_event: string, _callback: unknown) => {
         // Mock the progress event but don't call the callback since we're failing anyway
         return {};
       },
@@ -432,7 +432,7 @@ export const listProjects = async (): Promise<
 
           const metadataResult = await s3.getObject(metadataParams).promise();
           metadata = JSON.parse(metadataResult.Body?.toString() || '{}');
-        } catch (error) {
+        } catch (_) {
           loggerService.warn(`No metadata found for project ${projectId}`);
         }
 
@@ -522,7 +522,7 @@ export const isS3Configured = (): boolean => {
     }
 
     return true;
-  } catch (error) {
+  } catch (_) {
     return false;
   }
 };
@@ -560,7 +560,7 @@ export const getS3ConfigStatus = (): {
     result.isConfigured = result.missingConfig.length === 0 && result.invalidUrls.length === 0;
 
     return result;
-  } catch (error) {
+  } catch (_) {
     return result;
   }
 };

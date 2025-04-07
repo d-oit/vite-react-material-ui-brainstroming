@@ -25,7 +25,8 @@ export const withOfflineFallback = <P extends object>(
 
   const WithOfflineFallbackComponent: React.FC<P> = props => {
     const [isOnline, setIsOnline] = useState(offlineService.getOnlineStatus());
-    const [retryCount, setRetryCount] = useState(0);
+    // Unused state variables
+    // const [retryCount, setRetryCount] = useState(0);
 
     useEffect(() => {
       const removeListener = offlineService.addOnlineStatusListener(online => {

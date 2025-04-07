@@ -218,7 +218,7 @@ export const Dashboard = () => {
         <DialogTitle>Create New Project</DialogTitle>
         <DialogContent>
           <TextField
-            autoFocus
+            // Removed autoFocus for accessibility
             margin="dense"
             label="Project Name"
             fullWidth
