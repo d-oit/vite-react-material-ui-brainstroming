@@ -26,6 +26,7 @@ export interface Project {
   updatedAt: string;
   version: number;
   isArchived?: boolean;
+  isPinned?: boolean;
   currentCommitId?: string;
   commits?: GitCommit[];
   template?: ProjectTemplate;
@@ -63,6 +64,7 @@ export function createEmptyProject(id: string): Project {
     updatedAt: new Date().toISOString(),
     version: DEFAULT_PROJECT_VERSION,
     isArchived: false,
+    isPinned: false,
     template: ProjectTemplate.CUSTOM,
     syncSettings: {
       enableS3Sync: false,

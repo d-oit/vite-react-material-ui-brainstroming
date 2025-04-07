@@ -169,25 +169,48 @@ export class ProjectService {
 
   /**
    * Update a project
-   * @param project Updated project
+   * @param projectOrId Project or project ID to update
+   * @param updates Optional partial project updates (when providing ID as first parameter)
    * @returns Promise that resolves with the updated project
    */
-  public async updateProject(project: Project): Promise<Project> {
+  public async updateProject(
+    projectOrId: Project | string,
+    updates?: Partial<Project>
+  ): Promise<Project> {
+    // Determine if we're updating with a full project object or just specific fields
+    let projectId: string;
+    let projectToUpdate: Project | null;
+
+    if (typeof projectOrId === 'string') {
+      // We have an ID and partial updates
+      projectId = projectOrId;
+      if (!updates) {
+        throw new Error('When providing a project ID, updates must be specified');
+      }
+    } else {
+      // We have a full project object
+      projectId = projectOrId.id;
+      updates = projectOrId; // Use the full project as updates
+    }
+
     const metricId = performanceMonitoring.startMeasure(
       'ProjectService.updateProject',
       PerformanceCategory.DATA_LOADING,
-      { projectId: project.id, projectName: project.name }
+      { projectId }
     );
-    try {
-      const existingProject = await indexedDBService.getProject(project.id);
 
-      if (!existingProject) {
-        throw new Error(`Project with ID ${project.id} not found`);
+    try {
+      // Get the existing project
+      projectToUpdate = await indexedDBService.getProject(projectId);
+
+      if (!projectToUpdate) {
+        throw new Error(`Project with ID ${projectId} not found`);
       }
 
-      // Update the project
+      // Create the updated project by merging existing with updates
       const updatedProject = {
-        ...project,
+        ...projectToUpdate,
+        ...updates,
         updatedAt: new Date().toISOString(),
       };
 
@@ -195,13 +218,13 @@ export class ProjectService {
 
       // Add history entry
       await indexedDBService.addProjectHistoryEntry({
-        projectId: project.id,
+        projectId: updatedProject.id,
         action: 'update',
         timestamp: updatedProject.updatedAt,
         details: { version: updatedProject.version },
       });
 
-      loggerService.info(`Project updated: ${project.id} - ${project.name}`);
+      loggerService.info(`Project updated: ${updatedProject.id} - ${updatedProject.name}`);
       return updatedProject;
     } catch (error) {
       loggerService.error(
@@ -291,6 +314,8 @@ export class ProjectService {
         error instanceof Error ? error : new Error(String(error))
       );
       throw new Error(`Failed to ${archive ? 'archive' : 'unarchive'} project`);
+    } finally {
+      performanceMonitoring.endMeasure(metricId);
     }
   }
 
@@ -403,6 +428,11 @@ export class ProjectService {
    * @returns Promise that resolves with an array of history entries
    */
   public async getProjectHistory(id: string, limit = 100): Promise<ProjectHistoryEntry[]> {
+    const metricId = performanceMonitoring.startMeasure(
+      'ProjectService.getProjectHistory',
+      PerformanceCategory.DATA_LOADING,
+      { projectId: id, limit }
+    );
     try {
       return await indexedDBService.getProjectHistory(id, limit);
     } catch (error) {

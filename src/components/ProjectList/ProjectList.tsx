@@ -1,24 +1,9 @@
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Archive as ArchiveIcon,
-  MoreVert as MoreVertIcon,
-  History as HistoryIcon,
-  CloudUpload as CloudUploadIcon,
-  // Share as ShareIcon, // Unused
-} from '@mui/icons-material';
+import { Add as AddIcon, History as HistoryIcon } from '@mui/icons-material';
 import {
   Box,
   Typography,
   Grid,
-  Card,
-  CardContent,
-  CardActions,
   Button,
-  IconButton,
-  Divider,
-  // TextField, // Unused
   Dialog,
   DialogTitle,
   DialogContent,
@@ -26,18 +11,16 @@ import {
   DialogActions,
   CircularProgress,
   Alert,
-  Chip,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
+  useTheme,
 } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { useI18n } from '../../contexts/I18nContext';
 import projectService from '../../services/ProjectService';
 import type { Project } from '../../types';
 import type { ProjectTemplate } from '../../types/project';
+import ProjectCard from '../Project/ProjectCard';
 import ProjectCreateForm from '../Project/ProjectCreateForm';
 
 interface ProjectListProps {
@@ -47,6 +30,8 @@ interface ProjectListProps {
 
 export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRefresh }) => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const { t } = useI18n();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,11 +39,6 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
   const [confirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
   const [actionType, setActionType] = useState<'delete' | 'archive' | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-  // Unused state variables
-  // const [newProjectName, setNewProjectName] = useState<string>('');
-  // const [newProjectDescription, setNewProjectDescription] = useState<string>('');
-  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
-  const [menuProjectId, setMenuProjectId] = useState<string | null>(null);
 
   const loadProjects = async () => {
     setLoading(true);
@@ -106,7 +86,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
     }
   };
 
-  const handleOpenProject = (id: string) => {
+  const _handleOpenProject = (id: string) => {
     navigate(`/projects/${id}`);
   };
 
@@ -148,21 +128,27 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
     }
   };
 
-  const openMenu = (event: React.MouseEvent<HTMLElement>, projectId: string) => {
-    setMenuAnchorEl(event.currentTarget);
-    setMenuProjectId(projectId);
-  };
-
-  const closeMenu = () => {
-    setMenuAnchorEl(null);
-    setMenuProjectId(null);
-  };
-
-  const openConfirmDialog = (type: 'delete' | 'archive') => {
+  const openConfirmDialog = (type: 'delete' | 'archive', projectId: string) => {
     setActionType(type);
-    setSelectedProjectId(menuProjectId);
+    setSelectedProjectId(projectId);
     setConfirmDialogOpen(true);
-    closeMenu();
+  };
+
+  const handlePinProject = async (projectId: string, isPinned: boolean) => {
+    try {
+      // Update the project in the database
+      await projectService.updateProject(projectId, { isPinned });
+
+      // Update the local state
+      setProjects(projects.map(p => (p.id === projectId ? { ...p, isPinned } : p)));
+
+      if (onRefresh) {
+        onRefresh();
+      }
+    } catch (err) {
+      console.error('Error pinning/unpinning project:', err);
+      setError('Failed to update project');
+    }
   };
 
   const handleConfirmAction = async () => {
@@ -177,15 +163,6 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
     setConfirmDialogOpen(false);
     setSelectedProjectId(null);
     setActionType(null);
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    }).format(date);
   };
 
   if (loading && projects.length === 0) {
@@ -219,83 +196,49 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
       </Box>
 
       {projects.length === 0 ? (
-        <Box sx={{ textAlign: 'center', p: 4, bgcolor: 'background.paper', borderRadius: 1 }}>
+        <Box
+          sx={{
+            textAlign: 'center',
+            p: 4,
+            bgcolor: theme.palette.background.paper,
+            borderRadius: 2,
+            boxShadow: theme.shadows[1],
+          }}
+        >
           <HistoryIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2, opacity: 0.7 }} />
           <Typography variant="h6" gutterBottom>
-            No Projects Yet
+            {t('project.noProjects')}
           </Typography>
           <Typography variant="body1" color="text.secondary" paragraph>
-            Create your first brainstorming project to get started.
+            {t('project.createFirstProject')}
           </Typography>
           <Button
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
             onClick={() => setCreateDialogOpen(true)}
+            sx={{
+              mt: 2,
+              borderRadius: 2,
+              px: 3,
+              py: 1,
+              fontWeight: 500,
+            }}
           >
-            Create Project
+            {t('project.createProject')}
           </Button>
         </Box>
       ) : (
         <Grid container spacing={3} sx={{ width: '100%' }}>
           {projects.map(project => (
-            <Grid key={project.id} size={{ xs: 12, sm: 6, md: 4 }}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                    }}
-                  >
-                    <Typography
-                      variant="h6"
-                      component="h3"
-                      gutterBottom
-                      noWrap
-                      sx={{ maxWidth: '80%' }}
-                    >
-                      {project.name}
-                    </Typography>
-                    <IconButton size="small" onClick={e => openMenu(e, project.id)}>
-                      <MoreVertIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    paragraph
-                    sx={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: 'vertical',
-                      minHeight: '4.5em',
-                    }}
-                  >
-                    {project.description || 'No description'}
-                  </Typography>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-                    <Typography variant="caption" color="text.secondary">
-                      Created: {formatDate(project.createdAt)}
-                    </Typography>
-                    <Chip
-                      label={`v${project.version}`}
-                      size="small"
-                      variant="outlined"
-                      color="primary"
-                    />
-                  </Box>
-                </CardContent>
-                <Divider />
-                <CardActions>
-                  <Button size="small" onClick={() => handleOpenProject(project.id)} fullWidth>
-                    Open Project
-                  </Button>
-                </CardActions>
-              </Card>
+            <Grid key={project.id} item xs={12} sm={6} md={4}>
+              <ProjectCard
+                project={project}
+                onDelete={id => openConfirmDialog('delete', id)}
+                onArchive={id => openConfirmDialog('archive', id)}
+                onSync={handleSyncToS3}
+                onPin={handlePinProject}
+              />
             </Grid>
           ))}
         </Grid>
@@ -338,45 +281,6 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Project Actions Menu */}
-      <Menu anchorEl={menuAnchorEl} open={Boolean(menuAnchorEl)} onClose={closeMenu}>
-        <MenuItem
-          onClick={() => {
-            if (menuProjectId) handleOpenProject(menuProjectId);
-            closeMenu();
-          }}
-        >
-          <ListItemIcon>
-            <EditIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Open</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => openConfirmDialog('archive')}>
-          <ListItemIcon>
-            <ArchiveIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Archive</ListItemText>
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            if (menuProjectId) handleSyncToS3(menuProjectId);
-            closeMenu();
-          }}
-        >
-          <ListItemIcon>
-            <CloudUploadIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Sync to S3</ListItemText>
-        </MenuItem>
-        <Divider />
-        <MenuItem onClick={() => openConfirmDialog('delete')}>
-          <ListItemIcon>
-            <DeleteIcon fontSize="small" color="error" />
-          </ListItemIcon>
-          <ListItemText sx={{ color: 'error.main' }}>Delete</ListItemText>
-        </MenuItem>
-      </Menu>
     </Box>
   );
 };

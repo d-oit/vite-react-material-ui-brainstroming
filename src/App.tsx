@@ -15,7 +15,7 @@ import PerformanceProfiler from './components/PerformanceProfiler';
 import CSPMeta from './components/Security/CSPMeta';
 import LoadingFallback from './components/UI/LoadingFallback';
 import { ActionFeedbackProvider } from './contexts/ActionFeedbackContext';
-import { useI18n } from './contexts/I18nContext';
+import { I18nProvider, useI18n } from './contexts/I18nContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 import indexedDBService from './services/IndexedDBService';
 import loggerService from './services/LoggerService';
@@ -290,7 +290,9 @@ const AppWithTheme = () => {
 const App = () => {
   return (
     <SettingsProvider>
-      <AppWithTheme />
+      <I18nProvider initialLocale="en">
+        <AppWithTheme />
+      </I18nProvider>
     </SettingsProvider>
   );
 };

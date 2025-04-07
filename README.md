@@ -53,16 +53,10 @@ A fully responsive PWA for structured brainstorming with offline-first capabilit
 3. Create a `.env` file in the root directory with the following variables:
 
    ```env
-   # OpenRouter API (required for AI features)
-   VITE_OPENROUTER_API_KEY=your_openrouter_api_key
-
-   # AWS S3 (optional)
-   VITE_AWS_BUCKET_NAME=your_bucket_name
-   VITE_AWS_ACCESS_KEY_ID=your_access_key_id
-   VITE_AWS_SECRET_ACCESS_KEY=your_secret_access_key
-   VITE_AWS_REGION=us-east-1
-
+   VITE_S3_ENDPOINT=your_s3_endpoint_here
+   VITE_OPENROUTER_API_URL=your_openrouter_api_url_here
    VITE_PROJECT_VERSION=0.1.0
+   VITE_SKIP_DELETE_CONFIRMATION=false
    ```
 
 ### Development
@@ -140,38 +134,6 @@ npm run format:check
 #### Pre-commit Hooks
 
 This project uses Husky and lint-staged to automatically lint and format code before commits. This ensures that all committed code meets the project's quality standards.
-
-## Project Structure
-
-```text
-d.o.it.brainstorming/
-├── public/               # Static assets
-├── src/
-│   ├── components/       # UI components
-│   │   ├── Accessibility/  # Accessibility components
-│   │   ├── BrainstormFlow/ # Brainstorming canvas components
-│   │   ├── Chat/           # AI chat components
-│   │   ├── ErrorBoundary/  # Error handling
-│   │   ├── Layout/         # Layout components
-│   │   ├── OfflineIndicator/ # Offline status indicators
-│   │   ├── Project/        # Project management components
-│   │   ├── Security/       # Security components
-│   │   └── UI/             # Common UI components
-│   ├── contexts/         # React contexts
-│   ├── hooks/            # Custom React hooks
-│   ├── lib/              # Third-party library integrations
-│   ├── pages/            # Page components
-│   ├── services/         # Business logic services
-│   ├── types/            # TypeScript type definitions
-│   ├── utils/            # Utility functions
-│   ├── App.tsx           # Main application component
-│   ├── main.tsx          # Application entry point
-│   └── sw.ts             # Service worker for PWA
-├── .env                  # Environment variables
-├── index.html            # HTML entry point
-├── vite.config.ts        # Vite configuration
-└── tsconfig.json         # TypeScript configuration
-```
 
 ## PWA Features
 

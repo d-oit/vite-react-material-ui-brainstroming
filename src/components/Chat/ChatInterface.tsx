@@ -1,7 +1,8 @@
 import { Box, Paper, Typography } from '@mui/material';
 
-import { ChatPanel } from './ChatPanel';
 import type { NodeData } from '../../types';
+
+import { ChatPanel } from './ChatPanel';
 
 interface ChatInterfaceProps {
   projectId?: string;

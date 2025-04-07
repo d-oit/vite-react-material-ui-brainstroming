@@ -136,13 +136,14 @@ class PerformanceMonitoringService {
     category: PerformanceCategory,
     metadataFn?: (...args: any[]) => Record<string, any>
   ) {
-    // Store reference to the performance monitoring instance
+    // Capture 'this' context for use in the decorator
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const perfMonitor = this;
 
-    return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
       const originalMethod = descriptor.value;
 
-      descriptor.value = function(...args: any[]) {
+      descriptor.value = function (...args: any[]) {
         const metricName = `${target.constructor.name}.${propertyKey}`;
         const metadata = metadataFn ? metadataFn(...args) : undefined;
 
