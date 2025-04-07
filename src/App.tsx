@@ -14,9 +14,9 @@ import withOfflineFallback from './components/OfflineIndicator/withOfflineFallba
 import PerformanceProfiler from './components/PerformanceProfiler';
 import CSPMeta from './components/Security/CSPMeta';
 import LoadingFallback from './components/UI/LoadingFallback';
+import { ActionFeedbackProvider } from './contexts/ActionFeedbackContext';
 import { useI18n } from './contexts/I18nContext';
 import { SettingsProvider } from './contexts/SettingsContext';
-import { ActionFeedbackProvider } from './contexts/ActionFeedbackContext';
 import indexedDBService from './services/IndexedDBService';
 import loggerService from './services/LoggerService';
 import offlineService from './services/OfflineService';
@@ -209,72 +209,72 @@ const AppWithTheme = () => {
         <CssBaseline />
         <ActionFeedbackProvider>
           <ErrorBoundary>
-          <BrowserRouter
-            future={{
-              v7_startTransition: true,
-              v7_relativeSplatPath: true,
-            }}
-          >
-            <Suspense fallback={<LoadingFallback />}>
-              <Routes>
-                <Route
-                  path="/"
-                  element={
-                    <HomePage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
-                  }
-                />
-                <Route
-                  path="/projects"
-                  element={
-                    <ProjectDashboard
-                      onThemeToggle={toggleThemeMode}
-                      isDarkMode={mode === 'dark'}
-                    />
-                  }
-                />
-                <Route
-                  path="/projects/:projectId/*"
-                  element={withOfflineFallback(ProjectDetailPage)({
-                    onThemeToggle: toggleThemeMode,
-                    isDarkMode: mode === 'dark',
-                  })}
-                />
-                <Route
-                  path="/settings"
-                  element={
-                    <SettingsPage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
-                  }
-                />
-                {/* Removed standalone brainstorming route - now using quick project creation */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </Suspense>
-
-            {/* Offline indicator removed as per UI update plan */}
-
-            {/* Accessibility menu */}
-            <AccessibilityMenu position="bottom-left" />
-
-            {/* Performance profiler */}
-            <PerformanceProfiler />
-
-            {/* Update notification */}
-            <Snackbar
-              open={updateAvailable}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            <BrowserRouter
+              future={{
+                v7_startTransition: true,
+                v7_relativeSplatPath: true,
+              }}
             >
-              <Alert
-                severity="info"
-                action={
-                  <Button color="inherit" size="small" onClick={handleUpdateApp}>
-                    Update
-                  </Button>
-                }
+              <Suspense fallback={<LoadingFallback />}>
+                <Routes>
+                  <Route
+                    path="/"
+                    element={
+                      <HomePage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
+                    }
+                  />
+                  <Route
+                    path="/projects"
+                    element={
+                      <ProjectDashboard
+                        onThemeToggle={toggleThemeMode}
+                        isDarkMode={mode === 'dark'}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/projects/:projectId/*"
+                    element={withOfflineFallback(ProjectDetailPage)({
+                      onThemeToggle: toggleThemeMode,
+                      isDarkMode: mode === 'dark',
+                    })}
+                  />
+                  <Route
+                    path="/settings"
+                    element={
+                      <SettingsPage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
+                    }
+                  />
+                  {/* Removed standalone brainstorming route - now using quick project creation */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </Suspense>
+
+              {/* Offline indicator removed as per UI update plan */}
+
+              {/* Accessibility menu */}
+              <AccessibilityMenu position="bottom-left" />
+
+              {/* Performance profiler */}
+              <PerformanceProfiler />
+
+              {/* Update notification */}
+              <Snackbar
+                open={updateAvailable}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
               >
-                A new version is available!
-              </Alert>
-            </Snackbar>
-          </BrowserRouter>
+                <Alert
+                  severity="info"
+                  action={
+                    <Button color="inherit" size="small" onClick={handleUpdateApp}>
+                      Update
+                    </Button>
+                  }
+                >
+                  A new version is available!
+                </Alert>
+              </Snackbar>
+            </BrowserRouter>
           </ErrorBoundary>
         </ActionFeedbackProvider>
       </ThemeProvider>

@@ -1,5 +1,6 @@
-import { test } from '@playwright/test';
 import * as fs from 'fs';
+
+import { test } from '@playwright/test';
 
 test('debug quick brainstorm button', async ({ page }) => {
   // Create a log array
@@ -44,7 +45,7 @@ test('debug quick brainstorm button', async ({ page }) => {
 
   // Check for Add Node button
   const addNodeButton = page.getByRole('button', { name: 'Add Node' });
-  logs.push(`\nAdd Node button found: ${await addNodeButton.count() > 0}`);
+  logs.push(`\nAdd Node button found: ${(await addNodeButton.count()) > 0}`);
 
   // Check for all elements with aria-label
   logs.push('\nElements with aria-label:');

@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { MemoizedNodeEditDialog as NodeEditDialog } from '../../components/BrainstormFlow/NodeEditDialog';
-import { NodeType } from '../../types';
 import { I18nProvider } from '../../contexts/I18nContext';
 import { SettingsProvider } from '../../contexts/SettingsContext';
+import { NodeType } from '../../types';
 
 // Wrap component with required providers
 const renderWithProviders = (ui: React.ReactElement) => {
@@ -15,7 +16,6 @@ const renderWithProviders = (ui: React.ReactElement) => {
 };
 
 describe('NodeEditDialog', () => {
-
   const mockOnClose = vi.fn();
   const mockOnSave = vi.fn();
 
@@ -244,12 +244,7 @@ describe('NodeEditDialog', () => {
   it('renders in add mode when no initialValues are provided', () => {
     // Render the component in add mode
     renderWithProviders(
-      <NodeEditDialog
-        open={true}
-        onClose={mockOnClose}
-        onSave={mockOnSave}
-        isAdd={true}
-      />
+      <NodeEditDialog open={true} onClose={mockOnClose} onSave={mockOnSave} isAdd={true} />
     );
 
     // Check that the dialog is rendered in add mode

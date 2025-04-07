@@ -4,12 +4,13 @@ import { ProjectTemplate } from '../types/project';
 // These types are used in the Project type
 // import { Node, Edge } from '../types';
 
+import performanceMonitoring, { PerformanceCategory } from '../utils/performanceMonitoring';
+
 import gitService from './GitService';
 import indexedDBService from './IndexedDBService';
 import loggerService from './LoggerService';
 import offlineService from './OfflineService';
 import s3Service from './S3Service';
-import performanceMonitoring, { PerformanceCategory } from '../utils/performanceMonitoring';
 
 /**
  * Service for managing projects

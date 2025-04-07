@@ -23,7 +23,7 @@ import {
   FormControlLabel,
   Checkbox,
 } from '@mui/material';
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
 import type {
   Node as FlowNode,
   // Edge as FlowEdge,
@@ -34,17 +34,28 @@ import type {
   ReactFlowInstance,
   XYPosition,
 } from 'reactflow';
-import ReactFlow, {
-  Background,
-  Controls,
-  MiniMap,
-  useNodesState,
-  useEdgesState,
-  addEdge,
-  useReactFlow,
-  ReactFlowProvider,
-} from 'reactflow';
-import 'reactflow/dist/style.css';
+
+// Lazy load React Flow components
+const ReactFlowModule = lazy(() => import('reactflow').then(module => {
+  // Also import the CSS
+  import('reactflow/dist/style.css');
+  return { default: module.default };
+}));
+
+const ReactFlowComponents = lazy(() => import('reactflow').then(module => {
+  return {
+    default: {
+      Background: module.Background,
+      Controls: module.Controls,
+      MiniMap: module.MiniMap,
+      useNodesState: module.useNodesState,
+      useEdgesState: module.useEdgesState,
+      addEdge: module.addEdge,
+      useReactFlow: module.useReactFlow,
+      ReactFlowProvider: module.ReactFlowProvider,
+    }
+  };
+}));
 
 import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -100,8 +111,9 @@ const FlowContent = ({
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  // Initialize state variables
+  const [nodes, setNodes] = useState<FlowNode[]>([]);
+  const [edges, setEdges] = useState<any[]>(initialEdges || []);
   const [nodeEditOpen, setNodeEditOpen] = useState(false);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -111,8 +123,18 @@ const FlowContent = ({
   const [nodeToDelete, setNodeToDelete] = useState<string | null>(null);
   const [showChat, setShowChat] = useState(false);
 
-  // Get ReactFlow utility functions - now this is safe because we're inside ReactFlowProvider
-  const { fitView, zoomIn, zoomOut, _setViewport } = useReactFlow(); // _setViewport is not used currently
+  // These will be initialized when ReactFlow is loaded
+  const [reactFlowHooks, setReactFlowHooks] = useState<{
+    useNodesState: any;
+    useEdgesState: any;
+    useReactFlow: any;
+    addEdge: any;
+    onNodesChange: any;
+    onEdgesChange: any;
+    fitView: any;
+    zoomIn: any;
+    zoomOut: any;
+  }>({} as any);
 
   // Handle nodes change with external callback
   const handleNodesChange = useCallback(
@@ -182,16 +204,27 @@ const FlowContent = ({
         style: { stroke: '#2196f3', strokeWidth: 2 }, // Add styling
       };
 
-      const updatedEdges = addEdge(newEdge, edges);
-      setEdges(updatedEdges);
+      // Use the addEdge function from reactFlowHooks if available
+      if (reactFlowHooks.addEdge) {
+        const updatedEdges = reactFlowHooks.addEdge(newEdge, edges);
+        setEdges(updatedEdges);
 
-      if (externalEdgesChange) {
-        externalEdgesChange(updatedEdges);
+        if (externalEdgesChange) {
+          externalEdgesChange(updatedEdges);
+        }
+      } else {
+        // Fallback if addEdge is not available yet
+        const updatedEdges = [...edges, newEdge];
+        setEdges(updatedEdges);
+
+        if (externalEdgesChange) {
+          externalEdgesChange(updatedEdges);
+        }
       }
 
       showSnackbar(t('brainstorm.edgeCreated') || 'Connection created', 'success');
     },
-    [edges, setEdges, externalEdgesChange, t]
+    [edges, setEdges, externalEdgesChange, t, reactFlowHooks]
   );
 
   // Handle node click
@@ -523,66 +556,105 @@ const FlowContent = ({
         position: 'relative',
       }}
     >
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={handleNodesChange}
-        onEdgesChange={handleEdgesChange}
-        onConnect={onConnect}
-        onNodeClick={onNodeClick}
-        onInit={setReactFlowInstance}
-        nodeTypes={nodeTypes}
-        fitView
-        attributionPosition="bottom-right"
-        minZoom={0.1}
-        maxZoom={4}
-        defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-        proOptions={{ hideAttribution: true }}
-        snapToGrid={!isMobile}
-        snapGrid={[15, 15]}
-        deleteKeyCode={['Backspace', 'Delete']}
-        multiSelectionKeyCode={['Control', 'Meta']}
-        selectionKeyCode={['Shift']}
-        connectionMode="loose"
-        connectionLineStyle={{ stroke: '#2196f3', strokeWidth: 3 }}
-        connectionLineType="smoothstep"
-        zoomOnScroll={true}
-        panOnScroll={true}
-        panOnDrag={!isMobile}
-      >
-        <Background
-          color={theme.palette.mode === 'dark' ? '#555' : '#aaa'}
-          gap={isMobile ? 15 : 20}
-          size={isMobile ? 0.5 : 1}
-          variant={theme.palette.mode === 'dark' ? 'dots' : 'dots'}
-        />
+      <Suspense fallback={<Box sx={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading Flow Editor...</Box>}>
+        <ReactFlowComponents>
+          {(components) => {
+            // Initialize hooks and components from lazy-loaded ReactFlow
+            const {
+              Background,
+              Controls,
+              MiniMap,
+              ReactFlowProvider,
+              useNodesState,
+              useEdgesState,
+              useReactFlow,
+              addEdge
+            } = components.default;
 
-        {!isMobile && (
-          <MiniMap
-            nodeStrokeWidth={3}
-            zoomable
-            pannable
-            position="bottom-left"
-            style={{
-              backgroundColor:
-                theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[100],
-              border: `1px solid ${theme.palette.divider}`,
-            }}
-          />
-        )}
+            // Initialize the hooks if they haven't been initialized yet
+            useEffect(() => {
+              if (!reactFlowHooks.addEdge) {
+                setReactFlowHooks({
+                  useNodesState,
+                  useEdgesState,
+                  useReactFlow,
+                  addEdge,
+                  onNodesChange: null,
+                  onEdgesChange: null,
+                  fitView: null,
+                  zoomIn: null,
+                  zoomOut: null
+                });
+              }
+            }, []);
 
-        {!isMobile && !readOnly && (
-          <Controls
-            position="bottom-right"
-            showInteractive={false}
-            style={{
-              backgroundColor:
-                theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[100],
-              border: `1px solid ${theme.palette.divider}`,
-            }}
-          />
-        )}
-      </ReactFlow>
+            return (
+              <ReactFlowProvider>
+                <ReactFlowModule
+                  nodes={nodes}
+                  edges={edges}
+                  onNodesChange={handleNodesChange}
+                  onEdgesChange={handleEdgesChange}
+                  onConnect={onConnect}
+                  onNodeClick={onNodeClick}
+                  onInit={setReactFlowInstance}
+                  nodeTypes={nodeTypes}
+                  fitView
+                  attributionPosition="bottom-right"
+                  minZoom={0.1}
+                  maxZoom={4}
+                  defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+                  proOptions={{ hideAttribution: true }}
+                  snapToGrid={!isMobile}
+                  snapGrid={[15, 15]}
+                  deleteKeyCode={['Backspace', 'Delete']}
+                  multiSelectionKeyCode={['Control', 'Meta']}
+                  selectionKeyCode={['Shift']}
+                  connectionMode="loose"
+                  connectionLineStyle={{ stroke: '#2196f3', strokeWidth: 3 }}
+                  connectionLineType="smoothstep"
+                  zoomOnScroll={true}
+                  panOnScroll={true}
+                  panOnDrag={!isMobile}
+                >
+                  <Background
+                    color={theme.palette.mode === 'dark' ? '#555' : '#aaa'}
+                    gap={isMobile ? 15 : 20}
+                    size={isMobile ? 0.5 : 1}
+                    variant={theme.palette.mode === 'dark' ? 'dots' : 'dots'}
+                  />
+
+                  {!isMobile && (
+                    <MiniMap
+                      nodeStrokeWidth={3}
+                      zoomable
+                      pannable
+                      position="bottom-left"
+                      style={{
+                        backgroundColor:
+                          theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[100],
+                        border: `1px solid ${theme.palette.divider}`,
+                      }}
+                    />
+                  )}
+
+                  {!isMobile && !readOnly && (
+                    <Controls
+                      position="bottom-right"
+                      showInteractive={false}
+                      style={{
+                        backgroundColor:
+                          theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[100],
+                        border: `1px solid ${theme.palette.divider}`,
+                      }}
+                    />
+                  )}
+                </ReactFlowModule>
+              </ReactFlowProvider>
+            );
+          }}
+        </ReactFlowComponents>
+      </Suspense>
 
       {/* Chat Panel */}
       <Box

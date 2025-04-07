@@ -1,6 +1,7 @@
-import React from 'react';
+import type { BoxProps } from '@mui/material';
+import { Box } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Box, BoxProps } from '@mui/material';
+import React from 'react';
 
 // Animation variants
 const fadeVariants = {
@@ -40,7 +41,7 @@ const scaleVariants = {
 };
 
 // Animation types
-export type AnimationType = 
+export type AnimationType =
   | 'fade'
   | 'slideUp'
   | 'slideDown'
@@ -94,11 +95,11 @@ const AnimatedTransition: React.FC<AnimatedTransitionProps> = ({
   ...boxProps
 }) => {
   const variants = getVariant(type);
-  
+
   if (type === 'none') {
     return <Box {...boxProps}>{children}</Box>;
   }
-  
+
   return (
     <AnimatePresence mode="wait">
       {isVisible && (

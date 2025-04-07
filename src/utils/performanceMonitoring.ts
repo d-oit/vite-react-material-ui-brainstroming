@@ -136,14 +136,10 @@ class PerformanceMonitoringService {
   ) {
     const performanceService = this;
 
-    return function(
-      target: any,
-      propertyKey: string,
-      descriptor: PropertyDescriptor
-    ) {
+    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
       const originalMethod = descriptor.value;
 
-      descriptor.value = function(...args: any[]) {
+      descriptor.value = function (...args: any[]) {
         const metricName = `${target.constructor.name}.${propertyKey}`;
         const metadata = metadataFn ? metadataFn(...args) : undefined;
 
@@ -176,14 +172,11 @@ class PerformanceMonitoringService {
    * @param Component The React component to wrap
    * @param name Optional name for the metric (defaults to component display name)
    */
-  public wrapComponent<P>(
-    Component: React.ComponentType<P>,
-    name?: string
-  ): React.FC<P> {
+  public wrapComponent<P>(Component: React.ComponentType<P>, name?: string): React.FC<P> {
     const performanceService = this;
     const componentName = name || Component.displayName || Component.name || 'UnknownComponent';
 
-    const WrappedComponent: React.FC<P> = (props) => {
+    const WrappedComponent: React.FC<P> = props => {
       const metricId = React.useRef<string>('');
 
       React.useEffect(() => {
@@ -213,13 +206,16 @@ class PerformanceMonitoringService {
     console.group('Performance Metrics Report');
 
     // Group by category
-    const categorized = this.metrics.reduce((acc, metric) => {
-      if (!acc[metric.category]) {
-        acc[metric.category] = [];
-      }
-      acc[metric.category].push(metric);
-      return acc;
-    }, {} as Record<string, PerformanceMetric[]>);
+    const categorized = this.metrics.reduce(
+      (acc, metric) => {
+        if (!acc[metric.category]) {
+          acc[metric.category] = [];
+        }
+        acc[metric.category].push(metric);
+        return acc;
+      },
+      {} as Record<string, PerformanceMetric[]>
+    );
 
     // Log each category
     Object.entries(categorized).forEach(([category, metrics]) => {
@@ -229,10 +225,7 @@ class PerformanceMonitoringService {
       metrics
         .sort((a, b) => (b.duration || 0) - (a.duration || 0))
         .forEach(metric => {
-          console.log(
-            `${metric.name}: ${metric.duration?.toFixed(2)}ms`,
-            metric.metadata || ''
-          );
+          console.log(`${metric.name}: ${metric.duration?.toFixed(2)}ms`, metric.metadata || '');
         });
 
       console.groupEnd();

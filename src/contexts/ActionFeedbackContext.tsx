@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import ActionFeedback, { ActionFeedbackType } from '../components/UI/ActionFeedback';
+
+import type { ActionFeedbackType } from '../components/UI/ActionFeedback';
+import ActionFeedback from '../components/UI/ActionFeedback';
 
 interface ActionFeedbackContextType {
   showFeedback: (message: string, type: ActionFeedbackType, duration?: number) => void;
@@ -22,7 +24,7 @@ export const ActionFeedbackProvider: React.FC<ActionFeedbackProviderProps> = ({ 
   const [duration, setDuration] = useState(4000);
   const [progress, setProgress] = useState(0);
   const [loadingId, setLoadingId] = useState<string | null>(null);
-  
+
   // Show feedback
   const showFeedback = useCallback((message: string, type: ActionFeedbackType, duration = 4000) => {
     setMessage(message);
@@ -32,7 +34,7 @@ export const ActionFeedbackProvider: React.FC<ActionFeedbackProviderProps> = ({ 
     setLoadingId(null);
     setOpen(true);
   }, []);
-  
+
   // Show loading feedback
   const showLoading = useCallback((message: string, autoClose = false) => {
     const id = `loading-${Date.now()}`;
@@ -44,42 +46,48 @@ export const ActionFeedbackProvider: React.FC<ActionFeedbackProviderProps> = ({ 
     setOpen(true);
     return id;
   }, []);
-  
+
   // Update loading feedback
-  const updateLoading = useCallback((id: string, message: string, progress = 0) => {
-    if (id === loadingId) {
-      setMessage(message);
-      setProgress(progress);
-    }
-  }, [loadingId]);
-  
+  const updateLoading = useCallback(
+    (id: string, message: string, progress = 0) => {
+      if (id === loadingId) {
+        setMessage(message);
+        setProgress(progress);
+      }
+    },
+    [loadingId]
+  );
+
   // Complete loading feedback
-  const completeLoading = useCallback((id: string, message: string, type: 'success' | 'error' = 'success') => {
-    if (id === loadingId) {
-      setMessage(message);
-      setType(type);
-      setProgress(100);
-      setDuration(4000);
-      
-      // Auto-close after a delay
-      setTimeout(() => {
-        setOpen(false);
-      }, 4000);
-    }
-  }, [loadingId]);
-  
+  const completeLoading = useCallback(
+    (id: string, message: string, type: 'success' | 'error' = 'success') => {
+      if (id === loadingId) {
+        setMessage(message);
+        setType(type);
+        setProgress(100);
+        setDuration(4000);
+
+        // Auto-close after a delay
+        setTimeout(() => {
+          setOpen(false);
+        }, 4000);
+      }
+    },
+    [loadingId]
+  );
+
   // Hide feedback
   const hideFeedback = useCallback(() => {
     setOpen(false);
   }, []);
-  
+
   // Handle close
   const handleClose = useCallback(() => {
     if (type !== 'loading' || duration) {
       setOpen(false);
     }
   }, [type, duration]);
-  
+
   return (
     <ActionFeedbackContext.Provider
       value={{

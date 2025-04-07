@@ -9,6 +9,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/tests/setup.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**', '**/playwright/**'],
     coverage: {
       reporter: ['text', 'json', 'html'],
       exclude: [
@@ -16,6 +17,8 @@ export default defineConfig({
         'src/tests/setup.ts',
         'src/tests/test-utils.tsx',
         '**/*.d.ts',
+        '**/e2e/**',
+        '**/playwright/**',
       ],
     },
   },

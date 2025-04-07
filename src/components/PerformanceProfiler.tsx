@@ -1,10 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Button, 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
+import CloseIcon from '@mui/icons-material/Close';
+import DownloadIcon from '@mui/icons-material/Download';
+import MemoryIcon from '@mui/icons-material/Memory';
+import NetworkCheckIcon from '@mui/icons-material/NetworkCheck';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import SpeedIcon from '@mui/icons-material/Speed';
+import StorageIcon from '@mui/icons-material/Storage';
+import TouchAppIcon from '@mui/icons-material/TouchApp';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
   DialogActions,
   Typography,
   Table,
@@ -19,21 +26,12 @@ import {
   IconButton,
   Tooltip,
   Switch,
-  FormControlLabel
+  FormControlLabel,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import DownloadIcon from '@mui/icons-material/Download';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import SpeedIcon from '@mui/icons-material/Speed';
-import MemoryIcon from '@mui/icons-material/Memory';
-import StorageIcon from '@mui/icons-material/Storage';
-import NetworkCheckIcon from '@mui/icons-material/NetworkCheck';
-import TouchAppIcon from '@mui/icons-material/TouchApp';
+import React, { useState, useEffect } from 'react';
 
-import performanceMonitoring, { 
-  PerformanceMetric, 
-  PerformanceCategory 
-} from '../utils/performanceMonitoring';
+import type { PerformanceMetric } from '../utils/performanceMonitoring';
+import performanceMonitoring, { PerformanceCategory } from '../utils/performanceMonitoring';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -52,11 +50,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`performance-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 }
@@ -129,9 +123,9 @@ const PerformanceProfiler: React.FC = () => {
   const downloadMetrics = () => {
     const dataStr = JSON.stringify(metrics, null, 2);
     const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
-    
+
     const exportFileDefaultName = `performance_metrics_${new Date().toISOString()}.json`;
-    
+
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
@@ -153,7 +147,7 @@ const PerformanceProfiler: React.FC = () => {
   const getAverageDuration = (category?: PerformanceCategory) => {
     const filtered = getFilteredMetrics(category);
     if (filtered.length === 0) return 0;
-    
+
     const sum = filtered.reduce((acc, metric) => acc + (metric.duration || 0), 0);
     return sum / filtered.length;
   };
@@ -162,7 +156,7 @@ const PerformanceProfiler: React.FC = () => {
   const getSlowestMetric = (category?: PerformanceCategory) => {
     const filtered = getFilteredMetrics(category);
     if (filtered.length === 0) return null;
-    
+
     return filtered.reduce((slowest, current) => {
       return (current.duration || 0) > (slowest.duration || 0) ? current : slowest;
     }, filtered[0]);
@@ -208,12 +202,7 @@ const PerformanceProfiler: React.FC = () => {
       </Tooltip>
 
       {/* Performance profiler dialog */}
-      <Dialog
-        open={open}
-        onClose={() => setOpen(false)}
-        maxWidth="lg"
-        fullWidth
-      >
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="lg" fullWidth>
         <DialogTitle>
           Performance Profiler
           <IconButton
@@ -230,16 +219,12 @@ const PerformanceProfiler: React.FC = () => {
         </DialogTitle>
 
         <DialogContent dividers>
-          <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box
+            sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+          >
             <Box>
               <FormControlLabel
-                control={
-                  <Switch
-                    checked={enabled}
-                    onChange={toggleMonitoring}
-                    color="primary"
-                  />
-                }
+                control={<Switch checked={enabled} onChange={toggleMonitoring} color="primary" />}
                 label="Enable Monitoring"
               />
               <FormControlLabel
@@ -274,36 +259,12 @@ const PerformanceProfiler: React.FC = () => {
 
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={tabValue} onChange={handleTabChange} aria-label="performance tabs">
-              <Tab 
-                icon={<SpeedIcon />} 
-                label="All" 
-                {...a11yProps(0)} 
-              />
-              <Tab 
-                icon={<SpeedIcon />} 
-                label="Rendering" 
-                {...a11yProps(1)} 
-              />
-              <Tab 
-                icon={<StorageIcon />} 
-                label="Data Loading" 
-                {...a11yProps(2)} 
-              />
-              <Tab 
-                icon={<TouchAppIcon />} 
-                label="User Interaction" 
-                {...a11yProps(3)} 
-              />
-              <Tab 
-                icon={<NetworkCheckIcon />} 
-                label="Network" 
-                {...a11yProps(4)} 
-              />
-              <Tab 
-                icon={<MemoryIcon />} 
-                label="Storage" 
-                {...a11yProps(5)} 
-              />
+              <Tab icon={<SpeedIcon />} label="All" {...a11yProps(0)} />
+              <Tab icon={<SpeedIcon />} label="Rendering" {...a11yProps(1)} />
+              <Tab icon={<StorageIcon />} label="Data Loading" {...a11yProps(2)} />
+              <Tab icon={<TouchAppIcon />} label="User Interaction" {...a11yProps(3)} />
+              <Tab icon={<NetworkCheckIcon />} label="Network" {...a11yProps(4)} />
+              <Tab icon={<MemoryIcon />} label="Storage" {...a11yProps(5)} />
             </Tabs>
           </Box>
 
@@ -317,15 +278,11 @@ const PerformanceProfiler: React.FC = () => {
               </Paper>
               <Paper sx={{ p: 2, flexGrow: 1, minWidth: '200px' }}>
                 <Typography variant="subtitle2">Average Duration</Typography>
-                <Typography variant="h4">
-                  {getAverageDuration().toFixed(2)} ms
-                </Typography>
+                <Typography variant="h4">{getAverageDuration().toFixed(2)} ms</Typography>
               </Paper>
               <Paper sx={{ p: 2, flexGrow: 1, minWidth: '200px' }}>
                 <Typography variant="subtitle2">Slowest Operation</Typography>
-                <Typography variant="h6">
-                  {getSlowestMetric()?.name || 'N/A'}
-                </Typography>
+                <Typography variant="h6">{getSlowestMetric()?.name || 'N/A'}</Typography>
                 <Typography variant="body2">
                   {getSlowestMetric()?.duration?.toFixed(2) || 0} ms
                 </Typography>
@@ -400,22 +357,14 @@ const MetricsTable: React.FC<MetricsTableProps> = ({ metrics }) => {
                   {metric.name}
                 </TableCell>
                 <TableCell>{metric.category}</TableCell>
-                <TableCell align="right">
-                  {metric.duration?.toFixed(2) || 'N/A'}
-                </TableCell>
+                <TableCell align="right">{metric.duration?.toFixed(2) || 'N/A'}</TableCell>
                 <TableCell align="right">
                   {new Date(metric.startTime).toLocaleTimeString()}
                 </TableCell>
                 <TableCell align="right">
-                  {metric.endTime 
-                    ? new Date(metric.endTime).toLocaleTimeString() 
-                    : 'N/A'}
+                  {metric.endTime ? new Date(metric.endTime).toLocaleTimeString() : 'N/A'}
                 </TableCell>
-                <TableCell>
-                  {metric.metadata 
-                    ? JSON.stringify(metric.metadata) 
-                    : 'N/A'}
-                </TableCell>
+                <TableCell>{metric.metadata ? JSON.stringify(metric.metadata) : 'N/A'}</TableCell>
               </TableRow>
             ))
           )}

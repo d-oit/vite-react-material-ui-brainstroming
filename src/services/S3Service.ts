@@ -90,10 +90,12 @@ export class S3Service {
       // Dynamically import AWS SDK only when needed
       if (!this.AWS) {
         try {
-          // Use dynamic import to load AWS SDK only when needed
-          // @ts-expect-error - Dynamic import
-          const AWS = await import('aws-sdk/dist/aws-sdk.js');
-          this.AWS = AWS.default || AWS;
+          // Use dynamic import to load only the specific AWS SDK modules we need
+          const { S3 } = await import('aws-sdk/clients/s3');
+          const { config, Credentials } = await import('aws-sdk');
+
+          // Store the imported modules
+          this.AWS = { S3, config, Credentials };
         } catch (err) {
           console.error('Failed to load AWS SDK:', err);
           return false;

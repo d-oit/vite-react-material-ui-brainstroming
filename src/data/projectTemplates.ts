@@ -450,26 +450,20 @@ export function createProjectFromTemplate(
   // Use a type-safe approach to avoid object injection
   let template;
   switch (templateType) {
-    case 'blank':
-      template = projectTemplates.blank;
+    case ProjectTemplate.BUSINESS_PLAN:
+      template = projectTemplates[ProjectTemplate.BUSINESS_PLAN];
       break;
-    case 'business':
-      template = projectTemplates.business;
+    case ProjectTemplate.MARKETING_CAMPAIGN:
+      template = projectTemplates[ProjectTemplate.MARKETING_CAMPAIGN];
       break;
-    case 'education':
-      template = projectTemplates.education;
+    case ProjectTemplate.RESEARCH_PROJECT:
+      template = projectTemplates[ProjectTemplate.RESEARCH_PROJECT];
       break;
-    case 'personal':
-      template = projectTemplates.personal;
-      break;
-    case 'research':
-      template = projectTemplates.research;
-      break;
-    case 'software':
-      template = projectTemplates.software;
+    case ProjectTemplate.SOFTWARE_DEVELOPMENT:
+      template = projectTemplates[ProjectTemplate.SOFTWARE_DEVELOPMENT];
       break;
     default:
-      template = projectTemplates.blank;
+      template = projectTemplates[ProjectTemplate.CUSTOM];
   }
   const now = new Date().toISOString();
 

@@ -3,8 +3,8 @@ import { useState, useEffect, useCallback } from 'react';
 
 import { useErrorNotification } from '../../contexts/ErrorNotificationContext';
 import loggerService from '../../services/LoggerService';
-import performanceMonitoring, { PerformanceCategory } from '../../utils/performanceMonitoring';
 import type { Node, Edge, Project } from '../../types';
+import performanceMonitoring, { PerformanceCategory } from '../../utils/performanceMonitoring';
 import EnhancedBrainstormFlow from '../BrainstormFlow/EnhancedBrainstormFlow';
 import withPerformanceMonitoring from '../BrainstormFlow/withPerformanceMonitoring';
 
@@ -16,7 +16,10 @@ interface ProjectBrainstormingSectionProps {
 }
 
 // Wrap EnhancedBrainstormFlow with performance monitoring
-const PerformanceMonitoredBrainstormFlow = withPerformanceMonitoring(EnhancedBrainstormFlow, 'EnhancedBrainstormFlow');
+const PerformanceMonitoredBrainstormFlow = withPerformanceMonitoring(
+  EnhancedBrainstormFlow,
+  'EnhancedBrainstormFlow'
+);
 
 const ProjectBrainstormingSection = ({
   project,
@@ -132,4 +135,7 @@ const ProjectBrainstormingSection = ({
 };
 
 // Export with performance monitoring
-export default withPerformanceMonitoring(ProjectBrainstormingSection, 'ProjectBrainstormingSection');
+export default withPerformanceMonitoring(
+  ProjectBrainstormingSection,
+  'ProjectBrainstormingSection'
+);

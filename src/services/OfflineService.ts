@@ -50,7 +50,7 @@ export class OfflineService {
    * Notify all listeners about the current online status
    */
   private notifyListeners(): void {
-    this.listeners.forEach((listener) => {
+    this.listeners.forEach(listener => {
       try {
         listener(this.isOnline);
       } catch (error) {

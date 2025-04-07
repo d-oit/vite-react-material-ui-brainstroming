@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ProjectService } from '../../services/ProjectService';
+
+import gitService from '../../services/GitService';
 import indexedDBService from '../../services/IndexedDBService';
 import loggerService from '../../services/LoggerService';
-import s3Service from '../../services/S3Service';
-import gitService from '../../services/GitService';
 import offlineService from '../../services/OfflineService';
-import { ProjectTemplate } from '../../types/project';
+import { ProjectService } from '../../services/ProjectService';
+import s3Service from '../../services/S3Service';
 import type { Project, ProjectHistoryEntry } from '../../types';
+import { ProjectTemplate } from '../../types/project';
 
 // Mock dependencies
 vi.mock('../../services/IndexedDBService', () => ({
@@ -275,10 +276,12 @@ describe('ProjectService', () => {
           updatedAt: mockDate.toISOString(),
         })
       );
-      expect(result).toEqual(expect.objectContaining({
-        ...updatedProject,
-        updatedAt: mockDate.toISOString(),
-      }));
+      expect(result).toEqual(
+        expect.objectContaining({
+          ...updatedProject,
+          updatedAt: mockDate.toISOString(),
+        })
+      );
       expect(loggerService.info).toHaveBeenCalledWith(
         expect.stringContaining('Project updated'),
         expect.any(Object)

@@ -1,19 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Snackbar, 
-  Alert, 
-  AlertProps, 
-  Fade, 
-  CircularProgress,
-  Box,
-  Typography,
-  useTheme
-} from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import InfoIcon from '@mui/icons-material/Info';
 import WarningIcon from '@mui/icons-material/Warning';
+import { Snackbar, Alert, Fade, CircularProgress, Box, Typography, useTheme } from '@mui/material';
+import type { AlertProps } from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
 
 // Action feedback types
 export type ActionFeedbackType = 'success' | 'error' | 'info' | 'warning' | 'loading';
@@ -49,16 +41,16 @@ const ActionFeedback: React.FC<ActionFeedbackProps> = ({
 }) => {
   const theme = useTheme();
   const [progress, setProgress] = useState(progressValue);
-  
+
   // Update progress when progressValue changes
   useEffect(() => {
     setProgress(progressValue);
   }, [progressValue]);
-  
+
   // Auto-increment progress for loading type
   useEffect(() => {
     let timer: number;
-    
+
     if (open && type === 'loading' && !progressValue && progress < 95) {
       timer = window.setTimeout(() => {
         // Slow down as we approach 100%
@@ -66,25 +58,25 @@ const ActionFeedback: React.FC<ActionFeedbackProps> = ({
         setProgress(prev => Math.min(prev + increment, 95));
       }, 300);
     }
-    
+
     return () => {
       if (timer) clearTimeout(timer);
     };
   }, [open, type, progress, progressValue]);
-  
+
   // Reset progress when closed
   useEffect(() => {
     if (!open) {
       const timer = window.setTimeout(() => {
         setProgress(0);
       }, 300);
-      
+
       return () => {
         clearTimeout(timer);
       };
     }
   }, [open]);
-  
+
   // Get icon based on type
   const getIcon = () => {
     switch (type) {
@@ -102,7 +94,7 @@ const ActionFeedback: React.FC<ActionFeedbackProps> = ({
         return null;
     }
   };
-  
+
   // Get color based on type
   const getColor = (): AlertProps['severity'] => {
     switch (type) {
@@ -119,7 +111,7 @@ const ActionFeedback: React.FC<ActionFeedbackProps> = ({
         return 'info';
     }
   };
-  
+
   // Loading indicator component
   const LoadingIndicator = () => (
     <Box sx={{ width: '100%', mt: 1 }}>
@@ -155,7 +147,7 @@ const ActionFeedback: React.FC<ActionFeedbackProps> = ({
       )}
     </Box>
   );
-  
+
   return (
     <Snackbar
       open={open}

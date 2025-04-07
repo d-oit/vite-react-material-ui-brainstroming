@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { EnhancedBrainstormFlow } from '../../components/BrainstormFlow/EnhancedBrainstormFlow';
-import { NodeType } from '../../types';
 import { I18nProvider } from '../../contexts/I18nContext';
 import { SettingsProvider } from '../../contexts/SettingsContext';
+import { NodeType } from '../../types';
 import { mockResizeObserver } from '../test-utils';
 
 // Mock ReactFlow
@@ -11,9 +12,9 @@ vi.mock('reactflow', async () => {
   const actual = await vi.importActual('reactflow');
   return {
     ...actual,
-    ReactFlow: vi.fn().mockImplementation(({ children }) => (
-      <div data-testid="react-flow">{children}</div>
-    )),
+    ReactFlow: vi
+      .fn()
+      .mockImplementation(({ children }) => <div data-testid="react-flow">{children}</div>),
     useReactFlow: vi.fn().mockReturnValue({
       fitView: vi.fn(),
       zoomIn: vi.fn(),
@@ -45,7 +46,6 @@ const renderWithProviders = (ui: React.ReactElement) => {
 };
 
 describe('EnhancedBrainstormFlow', () => {
-
   beforeEach(() => {
     // Mock ResizeObserver
     mockResizeObserver();

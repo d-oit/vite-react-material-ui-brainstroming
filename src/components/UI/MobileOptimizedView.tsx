@@ -1,6 +1,6 @@
-import React from 'react';
-import { Box, useMediaQuery, useTheme, Paper, Typography, IconButton } from '@mui/material';
 import { ZoomIn, ZoomOut, Fullscreen, FullscreenExit } from '@mui/icons-material';
+import { Box, useMediaQuery, useTheme, Paper, Typography, IconButton } from '@mui/material';
+import React from 'react';
 
 interface MobileOptimizedViewProps {
   children: React.ReactNode;
@@ -27,7 +27,7 @@ const MobileOptimizedView: React.FC<MobileOptimizedViewProps> = ({
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
   return (
     <Box
       sx={{
@@ -51,7 +51,7 @@ const MobileOptimizedView: React.FC<MobileOptimizedViewProps> = ({
           <Typography variant="h6" noWrap>
             {title}
           </Typography>
-          
+
           {controlsEnabled && isMobile && (
             <Box>
               <IconButton onClick={onZoomIn} size="small" aria-label="Zoom in">
@@ -67,7 +67,7 @@ const MobileOptimizedView: React.FC<MobileOptimizedViewProps> = ({
           )}
         </Box>
       )}
-      
+
       <Box
         sx={{
           flexGrow: 1,
@@ -92,7 +92,7 @@ const MobileOptimizedView: React.FC<MobileOptimizedViewProps> = ({
           {children}
         </Box>
       </Box>
-      
+
       {/* Mobile controls at the bottom */}
       {controlsEnabled && isMobile && !title && (
         <Paper
