@@ -83,7 +83,7 @@ export class IndexedDBService {
   private initPromise: Promise<boolean> | null = null;
   private encryptionPassword: string | null = null;
   private encryptionAvailable = isEncryptionAvailable();
-  private fallbackStorage: Map<string, any> = new Map();
+  private fallbackStorage: Map<string, unknown> = new Map();
   private isIndexedDBSupported = typeof window !== 'undefined' && !!window.indexedDB;
 
   private constructor() {

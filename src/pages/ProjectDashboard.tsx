@@ -1,5 +1,5 @@
 import { Dashboard as DashboardIcon, Archive as ArchiveIcon } from '@mui/icons-material';
-import { Box, Container, Paper, Tabs, Tab, Typography, Divider } from '@mui/material';
+import { Box, Container, Paper, Tabs, Tab, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -39,7 +39,7 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
   onThemeToggle,
   isDarkMode,
 }) => {
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
 

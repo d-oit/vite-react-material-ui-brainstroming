@@ -34,7 +34,10 @@ export interface ChatSuggestion {
 /**
  * Create a node suggestion from node data
  */
-export function createNodeSuggestionFromNodeData(nodeData: NodeData, type: NodeType): NodeSuggestion {
+export function createNodeSuggestionFromNodeData(
+  nodeData: NodeData,
+  type: NodeType
+): NodeSuggestion {
   return {
     title: nodeData.title || nodeData.label || '',
     content: nodeData.content || '',

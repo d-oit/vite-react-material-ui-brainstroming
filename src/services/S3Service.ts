@@ -125,8 +125,8 @@ export class S3Service {
 
       this._isConfigured = true;
       return true;
-    } catch (error) {
-      console.error('Error configuring S3 service:', error);
+    } catch (_error) {
+      console.error('Error configuring S3 service:', _error);
       return false;
     }
   }

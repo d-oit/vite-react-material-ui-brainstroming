@@ -2,6 +2,13 @@
  * URL validation and sanitization utilities
  * Provides comprehensive validation and sanitization for URLs
  * to prevent security issues and ensure proper configuration
+ *
+ * This module implements security best practices for URL handling:
+ * - Validates URL format and structure
+ * - Enforces HTTPS where appropriate
+ * - Sanitizes URLs to prevent injection attacks
+ * - Provides specific validation for different URL types (API, S3, navigation)
+ * - Gracefully handles invalid or missing URLs
  */
 
 /**
@@ -173,7 +180,7 @@ export function validateApiEndpoint(
  */
 export function validateS3Endpoint(
   url: string,
-  allowHttp = true
+  allowHttp = false
 ): { isValid: boolean; message: string } {
   if (!url || url.trim() === '') {
     return { isValid: true, message: '' }; // S3 is optional, so empty is valid
@@ -347,4 +354,72 @@ export function isSameOrigin(url: string): boolean {
   } catch (_) {
     return false;
   }
+}
+
+/**
+ * Validate an OpenRouter API key
+ * @param apiKey API key to validate
+ * @returns Object with validation result and error message
+ */
+export function validateOpenRouterApiKey(apiKey: string): { isValid: boolean; message: string } {
+  if (!apiKey || apiKey.trim() === '') {
+    return { isValid: false, message: 'API key is required' };
+  }
+
+  // OpenRouter API keys typically follow a specific format
+  // This is a basic check - adjust based on actual OpenRouter API key format
+  const apiKeyPattern = /^[a-zA-Z0-9_-]{20,}$/;
+  if (!apiKeyPattern.test(apiKey)) {
+    return {
+      isValid: false,
+      message:
+        'API key format is invalid. It should be at least 20 characters long and contain only letters, numbers, underscores, and hyphens.',
+    };
+  }
+
+  return { isValid: true, message: '' };
+}
+
+/**
+ * Validate AWS credentials
+ * @param accessKeyId AWS access key ID
+ * @param secretAccessKey AWS secret access key
+ * @returns Object with validation result and error message
+ */
+export function validateAwsCredentials(
+  accessKeyId: string,
+  secretAccessKey: string
+): { isValid: boolean; message: string } {
+  // AWS access key IDs typically start with 'AKIA' and are 20 characters long
+  const accessKeyPattern = /^[A-Z0-9]{20}$/;
+  // AWS secret access keys are typically 40 characters long
+  const secretKeyPattern = /^[A-Za-z0-9/+=]{40}$/;
+
+  if (!accessKeyId || accessKeyId.trim() === '') {
+    return { isValid: true, message: '' }; // Optional, so empty is valid
+  }
+
+  if (!accessKeyPattern.test(accessKeyId)) {
+    return {
+      isValid: false,
+      message:
+        'AWS access key ID format is invalid. It should be 20 characters long and contain only uppercase letters and numbers.',
+    };
+  }
+
+  if (!secretAccessKey || secretAccessKey.trim() === '') {
+    return {
+      isValid: false,
+      message: 'AWS secret access key is required when access key ID is provided',
+    };
+  }
+
+  if (!secretKeyPattern.test(secretAccessKey)) {
+    return {
+      isValid: false,
+      message: 'AWS secret access key format is invalid. It should be 40 characters long.',
+    };
+  }
+
+  return { isValid: true, message: '' };
 }

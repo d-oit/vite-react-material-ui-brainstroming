@@ -1,9 +1,4 @@
-import {
-  Add as AddIcon,
-  ContentCopy as DuplicateIcon,
-  Delete as DeleteIcon,
-  Edit as EditIcon,
-} from '@mui/icons-material';
+import { Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -25,7 +20,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { AppShell } from '../components/Layout/AppShell';
@@ -108,9 +103,9 @@ interface ProjectTemplatesPageProps {
 
 export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTemplatesPageProps) => {
   const theme = useTheme();
-  const { t } = useI18n();
+  const { t: _t } = useI18n();
   const navigate = useNavigate();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const _isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [templates, setTemplates] = useState<Project[]>(sampleTemplates);
   const [selectedTemplate, setSelectedTemplate] = useState<Project | null>(null);
@@ -120,7 +115,7 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDescription, setNewProjectDescription] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);
 
   const handleCreateFromTemplate = async () => {
     if (!selectedTemplate || !newProjectName.trim()) return;

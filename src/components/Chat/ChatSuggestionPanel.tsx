@@ -1,4 +1,9 @@
-import { useState } from 'react';
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Check as CheckIcon,
+  CheckCircle as CheckCircleIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -8,21 +13,14 @@ import {
   CardActions,
   Chip,
   Divider,
-  List,
-  ListItem,
-  ListItemText,
   Paper,
   Stack,
   Tooltip,
   IconButton,
+  List,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Check as CheckIcon,
-  CheckCircle as CheckCircleIcon,
-} from '@mui/icons-material';
+import { useState, memo } from 'react';
+
 import { useI18n } from '../../contexts/I18nContext';
 import type { ChatSuggestion, NodeSuggestion, NodeData } from '../../types';
 import { createNodeDataFromSuggestion } from '../../types';
@@ -37,7 +35,7 @@ interface ChatSuggestionPanelProps {
 /**
  * Component for displaying and accepting chat-generated node suggestions
  */
-export default function ChatSuggestionPanel({
+function ChatSuggestionPanel({
   suggestion,
   onAcceptNode,
   onAcceptAll,
@@ -53,7 +51,7 @@ export default function ChatSuggestionPanel({
   const handleAcceptNode = (nodeSuggestion: NodeSuggestion) => {
     const nodeData = createNodeDataFromSuggestion(nodeSuggestion);
     onAcceptNode(nodeData);
-    
+
     // Mark this node as accepted
     const newAcceptedNodes = new Set(acceptedNodes);
     newAcceptedNodes.add(nodeData.id);
@@ -63,7 +61,7 @@ export default function ChatSuggestionPanel({
   const handleAcceptAll = () => {
     const nodeDatas = suggestion.nodes.map(createNodeDataFromSuggestion);
     onAcceptAll(nodeDatas);
-    
+
     // Mark all nodes as accepted
     const newAcceptedNodes = new Set(acceptedNodes);
     nodeDatas.forEach(node => newAcceptedNodes.add(node.id));
@@ -93,30 +91,49 @@ export default function ChatSuggestionPanel({
         mb: 2,
         borderRadius: 2,
         backgroundColor: 'background.paper',
+        boxShadow: theme =>
+          `0 4px 12px ${theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)'}`,
+        transition: 'all 0.3s ease',
+        '&:hover': {
+          boxShadow: theme =>
+            `0 6px 16px ${theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.15)'}`,
+        },
       }}
     >
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          {t('chat.suggestedNodes')}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {t('chat.basedOnPrompt')}: "{suggestion.originalMessage}"
-        </Typography>
+      <Box
+        sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}
+      >
+        <Box>
+          <Typography variant="h6" gutterBottom>
+            {t('chat.suggestedNodes')}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {t('chat.basedOnPrompt')}: &quot;{suggestion.originalMessage}&quot;
+          </Typography>
+        </Box>
+        <IconButton
+          size="small"
+          onClick={onDismiss}
+          sx={{ mt: -1, mr: -1 }}
+          aria-label={t('chat.dismiss')}
+        >
+          <DeleteIcon fontSize="small" />
+        </IconButton>
       </Box>
 
       <Divider sx={{ mb: 2 }} />
 
       <List>
         {suggestion.nodes.map((node, index) => {
-          const isAccepted = Array.from(acceptedNodes).some(id => 
-            id === createNodeDataFromSuggestion(node).id
+          const isAccepted = Array.from(acceptedNodes).some(
+            id => id === createNodeDataFromSuggestion(node).id
           );
-          
+
           return (
-            <Card 
-              key={index} 
-              variant="outlined" 
-              sx={{ 
+            <Card
+              key={index}
+              variant="outlined"
+              sx={{
                 mb: 2,
                 borderColor: isAccepted ? 'success.main' : 'divider',
                 backgroundColor: isAccepted ? 'success.light' : 'background.paper',
@@ -124,19 +141,22 @@ export default function ChatSuggestionPanel({
               }}
             >
               <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 1,
+                  }}
+                >
                   <Typography variant="h6">{node.title}</Typography>
-                  <Chip 
-                    label={node.type} 
-                    size="small" 
-                    color={getNodeTypeColor(node.type) as any}
-                  />
+                  <Chip label={node.type} size="small" color={getNodeTypeColor(node.type)} />
                 </Box>
-                
+
                 <Typography variant="body2" sx={{ mb: 1 }}>
                   {node.content}
                 </Typography>
-                
+
                 {node.tags && node.tags.length > 0 && (
                   <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
                     {node.tags.map((tag, tagIndex) => (
@@ -145,7 +165,7 @@ export default function ChatSuggestionPanel({
                   </Stack>
                 )}
               </CardContent>
-              
+
               <CardActions>
                 <Tooltip title={isAccepted ? t('chat.alreadyAccepted') : t('chat.acceptNode')}>
                   <span>
@@ -167,14 +187,10 @@ export default function ChatSuggestionPanel({
       </List>
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={onDismiss}
-        >
+        <Button variant="outlined" color="secondary" onClick={onDismiss}>
           {t('chat.dismiss')}
         </Button>
-        
+
         <Button
           variant="contained"
           color="primary"
@@ -187,3 +203,5 @@ export default function ChatSuggestionPanel({
     </Paper>
   );
 }
+
+export default memo(ChatSuggestionPanel);

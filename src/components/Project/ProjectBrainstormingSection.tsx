@@ -13,7 +13,7 @@ interface ProjectBrainstormingSectionProps {
   error?: string | null;
 }
 
-export const ProjectBrainstormingSection = ({
+const ProjectBrainstormingSection = ({
   project,
   onSave,
   isSaving = false,

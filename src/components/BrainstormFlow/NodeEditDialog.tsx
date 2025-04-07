@@ -33,7 +33,7 @@ import {
   Paper,
   // Alert, // Unused
 } from '@mui/material';
-import { useState, useEffect, /* useMemo */ } from 'react';
+import { useState, useEffect, memo /* useMemo */ } from 'react';
 
 import { useSettings } from '../../contexts/SettingsContext';
 import loggerService from '../../services/LoggerService';
@@ -49,7 +49,7 @@ interface NodeEditDialogProps {
   initialType?: NodeType;
 }
 
-export const NodeEditDialog = ({
+const NodeEditDialog = ({
   open,
   onClose,
   onSave,
@@ -488,3 +488,5 @@ export const NodeEditDialog = ({
     </Dialog>
   );
 };
+
+export const MemoizedNodeEditDialog = memo(NodeEditDialog);

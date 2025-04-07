@@ -33,12 +33,25 @@ export class ChatService {
   }
 
   /**
-   * Send a message to the LLM
-   * @param messages Chat history
-   * @param projectContext Project context to include
-   * @returns LLM response
+   * Send a message to the LLM and get a response
+   *
+   * This function handles communication with the OpenRouter API to send user messages
+   * and receive AI responses. It formats the chat history and project context into
+   * the format expected by the API, handles the API call, and processes the response.
+   *
+   * The function includes error handling for network issues, API errors, and response
+   * validation. It also adds project context as a system message to provide the AI
+   * with relevant information about the current project.
+   *
+   * @param messages - Array of ChatMessage objects representing the chat history
+   * @param projectContext - Optional context about the current project to help the AI generate relevant responses
+   * @returns Promise<ChatMessage> - A promise that resolves to a ChatMessage containing the AI's response
+   * @throws Error if the API key is not configured or if there's an API error
    */
-  public async sendMessage(messages: ChatMessage[], projectContext?: Record<string, unknown>): Promise<ChatMessage> {
+  public async sendMessage(
+    messages: ChatMessage[],
+    projectContext?: Record<string, unknown>
+  ): Promise<ChatMessage> {
     if (!this.apiKey) {
       throw new Error('ChatService is not configured. Call configure() first.');
     }
@@ -94,11 +107,22 @@ export class ChatService {
   }
 
   /**
-   * Generate node suggestions from the LLM
-   * @param prompt User prompt for generating nodes
-   * @param projectContext Project context to include
-   * @param existingNodes Existing nodes to consider
-   * @returns Chat suggestion with generated nodes
+   * Generate node suggestions based on a user prompt
+   *
+   * This function uses the OpenRouter API to generate structured node suggestions
+   * for brainstorming based on the user's input. It formats the response as a
+   * ChatSuggestion object containing NodeSuggestion objects that can be displayed
+   * to the user and converted to actual nodes in the brainstorming canvas.
+   *
+   * The function handles error cases, including API errors, parsing errors, and
+   * validation of the response format. It also includes context about the current
+   * project and existing nodes to help the AI generate more relevant suggestions.
+   *
+   * @param prompt - The user's text prompt describing what nodes to generate
+   * @param projectContext - Optional context about the current project (node count, types, etc.)
+   * @param existingNodes - Optional array of existing nodes to consider for context
+   * @returns Promise<ChatSuggestion> - A promise that resolves to a ChatSuggestion object
+   * @throws Error if the API key is not configured or if there's an API error
    */
   public async generateNodeSuggestions(
     prompt: string,
@@ -130,7 +154,7 @@ export class ChatService {
         ]
       }
 
-      Do not include any explanatory text outside the JSON structure.`
+      Do not include any explanatory text outside the JSON structure.`,
     };
 
     // Add project context if provided
@@ -146,7 +170,7 @@ export class ChatService {
     // Create user message
     const userMessage = {
       role: 'user',
-      content: prompt
+      content: prompt,
     };
 
     try {
@@ -184,15 +208,17 @@ export class ChatService {
         // Create the chat suggestion
         const chatSuggestion: ChatSuggestion = {
           id: crypto.randomUUID(),
-          nodes: parsedResponse.nodes.map((node: any) => ({
-            title: node.title || 'Untitled',
-            content: node.content || '',
-            type: this.validateNodeType(node.type),
-            tags: Array.isArray(node.tags) ? node.tags : []
-          })),
+          nodes: parsedResponse.nodes.map(
+            (node: { title?: string; content?: string; type?: string; tags?: string[] }) => ({
+              title: node.title || 'Untitled',
+              content: node.content || '',
+              type: this.validateNodeType(node.type),
+              tags: Array.isArray(node.tags) ? node.tags : [],
+            })
+          ),
           originalMessage: prompt,
           timestamp: new Date().toISOString(),
-          accepted: false
+          accepted: false,
         };
 
         return chatSuggestion;

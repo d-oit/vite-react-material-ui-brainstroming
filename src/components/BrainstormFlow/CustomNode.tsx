@@ -9,7 +9,7 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
-import { memo, useMemo, useState, useEffect } from 'react';
+import { memo, useMemo, useEffect } from 'react';
 import type { NodeProps } from 'reactflow';
 import { Handle, Position } from 'reactflow';
 

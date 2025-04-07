@@ -1,5 +1,5 @@
 import { Box, Typography, Paper, CircularProgress, Tabs, Tab, Divider } from '@mui/material';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { GitHistoryViewer } from '@/components/GitHistory/GitHistoryViewer';

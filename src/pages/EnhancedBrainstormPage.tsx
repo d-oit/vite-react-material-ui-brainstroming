@@ -67,7 +67,7 @@ export const EnhancedBrainstormPage = () => {
   const theme = useTheme();
   const { t } = useI18n();
   const { settings } = useSettings();
-  const navigate = useNavigate(); // Used for navigation after actions
+  const _navigate = useNavigate(); // Used for navigation after actions
   const { projectId } = useParams<{ projectId: string }>();
 
   const [loading, setLoading] = useState(false);

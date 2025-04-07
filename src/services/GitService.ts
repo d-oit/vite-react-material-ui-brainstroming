@@ -88,7 +88,9 @@ export class GitService {
    * @param projectId Project ID
    * @returns Array of commits
    */
-  public getCommits(projectId: string): any[] {
+  public getCommits(
+    projectId: string
+  ): { id: string; message: string; date: string; changes: unknown }[] {
     const projects = this.getProjects();
     const project = projects.find(p => p.id === projectId);
 
@@ -131,7 +133,9 @@ export class GitService {
    * @param projectId Project ID
    * @returns Current commit
    */
-  public getCurrentCommit(projectId: string): any | null {
+  public getCurrentCommit(
+    projectId: string
+  ): { id: string; message: string; date: string; changes: unknown } | null {
     const projects = this.getProjects();
     const project = projects.find(p => p.id === projectId);
 
@@ -145,7 +149,12 @@ export class GitService {
   /**
    * Get all projects from local storage
    */
-  private getProjects(): any[] {
+  private getProjects(): {
+    id: string;
+    name: string;
+    commits?: { id: string; message: string; date: string; changes: unknown }[];
+    currentCommitId?: string;
+  }[] {
     const projectsJson = localStorage.getItem(this.localStorageKey);
     return projectsJson ? JSON.parse(projectsJson) : [];
   }
@@ -153,7 +162,14 @@ export class GitService {
   /**
    * Save projects to local storage
    */
-  private saveProjects(projects: any[]): void {
+  private saveProjects(
+    projects: {
+      id: string;
+      name: string;
+      commits?: { id: string; message: string; date: string; changes: unknown }[];
+      currentCommitId?: string;
+    }[]
+  ): void {
     localStorage.setItem(this.localStorageKey, JSON.stringify(projects));
   }
 }

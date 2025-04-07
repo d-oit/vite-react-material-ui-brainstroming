@@ -1,6 +1,6 @@
 import type { PaletteMode, ThemeOptions } from '@mui/material';
 import { ThemeProvider, CssBaseline, createTheme, Button, Snackbar, Alert } from '@mui/material';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 // Icons are imported but not used in this file
 // They might be used in child components or for future implementation
@@ -12,15 +12,18 @@ import _OfflineFallback from './components/OfflineIndicator/OfflineFallback';
 import _OfflineIndicator from './components/OfflineIndicator/OfflineIndicator';
 import withOfflineFallback from './components/OfflineIndicator/withOfflineFallback';
 import CSPMeta from './components/Security/CSPMeta';
+import LoadingFallback from './components/UI/LoadingFallback';
 import { useI18n } from './contexts/I18nContext';
 import { SettingsProvider } from './contexts/SettingsContext';
-import { HomePage } from './pages/HomePage';
-import ProjectDashboard from './pages/ProjectDashboard';
-import { ProjectDetailPage } from './pages/ProjectDetailPage';
-import { SettingsPage } from './pages/SettingsPage';
 import indexedDBService from './services/IndexedDBService';
 import loggerService from './services/LoggerService';
 import offlineService from './services/OfflineService';
+
+// Lazy load pages for better performance
+const HomePage = lazy(() => import('./pages/HomePage'));
+const ProjectDashboard = lazy(() => import('./pages/ProjectDashboard'));
+const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 
 // Define theme settings
 const getDesignTokens = (mode: PaletteMode): ThemeOptions => {
@@ -199,33 +202,40 @@ const AppWithTheme = () => {
               v7_relativeSplatPath: true,
             }}
           >
-            <Routes>
-              <Route
-                path="/"
-                element={<HomePage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />}
-              />
-              <Route
-                path="/projects"
-                element={
-                  <ProjectDashboard onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
-                }
-              />
-              <Route
-                path="/projects/:projectId/*"
-                element={withOfflineFallback(ProjectDetailPage)({
-                  onThemeToggle: toggleThemeMode,
-                  isDarkMode: mode === 'dark',
-                })}
-              />
-              <Route
-                path="/settings"
-                element={
-                  <SettingsPage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
-                }
-              />
-              {/* Removed standalone brainstorming route - now using quick project creation */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <Suspense fallback={<LoadingFallback />}>
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <HomePage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
+                  }
+                />
+                <Route
+                  path="/projects"
+                  element={
+                    <ProjectDashboard
+                      onThemeToggle={toggleThemeMode}
+                      isDarkMode={mode === 'dark'}
+                    />
+                  }
+                />
+                <Route
+                  path="/projects/:projectId/*"
+                  element={withOfflineFallback(ProjectDetailPage)({
+                    onThemeToggle: toggleThemeMode,
+                    isDarkMode: mode === 'dark',
+                  })}
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <SettingsPage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
+                  }
+                />
+                {/* Removed standalone brainstorming route - now using quick project creation */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
 
             {/* Offline indicator removed as per UI update plan */}
 

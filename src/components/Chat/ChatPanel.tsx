@@ -20,13 +20,14 @@ import {
   Alert,
   Tooltip,
 } from '@mui/material';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 
 import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import chatService from '../../services/ChatService';
 import offlineService from '../../services/OfflineService';
 import type { ChatMessage, ChatSuggestion, NodeData } from '../../types';
+
 import ChatSuggestionPanel from './ChatSuggestionPanel';
 
 interface ChatPanelProps {
@@ -35,7 +36,7 @@ interface ChatPanelProps {
   onAddNodes?: (nodes: NodeData[]) => void;
 }
 
-export const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) => {
+const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) => {
   const { settings } = useSettings();
   const { t } = useI18n();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -166,10 +167,7 @@ export const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelPr
     setError(null);
 
     try {
-      const suggestion = await chatService.generateNodeSuggestions(
-        input,
-        projectContext
-      );
+      const suggestion = await chatService.generateNodeSuggestions(input, projectContext);
       setNodeSuggestion(suggestion);
       setInput(''); // Clear input after generating
     } catch (error) {
@@ -239,13 +237,30 @@ export const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelPr
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          background: theme =>
+            theme.palette.mode === 'dark'
+              ? 'linear-gradient(to right, rgba(25,118,210,0.1), rgba(25,118,210,0))'
+              : 'linear-gradient(to right, rgba(25,118,210,0.05), rgba(25,118,210,0))',
         }}
       >
-        <Box>
-          <Typography variant="h6">{t('chat.title')}</Typography>
-          <Typography variant="body2" color="text.secondary">
-            {t('chat.poweredBy')} OpenRouter
-          </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Avatar
+            sx={{
+              bgcolor: 'primary.main',
+              width: 36,
+              height: 36,
+            }}
+          >
+            <BotIcon fontSize="small" />
+          </Avatar>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.1rem' }}>
+              {t('chat.title')}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+              {t('chat.poweredBy')} OpenRouter
+            </Typography>
+          </Box>
         </Box>
         {!isOnline && (
           <Tooltip title={t('chat.offlineMode') || 'Offline Mode - Chat functionality is limited'}>
@@ -303,11 +318,34 @@ export const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelPr
               alignItems: 'center',
               justifyContent: 'center',
               height: '100%',
-              opacity: 0.7,
+              opacity: 0.8,
+              textAlign: 'center',
+              px: 3,
             }}
           >
-            <BotIcon sx={{ fontSize: 48, mb: 2 }} />
-            <Typography variant="body1">{t('chat.startConversation')}</Typography>
+            <Avatar
+              sx={{
+                width: 80,
+                height: 80,
+                bgcolor: 'primary.main',
+                mb: 3,
+                boxShadow: theme =>
+                  `0 4px 12px ${theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.1)'}`,
+              }}
+            >
+              <BotIcon sx={{ fontSize: 48 }} />
+            </Avatar>
+            <Typography variant="h6" gutterBottom>
+              {t('chat.title')}
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              {t('chat.startConversation')}
+            </Typography>
+            {!settings.openRouterApiKey && (
+              <Alert severity="info" sx={{ mt: 3, width: '100%' }}>
+                {t('chat.apiKeyMissing')}
+              </Alert>
+            )}
           </Box>
         ) : (
           messages.map(message => (
@@ -333,8 +371,39 @@ export const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelPr
                 elevation={1}
                 sx={{
                   p: 2,
-                  borderRadius: 2,
+                  borderRadius: theme => theme.spacing(2),
                   bgcolor: message.role === 'user' ? 'primary.light' : 'background.paper',
+                  boxShadow: theme =>
+                    `0 1px 3px ${theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.1)'}`,
+                  position: 'relative',
+                  '&::before':
+                    message.role !== 'user'
+                      ? {
+                          content: '""',
+                          position: 'absolute',
+                          top: 10,
+                          left: -8,
+                          width: 0,
+                          height: 0,
+                          borderTop: '8px solid transparent',
+                          borderBottom: '8px solid transparent',
+                          borderRight: theme => `8px solid ${theme.palette.background.paper}`,
+                        }
+                      : {},
+                  '&::after':
+                    message.role === 'user'
+                      ? {
+                          content: '""',
+                          position: 'absolute',
+                          top: 10,
+                          right: -8,
+                          width: 0,
+                          height: 0,
+                          borderTop: '8px solid transparent',
+                          borderBottom: '8px solid transparent',
+                          borderLeft: theme => `8px solid ${theme.palette.primary.light}`,
+                        }
+                      : {},
                 }}
               >
                 <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
@@ -377,7 +446,7 @@ export const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelPr
 
       <Divider />
 
-      <Box sx={{ p: 2, display: 'flex', gap: 1 }}>
+      <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
         <TextField
           fullWidth
           placeholder={
@@ -391,41 +460,79 @@ export const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelPr
           multiline
           maxRows={4}
           disabled={isLoading || isGeneratingNodes || !settings.openRouterApiKey || !isOnline}
-          sx={{ flexGrow: 1 }}
+          sx={{
+            flexGrow: 1,
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '12px',
+              transition: 'all 0.2s ease',
+              '&.Mui-focused': {
+                boxShadow: '0 0 0 2px rgba(25, 118, 210, 0.2)',
+              },
+            },
+          }}
           helperText={
             !isOnline ? t('chat.offlineHelp') || 'Chat will be available when you reconnect' : ''
           }
         />
 
-        {/* Node generation button - only show if onAddNodes is provided */}
-        {onAddNodes && (
-          <Tooltip title={t('chat.generateNodes') || 'Generate brainstorming nodes from your input'}>
-            <span>
-              <Button
-                variant="outlined"
-                color="secondary"
-                onClick={handleGenerateNodes}
-                disabled={isLoading || isGeneratingNodes || !input.trim() || !settings.openRouterApiKey || !isOnline}
-              >
-                {isGeneratingNodes ? (
-                  <CircularProgress size={24} />
-                ) : (
-                  <PsychologyIcon />
-                )}
-              </Button>
-            </span>
-          </Tooltip>
-        )}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, mt: 1 }}>
+          {/* Clear button */}
+          <Button
+            variant="text"
+            color="inherit"
+            startIcon={<ClearIcon />}
+            onClick={handleClearChat}
+            disabled={messages.length === 0 || isLoading || isGeneratingNodes}
+            size="small"
+            sx={{ flexGrow: 0 }}
+          >
+            {t('chat.clear')}
+          </Button>
 
-        <Button
-          variant="contained"
-          color="primary"
-          endIcon={<SendIcon />}
-          onClick={handleSendMessage}
-          disabled={isLoading || isGeneratingNodes || !input.trim() || !settings.openRouterApiKey || !isOnline}
-        >
-          {t('chat.send')}
-        </Button>
+          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+            {/* Node generation button - only show if onAddNodes is provided */}
+            {onAddNodes && (
+              <Tooltip
+                title={t('chat.generateNodes') || 'Generate brainstorming nodes from your input'}
+              >
+                <span>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={handleGenerateNodes}
+                    disabled={
+                      isLoading ||
+                      isGeneratingNodes ||
+                      !input.trim() ||
+                      !settings.openRouterApiKey ||
+                      !isOnline
+                    }
+                    sx={{ borderRadius: '8px' }}
+                  >
+                    {isGeneratingNodes ? <CircularProgress size={24} /> : <PsychologyIcon />}
+                  </Button>
+                </span>
+              </Tooltip>
+            )}
+
+            <Button
+              variant="contained"
+              color="primary"
+              endIcon={<SendIcon />}
+              onClick={handleSendMessage}
+              disabled={
+                isLoading ||
+                isGeneratingNodes ||
+                !input.trim() ||
+                !settings.openRouterApiKey ||
+                !isOnline
+              }
+              sx={{ borderRadius: '8px' }}
+            >
+              {t('chat.send')}
+            </Button>
+          </Box>
+        </Box>
       </Box>
 
       {messages.length > 0 && (
@@ -438,3 +545,6 @@ export const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelPr
     </Box>
   );
 };
+
+export const MemoizedChatPanel = memo(ChatPanel);
+export { ChatPanel };

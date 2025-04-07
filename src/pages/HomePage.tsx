@@ -13,7 +13,7 @@ interface HomePageProps {
   isDarkMode: boolean;
 }
 
-export const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
+const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
@@ -94,3 +94,5 @@ export const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
     </AppShell>
   );
 };
+
+export default HomePage;

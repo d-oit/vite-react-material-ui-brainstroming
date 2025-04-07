@@ -2,7 +2,7 @@ import type { Mock } from 'vitest';
 
 declare global {
   const vi: {
-    fn: <T extends (...args: any[]) => any>(implementation?: T) => Mock<T>;
+    fn: <T extends (...args: unknown[]) => unknown>(implementation?: T) => Mock<T>;
     mock: (path: string) => void;
     doMock: (path: string, factory?: () => unknown) => void;
     unmock: (path: string) => void;

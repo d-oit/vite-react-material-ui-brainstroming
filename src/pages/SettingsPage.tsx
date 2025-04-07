@@ -7,6 +7,7 @@ import {
   FormControl,
   FormControlLabel,
   FormGroup,
+  FormHelperText,
   Switch,
   Select,
   MenuItem,
@@ -36,10 +37,16 @@ import { useI18n } from '../contexts/I18nContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { ThemeMode } from '../types';
 import type { UserPreferences } from '../types';
-import { validateApiEndpoint, validateS3Endpoint, sanitizeUrl } from '../utils/urlValidation';
+import {
+  validateApiEndpoint as _validateApiEndpoint,
+  validateS3Endpoint,
+  sanitizeUrl,
+  validateOpenRouterApiKey,
+  validateAwsCredentials,
+} from '../utils/urlValidation';
 
 // Default user preferences
-const defaultPreferences: UserPreferences = {
+const _defaultPreferences: UserPreferences = {
   themeMode: ThemeMode.SYSTEM,
   autoSave: true,
   autoBackup: false,
@@ -80,7 +87,7 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
+const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
   const { settings, updateSettings } = useSettings();
   const [preferences, setPreferences] = useState<UserPreferences>(() => {
     // Use settings from the context
@@ -103,8 +110,19 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
   const [s3EndpointError, setS3EndpointError] = useState('');
   const [s3EndpointWarning, setS3EndpointWarning] = useState('');
 
-  const [openRouterApiUrl, setOpenRouterApiUrl] = useState(settings.openRouterApiKey || '');
-  const [openRouterApiUrlError, setOpenRouterApiUrlError] = useState('');
+  // AWS credentials
+  const [awsAccessKeyId, setAwsAccessKeyId] = useState(settings.awsAccessKeyId || '');
+  const [awsAccessKeyIdError, setAwsAccessKeyIdError] = useState('');
+  const [awsSecretAccessKey, setAwsSecretAccessKey] = useState(settings.awsSecretAccessKey || '');
+  const [awsSecretAccessKeyError, setAwsSecretAccessKeyError] = useState('');
+  const [awsRegion, setAwsRegion] = useState(settings.awsRegion || 'us-east-1');
+
+  // OpenRouter API
+  const [openRouterApiKey, setOpenRouterApiKey] = useState(settings.openRouterApiKey || '');
+  const [openRouterApiKeyError, setOpenRouterApiKeyError] = useState('');
+  const [openRouterModel, setOpenRouterModel] = useState(
+    settings.openRouterModel || 'anthropic/claude-3-opus'
+  );
 
   const [tabValue, setTabValue] = useState(0);
 
@@ -155,16 +173,28 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
 
   // Validate S3 endpoint when it changes
   const validateS3 = (url: string) => {
-    const result = validateS3Endpoint(url);
+    const result = validateS3Endpoint(url, false); // Require HTTPS in production
     setS3EndpointError(result.isValid ? '' : result.message);
     setS3EndpointWarning(result.isValid && result.message ? result.message : '');
     return result.isValid;
   };
 
-  // Validate OpenRouter API URL when it changes
-  const validateOpenRouterApi = (url: string) => {
-    const result = validateApiEndpoint(url);
-    setOpenRouterApiUrlError(result.isValid ? '' : result.message);
+  // Validate AWS credentials
+  const validateAws = (accessKeyId: string, secretAccessKey: string) => {
+    const result = validateAwsCredentials(accessKeyId, secretAccessKey);
+    setAwsAccessKeyIdError(
+      result.isValid ? '' : result.message.includes('access key ID') ? result.message : ''
+    );
+    setAwsSecretAccessKeyError(
+      result.isValid ? '' : result.message.includes('secret access key') ? result.message : ''
+    );
+    return result.isValid;
+  };
+
+  // Validate OpenRouter API key when it changes
+  const validateOpenRouterApiKeyFn = (apiKey: string) => {
+    const result = validateOpenRouterApiKey(apiKey);
+    setOpenRouterApiKeyError(result.isValid ? '' : result.message);
     return result.isValid;
   };
 
@@ -175,27 +205,67 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
     validateS3(value);
   };
 
-  // Handle OpenRouter API URL change
-  const handleOpenRouterApiUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle AWS access key ID change
+  const handleAwsAccessKeyIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setOpenRouterApiUrl(value);
-    validateOpenRouterApi(value);
+    setAwsAccessKeyId(value);
+    validateAws(value, awsSecretAccessKey);
+  };
+
+  // Handle AWS secret access key change
+  const handleAwsSecretAccessKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setAwsSecretAccessKey(value);
+    validateAws(awsAccessKeyId, value);
+  };
+
+  // Handle AWS region change
+  const handleAwsRegionChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const value = event.target.value as string;
+    setAwsRegion(value);
+  };
+
+  // Handle OpenRouter API key change
+  const handleOpenRouterApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setOpenRouterApiKey(value);
+    validateOpenRouterApiKeyFn(value);
+  };
+
+  // Handle OpenRouter model change
+  const handleOpenRouterModelChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const value = event.target.value as string;
+    setOpenRouterModel(value);
   };
 
   const handleSaveSettings = () => {
-    // Validate URLs before saving
+    // Validate all inputs before saving
     const isS3Valid = validateS3(s3Endpoint);
-    const isOpenRouterValid = validateOpenRouterApi(openRouterApiUrl);
+    const isAwsValid = validateAws(awsAccessKeyId, awsSecretAccessKey);
+    const isOpenRouterApiKeyValid = validateOpenRouterApiKeyFn(openRouterApiKey);
 
-    if (!isOpenRouterValid) {
+    // Check for validation errors
+    if (!isOpenRouterApiKeyValid) {
       setSnackbarSeverity('error');
-      setSnackbarMessage('Please fix the OpenRouter API URL errors before saving.');
+      setSnackbarMessage('Please fix the OpenRouter API key errors before saving.');
+      setSnackbarOpen(true);
+      return;
+    }
+
+    if (!isAwsValid && awsAccessKeyId.trim() !== '') {
+      setSnackbarSeverity('error');
+      setSnackbarMessage('Please fix the AWS credentials errors before saving.');
       setSnackbarOpen(true);
       return;
     }
 
     // S3 is optional, so we can save even if it's invalid, but we'll sanitize it
     const sanitizedS3Endpoint = isS3Valid ? sanitizeUrl(s3Endpoint) : '';
+
+    // Sanitize inputs for security
+    const sanitizedAwsAccessKeyId = awsAccessKeyId.trim();
+    const sanitizedAwsSecretAccessKey = awsSecretAccessKey.trim();
+    const sanitizedOpenRouterApiKey = openRouterApiKey.trim();
 
     // Update all settings at once
     updateSettings({
@@ -205,7 +275,11 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
       fontSize: preferences.fontSize,
       language: preferences.language,
       awsBucketName: sanitizedS3Endpoint,
-      openRouterApiKey: sanitizeUrl(openRouterApiUrl),
+      awsAccessKeyId: sanitizedAwsAccessKeyId,
+      awsSecretAccessKey: sanitizedAwsSecretAccessKey,
+      awsRegion: awsRegion,
+      openRouterApiKey: sanitizedOpenRouterApiKey,
+      openRouterModel: openRouterModel,
     });
 
     // Show success message
@@ -393,16 +467,19 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
                   <Typography variant="h6">API Configuration</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
+                  <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
+                    AWS S3 Configuration (Optional)
+                  </Typography>
                   <TextField
                     fullWidth
-                    label="AWS S3 Endpoint"
+                    label="S3 Endpoint URL"
                     value={s3Endpoint}
                     onChange={handleS3EndpointChange}
                     margin="normal"
                     helperText={
                       s3EndpointError ||
                       s3EndpointWarning ||
-                      'Used for project backups and sync (optional)'
+                      'HTTPS URL for S3 bucket (e.g., https://s3.amazonaws.com/your-bucket)'
                     }
                     error={!!s3EndpointError}
                     InputProps={{
@@ -414,16 +491,87 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
                     }}
                   />
 
+                  <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                    <TextField
+                      fullWidth
+                      label="AWS Access Key ID"
+                      value={awsAccessKeyId}
+                      onChange={handleAwsAccessKeyIdChange}
+                      margin="normal"
+                      helperText={awsAccessKeyIdError || 'Your AWS access key ID'}
+                      error={!!awsAccessKeyIdError}
+                    />
+
+                    <TextField
+                      fullWidth
+                      label="AWS Secret Access Key"
+                      value={awsSecretAccessKey}
+                      onChange={handleAwsSecretAccessKeyChange}
+                      margin="normal"
+                      type="password"
+                      helperText={awsSecretAccessKeyError || 'Your AWS secret access key'}
+                      error={!!awsSecretAccessKeyError}
+                    />
+                  </Box>
+
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel id="aws-region-label">AWS Region</InputLabel>
+                    <Select
+                      labelId="aws-region-label"
+                      value={awsRegion}
+                      label="AWS Region"
+                      onChange={handleAwsRegionChange}
+                    >
+                      <MenuItem value="us-east-1">US East (N. Virginia)</MenuItem>
+                      <MenuItem value="us-east-2">US East (Ohio)</MenuItem>
+                      <MenuItem value="us-west-1">US West (N. California)</MenuItem>
+                      <MenuItem value="us-west-2">US West (Oregon)</MenuItem>
+                      <MenuItem value="eu-west-1">EU (Ireland)</MenuItem>
+                      <MenuItem value="eu-central-1">EU (Frankfurt)</MenuItem>
+                      <MenuItem value="ap-northeast-1">Asia Pacific (Tokyo)</MenuItem>
+                      <MenuItem value="ap-southeast-1">Asia Pacific (Singapore)</MenuItem>
+                    </Select>
+                  </FormControl>
+
+                  <Divider sx={{ my: 3 }} />
+
+                  <Typography variant="subtitle1" gutterBottom>
+                    OpenRouter API Configuration
+                  </Typography>
                   <TextField
                     fullWidth
-                    label="OpenRouter API URL"
-                    value={openRouterApiUrl}
-                    onChange={handleOpenRouterApiUrlChange}
+                    label="OpenRouter API Key"
+                    value={openRouterApiKey}
+                    onChange={handleOpenRouterApiKeyChange}
                     margin="normal"
-                    helperText={openRouterApiUrlError || 'Used for the AI assistant'}
-                    error={!!openRouterApiUrlError}
+                    helperText={openRouterApiKeyError || 'Your OpenRouter API key for AI assistant'}
+                    error={!!openRouterApiKeyError}
                     required
                   />
+
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel id="openrouter-model-label">AI Model</InputLabel>
+                    <Select
+                      labelId="openrouter-model-label"
+                      value={openRouterModel}
+                      label="AI Model"
+                      onChange={handleOpenRouterModelChange}
+                    >
+                      <MenuItem value="anthropic/claude-3-opus">
+                        Claude 3 Opus (Best quality)
+                      </MenuItem>
+                      <MenuItem value="anthropic/claude-3-sonnet">
+                        Claude 3 Sonnet (Balanced)
+                      </MenuItem>
+                      <MenuItem value="anthropic/claude-3-haiku">Claude 3 Haiku (Fast)</MenuItem>
+                      <MenuItem value="openai/gpt-4o">GPT-4o</MenuItem>
+                      <MenuItem value="openai/gpt-4-turbo">GPT-4 Turbo</MenuItem>
+                      <MenuItem value="openai/gpt-3.5-turbo">GPT-3.5 Turbo (Economical)</MenuItem>
+                    </Select>
+                    <FormHelperText>
+                      Select the AI model to use for chat and node generation
+                    </FormHelperText>
+                  </FormControl>
                 </AccordionDetails>
               </Accordion>
             </Box>
@@ -465,3 +613,5 @@ export const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) =
     </AppShell>
   );
 };
+
+export default SettingsPage;

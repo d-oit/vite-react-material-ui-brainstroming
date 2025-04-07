@@ -45,13 +45,13 @@ const TabPanel = (props: TabPanelProps) => {
   );
 };
 
-export const ProjectDetailPage = () => {
+const ProjectDetailPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [chatOpen, setChatOpen] = useState(!isMobile);
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [edges, setEdges] = useState<Edge[]>([]);
+  const [_nodes, setNodes] = useState<Node[]>([]);
+  const [_edges, setEdges] = useState<Edge[]>([]);
   const [tabValue, setTabValue] = useState(0);
 
   const { project, loading, error, isSaving, saveProject, createNewVersion } = useProject({
@@ -72,7 +72,7 @@ export const ProjectDetailPage = () => {
       setEdges(updatedEdges);
 
       // Create updated project with new nodes and edges
-      const updatedProject = {
+      const _updatedProject = {
         ...project,
         nodes: updatedNodes,
         edges: updatedEdges,
@@ -309,3 +309,5 @@ export const ProjectDetailPage = () => {
     </AppShell>
   );
 };
+
+export default ProjectDetailPage;

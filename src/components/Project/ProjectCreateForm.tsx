@@ -1,5 +1,5 @@
 import { Info as InfoIcon, Close as CloseIcon } from '@mui/icons-material';
-import type { SelectChangeEvent } from '@mui/material';
+// import type { SelectChangeEvent } from '@mui/material';
 import {
   Box,
   Button,
