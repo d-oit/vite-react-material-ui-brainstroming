@@ -4,6 +4,8 @@ import {
   SmartToy as BotIcon,
   WifiOff as OfflineIcon,
   // Info as InfoIcon, // Unused
+  Psychology as PsychologyIcon,
+  Clear as ClearIcon,
 } from '@mui/icons-material';
 import {
   Box,
@@ -24,14 +26,16 @@ import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import chatService from '../../services/ChatService';
 import offlineService from '../../services/OfflineService';
-import type { ChatMessage } from '../../types';
+import type { ChatMessage, ChatSuggestion, NodeData } from '../../types';
+import ChatSuggestionPanel from './ChatSuggestionPanel';
 
 interface ChatPanelProps {
   projectId?: string;
   projectContext?: Record<string, unknown>;
+  onAddNodes?: (nodes: NodeData[]) => void;
 }
 
-export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
+export const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) => {
   const { settings } = useSettings();
   const { t } = useI18n();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -39,6 +43,8 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(offlineService.getOnlineStatus());
+  const [nodeSuggestion, setNodeSuggestion] = useState<ChatSuggestion | null>(null);
+  const [isGeneratingNodes, setIsGeneratingNodes] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Monitor online status
@@ -71,8 +77,15 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    scrollToBottom();
   }, [messages]);
+
+  /**
+   * Scroll to the bottom of the chat
+   */
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
@@ -101,6 +114,9 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
     setIsLoading(true);
     setError(null);
 
+    // Clear any existing node suggestions
+    setNodeSuggestion(null);
+
     try {
       const assistantMessage = await chatService.sendMessage(
         [...messages, userMessage],
@@ -118,7 +134,85 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
       }
     } finally {
       setIsLoading(false);
+      scrollToBottom();
     }
+  };
+
+  /**
+   * Generate node suggestions from the current input
+   */
+  const handleGenerateNodes = async () => {
+    if (!input.trim() || isGeneratingNodes) return;
+
+    // Check if online
+    if (!isOnline) {
+      setError(t('chat.offlineError') || 'Cannot generate nodes while offline');
+      return;
+    }
+
+    // Check if API key is configured
+    if (!settings.openRouterApiKey) {
+      setError(t('chat.apiKeyMissing') || 'API key is not configured');
+      return;
+    }
+
+    // Check if node generation is supported in this context
+    if (!onAddNodes) {
+      setError(t('chat.nodesNotSupported') || 'Node generation is not supported in this context');
+      return;
+    }
+
+    setIsGeneratingNodes(true);
+    setError(null);
+
+    try {
+      const suggestion = await chatService.generateNodeSuggestions(
+        input,
+        projectContext
+      );
+      setNodeSuggestion(suggestion);
+      setInput(''); // Clear input after generating
+    } catch (error) {
+      console.error('Error generating nodes:', error);
+
+      // Check if the error is due to being offline
+      if (!navigator.onLine) {
+        setError(t('chat.offlineError') || 'Cannot generate nodes while offline');
+      } else {
+        setError(
+          t('chat.generateNodesError') ||
+            'An error occurred while generating nodes. Please try again.'
+        );
+      }
+    } finally {
+      setIsGeneratingNodes(false);
+    }
+  };
+
+  /**
+   * Handle accepting a single node
+   */
+  const handleAcceptNode = (nodeData: NodeData) => {
+    if (onAddNodes) {
+      onAddNodes([nodeData]);
+    }
+  };
+
+  /**
+   * Handle accepting all nodes
+   */
+  const handleAcceptAllNodes = (nodeDatas: NodeData[]) => {
+    if (onAddNodes) {
+      onAddNodes(nodeDatas);
+    }
+    setNodeSuggestion(null); // Clear suggestions after accepting all
+  };
+
+  /**
+   * Dismiss node suggestions
+   */
+  const handleDismissSuggestions = () => {
+    setNodeSuggestion(null);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -181,6 +275,16 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
         </Alert>
       )}
 
+      {/* Node suggestions panel */}
+      {nodeSuggestion && (
+        <ChatSuggestionPanel
+          suggestion={nodeSuggestion}
+          onAcceptNode={handleAcceptNode}
+          onAcceptAll={handleAcceptAllNodes}
+          onDismiss={handleDismissSuggestions}
+        />
+      )}
+
       <Box
         sx={{
           flexGrow: 1,
@@ -191,7 +295,7 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
           gap: 2,
         }}
       >
-        {messages.length === 0 ? (
+        {messages.length === 0 && !nodeSuggestion ? (
           <Box
             sx={{
               display: 'flex',
@@ -286,19 +390,39 @@ export const ChatPanel = ({ projectId, projectContext }: ChatPanelProps) => {
           onKeyPress={handleKeyPress}
           multiline
           maxRows={4}
-          disabled={isLoading || !settings.openRouterApiKey || !isOnline}
+          disabled={isLoading || isGeneratingNodes || !settings.openRouterApiKey || !isOnline}
           sx={{ flexGrow: 1 }}
           helperText={
             !isOnline ? t('chat.offlineHelp') || 'Chat will be available when you reconnect' : ''
           }
         />
 
+        {/* Node generation button - only show if onAddNodes is provided */}
+        {onAddNodes && (
+          <Tooltip title={t('chat.generateNodes') || 'Generate brainstorming nodes from your input'}>
+            <span>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={handleGenerateNodes}
+                disabled={isLoading || isGeneratingNodes || !input.trim() || !settings.openRouterApiKey || !isOnline}
+              >
+                {isGeneratingNodes ? (
+                  <CircularProgress size={24} />
+                ) : (
+                  <PsychologyIcon />
+                )}
+              </Button>
+            </span>
+          </Tooltip>
+        )}
+
         <Button
           variant="contained"
           color="primary"
           endIcon={<SendIcon />}
           onClick={handleSendMessage}
-          disabled={isLoading || !input.trim() || !settings.openRouterApiKey || !isOnline}
+          disabled={isLoading || isGeneratingNodes || !input.trim() || !settings.openRouterApiKey || !isOnline}
         >
           {t('chat.send')}
         </Button>

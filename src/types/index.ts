@@ -22,6 +22,18 @@ export type {
   UserPreferences,
 } from './models';
 
+// Chat types
+export type {
+  ChatMessage,
+  NodeSuggestion,
+  ChatSuggestion,
+} from './chat';
+
+export {
+  createNodeSuggestionFromNodeData,
+  createNodeDataFromSuggestion,
+} from './chat';
+
 // Project types
 export type { Project, GitCommit, ProjectHistoryEntry } from './project';
 

@@ -17,11 +17,12 @@ import {
   // ListItemIcon, // Unused
   // ListItemText, // Unused
   // Tooltip, // Unused
-  // Paper, // Unused
+  Paper,
   // Typography, // Unused
   FormControlLabel,
   Checkbox,
 } from '@mui/material';
+import { SmartToy as SmartToyIcon, Close as CloseIcon } from '@mui/icons-material';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import type {
   Node as FlowNode,
@@ -53,6 +54,7 @@ import { NodeType } from '../../types';
 
 import CustomNode from './CustomNode';
 import { NodeEditDialog } from './NodeEditDialog';
+import { ChatPanel } from '../Chat/ChatPanel';
 
 // Define custom node types
 const nodeTypes: NodeTypes = {
@@ -104,6 +106,7 @@ const FlowContent = ({
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'info'>('info');
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [nodeToDelete, setNodeToDelete] = useState<string | null>(null);
+  const [showChat, setShowChat] = useState(false);
 
   // Get ReactFlow utility functions - now this is safe because we're inside ReactFlowProvider
   const { fitView, zoomIn, zoomOut, _setViewport } = useReactFlow(); // _setViewport is not used currently
@@ -200,6 +203,68 @@ const FlowContent = ({
       }
     },
     [nodes, readOnly]
+  );
+
+  /**
+   * Handle adding nodes from chat
+   */
+  const handleAddNodesFromChat = useCallback(
+    (nodeDatas: NodeData[]) => {
+      if (!reactFlowInstance || !nodeDatas.length) return;
+
+      // Get the current viewport
+      const { x, y, zoom } = reactFlowInstance.getViewport();
+
+      // Calculate a good position for the new nodes
+      // Start from the center of the viewport
+      const viewportCenter = {
+        x: -x / zoom + reactFlowInstance.getWidth() / 2 / zoom,
+        y: -y / zoom + reactFlowInstance.getHeight() / 2 / zoom,
+      };
+
+      // Create new nodes from the node data
+      const newNodes: Node[] = nodeDatas.map((nodeData, index) => {
+        // Position nodes in a grid-like pattern
+        const position = {
+          x: viewportCenter.x + (index % 3) * 250,
+          y: viewportCenter.y + Math.floor(index / 3) * 150,
+        };
+
+        return {
+          id: nodeData.id,
+          type: nodeData.type as NodeType || NodeType.IDEA,
+          position,
+          data: {
+            ...nodeData,
+            onEdit: handleNodeClick,
+            onDelete: (id: string) => {
+              setNodeToDelete(id);
+              setDeleteConfirmOpen(true);
+            },
+          },
+        };
+      });
+
+      // Add the new nodes to the flow
+      setNodes(nodes => [...nodes, ...newNodes]);
+
+      // Notify about the change
+      if (externalNodesChange) {
+        externalNodesChange([...nodes, ...newNodes]);
+      }
+
+      // Show success message
+      showSnackbar(
+        t('brainstorm.nodesAdded', { count: newNodes.length }),
+        'success'
+      );
+
+      // Fit the view to include the new nodes
+      setTimeout(() => {
+        fitView({ padding: 0.2, includeHiddenNodes: false });
+      }, 100);
+    },
+    [reactFlowInstance, nodes, setNodes, externalNodesChange, t, fitView, handleNodeClick]
   );
 
   // Handle node edit
@@ -518,6 +583,70 @@ const FlowContent = ({
           />
         )}
       </ReactFlow>
+
+      {/* Chat Panel */}
+      <Box
+        sx={{
+          position: 'absolute',
+          right: 16,
+          bottom: 16,
+          width: showChat ? 350 : 'auto',
+          height: showChat ? 500 : 'auto',
+          transition: 'all 0.3s ease',
+          zIndex: 5,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {showChat ? (
+          <Paper
+            elevation={3}
+            sx={{
+              height: '100%',
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              borderRadius: 2,
+              position: 'relative',
+            }}
+          >
+            <Button
+              size="small"
+              sx={{
+                position: 'absolute',
+                top: 4,
+                right: 4,
+                minWidth: 0,
+                width: 30,
+                height: 30,
+                borderRadius: '50%',
+                zIndex: 10,
+              }}
+              onClick={() => setShowChat(false)}
+            >
+              <CloseIcon fontSize="small" />
+            </Button>
+            <ChatPanel
+              onAddNodes={handleAddNodesFromChat}
+              projectContext={{
+                nodeCount: nodes.length,
+                edgeCount: edges.length,
+                nodeTypes: Object.keys(NodeType),
+              }}
+            />
+          </Paper>
+        ) : (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setShowChat(true)}
+            sx={{ borderRadius: '50%', width: 56, height: 56, minWidth: 0 }}
+          >
+            <SmartToyIcon />
+          </Button>
+        )}
+      </Box>
 
       {/* Confirmation Dialog */}
       <Dialog
