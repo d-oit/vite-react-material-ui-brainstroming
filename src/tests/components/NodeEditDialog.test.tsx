@@ -1,21 +1,21 @@
-import { describe, it, expect, vi as _vi, beforeEach as _beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoizedNodeEditDialog as NodeEditDialog } from '../../components/BrainstormFlow/NodeEditDialog';
+import { NodeType } from '../../types';
+import { I18nProvider } from '../../contexts/I18nContext';
+import { SettingsProvider } from '../../contexts/SettingsContext';
 
-import { MemoizedNodeEditDialog as _NodeEditDialog } from '../../components/BrainstormFlow/NodeEditDialog';
-import { NodeType as _NodeType } from '../../types';
-import {
-  render as _render,
-  screen as _screen,
-  fireEvent as _fireEvent,
-  waitFor as _waitFor,
-} from '../test-utils';
+// Wrap component with required providers
+const renderWithProviders = (ui: React.ReactElement) => {
+  return render(
+    <I18nProvider>
+      <SettingsProvider>{ui}</SettingsProvider>
+    </I18nProvider>
+  );
+};
 
 describe('NodeEditDialog', () => {
-  // Skip all tests in this file due to "too many open files" error in the test environment
-  it.skip('should skip all tests', () => {
-    expect(true).toBe(true);
-  });
 
-  /* Commented out due to "too many open files" error in the test environment
   const mockOnClose = vi.fn();
   const mockOnSave = vi.fn();
 
@@ -25,7 +25,7 @@ describe('NodeEditDialog', () => {
 
   it('renders with the correct initial values', () => {
     // Render the component
-    render(
+    renderWithProviders(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
@@ -56,7 +56,7 @@ describe('NodeEditDialog', () => {
 
   it('calls onSave with the updated values when the save button is clicked', async () => {
     // Render the component
-    render(
+    renderWithProviders(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
@@ -96,7 +96,7 @@ describe('NodeEditDialog', () => {
 
   it('calls onClose when the cancel button is clicked', () => {
     // Render the component
-    render(
+    renderWithProviders(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
@@ -122,7 +122,7 @@ describe('NodeEditDialog', () => {
 
   it('allows adding and removing tags', async () => {
     // Render the component
-    render(
+    renderWithProviders(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
@@ -169,7 +169,7 @@ describe('NodeEditDialog', () => {
 
   it('allows changing the node type', async () => {
     // Render the component
-    render(
+    renderWithProviders(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
@@ -205,7 +205,7 @@ describe('NodeEditDialog', () => {
 
   it('allows changing the node size', async () => {
     // Render the component
-    render(
+    renderWithProviders(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
@@ -240,5 +240,27 @@ describe('NodeEditDialog', () => {
       );
     });
   });
-  */
+
+  it('renders in add mode when no initialValues are provided', () => {
+    // Render the component in add mode
+    renderWithProviders(
+      <NodeEditDialog
+        open={true}
+        onClose={mockOnClose}
+        onSave={mockOnSave}
+        isAdd={true}
+      />
+    );
+
+    // Check that the dialog is rendered in add mode
+    expect(screen.getByText('Add New Node')).toBeInTheDocument();
+
+    // Check that the form fields are empty
+    expect(screen.getByLabelText('Title')).toHaveValue('');
+    expect(screen.getByLabelText('Content')).toHaveValue('');
+
+    // Check that the add button is rendered instead of save
+    expect(screen.getByText('Add')).toBeInTheDocument();
+    expect(screen.queryByText('Save')).not.toBeInTheDocument();
+  });
 });

@@ -46,6 +46,19 @@ export class OfflineService {
     isMetered: false,
   };
 
+  /**
+   * Notify all listeners about the current online status
+   */
+  private notifyListeners(): void {
+    this.listeners.forEach((listener) => {
+      try {
+        listener(this.isOnline);
+      } catch (error) {
+        console.error('Error in offline status listener:', error);
+      }
+    });
+  }
+
   private constructor() {
     // Initialize online/offline event listeners
     window.addEventListener('online', this.handleOnlineStatusChange.bind(this));
