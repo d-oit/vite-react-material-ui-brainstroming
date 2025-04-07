@@ -2,42 +2,69 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import { ChatService } from '../../services/ChatService';
 import type { ChatMessage, NodeSuggestion } from '../../types';
+import { NodeType } from '../../types/enums';
+
+// Create a proper mock for fetch
+const createFetchMock = () => {
+  const mockFn = vi.fn();
+  return mockFn;
+};
+
+// Helper to create a mock response
+const createMockResponse = (data: any, ok = true) => {
+  return Promise.resolve({
+    ok,
+    json: () => Promise.resolve(data),
+    text: () => Promise.resolve(JSON.stringify(data)),
+    status: ok ? 200 : 400,
+    statusText: ok ? 'OK' : 'Bad Request',
+  });
+};
 
 describe('ChatService', () => {
-  // Get a fresh instance for each test
-  let chatService: ChatService;
+  // Mock fetch
+  let mockFetch: ReturnType<typeof createFetchMock>;
 
-  // Mock fetch globally
-  const mockFetch = vi.fn();
-  global.fetch = mockFetch;
+  // Mock timestamp and ID generation
+  const mockTimestamp = '2023-01-01T00:00:00.000Z';
+  const mockId = '12345678-1234-1234-1234-123456789012';
 
-  // Helper to create a mock response
-  const createMockResponse = (data: any, ok = true) => {
-    return {
-      ok,
-      json: vi.fn().mockResolvedValue(data),
-      text: vi.fn().mockResolvedValue(JSON.stringify(data)),
-      status: ok ? 200 : 400,
-      statusText: ok ? 'OK' : 'Bad Request',
-    };
-  };
+  // Create a subclass of ChatService for testing
+  class TestChatService extends ChatService {
+    // Make constructor public for testing
+    public constructor() {
+      super();
+    }
 
-  // Mock crypto.randomUUID
-  const mockUUID = 'test-uuid-1234';
-  vi.spyOn(crypto, 'randomUUID').mockReturnValue(mockUUID);
+    protected override generateId(): string {
+      return mockId;
+    }
 
-  // Mock Date
-  const mockDate = new Date('2023-01-01T00:00:00Z');
-  vi.spyOn(global, 'Date').mockImplementation(() => mockDate as unknown as string);
+    protected override getTimestamp(): string {
+      return mockTimestamp;
+    }
+  }
+
+  // Use the test service instead of the real one
+  let chatService: TestChatService;
 
   beforeEach(() => {
     // Reset all mocks
     vi.clearAllMocks();
 
-    // Get a fresh instance
-    chatService = ChatService.getInstance();
+    // Create a new mock for fetch
+    mockFetch = createFetchMock();
+    global.fetch = mockFetch;
+
+    // Create a fresh instance of our test service
+    chatService = new TestChatService();
     chatService.configure('test-api-key', 'test-model');
   });
+
+  // Mock crypto.randomUUID
+  vi.spyOn(crypto, 'randomUUID').mockReturnValue(mockId);
+
+  // Remove duplicate beforeEach
 
   afterEach(() => {
     vi.resetAllMocks();
@@ -52,33 +79,49 @@ describe('ChatService', () => {
   });
 
   describe('configure', () => {
-    it('should configure the service with API key and model', () => {
+    it('should configure the service with API key and model', async () => {
       const service = ChatService.getInstance();
       service.configure('new-api-key', 'new-model');
 
       // Test the configuration by making a call that would fail if not configured
+      const mockModelsResponse = {
+        data: [
+          { id: 'model1', name: 'Model 1' },
+          { id: 'model2', name: 'Model 2' },
+        ],
+      };
+
+      // Setup the mock response
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ data: [] }),
+        json: async () => mockModelsResponse,
+        status: 200,
+        statusText: 'OK',
       });
 
-      return service.getAvailableModels().then(() => {
-        expect(mockFetch).toHaveBeenCalledWith(
-          'https://openrouter.ai/api/v1/models',
-          expect.objectContaining({
-            headers: expect.objectContaining({
-              Authorization: 'Bearer new-api-key',
-            }),
-          })
-        );
-      });
+      const models = await service.getAvailableModels();
+
+      expect(models).toHaveLength(2);
+      expect((models as any)[0].id).toBe('model1');
+      expect((models as any)[1].id).toBe('model2');
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://openrouter.ai/api/v1/models',
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: 'Bearer new-api-key',
+          }),
+        })
+      );
     });
   });
 
   describe('sendMessage', () => {
     it('should throw an error if not configured', async () => {
       // Create a new instance without configuration
-      const unconfiguredService = new ChatService();
+      const unconfiguredService = new TestChatService();
+      // Reset the configuration
+      unconfiguredService.configure('', '');
 
       await expect(unconfiguredService.sendMessage([])).rejects.toThrow(
         'ChatService is not configured'
@@ -105,9 +148,12 @@ describe('ChatService', () => {
         ],
       };
 
+      // Setup the mock response
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockResponse),
+        json: async () => mockResponse,
+        status: 200,
+        statusText: 'OK',
       });
 
       const result = await chatService.sendMessage(messages);
@@ -128,10 +174,10 @@ describe('ChatService', () => {
       );
 
       expect(result).toEqual({
-        id: mockUUID,
+        id: mockId,
         role: 'assistant',
         content: 'Hello, how can I help you?',
-        timestamp: mockDate.toISOString(),
+        timestamp: mockTimestamp,
       });
     });
 
@@ -150,12 +196,14 @@ describe('ChatService', () => {
         description: 'A test project',
       };
 
+      // Setup the mock response
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () =>
-          Promise.resolve({
-            choices: [{ message: { content: 'Response with context' } }],
-          }),
+        json: async () => ({
+          choices: [{ message: { content: 'Response with context' } }],
+        }),
+        status: 200,
+        statusText: 'OK',
       });
 
       await chatService.sendMessage(messages, projectContext);
@@ -189,10 +237,12 @@ describe('ChatService', () => {
         },
       ];
 
+      // Setup the mock error response
       mockFetch.mockResolvedValueOnce({
         ok: false,
+        json: async () => ({ error: { message: 'Invalid request' } }),
+        status: 400,
         statusText: 'Bad Request',
-        json: () => Promise.resolve({ error: { message: 'Invalid request' } }),
       });
 
       await expect(chatService.sendMessage(messages)).rejects.toThrow('API error: Invalid request');
@@ -202,7 +252,9 @@ describe('ChatService', () => {
   describe('generateNodeSuggestions', () => {
     it('should throw an error if not configured', async () => {
       // Create a new instance without configuration
-      const unconfiguredService = new ChatService();
+      const unconfiguredService = new TestChatService();
+      // Reset the configuration
+      unconfiguredService.configure('', '');
 
       await expect(unconfiguredService.generateNodeSuggestions('test prompt')).rejects.toThrow(
         'ChatService is not configured'
@@ -237,10 +289,7 @@ describe('ChatService', () => {
         ],
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      });
+      mockFetch.mockImplementationOnce(() => createMockResponse(mockResponse));
 
       const result = await chatService.generateNodeSuggestions(prompt);
 
@@ -253,7 +302,7 @@ describe('ChatService', () => {
       );
 
       expect(result).toEqual({
-        id: mockUUID,
+        id: mockId,
         nodes: [
           {
             title: 'Renewable Energy',
@@ -269,7 +318,7 @@ describe('ChatService', () => {
           },
         ],
         originalMessage: prompt,
-        timestamp: mockDate.toISOString(),
+        timestamp: mockTimestamp,
         accepted: false,
       });
     });
@@ -280,33 +329,31 @@ describe('ChatService', () => {
         {
           title: 'Existing Node',
           content: 'This is an existing node',
-          type: 'idea',
+          type: NodeType.IDEA,
           tags: ['existing'],
         },
       ];
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            choices: [
-              {
-                message: {
-                  content: JSON.stringify({
-                    nodes: [
-                      {
-                        title: 'New Node',
-                        content: 'This is a new node',
-                        type: 'task',
-                        tags: ['new'],
-                      },
-                    ],
-                  }),
-                },
+      mockFetch.mockImplementationOnce(() =>
+        createMockResponse({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({
+                  nodes: [
+                    {
+                      title: 'New Node',
+                      content: 'This is a new node',
+                      type: 'task',
+                      tags: ['new'],
+                    },
+                  ],
+                }),
               },
-            ],
-          }),
-      });
+            },
+          ],
+        })
+      );
 
       await chatService.generateNodeSuggestions(prompt, undefined, existingNodes);
 
@@ -340,10 +387,7 @@ describe('ChatService', () => {
         ],
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      });
+      mockFetch.mockImplementationOnce(() => createMockResponse(mockResponse));
 
       const result = await chatService.generateNodeSuggestions(prompt);
 
@@ -363,10 +407,7 @@ describe('ChatService', () => {
         ],
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      });
+      mockFetch.mockImplementationOnce(() => createMockResponse(mockResponse));
 
       await expect(chatService.generateNodeSuggestions(prompt)).rejects.toThrow(
         'Failed to parse node suggestions'
@@ -386,10 +427,7 @@ describe('ChatService', () => {
         ],
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      });
+      mockFetch.mockImplementationOnce(() => createMockResponse(mockResponse));
 
       await expect(chatService.generateNodeSuggestions(prompt)).rejects.toThrow(
         'Invalid response format'
@@ -400,7 +438,9 @@ describe('ChatService', () => {
   describe('getAvailableModels', () => {
     it('should throw an error if not configured', async () => {
       // Create a new instance without configuration
-      const unconfiguredService = new ChatService();
+      const unconfiguredService = new TestChatService();
+      // Reset the configuration
+      unconfiguredService.configure('', '');
 
       await expect(unconfiguredService.getAvailableModels()).rejects.toThrow(
         'ChatService is not configured'
@@ -415,10 +455,7 @@ describe('ChatService', () => {
         ],
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockModels),
-      });
+      mockFetch.mockImplementationOnce(() => createMockResponse(mockModels));
 
       const result = await chatService.getAvailableModels();
 
@@ -436,11 +473,9 @@ describe('ChatService', () => {
     });
 
     it('should handle API errors', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        statusText: 'Unauthorized',
-        json: () => Promise.resolve({ error: { message: 'Invalid API key' } }),
-      });
+      mockFetch.mockImplementationOnce(() =>
+        createMockResponse({ error: { message: 'Invalid API key' } }, false)
+      );
 
       await expect(chatService.getAvailableModels()).rejects.toThrow('API error: Invalid API key');
     });

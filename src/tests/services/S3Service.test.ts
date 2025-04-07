@@ -1,15 +1,11 @@
-// No direct AWS SDK import needed
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import loggerService from '../../services/LoggerService';
 import s3Service from '../../services/S3Service';
 import type { Project } from '../../types';
+import { S3 } from '../mocks/aws-sdk';
 import mockOfflineService from '../mocks/OfflineService';
 import { mockLocalStorage, mockOnlineStatus } from '../test-utils';
-
-// Import services after mocks
-
-// Mock AWS SDK
 
 // Use the mock instead of the real service
 const offlineService = mockOfflineService;
@@ -24,7 +20,20 @@ vi.mock('../../services/LoggerService', () => ({
     info: vi.fn(),
     error: vi.fn(),
     warn: vi.fn(),
+    debug: vi.fn(),
   },
+}));
+
+// Mock AWS SDK
+vi.mock('aws-sdk', () => ({
+  S3,
+  config: {
+    update: vi.fn(),
+  },
+}));
+
+vi.mock('aws-sdk/clients/s3', () => ({
+  S3,
 }));
 
 // Reset mocks before each test

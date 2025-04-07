@@ -10,6 +10,16 @@ export default defineConfig({
     setupFiles: ['./src/tests/setup.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**', '**/playwright/**'],
+    pool: 'forks', // Use process isolation to avoid 'too many open files' error
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+      forks: {
+        isolate: true,
+      },
+    },
+    maxConcurrency: 1, // Run tests sequentially to avoid resource issues
     coverage: {
       reporter: ['text', 'json', 'html'],
       exclude: [

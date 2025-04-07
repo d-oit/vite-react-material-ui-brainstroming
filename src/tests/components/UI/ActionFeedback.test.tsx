@@ -1,17 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { ThemeProvider, createTheme } from '@mui/material';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import ActionFeedback from '../../../components/UI/ActionFeedback';
-import { ThemeProvider, createTheme } from '@mui/material';
 
 describe('ActionFeedback', () => {
   const theme = createTheme();
   const renderWithTheme = (ui: React.ReactElement) => {
-    return render(
-      <ThemeProvider theme={theme}>
-        {ui}
-      </ThemeProvider>
-    );
+    return render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
   };
 
   beforeEach(() => {
@@ -26,12 +23,7 @@ describe('ActionFeedback', () => {
     const onClose = vi.fn();
 
     renderWithTheme(
-      <ActionFeedback
-        message="Operation successful"
-        type="success"
-        open={true}
-        onClose={onClose}
-      />
+      <ActionFeedback message="Operation successful" type="success" open={true} onClose={onClose} />
     );
 
     expect(screen.getByText('Operation successful')).toBeInTheDocument();
@@ -41,12 +33,7 @@ describe('ActionFeedback', () => {
     const onClose = vi.fn();
 
     renderWithTheme(
-      <ActionFeedback
-        message="Operation failed"
-        type="error"
-        open={true}
-        onClose={onClose}
-      />
+      <ActionFeedback message="Operation failed" type="error" open={true} onClose={onClose} />
     );
 
     expect(screen.getByText('Operation failed')).toBeInTheDocument();
@@ -88,21 +75,19 @@ describe('ActionFeedback', () => {
     vi.advanceTimersByTime(1500);
 
     // Wait for the onClose to be called
-    await waitFor(() => {
-      expect(onClose).toHaveBeenCalled();
-    }, { timeout: 1000 });
+    await waitFor(
+      () => {
+        expect(onClose).toHaveBeenCalled();
+      },
+      { timeout: 1000 }
+    );
   });
 
   it('should not auto-hide loading feedback', () => {
     const onClose = vi.fn();
 
     renderWithTheme(
-      <ActionFeedback
-        message="Loading..."
-        type="loading"
-        open={true}
-        onClose={onClose}
-      />
+      <ActionFeedback message="Loading..." type="loading" open={true} onClose={onClose} />
     );
 
     // Advance timers
@@ -130,10 +115,13 @@ describe('ActionFeedback', () => {
     vi.advanceTimersByTime(1000);
 
     // Progress should have increased
-    await waitFor(() => {
-      const progressText = screen.getByText(/\d+%/);
-      const progress = parseInt(progressText.textContent || '0');
-      expect(progress).toBeGreaterThan(0);
-    }, { timeout: 1000 });
+    await waitFor(
+      () => {
+        const progressText = screen.getByText(/\d+%/);
+        const progress = parseInt(progressText.textContent || '0');
+        expect(progress).toBeGreaterThan(0);
+      },
+      { timeout: 1000 }
+    );
   });
 });

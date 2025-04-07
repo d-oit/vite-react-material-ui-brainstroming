@@ -1,32 +1,22 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { ThemeProvider, createTheme, Button } from '@mui/material';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { ActionFeedbackProvider, useActionFeedback } from '../../contexts/ActionFeedbackContext';
-import { ThemeProvider, createTheme, Button } from '@mui/material';
 
 // Test component that uses the ActionFeedback context
 const TestComponent = () => {
-  const {
-    showFeedback,
-    showLoading,
-    updateLoading,
-    completeLoading,
-    hideFeedback
-  } = useActionFeedback();
+  const { showFeedback, showLoading, updateLoading, completeLoading, hideFeedback } =
+    useActionFeedback();
 
   return (
     <div>
-      <Button
-        data-testid="show-success"
-        onClick={() => showFeedback('Success message', 'success')}
-      >
+      <Button data-testid="show-success" onClick={() => showFeedback('Success message', 'success')}>
         Show Success
       </Button>
 
-      <Button
-        data-testid="show-error"
-        onClick={() => showFeedback('Error message', 'error')}
-      >
+      <Button data-testid="show-error" onClick={() => showFeedback('Error message', 'error')}>
         Show Error
       </Button>
 
@@ -61,14 +51,11 @@ const TestComponent = () => {
         Complete Loading
       </Button>
 
-      <Button
-        data-testid="hide-feedback"
-        onClick={() => hideFeedback()}
-      >
+      <Button data-testid="hide-feedback" onClick={() => hideFeedback()}>
         Hide Feedback
       </Button>
 
-      <div id="loading-id"></div>
+      <div id="loading-id" />
     </div>
   );
 };
@@ -158,9 +145,12 @@ describe('ActionFeedbackContext', () => {
     vi.advanceTimersByTime(5000);
 
     // Wait for the feedback to be hidden
-    await waitFor(() => {
-      expect(screen.queryByText('Loading complete')).not.toBeInTheDocument();
-    }, { timeout: 1000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByText('Loading complete')).not.toBeInTheDocument();
+      },
+      { timeout: 1000 }
+    );
   });
 
   it('should hide feedback', async () => {
@@ -177,8 +167,11 @@ describe('ActionFeedbackContext', () => {
     await user.click(screen.getByTestId('hide-feedback'));
 
     // Wait for the feedback to be hidden
-    await waitFor(() => {
-      expect(screen.queryByText('Success message')).not.toBeInTheDocument();
-    }, { timeout: 1000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByText('Success message')).not.toBeInTheDocument();
+      },
+      { timeout: 1000 }
+    );
   });
 });

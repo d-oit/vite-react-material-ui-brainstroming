@@ -40,6 +40,7 @@ afterEach(() => {
 });
 
 beforeEach(() => {
+  // Mock PWA register
   vi.mock('virtual:pwa-register', () => ({
     registerSW: () => ({
       onNeedRefresh: vi.fn(),
@@ -48,4 +49,28 @@ beforeEach(() => {
       onRegisterError: vi.fn(),
     }),
   }));
+
+  // Mock LoggerService
+  vi.mock('../services/LoggerService', async () => {
+    const { LoggerService } = await import('./mocks/LoggerService');
+    return {
+      default: new LoggerService('test'),
+      LoggerService,
+    };
+  });
+
+  // Mock AWS SDK
+  vi.mock('aws-sdk', async () => {
+    const awsMock = await import('./mocks/aws-sdk');
+    return {
+      ...awsMock,
+      default: awsMock.default,
+    };
+  });
+
+  // Mock AWS SDK clients
+  vi.mock('aws-sdk/clients/s3', async () => {
+    const { S3 } = await import('./mocks/aws-sdk');
+    return { S3 };
+  });
 });

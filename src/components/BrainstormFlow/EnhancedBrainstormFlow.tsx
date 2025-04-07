@@ -34,39 +34,47 @@ import type {
   ReactFlowInstance,
   XYPosition,
 } from 'reactflow';
-
-// Lazy load React Flow components
-const ReactFlowModule = lazy(() => import('reactflow').then(module => {
-  // Also import the CSS
-  import('reactflow/dist/style.css');
-  return { default: module.default };
-}));
-
-const ReactFlowComponents = lazy(() => import('reactflow').then(module => {
-  return {
-    default: {
-      Background: module.Background,
-      Controls: module.Controls,
-      MiniMap: module.MiniMap,
-      useNodesState: module.useNodesState,
-      useEdgesState: module.useEdgesState,
-      addEdge: module.addEdge,
-      useReactFlow: module.useReactFlow,
-      ReactFlowProvider: module.ReactFlowProvider,
-    }
-  };
-}));
+import { ReactFlowProvider } from 'reactflow';
 
 import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
-import performanceMonitoring, { PerformanceCategory, useRenderPerformance } from '../../utils/performanceMonitoring';
 import loggerService from '../../services/LoggerService';
 import type { NodeData, Node, Edge } from '../../types';
 import { NodeType } from '../../types';
+import performanceMonitoring, {
+  PerformanceCategory,
+  useRenderPerformance,
+} from '../../utils/performanceMonitoring';
 import { MemoizedChatPanel } from '../Chat/ChatPanel';
 
 import CustomNode from './CustomNode';
 import { MemoizedNodeEditDialog } from './NodeEditDialog';
+
+// Lazy load React Flow components
+const ReactFlowModule = lazy(() =>
+  import('reactflow').then(module => {
+    // Also import the CSS
+    import('reactflow/dist/style.css');
+    return { default: module.default };
+  })
+);
+
+const ReactFlowComponents = lazy(() =>
+  import('reactflow').then(module => {
+    return {
+      default: {
+        Background: module.Background,
+        Controls: module.Controls,
+        MiniMap: module.MiniMap,
+        useNodesState: module.useNodesState,
+        useEdgesState: module.useEdgesState,
+        addEdge: module.addEdge,
+        useReactFlow: module.useReactFlow,
+        ReactFlowProvider: module.ReactFlowProvider,
+      },
+    };
+  })
+);
 
 // Define custom node types
 const nodeTypes: NodeTypes = {
@@ -110,6 +118,7 @@ const FlowContent = ({
   const { settings, updateSettings } = useSettings();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const isInitialized = useRef(false);
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
   // Initialize state variables
   const [nodes, setNodes] = useState<FlowNode[]>([]);
@@ -556,9 +565,23 @@ const FlowContent = ({
         position: 'relative',
       }}
     >
-      <Suspense fallback={<Box sx={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading Flow Editor...</Box>}>
+      <Suspense
+        fallback={
+          <Box
+            sx={{
+              height: '100%',
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            Loading Flow Editor...
+          </Box>
+        }
+      >
         <ReactFlowComponents>
-          {(components) => {
+          {components => {
             // Initialize hooks and components from lazy-loaded ReactFlow
             const {
               Background,
@@ -568,25 +591,24 @@ const FlowContent = ({
               useNodesState,
               useEdgesState,
               useReactFlow,
-              addEdge
+              addEdge,
             } = components.default;
 
             // Initialize the hooks if they haven't been initialized yet
-            useEffect(() => {
-              if (!reactFlowHooks.addEdge) {
-                setReactFlowHooks({
-                  useNodesState,
-                  useEdgesState,
-                  useReactFlow,
-                  addEdge,
-                  onNodesChange: null,
-                  onEdgesChange: null,
-                  fitView: null,
-                  zoomIn: null,
-                  zoomOut: null
-                });
-              }
-            }, []);
+            if (!reactFlowHooks.addEdge && !isInitialized.current) {
+              isInitialized.current = true;
+              setReactFlowHooks({
+                useNodesState,
+                useEdgesState,
+                useReactFlow,
+                addEdge,
+                onNodesChange: null,
+                onEdgesChange: null,
+                fitView: null,
+                zoomIn: null,
+                zoomOut: null,
+              });
+            }
 
             return (
               <ReactFlowProvider>
@@ -632,7 +654,9 @@ const FlowContent = ({
                       position="bottom-left"
                       style={{
                         backgroundColor:
-                          theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[100],
+                          theme.palette.mode === 'dark'
+                            ? theme.palette.grey[900]
+                            : theme.palette.grey[100],
                         border: `1px solid ${theme.palette.divider}`,
                       }}
                     />
@@ -644,7 +668,9 @@ const FlowContent = ({
                       showInteractive={false}
                       style={{
                         backgroundColor:
-                          theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[100],
+                          theme.palette.mode === 'dark'
+                            ? theme.palette.grey[900]
+                            : theme.palette.grey[100],
                         border: `1px solid ${theme.palette.divider}`,
                       }}
                     />

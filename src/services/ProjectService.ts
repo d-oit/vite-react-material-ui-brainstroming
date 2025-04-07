@@ -3,7 +3,6 @@ import type { Project, ProjectHistoryEntry } from '../types';
 import { ProjectTemplate } from '../types/project';
 // These types are used in the Project type
 // import { Node, Edge } from '../types';
-
 import performanceMonitoring, { PerformanceCategory } from '../utils/performanceMonitoring';
 
 import gitService from './GitService';

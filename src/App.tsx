@@ -22,11 +22,16 @@ import loggerService from './services/LoggerService';
 import offlineService from './services/OfflineService';
 import performanceMonitoring, { PerformanceCategory } from './utils/performanceMonitoring';
 
-// Lazy load pages for better performance
+// Lazy load pages and heavy components for better performance
 const HomePage = lazy(() => import('./pages/HomePage'));
 const ProjectDashboard = lazy(() => import('./pages/ProjectDashboard'));
 const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+
+// Lazy load Material UI components that are heavy
+const Dialog = lazy(() => import('@mui/material/Dialog'));
+const Drawer = lazy(() => import('@mui/material/Drawer'));
+const AppBar = lazy(() => import('@mui/material/AppBar'));
 
 // Define theme settings
 const getDesignTokens = (mode: PaletteMode): ThemeOptions => {

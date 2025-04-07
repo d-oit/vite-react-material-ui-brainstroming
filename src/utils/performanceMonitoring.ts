@@ -2,6 +2,8 @@
  * Performance monitoring utilities for the application
  */
 
+import { useRef, useEffect } from 'react';
+
 import { LoggerService } from '../services/LoggerService';
 
 /**
@@ -134,16 +136,18 @@ class PerformanceMonitoringService {
     category: PerformanceCategory,
     metadataFn?: (...args: any[]) => Record<string, any>
   ) {
-    const performanceService = this;
+    // Store reference to the performance monitoring instance
+    const perfMonitor = this;
 
-    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
       const originalMethod = descriptor.value;
 
-      descriptor.value = function (...args: any[]) {
+      descriptor.value = function(...args: any[]) {
         const metricName = `${target.constructor.name}.${propertyKey}`;
         const metadata = metadataFn ? metadataFn(...args) : undefined;
 
-        const metricId = performanceService.startMeasure(metricName, category, metadata);
+        // Use the stored reference to the performance monitoring instance
+        const metricId = perfMonitor.startMeasure(metricName, category, metadata);
 
         try {
           const result = originalMethod.apply(this, args);
@@ -151,14 +155,14 @@ class PerformanceMonitoringService {
           // Handle promises
           if (result instanceof Promise) {
             return result.finally(() => {
-              performanceService.endMeasure(metricId);
+              perfMonitor.endMeasure(metricId);
             });
           }
 
-          performanceService.endMeasure(metricId);
+          perfMonitor.endMeasure(metricId);
           return result;
         } catch (error) {
-          performanceService.endMeasure(metricId, { error: error.message });
+          perfMonitor.endMeasure(metricId, { error: error.message });
           throw error;
         }
       };
@@ -173,14 +177,15 @@ class PerformanceMonitoringService {
    * @param name Optional name for the metric (defaults to component display name)
    */
   public wrapComponent<P>(Component: React.ComponentType<P>, name?: string): React.FC<P> {
-    const performanceService = this;
     const componentName = name || Component.displayName || Component.name || 'UnknownComponent';
+    // Store reference to the performance monitoring instance
+    const perfMonitor = this;
 
     const WrappedComponent: React.FC<P> = props => {
       const metricId = React.useRef<string>('');
 
       React.useEffect(() => {
-        metricId.current = performanceService.startMeasure(
+        metricId.current = perfMonitor.startMeasure(
           `${componentName}_render`,
           PerformanceCategory.RENDERING,
           { props: Object.keys(props) }
@@ -243,13 +248,10 @@ export const performanceMonitoring = new PerformanceMonitoringService();
  * @param componentName Name of the component
  * @param dependencies Dependencies array to control when to measure
  */
-export function useRenderPerformance(
-  componentName: string,
-  dependencies: React.DependencyList = []
-): void {
-  const metricId = React.useRef<string>('');
+export function useRenderPerformance(componentName: string, dependencies: any[] = []): void {
+  const metricId = useRef<string>('');
 
-  React.useEffect(() => {
+  useEffect(() => {
     metricId.current = performanceMonitoring.startMeasure(
       `${componentName}_render`,
       PerformanceCategory.RENDERING

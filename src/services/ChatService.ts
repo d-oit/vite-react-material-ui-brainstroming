@@ -9,7 +9,7 @@ export class ChatService {
   private apiUrl: string = 'https://openrouter.ai/api/v1/chat/completions';
   private model: string = 'anthropic/claude-3-opus';
 
-  private constructor() {
+  protected constructor() {
     // Initialize if needed
   }
 
@@ -30,6 +30,22 @@ export class ChatService {
     if (model) {
       this.model = model;
     }
+  }
+
+  /**
+   * Generate a unique ID - extracted for testability
+   * @returns A unique ID string
+   */
+  protected generateId(): string {
+    return crypto.randomUUID();
+  }
+
+  /**
+   * Get the current timestamp - extracted for testability
+   * @returns ISO timestamp string
+   */
+  protected getTimestamp(): string {
+    return new Date().toISOString();
   }
 
   /**
@@ -94,11 +110,14 @@ export class ChatService {
       const assistantMessage =
         data.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
 
+      // Create a timestamp string that's safe for testing
+      const timestamp = this.getTimestamp();
+
       return {
-        id: crypto.randomUUID(),
+        id: this.generateId(),
         role: 'assistant',
         content: assistantMessage,
-        timestamp: new Date().toISOString(),
+        timestamp,
       };
     } catch (error) {
       console.error('Error calling OpenRouter API:', error);
@@ -207,7 +226,7 @@ export class ChatService {
 
         // Create the chat suggestion
         const chatSuggestion: ChatSuggestion = {
-          id: crypto.randomUUID(),
+          id: this.generateId(),
           nodes: parsedResponse.nodes.map(
             (node: { title?: string; content?: string; type?: string; tags?: string[] }) => ({
               title: node.title || 'Untitled',

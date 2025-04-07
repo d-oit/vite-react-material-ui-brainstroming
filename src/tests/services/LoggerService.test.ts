@@ -353,9 +353,11 @@ describe('LoggerService', () => {
         'error',
         'Error message',
         expect.objectContaining({
-          name: 'Error',
-          errorMessage: 'Test error',
-          stack: expect.any(String),
+          error: expect.objectContaining({
+            name: 'Error',
+            message: 'Test error',
+            stack: expect.any(String),
+          }),
         })
       );
     });
