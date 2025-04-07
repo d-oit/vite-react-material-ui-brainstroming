@@ -26,13 +26,16 @@ import {
 import { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
 import type {
   Node as FlowNode,
-  // Edge as FlowEdge,
   NodeTypes,
-  // EdgeTypes,
   Connection,
-  // Panel,
   ReactFlowInstance,
   XYPosition,
+  NodeChange,
+  EdgeChange,
+  OnNodesChange,
+  OnEdgesChange,
+  Background as ReactFlowBackground,
+  BackgroundVariant,
 } from 'reactflow';
 import { ReactFlowProvider } from 'reactflow';
 
@@ -75,25 +78,28 @@ const ReactFlowComponentsLoader = lazy(() =>
         },
       };
       return <>{children(components)}</>;
-    }
+    },
   }))
 );
 
 // Create a component that will render the children function with the ReactFlow components
-const ReactFlowComponents = ({ children }: { children: (components: unknown) => React.ReactNode }) => {
-  // Use a ref to store the components to avoid re-renders
-  const componentsRef = useRef<unknown>(null);
+interface ReactFlowComponentsProps {
+  children: (components: {
+    default: {
+      Background: typeof ReactFlowBackground;
+      Controls: typeof import('reactflow').Controls;
+      MiniMap: typeof import('reactflow').MiniMap;
+      useReactFlow: typeof import('reactflow').useReactFlow;
+      ReactFlowProvider: typeof import('reactflow').ReactFlowProvider;
+    };
+  }) => React.ReactNode;
+}
 
-  return (
-    <ReactFlowComponentsLoader>
-      {(components) => {
-        // Store the components in the ref
-        componentsRef.current = components;
-        return children(components);
-      }}
-    </ReactFlowComponentsLoader>
-  );
-};
+const ReactFlowComponents = ({ children }: ReactFlowComponentsProps) => (
+  <ReactFlowComponentsLoader>
+    {components => children(components as Parameters<ReactFlowComponentsProps['children']>[0])}
+  </ReactFlowComponentsLoader>
+);
 
 // Define custom node types
 const nodeTypes: NodeTypes = {
@@ -140,7 +146,7 @@ const FlowContent = ({
   const isInitialized = useRef(false);
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
   // Initialize state variables
-  const [nodes, setNodes] = useState<FlowNode[]>([]);
+  const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<any[]>(initialEdges || []);
   const [nodeEditOpen, setNodeEditOpen] = useState(false);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
@@ -165,28 +171,29 @@ const FlowContent = ({
   }>({} as any);
 
   // References to ReactFlow functions
-  const [fitView, setFitView] = useState<((params?: { padding?: number, includeHiddenNodes?: boolean }) => void) | null>(null);
+  const [fitView, setFitView] = useState<
+    ((params?: { padding?: number; includeHiddenNodes?: boolean }) => void) | null
+  >(null);
   const [zoomIn, setZoomIn] = useState<(() => void) | null>(null);
   const [zoomOut, setZoomOut] = useState<(() => void) | null>(null);
 
   // Handle nodes change with external callback
-  const handleNodesChange = useCallback(
-    (changes: { id: string; type: string; position?: XYPosition }[]) => {
-      // Update internal nodes state based on changes
+  const handleNodesChange: OnNodesChange = useCallback(
+    changes => {
       const updatedNodes = nodes.map(node => {
-        const change = changes.find(
-          (c: { id: string; type: string }) => c.id === node.id && c.type === 'position'
-        );
-        if (change) {
+        const positionChange = changes.find(
+          change => 'id' in change && change.id === node.id && change.type === 'position'
+        ) as { id: string; type: 'position'; position: XYPosition } | undefined;
+
+        if (positionChange) {
           return {
             ...node,
-            position: change.position || node.position,
+            position: positionChange.position,
           };
         }
         return node;
       });
 
-      // Notify parent component about changes if callback is provided
       if (externalNodesChange) {
         externalNodesChange(updatedNodes);
       }
@@ -195,16 +202,17 @@ const FlowContent = ({
   );
 
   // Handle edges change with external callback
-  const handleEdgesChange = useCallback(
-    (changes: { id: string; type: string }[]) => {
-      // Filter out removed edges
+  const handleEdgesChange: OnEdgesChange = useCallback(
+    changes => {
       const removedEdgeIds = changes
-        .filter((c: { type: string }) => c.type === 'remove')
-        .map((c: { id: string }) => c.id);
+        .filter(
+          (change): change is { id: string; type: 'remove' } =>
+            'id' in change && change.type === 'remove'
+        )
+        .map(change => change.id);
 
       const updatedEdges = edges.filter(edge => !removedEdgeIds.includes(edge.id));
 
-      // Notify parent component about changes if callback is provided
       if (externalEdgesChange) {
         externalEdgesChange(updatedEdges);
       }
@@ -504,19 +512,15 @@ const FlowContent = ({
       // Get the current viewport
       const { x, y, zoom } = reactFlowInstance.getViewport();
 
-      // Calculate a good position for the new nodes
-      // Start from the center of the viewport
-      const viewportCenter = {
-        x: -x / zoom + reactFlowInstance.getWidth() / 2 / zoom,
-        y: -y / zoom + reactFlowInstance.getHeight() / 2 / zoom,
-      };
-
+      // Calculate viewport center and spacing
+      const viewportDimensions = reactFlowInstance.getViewport();
+      const spacing = 250 * viewportDimensions.zoom;
       // Create new nodes from the node data
       const newNodes: Node[] = nodeDatas.map((nodeData, index) => {
-        // Position nodes in a grid-like pattern
+        // Position nodes in a grid-like pattern with zoom-adjusted spacing
         const position = {
-          x: viewportCenter.x + (index % 3) * 250,
-          y: viewportCenter.y + Math.floor(index / 3) * 150,
+          x: (-x + spacing * (index % 3)) / zoom,
+          y: (-y + spacing * Math.floor(index / 3)) / zoom,
         };
 
         return {
@@ -543,11 +547,11 @@ const FlowContent = ({
       }
 
       // Show success message
-      showSnackbar(t('brainstorm.nodesAdded', { count: newNodes.length }), 'success');
+      showSnackbar(t('brainstorm.nodesAdded', { count: String(newNodes.length) }), 'success');
 
       // Fit the view to include the new nodes
       setTimeout(() => {
-        fitView({ padding: 0.2, includeHiddenNodes: false });
+        fitView?.({ padding: 0.2, includeHiddenNodes: false });
       }, 100);
     },
     [reactFlowInstance, nodes, setNodes, externalNodesChange, t, fitView]
@@ -628,120 +632,102 @@ const FlowContent = ({
         }
       >
         <ReactFlowComponents>
-          {components => {
-            // Initialize hooks and components from lazy-loaded ReactFlow
-            const {
-              Background,
-              Controls,
-              MiniMap,
-              ReactFlowProvider,
-              useNodesState,
-              useEdgesState,
-              useReactFlow,
-              addEdge,
-            } = components.default;
+          {(components: {
+            default: {
+              Background: typeof import('reactflow').Background;
+              Controls: typeof import('reactflow').Controls;
+              MiniMap: typeof import('reactflow').MiniMap;
+              useReactFlow: typeof import('reactflow').useReactFlow;
+            };
+          }) => {
+            // Create an inner component to properly handle React Flow hooks
+            const FlowInner = () => {
+              const { Background, Controls, MiniMap, useReactFlow } = components.default;
 
-            // Initialize the hooks if they haven't been initialized yet
-            if (!reactFlowHooks.addEdge && !isInitialized.current) {
-              // Mark as initialized to prevent multiple initializations
-              isInitialized.current = true;
+              // Get ReactFlow instance methods
+              const flowInstance = useReactFlow();
 
-              // Schedule the state updates for the next render cycle
-              setTimeout(() => {
-                setReactFlowHooks({
-                  useNodesState,
-                  useEdgesState,
-                  useReactFlow,
-                  addEdge,
-                  onNodesChange: null,
-                  onEdgesChange: null,
-                  fitView: null,
-                  zoomIn: null,
-                  zoomOut: null,
-                });
-
-                // Get the ReactFlow instance methods from the useReactFlow hook
-                try {
-                  const reactFlowAPI = useReactFlow();
-                  if (reactFlowAPI) {
-                    setFitView(() => reactFlowAPI.fitView);
-                    setZoomIn(() => reactFlowAPI.zoomIn);
-                    setZoomOut(() => reactFlowAPI.zoomOut);
-                  }
-                } catch (error) {
-                  console.warn('Failed to initialize ReactFlow hooks:', error);
+              // Initialize control functions on mount
+              useEffect(() => {
+                if (!isInitialized.current && flowInstance) {
+                  isInitialized.current = true;
+                  setFitView(() => flowInstance.fitView);
+                  setZoomIn(() => flowInstance.zoomIn);
+                  setZoomOut(() => flowInstance.zoomOut);
                 }
-              }, 0);
-            }
+              }, [flowInstance]);
 
-            return (
-              <ReactFlowProvider>
-                <ReactFlowModule
-                  nodes={nodes}
-                  edges={edges}
-                  onNodesChange={handleNodesChange}
-                  onEdgesChange={handleEdgesChange}
-                  onConnect={onConnect}
-                  onNodeClick={onNodeClick}
-                  onInit={setReactFlowInstance}
-                  nodeTypes={nodeTypes}
-                  fitView
-                  attributionPosition="bottom-right"
-                  minZoom={0.1}
-                  maxZoom={4}
-                  defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-                  proOptions={{ hideAttribution: true }}
-                  snapToGrid={!isMobile}
-                  snapGrid={[15, 15]}
-                  deleteKeyCode={['Backspace', 'Delete']}
-                  multiSelectionKeyCode={['Control', 'Meta']}
-                  selectionKeyCode={['Shift']}
-                  connectionMode={"loose" as any}
-                  connectionLineStyle={{ stroke: '#2196f3', strokeWidth: 3 }}
-                  connectionLineType={"smoothstep" as any}
-                  zoomOnScroll={true}
-                  panOnScroll={true}
-                  panOnDrag={!isMobile}
-                >
-                  <Background
-                    color={theme.palette.mode === 'dark' ? '#555' : '#aaa'}
-                    gap={isMobile ? 15 : 20}
-                    size={isMobile ? 0.5 : 1}
-                    variant={theme.palette.mode === 'dark' ? 'dots' : 'dots'}
-                  />
-
-                  {!isMobile && (
-                    <MiniMap
-                      nodeStrokeWidth={3}
-                      zoomable
-                      pannable
-                      position="bottom-left"
-                      style={{
-                        backgroundColor:
-                          theme.palette.mode === 'dark'
-                            ? theme.palette.grey[900]
-                            : theme.palette.grey[100],
-                        border: `1px solid ${theme.palette.divider}`,
-                      }}
+              return (
+                <ReactFlowProvider>
+                  <ReactFlowModule
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={handleNodesChange}
+                    onEdgesChange={handleEdgesChange}
+                    onConnect={onConnect}
+                    onNodeClick={onNodeClick}
+                    onInit={setReactFlowInstance}
+                    nodeTypes={nodeTypes}
+                    fitView
+                    attributionPosition="bottom-right"
+                    minZoom={0.1}
+                    maxZoom={4}
+                    defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+                    proOptions={{ hideAttribution: true }}
+                    snapToGrid={!isMobile}
+                    snapGrid={[15, 15]}
+                    deleteKeyCode={['Backspace', 'Delete']}
+                    multiSelectionKeyCode={['Control', 'Meta']}
+                    selectionKeyCode={['Shift']}
+                    connectionMode={'loose' as any}
+                    connectionLineStyle={{ stroke: '#2196f3', strokeWidth: 3 }}
+                    connectionLineType={'smoothstep' as any}
+                    zoomOnScroll={true}
+                    panOnScroll={true}
+                    panOnDrag={!isMobile}
+                  >
+                    <Background
+                      color={theme.palette.mode === 'dark' ? '#555' : '#aaa'}
+                      gap={isMobile ? 15 : 20}
+                      size={isMobile ? 0.5 : 1}
+                      variant={'dots' as BackgroundVariant}
                     />
-                  )}
 
-                  {!isMobile && !readOnly && (
-                    <Controls
-                      position="bottom-right"
-                      showInteractive={false}
-                      style={{
-                        backgroundColor:
-                          theme.palette.mode === 'dark'
-                            ? theme.palette.grey[900]
-                            : theme.palette.grey[100],
-                        border: `1px solid ${theme.palette.divider}`,
-                      }}
-                    />
-                  )}
-                </ReactFlowModule>
-              </ReactFlowProvider>
-            );
+                    {!isMobile && (
+                      <MiniMap
+                        nodeStrokeWidth={3}
+                        zoomable
+                        pannable
+                        position="bottom-left"
+                        style={{
+                          backgroundColor:
+                            theme.palette.mode === 'dark'
+                              ? theme.palette.grey[900]
+                              : theme.palette.grey[100],
+                          border: `1px solid ${theme.palette.divider}`,
+                        }}
+                      />
+                    )}
+
+                    {!isMobile && !readOnly && (
+                      <Controls
+                        position="bottom-right"
+                        showInteractive={false}
+                        style={{
+                          backgroundColor:
+                            theme.palette.mode === 'dark'
+                              ? theme.palette.grey[900]
+                              : theme.palette.grey[100],
+                          border: `1px solid ${theme.palette.divider}`,
+                        }}
+                      />
+                    )}
+                  </ReactFlowModule>
+                </ReactFlowProvider>
+              );
+            };
+
+            return <FlowInner />;
           }}
         </ReactFlowComponents>
       </Suspense>
