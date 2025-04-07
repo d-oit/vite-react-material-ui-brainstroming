@@ -1,8 +1,15 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  vi as _vi,
+  beforeEach as _beforeEach,
+  afterEach as _afterEach,
+} from 'vitest';
 
-import indexedDBService from '../../services/IndexedDBService';
-import { NodeType } from '../../types';
-import { mockIndexedDB } from '../test-utils';
+import { default as _indexedDBService } from '../../services/IndexedDBService';
+import { NodeType as _NodeType } from '../../types';
+import { mockIndexedDB as _mockIndexedDB } from '../test-utils';
 
 describe('IndexedDBService', () => {
   // Skip all tests in this file since IndexedDB is not supported in the test environment

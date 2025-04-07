@@ -1,22 +1,28 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi as _vi, beforeEach as _beforeEach } from 'vitest';
 
-import { EnhancedBrainstormFlow } from '../../components/BrainstormFlow/EnhancedBrainstormFlow';
-import { NodeType } from '../../types';
-import { render, screen, fireEvent, waitFor, mockResizeObserver } from '../test-utils';
+import { EnhancedBrainstormFlow as _EnhancedBrainstormFlow } from '../../components/BrainstormFlow/EnhancedBrainstormFlow';
+import { NodeType as _NodeType } from '../../types';
+import {
+  render as _render,
+  screen as _screen,
+  fireEvent as _fireEvent,
+  waitFor as _waitFor,
+  mockResizeObserver as _mockResizeObserver,
+} from '../test-utils';
 
 // Mock ReactFlow
-vi.mock('@reactflow/core', async () => {
-  const actual = await vi.importActual('@reactflow/core');
+_vi.mock('@reactflow/core', async () => {
+  const actual = await _vi.importActual('@reactflow/core');
   return {
     ...actual,
-    ReactFlow: vi
+    ReactFlow: _vi
       .fn()
       .mockImplementation(({ children }) => <div data-testid="react-flow">{children}</div>),
-    useReactFlow: vi.fn().mockReturnValue({
-      fitView: vi.fn(),
-      zoomIn: vi.fn(),
-      zoomOut: vi.fn(),
-      setCenter: vi.fn(),
+    useReactFlow: _vi.fn().mockReturnValue({
+      fitView: _vi.fn(),
+      zoomIn: _vi.fn(),
+      zoomOut: _vi.fn(),
+      setCenter: _vi.fn(),
     }),
   };
 });

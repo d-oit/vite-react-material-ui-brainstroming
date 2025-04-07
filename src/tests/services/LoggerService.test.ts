@@ -222,7 +222,7 @@ describe('LoggerService', () => {
       loggerService.getLogs = vi.fn().mockImplementation(async () => {
         try {
           await indexedDBService.getLogs();
-        } catch (error) {
+        } catch (_error) {
           // Error is handled silently
         }
         return [];
@@ -286,7 +286,7 @@ describe('LoggerService', () => {
       loggerService.clearLogs = vi.fn().mockImplementation(async date => {
         try {
           await indexedDBService.clearLogs(date);
-        } catch (error) {
+        } catch (_error) {
           // Error is handled silently
         }
         return undefined;

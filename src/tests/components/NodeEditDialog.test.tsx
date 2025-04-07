@@ -1,8 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi as _vi, beforeEach as _beforeEach } from 'vitest';
 
-import { NodeEditDialog } from '../../components/BrainstormFlow/NodeEditDialog';
-import { NodeType } from '../../types';
-import { render, screen, fireEvent, waitFor } from '../test-utils';
+import { MemoizedNodeEditDialog as _NodeEditDialog } from '../../components/BrainstormFlow/NodeEditDialog';
+import { NodeType as _NodeType } from '../../types';
+import {
+  render as _render,
+  screen as _screen,
+  fireEvent as _fireEvent,
+  waitFor as _waitFor,
+} from '../test-utils';
 
 describe('NodeEditDialog', () => {
   // Skip all tests in this file due to "too many open files" error in the test environment

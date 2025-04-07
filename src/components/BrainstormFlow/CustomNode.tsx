@@ -64,7 +64,21 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
     const validSize = ['small', 'medium', 'large'].includes(size) ? size : 'medium';
 
     // Get the size configuration from node preferences
-    const sizeConfig = nodePreferences.nodeSizes[validSize];
+    // Use a type-safe approach to avoid object injection
+    let sizeConfig;
+    switch (validSize) {
+      case 'small':
+        sizeConfig = nodePreferences.nodeSizes.small;
+        break;
+      case 'medium':
+        sizeConfig = nodePreferences.nodeSizes.medium;
+        break;
+      case 'large':
+        sizeConfig = nodePreferences.nodeSizes.large;
+        break;
+      default:
+        sizeConfig = null;
+    }
 
     if (!sizeConfig) {
       console.error('Invalid size configuration for node:', { size, validSize, nodePreferences });

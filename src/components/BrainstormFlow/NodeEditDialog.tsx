@@ -287,8 +287,19 @@ const NodeEditDialog = ({
                     color="text.secondary"
                     sx={{ display: 'block', mt: 1 }}
                   >
-                    Width: {nodePreferences.nodeSizes[size].width}px, Font:{' '}
-                    {nodePreferences.nodeSizes[size].fontSize}rem
+                    Width:{' '}
+                    {size === 'small'
+                      ? nodePreferences.nodeSizes.small.width
+                      : size === 'medium'
+                        ? nodePreferences.nodeSizes.medium.width
+                        : nodePreferences.nodeSizes.large.width}
+                    px, Font:{' '}
+                    {size === 'small'
+                      ? nodePreferences.nodeSizes.small.fontSize
+                      : size === 'medium'
+                        ? nodePreferences.nodeSizes.medium.fontSize
+                        : nodePreferences.nodeSizes.large.fontSize}
+                    rem
                   </Typography>
                 )}
               </Grid>
@@ -418,14 +429,26 @@ const NodeEditDialog = ({
             </Typography>
             <Box
               sx={{
-                width: nodePreferences ? nodePreferences.nodeSizes[size].width : 200,
+                width: nodePreferences
+                  ? size === 'small'
+                    ? nodePreferences.nodeSizes.small.width
+                    : size === 'medium'
+                      ? nodePreferences.nodeSizes.medium.width
+                      : nodePreferences.nodeSizes.large.width
+                  : 200,
                 backgroundColor: color || defaultNodeColor,
                 borderLeft: `4px solid ${theme.palette.primary.main}`,
                 borderRadius: 1,
                 p: 1,
                 boxShadow: 1,
                 fontSize: nodePreferences
-                  ? `${nodePreferences.nodeSizes[size].fontSize}rem`
+                  ? `${
+                      size === 'small'
+                        ? nodePreferences.nodeSizes.small.fontSize
+                        : size === 'medium'
+                          ? nodePreferences.nodeSizes.medium.fontSize
+                          : nodePreferences.nodeSizes.large.fontSize
+                    }rem`
                   : '1rem',
               }}
             >
@@ -434,7 +457,13 @@ const NodeEditDialog = ({
                 sx={{
                   fontWeight: 'bold',
                   fontSize: nodePreferences
-                    ? `calc(${nodePreferences.nodeSizes[size].fontSize}rem * 1.1)`
+                    ? `calc(${
+                        size === 'small'
+                          ? nodePreferences.nodeSizes.small.fontSize
+                          : size === 'medium'
+                            ? nodePreferences.nodeSizes.medium.fontSize
+                            : nodePreferences.nodeSizes.large.fontSize
+                      }rem * 1.1)`
                     : '1.1rem',
                 }}
               >
@@ -463,7 +492,13 @@ const NodeEditDialog = ({
                 variant="body2"
                 sx={{
                   fontSize: nodePreferences
-                    ? `calc(${nodePreferences.nodeSizes[size].fontSize}rem * 0.9)`
+                    ? `calc(${
+                        size === 'small'
+                          ? nodePreferences.nodeSizes.small.fontSize
+                          : size === 'medium'
+                            ? nodePreferences.nodeSizes.medium.fontSize
+                            : nodePreferences.nodeSizes.large.fontSize
+                      }rem * 0.9)`
                     : '0.9rem',
                   opacity: 0.8,
                 }}

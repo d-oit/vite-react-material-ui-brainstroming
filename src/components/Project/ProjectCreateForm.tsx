@@ -81,8 +81,64 @@ export const ProjectCreateForm = ({
     onSubmit(name, description, template);
   };
 
+  const getTemplateName = (templateType: ProjectTemplate): string => {
+    // Use a type-safe approach to avoid object injection
+    switch (templateType) {
+      case 'blank':
+        return projectTemplates.blank?.name || templateType;
+      case 'business':
+        return projectTemplates.business?.name || templateType;
+      case 'education':
+        return projectTemplates.education?.name || templateType;
+      case 'personal':
+        return projectTemplates.personal?.name || templateType;
+      case 'research':
+        return projectTemplates.research?.name || templateType;
+      case 'software':
+        return projectTemplates.software?.name || templateType;
+      default:
+        return templateType;
+    }
+  };
+
   const getTemplateDescription = (templateType: ProjectTemplate): string => {
-    return projectTemplates[templateType]?.description || '';
+    // Use a type-safe approach to avoid object injection
+    switch (templateType) {
+      case 'blank':
+        return projectTemplates.blank?.description || '';
+      case 'business':
+        return projectTemplates.business?.description || '';
+      case 'education':
+        return projectTemplates.education?.description || '';
+      case 'personal':
+        return projectTemplates.personal?.description || '';
+      case 'research':
+        return projectTemplates.research?.description || '';
+      case 'software':
+        return projectTemplates.software?.description || '';
+      default:
+        return '';
+    }
+  };
+
+  const getTemplateFeatures = (templateType: ProjectTemplate): string[] => {
+    // Use a type-safe approach to avoid object injection
+    switch (templateType) {
+      case 'blank':
+        return projectTemplates.blank?.features || [];
+      case 'business':
+        return projectTemplates.business?.features || [];
+      case 'education':
+        return projectTemplates.education?.features || [];
+      case 'personal':
+        return projectTemplates.personal?.features || [];
+      case 'research':
+        return projectTemplates.research?.features || [];
+      case 'software':
+        return projectTemplates.software?.features || [];
+      default:
+        return [];
+    }
   };
 
   const openTemplateInfo = (templateType: ProjectTemplate) => {
@@ -97,7 +153,28 @@ export const ProjectCreateForm = ({
   // Auto-generate a project name based on template if name is empty
   useEffect(() => {
     if (name === '' && template !== ProjectTemplate.CUSTOM) {
-      const templateName = projectTemplates[template]?.name || '';
+      // Use a type-safe approach to avoid object injection
+      let templateName = '';
+      switch (template) {
+        case 'blank':
+          templateName = projectTemplates.blank?.name || '';
+          break;
+        case 'business':
+          templateName = projectTemplates.business?.name || '';
+          break;
+        case 'education':
+          templateName = projectTemplates.education?.name || '';
+          break;
+        case 'personal':
+          templateName = projectTemplates.personal?.name || '';
+          break;
+        case 'research':
+          templateName = projectTemplates.research?.name || '';
+          break;
+        case 'software':
+          templateName = projectTemplates.software?.name || '';
+          break;
+      }
       if (templateName) {
         setName(`${templateName} - ${new Date().toLocaleDateString()}`);
       }
@@ -197,7 +274,7 @@ export const ProjectCreateForm = ({
                             component="div"
                             sx={{ fontWeight: 'bold' }}
                           >
-                            {projectTemplates[templateType]?.name || templateType}
+                            {getTemplateName(templateType)}
                           </Typography>
                           <Tooltip title={t('project.moreInfo')}>
                             <IconButton
@@ -262,7 +339,7 @@ export const ProjectCreateForm = ({
           <>
             <DialogTitle>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                {projectTemplates[selectedTemplateInfo]?.name || selectedTemplateInfo}
+                {getTemplateName(selectedTemplateInfo)}
                 <IconButton onClick={closeTemplateInfo} size="small">
                   <CloseIcon />
                 </IconButton>
@@ -270,13 +347,13 @@ export const ProjectCreateForm = ({
             </DialogTitle>
             <DialogContent dividers>
               <Typography variant="body1" paragraph>
-                {projectTemplates[selectedTemplateInfo]?.description}
+                {getTemplateDescription(selectedTemplateInfo)}
               </Typography>
               <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'medium', mt: 2 }}>
                 {t('project.templateIncludes')}:
               </Typography>
               <ul>
-                {projectTemplates[selectedTemplateInfo]?.features?.map((feature, index) => (
+                {getTemplateFeatures(selectedTemplateInfo).map((feature, index) => (
                   <li key={index}>
                     <Typography variant="body2">{feature}</Typography>
                   </li>

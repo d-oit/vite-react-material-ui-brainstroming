@@ -128,16 +128,34 @@ export const NodePreferencesManager = () => {
     property: 'width' | 'fontSize',
     value: number
   ) => {
+    // Create a safe copy of the preferences
     const updatedPreferences = {
       ...localPreferences,
       nodeSizes: {
         ...localPreferences.nodeSizes,
-        [size]: {
-          ...localPreferences.nodeSizes[size],
-          [property]: value,
-        },
       },
     };
+
+    // Update the specific size and property in a type-safe way
+    if (size === 'small') {
+      updatedPreferences.nodeSizes.small = {
+        ...localPreferences.nodeSizes.small,
+      };
+      if (property === 'width') updatedPreferences.nodeSizes.small.width = value;
+      if (property === 'fontSize') updatedPreferences.nodeSizes.small.fontSize = value;
+    } else if (size === 'medium') {
+      updatedPreferences.nodeSizes.medium = {
+        ...localPreferences.nodeSizes.medium,
+      };
+      if (property === 'width') updatedPreferences.nodeSizes.medium.width = value;
+      if (property === 'fontSize') updatedPreferences.nodeSizes.medium.fontSize = value;
+    } else if (size === 'large') {
+      updatedPreferences.nodeSizes.large = {
+        ...localPreferences.nodeSizes.large,
+      };
+      if (property === 'width') updatedPreferences.nodeSizes.large.width = value;
+      if (property === 'fontSize') updatedPreferences.nodeSizes.large.fontSize = value;
+    }
 
     setLocalPreferences(updatedPreferences);
   };
@@ -267,8 +285,20 @@ export const NodePreferencesManager = () => {
           <Grid item key={size}>
             <NodeSizePreview
               size={size}
-              width={localPreferences.nodeSizes[size].width}
-              fontSize={localPreferences.nodeSizes[size].fontSize}
+              width={
+                size === 'small'
+                  ? localPreferences.nodeSizes.small.width
+                  : size === 'medium'
+                    ? localPreferences.nodeSizes.medium.width
+                    : localPreferences.nodeSizes.large.width
+              }
+              fontSize={
+                size === 'small'
+                  ? localPreferences.nodeSizes.small.fontSize
+                  : size === 'medium'
+                    ? localPreferences.nodeSizes.medium.fontSize
+                    : localPreferences.nodeSizes.large.fontSize
+              }
               isSelected={settings.preferredNodeSize === size}
               onClick={() => handleSizeChange(size)}
             />
@@ -290,10 +320,22 @@ export const NodePreferencesManager = () => {
                 </Typography>
 
                 <Typography variant="body2" gutterBottom>
-                  Width: {localPreferences.nodeSizes[size].width}px
+                  Width:{' '}
+                  {size === 'small'
+                    ? localPreferences.nodeSizes.small.width
+                    : size === 'medium'
+                      ? localPreferences.nodeSizes.medium.width
+                      : localPreferences.nodeSizes.large.width}
+                  px
                 </Typography>
                 <Slider
-                  value={localPreferences.nodeSizes[size].width}
+                  value={
+                    size === 'small'
+                      ? localPreferences.nodeSizes.small.width
+                      : size === 'medium'
+                        ? localPreferences.nodeSizes.medium.width
+                        : localPreferences.nodeSizes.large.width
+                  }
                   min={100}
                   max={400}
                   step={10}
@@ -303,10 +345,22 @@ export const NodePreferencesManager = () => {
                 />
 
                 <Typography variant="body2" gutterBottom>
-                  Font Size: {localPreferences.nodeSizes[size].fontSize}rem
+                  Font Size:{' '}
+                  {size === 'small'
+                    ? localPreferences.nodeSizes.small.fontSize
+                    : size === 'medium'
+                      ? localPreferences.nodeSizes.medium.fontSize
+                      : localPreferences.nodeSizes.large.fontSize}
+                  rem
                 </Typography>
                 <Slider
-                  value={localPreferences.nodeSizes[size].fontSize}
+                  value={
+                    size === 'small'
+                      ? localPreferences.nodeSizes.small.fontSize
+                      : size === 'medium'
+                        ? localPreferences.nodeSizes.medium.fontSize
+                        : localPreferences.nodeSizes.large.fontSize
+                  }
                   min={0.6}
                   max={1.6}
                   step={0.1}

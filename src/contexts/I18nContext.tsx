@@ -235,13 +235,29 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ children, defaultLoc
 
   // Translation function
   const t = (key: string, params?: Record<string, string>): string => {
-    const translation = translations[locale]?.[key] || key;
+    // Use a type-safe approach to avoid object injection
+    let translationMap: Record<string, string> = {};
+
+    if (locale === 'en') {
+      translationMap = translations.en;
+    } else if (locale === 'de') {
+      translationMap = translations.de;
+    } else {
+      // Fallback to English
+      translationMap = translations.en;
+    }
+
+    const translation = translationMap[key] || key;
 
     if (params) {
-      return Object.entries(params).reduce(
-        (acc, [paramKey, paramValue]) => acc.replace(`{{${paramKey}}}`, paramValue),
-        translation
-      );
+      // Use a safer approach for parameter replacement
+      let result = translation;
+      for (const [paramKey, paramValue] of Object.entries(params)) {
+        // Use a regular string replace instead of dynamic template literals
+        const placeholder = `{{${paramKey}}}`;
+        result = result.split(placeholder).join(paramValue);
+      }
+      return result;
     }
 
     return translation;

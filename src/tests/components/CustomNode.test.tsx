@@ -1,8 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi as _vi, beforeEach as _beforeEach } from 'vitest';
 
-import CustomNode from '../../components/BrainstormFlow/CustomNode';
-import { NodeType } from '../../types';
-import { render, screen, fireEvent, mockResizeObserver } from '../test-utils';
+import { default as _CustomNode } from '../../components/BrainstormFlow/CustomNode';
+import { NodeType as _NodeType } from '../../types';
+import {
+  render as _render,
+  screen as _screen,
+  fireEvent as _fireEvent,
+  mockResizeObserver as _mockResizeObserver,
+} from '../test-utils';
 
 describe('CustomNode', () => {
   // Skip all tests in this file due to "too many open files" error in the test environment

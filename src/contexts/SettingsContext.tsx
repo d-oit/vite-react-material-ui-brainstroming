@@ -243,14 +243,41 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     // If a custom color is provided for this specific node, use it
     if (customColor) return customColor;
 
-    // If node has a custom color in preferences, use it
-    if (nodePreferences?.customColors?.[type]) {
-      return nodePreferences.customColors[type]!;
+    // If node has a custom color in preferences, use it in a type-safe way
+    if (nodePreferences?.customColors) {
+      // Check each type explicitly to avoid object injection
+      if (type === 'task' && nodePreferences.customColors.task) {
+        return nodePreferences.customColors.task;
+      } else if (type === 'note' && nodePreferences.customColors.note) {
+        return nodePreferences.customColors.note;
+      } else if (type === 'idea' && nodePreferences.customColors.idea) {
+        return nodePreferences.customColors.idea;
+      } else if (type === 'decision' && nodePreferences.customColors.decision) {
+        return nodePreferences.customColors.decision;
+      } else if (type === 'question' && nodePreferences.customColors.question) {
+        return nodePreferences.customColors.question;
+      } else if (type === 'action' && nodePreferences.customColors.action) {
+        return nodePreferences.customColors.action;
+      }
     }
 
-    // If active color scheme has a color for this node type, use it
+    // If active color scheme has a color for this node type, use it in a type-safe way
     if (activeColorScheme) {
-      return activeColorScheme.colors[type] || '#f5f5f5';
+      // Check each type explicitly to avoid object injection
+      if (type === 'task') {
+        return activeColorScheme.colors.task || '#f5f5f5';
+      } else if (type === 'note') {
+        return activeColorScheme.colors.note || '#f5f5f5';
+      } else if (type === 'idea') {
+        return activeColorScheme.colors.idea || '#f5f5f5';
+      } else if (type === 'decision') {
+        return activeColorScheme.colors.decision || '#f5f5f5';
+      } else if (type === 'question') {
+        return activeColorScheme.colors.question || '#f5f5f5';
+      } else if (type === 'action') {
+        return activeColorScheme.colors.action || '#f5f5f5';
+      }
+      return '#f5f5f5';
     }
 
     // Fallback colors if no active scheme

@@ -447,7 +447,30 @@ export function createProjectFromTemplate(
   name: string,
   description: string
 ): Project {
-  const template = projectTemplates[templateType];
+  // Use a type-safe approach to avoid object injection
+  let template;
+  switch (templateType) {
+    case 'blank':
+      template = projectTemplates.blank;
+      break;
+    case 'business':
+      template = projectTemplates.business;
+      break;
+    case 'education':
+      template = projectTemplates.education;
+      break;
+    case 'personal':
+      template = projectTemplates.personal;
+      break;
+    case 'research':
+      template = projectTemplates.research;
+      break;
+    case 'software':
+      template = projectTemplates.software;
+      break;
+    default:
+      template = projectTemplates.blank;
+  }
   const now = new Date().toISOString();
 
   return {
