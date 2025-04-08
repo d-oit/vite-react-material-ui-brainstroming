@@ -23,7 +23,7 @@ import {
   FormControlLabel,
   Checkbox,
 } from '@mui/material';
-import { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
 import type {
   Node as FlowNode,
   NodeTypes,
@@ -40,6 +40,7 @@ import { ReactFlowProvider } from 'reactflow';
 import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import loggerService from '../../services/LoggerService';
+import { MetricCategory, performanceTracker } from '../../utils/performanceTracker';
 import type { NodeData, Node, Edge } from '../../types';
 import { NodeType, EdgeType } from '../../types';
 // Import performance monitoring utilities
@@ -136,13 +137,13 @@ interface EnhancedBrainstormFlowProps {
 }
 
 // This is the main component that will be exported
-const EnhancedBrainstormFlow = (props: EnhancedBrainstormFlowProps) => {
+const EnhancedBrainstormFlow = React.memo((props: EnhancedBrainstormFlowProps) => {
   return (
     <ReactFlowProvider>
       <FlowContent {...props} />
     </ReactFlowProvider>
   );
-};
+});
 
 export { EnhancedBrainstormFlow };
 
@@ -150,7 +151,7 @@ export { EnhancedBrainstormFlow };
 // Split into smaller components for better maintainability
 // These components will be used in future implementations
 
-const FlowContent = ({
+const FlowContent = React.memo(({
   initialNodes = [],
   initialEdges = [],
   onSave,
@@ -483,7 +484,13 @@ const FlowContent = ({
   // Process nodes to add event handlers
   const processNodes = useCallback(
     (nodesToProcess: Node[]): Node[] => {
-      return nodesToProcess.map(node => ({
+      const metricId = performanceTracker.startMeasure(
+        'ProcessNodes',
+        MetricCategory.RENDER,
+        { nodeCount: nodesToProcess.length }
+      );
+
+      const result = nodesToProcess.map(node => ({
         ...node,
         data: {
           ...node.data,
@@ -527,6 +534,9 @@ const FlowContent = ({
           },
         },
       }));
+
+      performanceTracker.endMeasure(metricId);
+      return result;
     },
     [nodes, handleNodeDeleteRequest, setNodes, externalNodesChange]
   );
@@ -587,8 +597,16 @@ const FlowContent = ({
   // Save the flow
   const saveFlow = useCallback(() => {
     if (onSave) {
+      const metricId = performanceTracker.startMeasure(
+        'SaveFlow',
+        MetricCategory.INTERACTION,
+        { nodeCount: nodes.length, edgeCount: edges.length }
+      );
+
       onSave(nodes as Node[], edges as Edge[]);
       showSnackbar(t('brainstorm.flowSaved'), 'success');
+
+      performanceTracker.endMeasure(metricId);
     }
   }, [nodes, edges, onSave, t]);
 
@@ -682,8 +700,16 @@ const FlowContent = ({
   // Process initial nodes to add event handlers
   useEffect(() => {
     if (initialNodes.length > 0 && Array.isArray(initialNodes)) {
+      const metricId = performanceTracker.startMeasure(
+        'ProcessInitialNodes',
+        MetricCategory.RENDER,
+        { nodeCount: initialNodes.length }
+      );
+
       const processedNodes = processNodes(initialNodes);
       setNodes(processedNodes);
+
+      performanceTracker.endMeasure(metricId);
     }
   }, [initialNodes, processNodes, setNodes]);
 
@@ -700,8 +726,14 @@ const FlowContent = ({
   useEffect(() => {
     const handleResize = () => {
       if (reactFlowInstance && nodes.length > 0 && fitView) {
+        const metricId = performanceTracker.startMeasure(
+          'ResizeViewFit',
+          MetricCategory.INTERACTION
+        );
+
         setTimeout(() => {
           fitView({ padding: 0.2 });
+          performanceTracker.endMeasure(metricId);
         }, 200);
       }
     };
@@ -1351,7 +1383,9 @@ const FlowContent = ({
       />
     </Box>
   );
-};
+});
+
+
 
 // Add type definition for the global API
 declare global {

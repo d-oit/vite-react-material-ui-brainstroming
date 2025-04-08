@@ -30,6 +30,7 @@ import {
   Memory as CacheIcon,
   BugReport as DebugIcon,
   Psychology as BrainstormIcon,
+  Accessibility as AccessibilityIcon,
 } from '@mui/icons-material';
 
 import type { NavigationItem } from '../types/navigation';
@@ -381,5 +382,21 @@ export const navigationItems: NavigationItem[] = [
     icon: <ChatIcon />,
     path: '/chat',
     accessLevel: 'basic',
+  },
+  {
+    id: 'accessibility-options',
+    type: 'custom',
+    label: 'Accessibility Options',
+    icon: <AccessibilityIcon />,
+    accessLevel: 'basic',
+    component: 'accessibility',
+  },
+  {
+    id: 'performance-monitor',
+    type: 'custom',
+    label: 'Performance Monitor',
+    icon: <MonitorIcon />,
+    accessLevel: 'basic',
+    component: 'performance',
   },
 ];

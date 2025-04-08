@@ -170,8 +170,11 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
 
     setIsSaving(true);
     try {
+      // Ensure version is a string before splitting
+      const versionStr =
+        typeof project.version === 'string' ? project.version : String(project.version);
       // Increment version number (assuming semver format)
-      const versionParts = project.version.split('.');
+      const versionParts = versionStr.split('.');
       const minorVersionStr = versionParts[1] ?? '0';
       const newMinorVersion = parseInt(minorVersionStr, 10) + 1;
       const newVersion = `${versionParts[0]}.${newMinorVersion}.0`;

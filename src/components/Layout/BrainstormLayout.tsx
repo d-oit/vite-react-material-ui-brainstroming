@@ -45,10 +45,18 @@ function TabPanel(props: TabPanelProps) {
       hidden={value !== index}
       id={`sidebar-tabpanel-${index}`}
       aria-labelledby={`sidebar-tab-${index}`}
+      aria-hidden={value !== index}
       sx={{ height: '100%', overflow: 'auto' }}
       {...other}
     >
-      {value === index && <Box sx={{ height: '100%' }}>{children}</Box>}
+      {value === index && (
+        <Box
+          sx={{ height: '100%' }}
+          tabIndex={value === index ? 0 : -1}
+        >
+          {children}
+        </Box>
+      )}
     </Box>
   );
 }
@@ -178,13 +186,25 @@ export const BrainstormLayout = ({
                   marginLeft: 60,
                 }}
               >
-                <IconButton onClick={onZoomIn} size="small">
+                <IconButton
+                  onClick={onZoomIn}
+                  size="small"
+                  aria-label={t('brainstorm.zoomIn')}
+                >
                   <ZoomInIcon />
                 </IconButton>
-                <IconButton onClick={onZoomOut} size="small">
+                <IconButton
+                  onClick={onZoomOut}
+                  size="small"
+                  aria-label={t('brainstorm.zoomOut')}
+                >
                   <ZoomOutIcon />
                 </IconButton>
-                <IconButton onClick={onFitView} size="small">
+                <IconButton
+                  onClick={onFitView}
+                  size="small"
+                  aria-label={t('brainstorm.fitView')}
+                >
                   <FitScreenIcon />
                 </IconButton>
               </Box>
@@ -206,9 +226,24 @@ export const BrainstormLayout = ({
             >
               <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                  <Tabs value={sidebarTab} onChange={handleTabChange} variant="fullWidth">
-                    <Tab icon={<ChatIcon />} label={t('chat.title')} />
-                    <Tab icon={<HistoryIcon />} label={t('gitHistory.title')} />
+                  <Tabs
+                    value={sidebarTab}
+                    onChange={handleTabChange}
+                    variant="fullWidth"
+                    aria-label="Sidebar tabs"
+                  >
+                    <Tab
+                      icon={<ChatIcon />}
+                      label={t('chat.title')}
+                      id={`sidebar-tab-0`}
+                      aria-controls={`sidebar-tabpanel-0`}
+                    />
+                    <Tab
+                      icon={<HistoryIcon />}
+                      label={t('gitHistory.title')}
+                      id={`sidebar-tab-1`}
+                      aria-controls={`sidebar-tabpanel-1`}
+                    />
                   </Tabs>
                 </Box>
 
@@ -258,17 +293,29 @@ export const BrainstormLayout = ({
                   }}
                 >
                   <Tooltip title={t('brainstorm.zoomIn')}>
-                    <IconButton onClick={onZoomIn} size="small">
+                    <IconButton
+                      onClick={onZoomIn}
+                      size="small"
+                      aria-label={t('brainstorm.zoomIn')}
+                    >
                       <ZoomInIcon />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title={t('brainstorm.zoomOut')}>
-                    <IconButton onClick={onZoomOut} size="small">
+                    <IconButton
+                      onClick={onZoomOut}
+                      size="small"
+                      aria-label={t('brainstorm.zoomOut')}
+                    >
                       <ZoomOutIcon />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title={t('brainstorm.fitView')}>
-                    <IconButton onClick={onFitView} size="small">
+                    <IconButton
+                      onClick={onFitView}
+                      size="small"
+                      aria-label={t('brainstorm.fitView')}
+                    >
                       <FitScreenIcon />
                     </IconButton>
                   </Tooltip>
@@ -285,6 +332,9 @@ export const BrainstormLayout = ({
                   display: 'flex',
                   flexDirection: 'column',
                 }}
+                id="sidebar-panel"
+                aria-label={t('common.sidebar')}
+                role="complementary"
               >
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -335,38 +385,65 @@ export const BrainstormLayout = ({
       >
         {onSave && (
           <Tooltip title={isSaving ? t('common.saving') : t('common.save')}>
-            <Fab
-              color="primary"
-              size="medium"
-              onClick={handleSave}
-              disabled={isSaving}
-            >
-              {isSaving ? <CircularProgress size={24} color="inherit" /> : <SaveIcon />}
-            </Fab>
+            <span>
+              <Fab
+                color="primary"
+                size="medium"
+                onClick={handleSave}
+                disabled={isSaving}
+                aria-label={isSaving ? t('common.saving') : t('common.save')}
+              >
+                {isSaving ? <CircularProgress size={24} color="inherit" /> : <SaveIcon />}
+              </Fab>
+            </span>
           </Tooltip>
         )}
 
         <Tooltip title={isFullscreen ? t('brainstorm.exitFullscreen') : t('brainstorm.fullscreen')}>
-          <Fab color="default" size="medium" onClick={toggleFullscreen}>
-            {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
-          </Fab>
+          <span>
+            <Fab
+              color="default"
+              size="medium"
+              onClick={toggleFullscreen}
+              aria-label={isFullscreen ? t('brainstorm.exitFullscreen') : t('brainstorm.fullscreen')}
+              aria-pressed={isFullscreen}
+            >
+              {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+            </Fab>
+          </span>
         </Tooltip>
 
         {/* Add button for creating new nodes */}
         <Tooltip title={t('brainstorm.addNode')}>
-          <Fab color="default" size="medium" onClick={onAddNode}>
-            <AddIcon />
-          </Fab>
+          <span>
+            <Fab
+              color="default"
+              size="medium"
+              onClick={onAddNode}
+              aria-label={t('brainstorm.addNode')}
+            >
+              <AddIcon />
+            </Fab>
+          </span>
         </Tooltip>
 
         {/* Chat button - only show when sidebar is closed */}
         {!sidebarOpen && (
           <Tooltip title={t('chat.openAssistant')}>
-            <Fab color="secondary" size="medium" onClick={toggleSidebar}>
-              <Badge color="error" variant="dot" invisible={true}>
-                <ChatIcon />
-              </Badge>
-            </Fab>
+            <span>
+              <Fab
+                color="secondary"
+                size="medium"
+                onClick={toggleSidebar}
+                aria-label={t('chat.openAssistant')}
+                aria-expanded={sidebarOpen}
+                aria-controls="sidebar-panel"
+              >
+                <Badge color="error" variant="dot" invisible={true}>
+                  <ChatIcon />
+                </Badge>
+              </Fab>
+            </span>
           </Tooltip>
         )}
       </Box>

@@ -11,8 +11,12 @@ import {
   ListItemText,
   useTheme,
 } from '@mui/material';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import AccessibilityMenu from '../Accessibility/AccessibilityMenu';
+import AccessibilityOverlay from '../Accessibility/AccessibilityOverlay';
+import PerformanceProfiler from '../PerformanceProfiler';
 
 import { useNavigation } from '../../contexts/NavigationContext';
 import type { NavigationItem as NavigationItemType } from '../../types/navigation';
@@ -32,6 +36,7 @@ const NavigationItem = ({ item, level }: NavigationItemProps) => {
   const isSection = item.type === 'section';
   const isLink = item.type === 'link';
   const isAction = item.type === 'action';
+  const isCustom = item.type === 'custom';
 
   // Handle item click
   const handleClick = useCallback(() => {
@@ -43,6 +48,7 @@ const NavigationItem = ({ item, level }: NavigationItemProps) => {
       // Handle action items (custom logic would go here)
       console.log(`Action clicked: ${item.id}`);
     }
+    // Custom components handle their own click events
   }, [isSection, hasChildren, isLink, isAction, item.id, item.path, toggleSection, navigate]);
 
   // Calculate indentation based on level
@@ -156,6 +162,9 @@ const NavigationItem = ({ item, level }: NavigationItemProps) => {
           </List>
         </Collapse>
       )}
+      {/* Render custom components */}
+      {isCustom && item.component === 'accessibility' && <SidebarAccessibilityItem />}
+      {isCustom && item.component === 'performance' && <SidebarPerformanceItem />}
     </>
   );
 };

@@ -29,10 +29,16 @@ import { useErrorNotification } from '../../contexts/ErrorNotificationContext';
 import { useSettings } from '../../contexts/SettingsContext';
 
 interface AccessibilityMenuProps {
-  position?: 'top-right' | 'bottom-right' | 'bottom-left' | 'top-left';
+  position?: 'top-right' | 'bottom-right' | 'bottom-left' | 'top-left' | 'center';
+  open?: boolean;
+  onClose?: () => void;
 }
 
-export const AccessibilityMenu = ({ position = 'bottom-left' }: AccessibilityMenuProps) => {
+export const AccessibilityMenu = ({
+  position = 'bottom-left',
+  open = false,
+  onClose
+}: AccessibilityMenuProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { settings, updateSettings } = useSettings();
   const { showError } = useErrorNotification();
@@ -141,6 +147,8 @@ export const AccessibilityMenu = ({ position = 'bottom-left' }: AccessibilityMen
         return { bottom: 80, right: 16 }; // Above bottom navigation
       case 'top-left':
         return { top: 80, left: 16 }; // Below AppBar
+      case 'center':
+        return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }; // Centered
       case 'bottom-left':
       default:
         return { bottom: 80, left: 16 }; // Above bottom navigation
@@ -153,6 +161,9 @@ export const AccessibilityMenu = ({ position = 'bottom-left' }: AccessibilityMen
 
   const handleClose = () => {
     setAnchorEl(null);
+    if (onClose) {
+      onClose();
+    }
   };
 
   const handleFontSizeChange = (_event: Event, newValue: number | number[]) => {

@@ -34,6 +34,7 @@ const HomePage = lazy(() => import('./pages/HomePage'));
 const ProjectDashboard = lazy(() => import('./pages/ProjectDashboard'));
 const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const PerformancePage = lazy(() => import('./pages/PerformancePage'));
 
 // Lazy load Material UI components that are heavy
 // These components are used dynamically based on user interactions
@@ -275,6 +276,12 @@ const AppWithTheme = () => {
                       <SettingsPage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
                     }
                   />
+                  <Route
+                    path="/performance"
+                    element={
+                      <PerformancePage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
+                    }
+                  />
                   {/* Removed standalone brainstorming route - now using quick project creation */}
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
@@ -282,14 +289,7 @@ const AppWithTheme = () => {
 
               {/* Offline indicator removed as per UI update plan */}
 
-              {/* Accessibility components */}
-              <AccessibilityMenu position="bottom-left" />
-              <AccessibilityOverlay />
-
-              {/* Performance profiler */}
-              <PerformanceProfiler />
-
-              {/* Screen reader announcer */}
+              {/* Screen reader announcer - always visible */}
               <ScreenReaderAnnouncer messages={[]} politeness="polite" />
 
               {/* Update notification */}

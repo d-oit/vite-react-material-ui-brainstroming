@@ -10,6 +10,7 @@ import {
   Close as CloseIcon,
   FolderOpen as ProjectsIcon,
   BubbleChart as BrainstormIcon,
+  BarChart as BarChartIcon,
 } from '@mui/icons-material';
 import {
   Box,
@@ -126,6 +127,12 @@ export const AppShell = ({
       icon: <SettingsIcon />,
       path: '/settings',
       active: location.pathname === '/settings',
+    },
+    {
+      text: t('nav.performance') || 'Performance',
+      icon: <BarChartIcon />,
+      path: '/performance',
+      active: location.pathname === '/performance',
     },
   ];
 

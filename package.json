@@ -21,6 +21,8 @@
     "test:coverage": "vitest run --config vitest.config.ts --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "test:a11y": "playwright test src/tests/accessibility/a11y-audit.ts",
+    "test:a11y:report": "playwright test src/tests/accessibility/a11y-audit.ts --reporter=html && open playwright-report/index.html",
     "prepare": "husky install"
   },
   "dependencies": {
@@ -58,6 +60,7 @@
     ]
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.8.5",
     "@playwright/test": "^1.42.1",
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^14.2.1",

@@ -109,6 +109,7 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
                   theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200],
               },
             }}
+            aria-label={t('flow.showMiniMap') || 'Show mini map'}
           >
             <ShowIcon fontSize="small" />
           </IconButton>
@@ -127,6 +128,8 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
         flexDirection: 'column',
         alignItems: 'flex-end',
       }}
+      role="region"
+      aria-label={t('flow.miniMap') || 'Flow minimap'}
     >
       <Box
         sx={{
@@ -204,6 +207,9 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
                   theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200],
               },
             }}
+            aria-label={expanded ? t('flow.collapseMiniMap') || 'Collapse mini map' : t('flow.expandMiniMap') || 'Expand mini map'}
+            aria-expanded={expanded}
+            aria-controls="minimap-container"
           >
             {expanded ? <CollapseIcon fontSize="small" /> : <ExpandIcon fontSize="small" />}
           </IconButton>
@@ -221,6 +227,7 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
                   theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200],
               },
             }}
+            aria-label={t('flow.hideMiniMap') || 'Hide mini map'}
           >
             <HideIcon fontSize="small" />
           </IconButton>
@@ -246,6 +253,8 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
           boxShadow: '0 4px 8px rgba(0,0,0,0.15)', // Add shadow for better visibility
           borderRadius: 4, // Rounded corners
         }}
+        aria-hidden="true" // The minimap is a visual aid and not meant to be accessible
+        id="minimap-container"
       />
     </Box>
   );

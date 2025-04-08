@@ -2,13 +2,15 @@ import type { ReactNode } from 'react';
 
 export interface NavigationItem {
   id: string;
-  type: 'section' | 'action' | 'link';
+  type: 'section' | 'action' | 'link' | 'custom';
   label: string;
   icon: ReactNode;
   path?: string;
   badge?: number;
   children?: NavigationItem[];
   accessLevel: 'basic' | 'admin';
+  actionType?: string;
+  component?: 'accessibility' | 'performance' | string;
 }
 
 export interface NavigationTheme {

@@ -30,11 +30,11 @@ import {
 } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 
-import type { PerformanceMetric } from '../utils/performanceMonitoring';
+import type { PerformanceMetric } from '../utils/performanceTracker';
 import {
-  default as performanceMonitoringUtil,
+  performanceTracker as performanceMonitoringUtil,
   PerformanceCategory,
-} from '../utils/performanceMonitoring';
+} from '../utils/performanceTracker';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -68,8 +68,19 @@ function a11yProps(index: number) {
 /**
  * Performance profiler component that displays performance metrics
  */
-const PerformanceProfiler: React.FC = () => {
-  const [open, setOpen] = useState(false);
+interface PerformanceProfilerProps {
+  open?: boolean;
+  onClose?: () => void;
+}
+
+const PerformanceProfiler: React.FC<PerformanceProfilerProps> = ({
+  open: externalOpen,
+  onClose
+}) => {
+  // Use internal state if no external open prop is provided
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+
   const [metrics, setMetrics] = useState<PerformanceMetric[]>([]);
   const [tabValue, setTabValue] = useState(0);
   const [enabled, setEnabled] = useState(true);
