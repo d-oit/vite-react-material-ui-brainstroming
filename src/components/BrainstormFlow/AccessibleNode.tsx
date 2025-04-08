@@ -1,5 +1,5 @@
-import React from 'react';
 import { Box, Card, CardContent, Typography, Chip, useTheme } from '@mui/material';
+import React from 'react';
 
 import { useI18n } from '../../contexts/I18nContext';
 import type { NodeData } from '../../types';
@@ -26,12 +26,19 @@ const AccessibleNode: React.FC<AccessibleNodeProps> = ({
   style,
 }) => {
   const theme = useTheme();
-  const { t } = useI18n();
+  const { t: _t } = useI18n(); // Unused variable prefixed with underscore
 
   // Default colors if not provided
-  const backgroundColor = style?.backgroundColor || theme.palette.background.paper;
-  const borderColor = style?.borderColor || theme.palette.primary.main;
-  const textColor = style?.color || theme.palette.text.primary;
+  const backgroundColor =
+    style?.backgroundColor !== undefined && style.backgroundColor !== null
+      ? style.backgroundColor
+      : theme.palette.background.paper;
+  const borderColor =
+    style?.borderColor !== undefined && style.borderColor !== null
+      ? style.borderColor
+      : theme.palette.primary.main;
+  const textColor =
+    style?.color !== undefined && style.color !== null ? style.color : theme.palette.text.primary;
 
   return (
     <Card
@@ -52,7 +59,7 @@ const AccessibleNode: React.FC<AccessibleNodeProps> = ({
       aria-pressed={isSelected}
       aria-label={`${data.label}: ${data.content}`}
       onClick={onSelect}
-      onKeyDown={(e) => {
+      onKeyDown={e => {
         if (e.key === 'Enter') {
           onSelect();
         } else if (e.key === 'e' || e.key === 'E') {
@@ -71,7 +78,7 @@ const AccessibleNode: React.FC<AccessibleNodeProps> = ({
         </Typography>
         {data.tags && data.tags.length > 0 && (
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {data.tags.map((tag) => (
+            {data.tags.map(tag => (
               <Chip
                 key={tag}
                 label={tag}

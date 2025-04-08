@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { Close as CloseIcon } from '@mui/icons-material';
 import {
   Dialog,
   DialogTitle,
@@ -17,7 +17,7 @@ import {
   Chip,
   Autocomplete,
 } from '@mui/material';
-import { Close as CloseIcon } from '@mui/icons-material';
+import React, { useState, useEffect } from 'react';
 
 import { useI18n } from '../../contexts/I18nContext';
 import type { Node } from '../../types';
@@ -29,7 +29,12 @@ interface NodeEditDialogProps {
   onSave: (nodeId: string, newData: { label: string; content: string; tags?: string[] }) => void;
 }
 
-const ResponsiveNodeEditDialog: React.FC<NodeEditDialogProps> = ({ open, onClose, node, onSave }) => {
+const ResponsiveNodeEditDialog: React.FC<NodeEditDialogProps> = ({
+  open,
+  onClose,
+  node,
+  onSave,
+}) => {
   const theme = useTheme();
   const { t } = useI18n();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));

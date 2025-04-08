@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-import { uploadProject, downloadProject } from '@/lib/s3Service';
-import type { Project, Node, Edge } from '@/types';
+import { uploadProject, downloadProject } from '../lib/s3Service';
+import type { Project, Node, Edge } from '../types';
+import { ProjectTemplate } from '../types/project';
 
 interface UseProjectProps {
   projectId?: string;
@@ -27,8 +28,14 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
       // Try to load from S3, but don't fail if S3 is not configured
       try {
         const loadedProject = await downloadProject(projectId, version);
-        if (loadedProject !== null && loadedProject !== undefined) {
-          setProject(loadedProject);
+        if (
+          loadedProject !== null &&
+          typeof loadedProject === 'object' &&
+          'id' in loadedProject &&
+          'name' in loadedProject &&
+          'nodes' in loadedProject
+        ) {
+          setProject(loadedProject as Project);
           return;
         }
       } catch (s3Error) {
@@ -47,8 +54,14 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
       // If we get here, either S3 failed or returned no project
       // Try to load from local storage as a fallback
       const localProject = await loadProjectFromLocalStorage(projectId);
-      if (localProject !== null && localProject !== undefined) {
-        setProject(localProject);
+      if (
+        localProject !== null &&
+        typeof localProject === 'object' &&
+        'id' in localProject &&
+        'name' in localProject &&
+        'nodes' in localProject
+      ) {
+        setProject(localProject as Project);
       } else {
         setError('Project not found');
       }
@@ -82,8 +95,14 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       version: '0.1.0',
-      nodes: [],
-      edges: [],
+      template: ProjectTemplate.CUSTOM,
+      nodes: [] as Node[],
+      edges: [] as Edge[],
+      syncSettings: {
+        enableS3Sync: false,
+        syncFrequency: 'manual',
+        intervalMinutes: 30,
+      },
     };
 
     setProject(newProject);
@@ -92,7 +111,7 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
 
   // Save project
   const saveProject = useCallback(async (): Promise<boolean> => {
-    if (project === null || project === undefined) return false;
+    if (project === null || !('id' in project) || !('nodes' in project)) return false;
 
     setIsSaving(true);
     try {
@@ -202,7 +221,7 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
       };
 
       setProject((prev: Project | null) => {
-        if (prev === null || prev === undefined) return null;
+        if (prev === null || !('id' in prev) || !('nodes' in prev)) return null;
         return {
           ...prev,
           nodes: [...prev.nodes, newNode],
@@ -327,9 +346,10 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
   // Auto-save effect
   useEffect(() => {
     if (
-      autoSave === false ||
+      autoSave !== true ||
       project === null ||
-      project === undefined ||
+      !('id' in project) ||
+      !('nodes' in project) ||
       loading === true ||
       isSaving === true
     ) {

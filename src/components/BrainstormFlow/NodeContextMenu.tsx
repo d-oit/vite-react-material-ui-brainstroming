@@ -27,6 +27,10 @@ interface NodeContextMenuProps {
   onLinkToChat: (node: Node) => void;
 }
 
+/**
+ * NodeContextMenu component for displaying a context menu for nodes
+ * Provides options for editing, duplicating, styling, and deleting nodes
+ */
 export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
   node,
   anchorPosition,
@@ -42,6 +46,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
   const theme = useTheme();
   const { t } = useI18n();
 
+  // Only render if we have a node
   if (!node) return null;
 
   return (
@@ -52,6 +57,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
       anchorPosition={
         anchorPosition !== null ? { top: anchorPosition.y, left: anchorPosition.x } : undefined
       }
+      // Ensure the menu is properly labeled for screen readers
       MenuListProps={{
         'aria-label': t('flow.nodeContextMenu') || 'Node context menu',
         dense: true,

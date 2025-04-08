@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import offlineService from '../../services/OfflineService';
 
-import OfflineFallback from './OfflineFallback';
+import { default as OfflineFallbackComponent } from './OfflineFallback';
 
 interface WithOfflineFallbackOptions {
   requiresNetwork?: boolean;
@@ -25,8 +25,7 @@ export const withOfflineFallback = <P extends object>(
 
   const WithOfflineFallbackComponent: React.FC<P> = props => {
     const [isOnline, setIsOnline] = useState(offlineService.getOnlineStatus());
-    // Unused state variables
-    // const [retryCount, setRetryCount] = useState(0);
+    const [retryCount, setRetryCount] = useState(0);
 
     useEffect(() => {
       const removeListener = offlineService.addOnlineStatusListener(online => {
@@ -49,15 +48,19 @@ export const withOfflineFallback = <P extends object>(
     }
 
     // Otherwise, render the fallback UI
-    if (customFallback) {
+    if (customFallback !== undefined && customFallback !== null) {
       return <>{customFallback}</>;
     }
 
-    return <OfflineFallback onRetry={handleRetry} message={message} showActions={showActions} />;
+    return (
+      <OfflineFallbackComponent onRetry={handleRetry} message={message} showActions={showActions} />
+    );
   };
 
   // Set display name for debugging
-  const wrappedComponentName = WrappedComponent.displayName || WrappedComponent.name || 'Component';
+  const wrappedComponentName =
+    (WrappedComponent.displayName ?? WrappedComponent.name) || 'Component';
+
   WithOfflineFallbackComponent.displayName = `WithOfflineFallback(${wrappedComponentName})`;
 
   return WithOfflineFallbackComponent;

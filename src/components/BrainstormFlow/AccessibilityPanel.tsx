@@ -1,4 +1,12 @@
-import React, { useState } from 'react';
+import {
+  Accessibility as AccessibilityIcon,
+  Close as CloseIcon,
+  ZoomIn as ZoomInIcon,
+  ZoomOut as ZoomOutIcon,
+  FitScreen as FitScreenIcon,
+  Add as AddIcon,
+  Help as HelpIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -14,15 +22,7 @@ import {
   Tooltip,
   useTheme,
 } from '@mui/material';
-import {
-  Accessibility as AccessibilityIcon,
-  Close as CloseIcon,
-  ZoomIn as ZoomInIcon,
-  ZoomOut as ZoomOutIcon,
-  FitScreen as FitScreenIcon,
-  Add as AddIcon,
-  Help as HelpIcon,
-} from '@mui/icons-material';
+import React, { useState } from 'react';
 
 import { useI18n } from '../../contexts/I18nContext';
 import type { Node } from '../../types';
@@ -135,7 +135,7 @@ const AccessibilityPanel: React.FC<AccessibilityPanelProps> = ({
           control={
             <Switch
               checked={highContrastMode}
-              onChange={(e) => setHighContrastMode(e.target.checked)}
+              onChange={e => setHighContrastMode(e.target.checked)}
               name="highContrastMode"
             />
           }
@@ -149,7 +149,7 @@ const AccessibilityPanel: React.FC<AccessibilityPanelProps> = ({
           control={
             <Switch
               checked={largeTextMode}
-              onChange={(e) => setLargeTextMode(e.target.checked)}
+              onChange={e => setLargeTextMode(e.target.checked)}
               name="largeTextMode"
             />
           }
@@ -307,7 +307,7 @@ const AccessibilityPanel: React.FC<AccessibilityPanelProps> = ({
             {t('accessibility.noNodes') || 'No nodes available'}
           </Typography>
         ) : (
-          nodes.map((node) => (
+          nodes.map(node => (
             <AccessibleNode
               key={node.id}
               data={node.data}

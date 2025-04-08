@@ -31,7 +31,10 @@ import {
 import React, { useState, useEffect } from 'react';
 
 import type { PerformanceMetric } from '../utils/performanceMonitoring';
-import performanceMonitoring, { PerformanceCategory } from '../utils/performanceMonitoring';
+import {
+  default as performanceMonitoringUtil,
+  PerformanceCategory,
+} from '../utils/performanceMonitoring';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -72,32 +75,14 @@ const PerformanceProfiler: React.FC = () => {
   const [enabled, setEnabled] = useState(true);
   const [refreshInterval, setRefreshInterval] = useState<number | null>(null);
 
-  // Get the icon for a category
-  const getCategoryIcon = (category: PerformanceCategory) => {
-    switch (category) {
-      case PerformanceCategory.RENDERING:
-        return <SpeedIcon />;
-      case PerformanceCategory.DATA_LOADING:
-        return <StorageIcon />;
-      case PerformanceCategory.USER_INTERACTION:
-        return <TouchAppIcon />;
-      case PerformanceCategory.NETWORK:
-        return <NetworkCheckIcon />;
-      case PerformanceCategory.STORAGE:
-        return <MemoryIcon />;
-      default:
-        return <SpeedIcon />;
-    }
-  };
-
   // Refresh metrics
   const refreshMetrics = () => {
-    setMetrics(performanceMonitoring.getMetrics());
+    setMetrics(performanceMonitoringUtil.getMetrics());
   };
 
   // Toggle auto-refresh
   const toggleAutoRefresh = () => {
-    if (refreshInterval) {
+    if (refreshInterval !== null) {
       clearInterval(refreshInterval);
       setRefreshInterval(null);
     } else {
@@ -110,12 +95,12 @@ const PerformanceProfiler: React.FC = () => {
   const toggleMonitoring = () => {
     const newState = !enabled;
     setEnabled(newState);
-    performanceMonitoring.setEnabled(newState);
+    performanceMonitoringUtil.setEnabled(newState);
   };
 
   // Clear metrics
   const clearMetrics = () => {
-    performanceMonitoring.clearMetrics();
+    performanceMonitoringUtil.clearMetrics();
     refreshMetrics();
   };
 
@@ -139,7 +124,7 @@ const PerformanceProfiler: React.FC = () => {
 
   // Filter metrics by category
   const getFilteredMetrics = (category?: PerformanceCategory) => {
-    if (!category) return metrics;
+    if (category === undefined) return metrics;
     return metrics.filter(metric => metric.category === category);
   };
 
@@ -148,17 +133,19 @@ const PerformanceProfiler: React.FC = () => {
     const filtered = getFilteredMetrics(category);
     if (filtered.length === 0) return 0;
 
-    const sum = filtered.reduce((acc, metric) => acc + (metric.duration || 0), 0);
+    const sum = filtered.reduce((acc, metric) => acc + (metric.duration ?? 0), 0);
     return sum / filtered.length;
   };
 
   // Get the slowest metric for a category
-  const getSlowestMetric = (category?: PerformanceCategory) => {
+  const getSlowestMetric = (category?: PerformanceCategory): PerformanceMetric | null => {
     const filtered = getFilteredMetrics(category);
     if (filtered.length === 0) return null;
 
     return filtered.reduce((slowest, current) => {
-      return (current.duration || 0) > (slowest.duration || 0) ? current : slowest;
+      const currentDuration = current.duration ?? 0;
+      const slowestDuration = slowest.duration ?? 0;
+      return currentDuration > slowestDuration ? current : slowest;
     }, filtered[0]);
   };
 
@@ -172,7 +159,7 @@ const PerformanceProfiler: React.FC = () => {
   // Cleanup interval on unmount
   useEffect(() => {
     return () => {
-      if (refreshInterval) {
+      if (refreshInterval !== null) {
         clearInterval(refreshInterval);
       }
     };
@@ -230,7 +217,7 @@ const PerformanceProfiler: React.FC = () => {
               <FormControlLabel
                 control={
                   <Switch
-                    checked={!!refreshInterval}
+                    checked={refreshInterval !== null}
                     onChange={toggleAutoRefresh}
                     color="primary"
                   />
@@ -282,10 +269,17 @@ const PerformanceProfiler: React.FC = () => {
               </Paper>
               <Paper sx={{ p: 2, flexGrow: 1, minWidth: '200px' }}>
                 <Typography variant="subtitle2">Slowest Operation</Typography>
-                <Typography variant="h6">{getSlowestMetric()?.name || 'N/A'}</Typography>
-                <Typography variant="body2">
-                  {getSlowestMetric()?.duration?.toFixed(2) || 0} ms
-                </Typography>
+                {(() => {
+                  const slowest = getSlowestMetric();
+                  return (
+                    <>
+                      <Typography variant="h6">{slowest?.name ?? 'N/A'}</Typography>
+                      <Typography variant="body2">
+                        {slowest?.duration !== undefined ? slowest.duration.toFixed(2) : '0'} ms
+                      </Typography>
+                    </>
+                  );
+                })()}
               </Paper>
             </Box>
           </Box>
@@ -328,7 +322,7 @@ interface MetricsTableProps {
 
 const MetricsTable: React.FC<MetricsTableProps> = ({ metrics }) => {
   // Sort metrics by duration (descending)
-  const sortedMetrics = [...metrics].sort((a, b) => (b.duration || 0) - (a.duration || 0));
+  const sortedMetrics = [...metrics].sort((a, b) => (b.duration ?? 0) - (a.duration ?? 0));
 
   return (
     <TableContainer component={Paper}>
@@ -357,14 +351,24 @@ const MetricsTable: React.FC<MetricsTableProps> = ({ metrics }) => {
                   {metric.name}
                 </TableCell>
                 <TableCell>{metric.category}</TableCell>
-                <TableCell align="right">{metric.duration?.toFixed(2) || 'N/A'}</TableCell>
                 <TableCell align="right">
-                  {new Date(metric.startTime).toLocaleTimeString()}
+                  {metric.duration !== undefined ? metric.duration.toFixed(2) : 'N/A'}
                 </TableCell>
                 <TableCell align="right">
-                  {metric.endTime ? new Date(metric.endTime).toLocaleTimeString() : 'N/A'}
+                  {(() => {
+                    if (metric.startTime === undefined) return 'N/A';
+                    return new Date(metric.startTime).toLocaleTimeString();
+                  })()}
                 </TableCell>
-                <TableCell>{metric.metadata ? JSON.stringify(metric.metadata) : 'N/A'}</TableCell>
+                <TableCell align="right">
+                  {(() => {
+                    if (metric.endTime === undefined) return 'N/A';
+                    return new Date(metric.endTime).toLocaleTimeString();
+                  })()}
+                </TableCell>
+                <TableCell>
+                  {metric.metadata !== undefined ? JSON.stringify(metric.metadata) : 'N/A'}
+                </TableCell>
               </TableRow>
             ))
           )}

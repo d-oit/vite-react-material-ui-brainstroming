@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  InputBase,
   List,
   ListItem,
   ListItemButton,
@@ -21,6 +22,7 @@ import {
   Tooltip,
   Typography,
   useTheme,
+  styled,
 } from '@mui/material';
 import React, { useState } from 'react';
 
@@ -32,6 +34,24 @@ interface Language {
   nativeName: string;
   flag?: string;
 }
+
+// Styled search input
+const SearchInput = styled(InputBase)(({ theme }) => ({
+  width: '100%',
+  '& .MuiInputBase-input': {
+    padding: '8px 8px 8px 36px',
+    borderRadius: '4px',
+    border: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
+    fontSize: '16px',
+    transition: theme.transitions.create(['border-color', 'box-shadow']),
+    '&:focus': {
+      borderColor: theme.palette.primary.main,
+      boxShadow: `0 0 0 1px ${theme.palette.primary.main}`,
+    },
+  },
+}));
 
 // List of supported languages
 const languages: Language[] = [
@@ -64,7 +84,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   showNativeNames = true,
 }) => {
   const theme = useTheme();
-  const { language, setLanguage, t } = useI18n();
+  const { locale, setLocale, t } = useI18n();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -87,13 +107,13 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   };
 
   const handleLanguageSelect = (code: string) => {
-    setLanguage(code);
+    setLocale(code);
     handleMenuClose();
     handleDialogClose();
   };
 
   // Get current language
-  const currentLanguage = languages.find(lang => lang.code === language) || languages[0];
+  const currentLanguage = languages.find(lang => lang.code === locale) || languages[0];
 
   // Filter languages based on search query
   const filteredLanguages = languages.filter(
@@ -135,7 +155,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         <MenuItem
           key={lang.code}
           onClick={() => handleLanguageSelect(lang.code)}
-          selected={lang.code === language}
+          selected={lang.code === locale}
         >
           {showFlags && lang.flag && <ListItemIcon sx={{ minWidth: 36 }}>{lang.flag}</ListItemIcon>}
           <ListItemText
@@ -155,7 +175,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
               </>
             }
           />
-          {lang.code === language && <CheckIcon fontSize="small" color="primary" />}
+          {lang.code === locale && <CheckIcon fontSize="small" color="primary" />}
         </MenuItem>
       ))}
     </Menu>
@@ -184,20 +204,11 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
               color: 'action.active',
             }}
           />
-          <input
-            type="text"
+          <SearchInput
+            fullWidth
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder={t('language.search') || 'Search languages'}
-            style={{
-              width: '100%',
-              padding: '8px 8px 8px 36px',
-              borderRadius: '4px',
-              border: `1px solid ${theme.palette.divider}`,
-              backgroundColor: theme.palette.background.paper,
-              color: theme.palette.text.primary,
-              fontSize: '16px',
-            }}
           />
         </Box>
 
@@ -206,7 +217,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             <ListItem key={lang.code} disablePadding>
               <ListItemButton
                 onClick={() => handleLanguageSelect(lang.code)}
-                selected={lang.code === language}
+                selected={lang.code === locale}
               >
                 {showFlags && lang.flag && (
                   <ListItemIcon sx={{ minWidth: 36 }}>{lang.flag}</ListItemIcon>
@@ -217,7 +228,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                     showNativeNames && lang.name !== lang.nativeName ? lang.nativeName : undefined
                   }
                 />
-                {lang.code === language && <CheckIcon color="primary" />}
+                {lang.code === locale && <CheckIcon color="primary" />}
               </ListItemButton>
             </ListItem>
           ))}

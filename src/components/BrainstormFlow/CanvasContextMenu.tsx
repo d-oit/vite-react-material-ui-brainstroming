@@ -29,6 +29,10 @@ interface CanvasContextMenuProps {
   canPaste: boolean;
 }
 
+/**
+ * CanvasContextMenu component for displaying a context menu for the canvas
+ * Provides options for adding nodes, pasting, fitting view, toggling grid, and undo/redo
+ */
 export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
   anchorPosition,
   open,
@@ -55,6 +59,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
       anchorPosition={
         anchorPosition !== null ? { top: anchorPosition.y, left: anchorPosition.x } : undefined
       }
+      // Ensure the menu is properly labeled for screen readers
       MenuListProps={{
         'aria-label': t('flow.canvasContextMenu') || 'Canvas context menu',
         dense: true,

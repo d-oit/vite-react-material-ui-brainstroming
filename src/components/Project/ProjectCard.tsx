@@ -150,25 +150,23 @@ export const ProjectCard = ({ project, onDelete, onArchive, onSync, onPin }: Pro
         </IconButton>
       </Tooltip>
 
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', p: 2, pb: 0 }}>
+        <Typography variant="h6" noWrap sx={{ fontWeight: 600 }}>
+          {project.name}
+        </Typography>
+        <IconButton
+          aria-label="settings"
+          onClick={handleMenuOpen}
+          size="small"
+        >
+          <MoreVertIcon />
+        </IconButton>
+      </Box>
+
       <CardActionArea
         onClick={handleOpenProject}
         sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
       >
-        <CardHeader
-          title={
-            <Typography variant="h6" noWrap sx={{ fontWeight: 600 }}>
-              {project.name}
-            </Typography>
-          }
-          action={
-            <IconButton aria-label="settings" onClick={handleMenuOpen}>
-              <MoreVertIcon />
-            </IconButton>
-          }
-          sx={{
-            pb: 0,
-          }}
-        />
         <CardContent sx={{ pt: 1, pb: 2, flexGrow: 1 }}>
           <Typography
             variant="body2"

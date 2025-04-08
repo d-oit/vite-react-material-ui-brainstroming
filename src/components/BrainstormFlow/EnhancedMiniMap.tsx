@@ -11,13 +11,17 @@ import React, { useState } from 'react';
 import { MiniMap as ReactFlowMiniMap } from 'reactflow';
 
 import { useI18n } from '../../contexts/I18nContext';
+import type { Node, Edge } from '../../types';
 
 interface EnhancedMiniMapProps {
+  nodes: Node[];
+  edges: Edge[];
+  onNodeClick: (nodeId: string) => void;
   onZoomIn?: () => void;
   onZoomOut?: () => void;
   onFitView?: () => void;
   position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
-  nodeColor?: string | ((node: any) => string);
+  nodeColor?: string | ((node: Node) => string);
   nodeBorderRadius?: number;
   nodeStrokeWidth?: number;
   nodeStrokeColor?: string;
@@ -31,6 +35,10 @@ interface EnhancedMiniMapProps {
 }
 
 export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
+  nodes,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  edges,
+  onNodeClick,
   onZoomIn,
   onZoomOut,
   onFitView,
@@ -220,6 +228,7 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
       </Box>
 
       <ReactFlowMiniMap
+        nodes={nodes}
         nodeColor={nodeColor}
         nodeBorderRadius={nodeBorderRadius}
         nodeStrokeWidth={nodeStrokeWidth}
@@ -227,6 +236,7 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
         maskColor={maskColor || defaultMaskColor}
         zoomable={zoomable}
         pannable={pannable}
+        onNodeClick={onNodeClick}
         style={{
           backgroundColor: backgroundColor || defaultBackgroundColor,
           border: `1px solid ${borderColor || defaultBorderColor}`,

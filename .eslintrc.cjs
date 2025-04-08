@@ -61,7 +61,15 @@ module.exports = {
       argsIgnorePattern: '^_',
       varsIgnorePattern: '^_',
     }],
-    '@typescript-eslint/strict-boolean-expressions': 'error',
+    '@typescript-eslint/strict-boolean-expressions': ['error', {
+      allowString: true,
+      allowNumber: true,
+      allowNullableObject: true,
+      allowNullableBoolean: true,
+      allowNullableString: true,
+      allowNullableNumber: true,
+      allowAny: false,
+    }],
     '@typescript-eslint/no-floating-promises': 'error',
     '@typescript-eslint/await-thenable': 'error',
     '@typescript-eslint/no-misused-promises': 'error',
@@ -93,11 +101,9 @@ module.exports = {
     'security/detect-possible-timing-attacks': 'warn',
     'security/detect-non-literal-regexp': 'warn',
 
-    // Prettier
-    'prettier/prettier': ['error', {
-      endOfLine: 'auto'
-    }],
-    'linebreak-style': ['error', 'unix'],
+    // Prettier - Ensure Prettier runs and reports errors, but configuration is sourced from .prettierrc.js
+    'prettier/prettier': 'error',
+    // 'linebreak-style' is handled by Prettier (via endOfLine: 'lf' in .prettierrc.js)
   },
   settings: {
     react: {

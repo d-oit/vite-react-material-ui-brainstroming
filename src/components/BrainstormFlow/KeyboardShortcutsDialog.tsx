@@ -1,4 +1,4 @@
-import React from 'react';
+import { Close as CloseIcon } from '@mui/icons-material';
 import {
   Dialog,
   DialogTitle,
@@ -16,8 +16,9 @@ import {
   IconButton,
   useTheme,
   useMediaQuery,
+  Box,
 } from '@mui/material';
-import { Close as CloseIcon } from '@mui/icons-material';
+import React from 'react';
 
 import { useI18n } from '../../contexts/I18nContext';
 
@@ -119,7 +120,10 @@ const KeyboardShortcutsDialog: React.FC<KeyboardShortcutsDialogProps> = ({ open,
       fullScreen={isMobile}
       aria-labelledby="keyboard-shortcuts-dialog-title"
     >
-      <DialogTitle id="keyboard-shortcuts-dialog-title" sx={{ display: 'flex', alignItems: 'center' }}>
+      <DialogTitle
+        id="keyboard-shortcuts-dialog-title"
+        sx={{ display: 'flex', alignItems: 'center' }}
+      >
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           {t('shortcuts.title') || 'Keyboard Shortcuts'}
         </Typography>
@@ -128,8 +132,8 @@ const KeyboardShortcutsDialog: React.FC<KeyboardShortcutsDialogProps> = ({ open,
         </IconButton>
       </DialogTitle>
       <DialogContent dividers>
-        {shortcuts.map((category) => (
-          <div key={category.category} style={{ marginBottom: theme.spacing(3) }}>
+        {shortcuts.map(category => (
+          <Box key={category.category} sx={{ marginBottom: theme.spacing(3) }}>
             <Typography variant="h6" gutterBottom>
               {category.category}
             </Typography>
@@ -142,7 +146,7 @@ const KeyboardShortcutsDialog: React.FC<KeyboardShortcutsDialogProps> = ({ open,
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {category.items.map((item) => (
+                  {category.items.map(item => (
                     <TableRow key={item.action}>
                       <TableCell>{item.action}</TableCell>
                       <TableCell>
@@ -163,7 +167,7 @@ const KeyboardShortcutsDialog: React.FC<KeyboardShortcutsDialogProps> = ({ open,
                 </TableBody>
               </Table>
             </TableContainer>
-          </div>
+          </Box>
         ))}
       </DialogContent>
       <DialogActions>

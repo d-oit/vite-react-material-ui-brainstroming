@@ -24,6 +24,8 @@ export interface Node {
     onEdit?: (id: string) => void;
     onDelete?: (id: string, event: React.MouseEvent) => void;
   };
+  style?: Record<string, unknown>;
+  selected?: boolean;
 }
 
 export interface Edge {
@@ -33,6 +35,8 @@ export interface Edge {
   type?: EdgeType;
   label?: string;
   animated?: boolean;
+  style?: Record<string, unknown>;
+  selected?: boolean;
 }
 
 // Settings and preferences
@@ -41,6 +45,9 @@ export interface Settings {
   language: string;
   autoSave: boolean;
   autoBackup: boolean;
+  showMiniMap?: boolean;
+  showGrid?: boolean;
+  skipDeleteConfirmation?: boolean;
 }
 
 export interface LogEntry {

@@ -231,9 +231,9 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
           </Button>
         </Box>
       ) : (
-        <Grid container spacing={3} sx={{ width: '100%' }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 3, width: '100%' }}>
           {projects.map(project => (
-            <Grid key={project.id} item xs={12} sm={6} md={4}>
+            <Box key={project.id}>
               <ProjectCard
                 project={project}
                 onDelete={id => openConfirmDialog('delete', id)}
@@ -241,9 +241,9 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
                 onSync={handleSyncToS3}
                 onPin={handlePinProject}
               />
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       )}
 
       {/* Create Project Dialog */}

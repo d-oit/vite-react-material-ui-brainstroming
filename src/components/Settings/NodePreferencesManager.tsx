@@ -280,9 +280,9 @@ export const NodePreferencesManager = () => {
         Size Preview
       </Typography>
 
-      <Grid container spacing={2} sx={{ mb: 4 }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 4 }}>
         {(['small', 'medium', 'large'] as const).map(size => (
-          <Grid item key={size}>
+          <Box key={size}>
             <NodeSizePreview
               size={size}
               width={
@@ -302,17 +302,17 @@ export const NodePreferencesManager = () => {
               isSelected={settings.preferredNodeSize === size}
               onClick={() => handleSizeChange(size)}
             />
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
 
       <Typography variant="subtitle1" gutterBottom>
         Customize Sizes
       </Typography>
 
-      <Grid container spacing={3} sx={{ width: '100%' }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 3, width: '100%' }}>
         {(['small', 'medium', 'large'] as const).map(size => (
-          <Grid size={{ xs: 12, md: 4 }} key={size}>
+          <Box key={size}>
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
@@ -369,9 +369,9 @@ export const NodePreferencesManager = () => {
                 />
               </CardContent>
             </Card>
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
 
       <Divider sx={{ my: 4 }} />
 
@@ -384,13 +384,13 @@ export const NodePreferencesManager = () => {
         color for nodes of each type.
       </Typography>
 
-      <Grid container spacing={3} sx={{ mb: 4, width: '100%' }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 3, mb: 4, width: '100%' }}>
         {Object.values(NodeType).map(nodeType => {
           const nodeTypeLabel = nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
           const currentColor = localPreferences.customColors?.[nodeType] || '#e3f2fd';
 
           return (
-            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={nodeType}>
+            <Box key={nodeType}>
               <Card>
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -455,10 +455,10 @@ export const NodePreferencesManager = () => {
                   />
                 </CardContent>
               </Card>
-            </Grid>
+            </Box>
           );
         })}
-      </Grid>
+      </Box>
 
       {/* Snackbar for notifications */}
       <Snackbar

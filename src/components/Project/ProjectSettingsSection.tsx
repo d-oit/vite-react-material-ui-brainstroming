@@ -57,10 +57,16 @@ export const ProjectSettingsSection = ({
 
   // Initialize sync settings from project
   useEffect(() => {
-    if (project && project.syncSettings) {
+    if (
+      project &&
+      typeof project === 'object' &&
+      project.syncSettings &&
+      typeof project.syncSettings === 'object'
+    ) {
       setSyncSettings(project.syncSettings);
-      if (project.syncSettings.lastSyncedAt) {
-        setLastSyncTime(project.syncSettings.lastSyncedAt);
+      const lastSyncedAt = project.syncSettings.lastSyncedAt;
+      if (typeof lastSyncedAt === 'string' && lastSyncedAt.length > 0) {
+        setLastSyncTime(lastSyncedAt);
       }
     }
 
@@ -121,7 +127,7 @@ export const ProjectSettingsSection = ({
   const handleIntervalMinutesChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = parseInt(event.target.value, 10);
-      if (!isNaN(value) && value > 0) {
+      if (typeof value === 'number' && !Number.isNaN(value) && value > 0) {
         handleSyncSettingsChange({ intervalMinutes: value });
       }
     },
@@ -260,7 +266,12 @@ export const ProjectSettingsSection = ({
     setImportLoading(true);
     try {
       const importedProject = await downloadProject(project.id);
-      if (importedProject) {
+      if (
+        importedProject &&
+        typeof importedProject === 'object' &&
+        'name' in importedProject &&
+        'description' in importedProject
+      ) {
         // Update the current project with imported data
         const updatedProject = {
           ...project,
@@ -342,7 +353,11 @@ export const ProjectSettingsSection = ({
               <TextField
                 label="Interval (minutes)"
                 type="number"
-                value={syncSettings.intervalMinutes || 30}
+                value={
+                  typeof syncSettings.intervalMinutes === 'number'
+                    ? syncSettings.intervalMinutes
+                    : 30
+                }
                 onChange={handleIntervalMinutesChange}
                 fullWidth
                 sx={{ mb: 2 }}

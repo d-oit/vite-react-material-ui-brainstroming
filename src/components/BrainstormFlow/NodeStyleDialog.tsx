@@ -46,13 +46,13 @@ export const NodeStyleDialog: React.FC<NodeStyleDialogProps> = ({
   // Update state when node changes or dialog opens
   useEffect(() => {
     if (node && open) {
-      setBackgroundColor((node.style?.backgroundColor as string) || '#ffffff');
-      setBorderColor((node.style?.borderColor as string) || '#000000');
-      setBorderWidth((node.style?.borderWidth as number) || 1);
-      setBorderRadius((node.style?.borderRadius as number) || 5);
-      setFontSize((node.style?.fontSize as number) || 14);
-      setFontFamily((node.style?.fontFamily as string) || 'Arial');
-      setTextColor((node.style?.color as string) || '#000000');
+      setBackgroundColor((node.style?.backgroundColor as string) ?? '#ffffff');
+      setBorderColor((node.style?.borderColor as string) ?? '#000000');
+      setBorderWidth((node.style?.borderWidth as number) ?? 1);
+      setBorderRadius((node.style?.borderRadius as number) ?? 5);
+      setFontSize((node.style?.fontSize as number) ?? 14);
+      setFontFamily((node.style?.fontFamily as string) ?? 'Arial');
+      setTextColor((node.style?.color as string) ?? '#000000');
     }
   }, [node, open]);
 
@@ -77,16 +77,16 @@ export const NodeStyleDialog: React.FC<NodeStyleDialogProps> = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>{t('flow.styleNode') || 'Style Node'}</DialogTitle>
+      <DialogTitle>{t('flow.styleNode') ?? 'Style Node'}</DialogTitle>
       <DialogContent>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <Typography variant="h6" gutterBottom>
-              {t('flow.background') || 'Background'}
+              {t('flow.background') ?? 'Background'}
             </Typography>
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle2" gutterBottom>
-                {t('flow.backgroundColor') || 'Background Color'}
+                {t('flow.backgroundColor') ?? 'Background Color'}
               </Typography>
               <TwitterPicker
                 color={backgroundColor}
@@ -97,11 +97,11 @@ export const NodeStyleDialog: React.FC<NodeStyleDialogProps> = ({
             </Box>
 
             <Typography variant="h6" gutterBottom>
-              {t('flow.border') || 'Border'}
+              {t('flow.border') ?? 'Border'}
             </Typography>
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle2" gutterBottom>
-                {t('flow.borderColor') || 'Border Color'}
+                {t('flow.borderColor') ?? 'Border Color'}
               </Typography>
               <TwitterPicker
                 color={borderColor}
@@ -112,7 +112,7 @@ export const NodeStyleDialog: React.FC<NodeStyleDialogProps> = ({
             </Box>
 
             <Typography gutterBottom>
-              {t('flow.borderWidth') || 'Border Width'}: {borderWidth}px
+              {t('flow.borderWidth') ?? 'Border Width'}: {borderWidth}px
             </Typography>
             <Slider
               value={borderWidth}
@@ -125,7 +125,7 @@ export const NodeStyleDialog: React.FC<NodeStyleDialogProps> = ({
             />
 
             <Typography gutterBottom>
-              {t('flow.borderRadius') || 'Border Radius'}: {borderRadius}px
+              {t('flow.borderRadius') ?? 'Border Radius'}: {borderRadius}px
             </Typography>
             <Slider
               value={borderRadius}
@@ -140,11 +140,11 @@ export const NodeStyleDialog: React.FC<NodeStyleDialogProps> = ({
 
           <Grid item xs={12} md={6}>
             <Typography variant="h6" gutterBottom>
-              {t('flow.text') || 'Text'}
+              {t('flow.text') ?? 'Text'}
             </Typography>
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle2" gutterBottom>
-                {t('flow.textColor') || 'Text Color'}
+                {t('flow.textColor') ?? 'Text Color'}
               </Typography>
               <TwitterPicker
                 color={textColor}
@@ -155,7 +155,7 @@ export const NodeStyleDialog: React.FC<NodeStyleDialogProps> = ({
             </Box>
 
             <Typography gutterBottom>
-              {t('flow.fontSize') || 'Font Size'}: {fontSize}px
+              {t('flow.fontSize') ?? 'Font Size'}: {fontSize}px
             </Typography>
             <Slider
               value={fontSize}
@@ -169,13 +169,13 @@ export const NodeStyleDialog: React.FC<NodeStyleDialogProps> = ({
 
             <FormControl fullWidth margin="normal">
               <InputLabel id="font-family-label">
-                {t('flow.fontFamily') || 'Font Family'}
+                {t('flow.fontFamily') ?? 'Font Family'}
               </InputLabel>
               <Select
                 labelId="font-family-label"
                 value={fontFamily}
                 onChange={e => setFontFamily(e.target.value)}
-                label={t('flow.fontFamily') || 'Font Family'}
+                label={t('flow.fontFamily') ?? 'Font Family'}
               >
                 <MenuItem value="Arial">Arial</MenuItem>
                 <MenuItem value="Helvetica">Helvetica</MenuItem>
@@ -197,7 +197,7 @@ export const NodeStyleDialog: React.FC<NodeStyleDialogProps> = ({
 
         <Box sx={{ mt: 3, p: 2, border: '1px solid #ccc', borderRadius: 1 }}>
           <Typography variant="h6" gutterBottom>
-            {t('flow.preview') || 'Preview'}
+            {t('flow.preview') ?? 'Preview'}
           </Typography>
           <Box
             sx={{
@@ -221,9 +221,9 @@ export const NodeStyleDialog: React.FC<NodeStyleDialogProps> = ({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{t('common.cancel') || 'Cancel'}</Button>
+        <Button onClick={onClose}>{t('common.cancel') ?? 'Cancel'}</Button>
         <Button onClick={handleSave} variant="contained" color="primary">
-          {t('common.save') || 'Save'}
+          {t('common.save') ?? 'Save'}
         </Button>
       </DialogActions>
     </Dialog>

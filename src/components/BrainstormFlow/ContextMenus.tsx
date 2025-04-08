@@ -2,9 +2,9 @@ import React from 'react';
 
 import type { Node, Edge, NodeType } from '../../types';
 
-import CanvasContextMenu from './CanvasContextMenu';
-import EdgeContextMenu from './EdgeContextMenu';
-import NodeContextMenu from './NodeContextMenu';
+import { CanvasContextMenu } from './CanvasContextMenu';
+import { EdgeContextMenu } from './EdgeContextMenu';
+import { NodeContextMenu } from './NodeContextMenu';
 
 interface ContextMenusProps {
   // Node context menu props
@@ -44,6 +44,10 @@ interface ContextMenusProps {
   canPaste: boolean;
 }
 
+/**
+ * ContextMenus component that manages all context menus in the flow editor
+ * Includes context menus for nodes, edges, and the canvas
+ */
 export const ContextMenus: React.FC<ContextMenusProps> = ({
   // Node context menu props
   nodeContextMenuOpen,

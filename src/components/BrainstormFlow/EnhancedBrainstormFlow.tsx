@@ -50,12 +50,18 @@ import { MemoizedChatPanel } from '../Chat/ChatPanel';
 import AccessibilityPanel from './AccessibilityPanel';
 import EditableNode from './EditableNode';
 import EnhancedControls from './EnhancedControls';
+import EnhancedControlsPanel from './EnhancedControlsPanel';
+import EnhancedMiniMap from './EnhancedMiniMap';
+import EnhancedZoomControls from './EnhancedZoomControls';
 import FlowContextMenuHandler from './FlowContextMenuHandler';
 import KeyboardShortcutsDialog from './KeyboardShortcutsDialog';
 import KeyboardShortcutsHandler from './KeyboardShortcutsHandler';
+import KeyboardShortcutsOverlay from './KeyboardShortcutsOverlay';
+import EdgeStyleDialog from './EdgeStyleDialog';
+import LinkedNodesHighlight from './LinkedNodesHighlight';
 import MobileControls from './MobileControls';
+import NodeStyleDialog from './NodeStyleDialog';
 import ResponsiveNodeEditDialog from './ResponsiveNodeEditDialog';
-// NodeStyleDialog will be used in future implementations
 
 // Lazy load React Flow components and CSS with preloading hints
 const ReactFlowModule = lazy(async () => {
@@ -161,8 +167,12 @@ const FlowContent = ({
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
 
   // State for nodes and edges
-  const [nodes, setNodes] = useState<Node[]>(initialNodes || []);
-  const [edges, setEdges] = useState<Edge[]>(initialEdges || []);
+  const [nodes, setNodes] = useState<Node[]>(
+    initialNodes !== undefined && initialNodes !== null ? initialNodes : []
+  );
+  const [edges, setEdges] = useState<Edge[]>(
+    initialEdges !== undefined && initialEdges !== null ? initialEdges : []
+  );
 
   // State for node editing and styling
   const [nodeEditOpen, setNodeEditOpen] = useState(false);
@@ -176,6 +186,51 @@ const FlowContent = ({
   // State for accessibility panel and keyboard shortcuts dialog
   const [accessibilityPanelOpen, setAccessibilityPanelOpen] = useState(false);
   const [keyboardShortcutsOpen, setKeyboardShortcutsOpen] = useState(false);
+  const [keyboardShortcutsOverlayOpen, setKeyboardShortcutsOverlayOpen] = useState(false);
+
+  // State for node and edge styling
+  const [nodeStyleDialogOpen, setNodeStyleDialogOpen] = useState(false);
+  const [edgeStyleDialogOpen, setEdgeStyleDialogOpen] = useState(false);
+  const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
+
+  // State for enhanced controls
+  const [showMiniMap, setShowMiniMap] = useState(true);
+  const [showGrid, setShowGrid] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+
+  // State for linked nodes highlight
+  const [linkedNodeIds, setLinkedNodeIds] = useState<string[]>([]);
+  const [nodePositions, setNodePositions] = useState<
+    Record<string, { x: number; y: number; width: number; height: number }>
+  >({});
+
+  // Update node positions for linked nodes highlight
+  useEffect(() => {
+    if (reactFlowInstance && nodes.length > 0) {
+      // Get the current viewport
+      const viewport = reactFlowInstance.getViewport();
+
+      // Calculate node positions in the viewport
+      const positions: Record<string, { x: number; y: number; width: number; height: number }> = {};
+
+      nodes.forEach(node => {
+        const element = document.querySelector(`[data-id="${node.id}"]`);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          positions[node.id] = {
+            x: node.position.x * viewport.zoom + viewport.x,
+            y: node.position.y * viewport.zoom + viewport.y,
+            width: rect.width,
+            height: rect.height,
+          };
+        }
+      });
+
+      // Update node positions
+      setNodePositions(positions);
+    }
+  }, [reactFlowInstance, nodes]);
 
   // State for delete confirmation
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -196,6 +251,7 @@ const FlowContent = ({
   // Handle nodes change with external callback
   const handleNodesChange: OnNodesChange = useCallback(
     changes => {
+      if (!changes?.length) return;
       const updatedNodes = nodes.map(node => {
         const positionChange = changes.find(
           change => 'id' in change && change.id === node.id && change.type === 'position'
@@ -265,13 +321,12 @@ const FlowContent = ({
       };
 
       // Add the new edge to the edges array
-        // Fallback if addEdge is not available yet
-        const updatedEdges = [...edges, newEdge];
-        setEdges(updatedEdges);
+      // Fallback if addEdge is not available yet
+      const updatedEdges = [...edges, newEdge];
+      setEdges(updatedEdges);
 
-        if (externalEdgesChange) {
-          externalEdgesChange(updatedEdges);
-        }
+      if (externalEdgesChange) {
+        externalEdgesChange(updatedEdges);
       }
 
       showSnackbar(t('brainstorm.edgeCreated') || 'Connection created', 'success');
@@ -310,6 +365,7 @@ const FlowContent = ({
   // Handle node edit
   const handleNodeEdit = useCallback(
     (nodeId: string, newData: { label: string; content: string; tags?: string[] }) => {
+      if (!nodeId) return;
       const updatedNodes = nodes.map(node => {
         if (node.id === nodeId) {
           return {
@@ -411,7 +467,8 @@ const FlowContent = ({
 
       // Check if skipDeleteConfirmation is enabled in settings
       const skipConfirmation =
-        process.env.VITE_SKIP_DELETE_CONFIRMATION === 'true' || Boolean(settings.skipDeleteConfirmation);
+        process.env.VITE_SKIP_DELETE_CONFIRMATION === 'true' ||
+        Boolean(settings.skipDeleteConfirmation);
 
       if (skipConfirmation) {
         handleNodeDelete(nodeId);
@@ -477,7 +534,7 @@ const FlowContent = ({
   // Add a new node
   const addNode = useCallback(
     (type: NodeType) => {
-      if (readOnly || !reactFlowInstance) return;
+      if (readOnly === true || reactFlowInstance === null) return;
 
       // Get the center position of the viewport
       const { x, y, zoom } = reactFlowInstance.getViewport();
@@ -547,7 +604,7 @@ const FlowContent = ({
    */
   const handleAddNodesFromChat = useCallback(
     (nodeDatas: NodeData[]) => {
-      if (!reactFlowInstance || nodeDatas.length === 0) return;
+      if (reactFlowInstance === null || !Array.isArray(nodeDatas) || nodeDatas.length === 0) return;
 
       // Get the current viewport
       const { x, y, zoom } = reactFlowInstance.getViewport();
@@ -565,7 +622,10 @@ const FlowContent = ({
 
         return {
           id: nodeData.id,
-          type: (nodeData.type as NodeType) || NodeType.IDEA,
+          type:
+            nodeData.type !== undefined && nodeData.type !== null
+              ? (nodeData.type as NodeType)
+              : NodeType.IDEA,
           position,
           data: {
             ...nodeData,
@@ -573,8 +633,10 @@ const FlowContent = ({
             // eslint-disable-next-line react-hooks/exhaustive-deps
             onEdit: (id: string) => handleNodeClick(id),
             onDelete: (id: string) => {
-              setNodeToDelete(id);
-              setDeleteConfirmOpen(true);
+              if (id) {
+                setNodeToDelete(id);
+                setDeleteConfirmOpen(true);
+              }
             },
           },
         };
@@ -596,7 +658,7 @@ const FlowContent = ({
         fitView?.({ padding: 0.2, includeHiddenNodes: false });
       }, 100);
     },
-    [reactFlowInstance, nodes, setNodes, externalNodesChange, t, fitView]
+    [reactFlowInstance, nodes, setNodes, externalNodesChange, t, fitView, handleNodeClick]
   );
 
   // Expose zoom functions to parent
@@ -606,7 +668,8 @@ const FlowContent = ({
         zoomIn: zoomIn,
         zoomOut: zoomOut,
         fitView: () => fitView({ padding: 0.2 }),
-        addNode: (type?: NodeType) => addNode(type || NodeType.IDEA),
+        addNode: (type?: NodeType) =>
+          addNode(type !== undefined && type !== null ? type : NodeType.IDEA),
         saveFlow,
       };
     }
@@ -691,7 +754,7 @@ const FlowContent = ({
 
               // Initialize control functions on mount
               useEffect(() => {
-                if (!isInitialized.current && flowInstance) {
+                if (!isInitialized.current && Boolean(flowInstance)) {
                   isInitialized.current = true;
                   setFitView(() => flowInstance.fitView);
                   setZoomIn(() => flowInstance.zoomIn);
@@ -743,7 +806,7 @@ const FlowContent = ({
                         // The FlowContextMenuHandler will handle this event
                       }
                     }}
-                    onPaneContextMenu={(event) => {
+                    onPaneContextMenu={event => {
                       if (readOnly) return;
                       event.preventDefault();
                       // The FlowContextMenuHandler will handle this event
@@ -788,17 +851,17 @@ const FlowContent = ({
                       edges={edges}
                       onNodesChange={setNodes}
                       onEdgesChange={setEdges}
-                      onNodeEdit={(node) => {
+                      onNodeEdit={node => {
                         setSelectedNode(node);
                         setNodeEditOpen(true);
                       }}
-                      onNodeDelete={(node) => handleNodeDeleteRequest(node.id)}
-                      onNodeStyle={(node) => {
+                      onNodeDelete={node => handleNodeDeleteRequest(node.id)}
+                      onNodeStyle={node => {
                         setSelectedNode(node);
                         // Node styling will be implemented in future updates
                         console.log('Style node:', node);
                       }}
-                      onAddChildNode={(node) => {
+                      onAddChildNode={node => {
                         // Process the node to add event handlers
                         const childNode: Node = {
                           id: `node-${Date.now()}`,
@@ -840,7 +903,7 @@ const FlowContent = ({
                         setNodes([...nodes, childNode]);
                         setEdges([...edges, childEdge]);
                       }}
-                      onLinkNodeToChat={(node) => {
+                      onLinkNodeToChat={node => {
                         // This would be implemented when chat integration is added
                         console.log('Link node to chat:', node);
                       }}
@@ -1057,19 +1120,25 @@ const FlowContent = ({
         onZoomIn={() => reactFlowInstance?.zoomIn()}
         onZoomOut={() => reactFlowInstance?.zoomOut()}
         onFitView={() => reactFlowInstance?.fitView({ padding: 0.2 })}
-        onAddNode={addNode}
+        onAddNode={() => addNode(NodeType.IDEA)}
         onSave={saveFlow}
         onUndo={() => console.log('Undo')}
         onRedo={() => console.log('Redo')}
-        onToggleGrid={() => console.log('Toggle grid')}
+        onToggleGrid={() => setShowGrid(!showGrid)}
+        onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
         onDelete={() => {
           if (selectedNode) {
             handleNodeDeleteRequest(selectedNode.id);
           }
         }}
-        onHelp={() => setKeyboardShortcutsOpen(true)}
-        readOnly={readOnly}
-        disabled={false}
+        onEscape={() => {
+          if (keyboardShortcutsOverlayOpen) {
+            setKeyboardShortcutsOverlayOpen(false);
+          } else {
+            setKeyboardShortcutsOpen(true);
+          }
+        }}
+        disabled={readOnly}
       />
 
       {/* Accessibility Panel */}
@@ -1077,7 +1146,7 @@ const FlowContent = ({
         open={accessibilityPanelOpen}
         onClose={() => setAccessibilityPanelOpen(false)}
         nodes={nodes}
-        onNodeSelect={(nodeId) => {
+        onNodeSelect={nodeId => {
           const node = nodes.find(n => n.id === nodeId);
           if (node) {
             setSelectedNode(node);
@@ -1089,14 +1158,14 @@ const FlowContent = ({
             });
           }
         }}
-        onNodeEdit={(nodeId) => {
+        onNodeEdit={nodeId => {
           const node = nodes.find(n => n.id === nodeId);
           if (node) {
             setSelectedNode(node);
             setNodeEditOpen(true);
           }
         }}
-        onNodeDelete={(nodeId) => handleNodeDeleteRequest(nodeId)}
+        onNodeDelete={nodeId => handleNodeDeleteRequest(nodeId)}
         onAddNode={addNode}
         onZoomIn={() => reactFlowInstance?.zoomIn()}
         onZoomOut={() => reactFlowInstance?.zoomOut()}
@@ -1109,6 +1178,176 @@ const FlowContent = ({
       <KeyboardShortcutsDialog
         open={keyboardShortcutsOpen}
         onClose={() => setKeyboardShortcutsOpen(false)}
+      />
+
+      {/* Keyboard Shortcuts Overlay */}
+      <KeyboardShortcutsOverlay
+        open={keyboardShortcutsOverlayOpen}
+        onClose={() => setKeyboardShortcutsOverlayOpen(false)}
+      />
+
+      {/* Node Style Dialog */}
+      <NodeStyleDialog
+        open={nodeStyleDialogOpen}
+        onClose={() => setNodeStyleDialogOpen(false)}
+        node={selectedNode}
+        onSave={(nodeId, style) => {
+          const updatedNodes = nodes.map(node => {
+            if (node.id === nodeId) {
+              return {
+                ...node,
+                style: { ...node.style, ...style },
+              };
+            }
+            return node;
+          });
+
+          if (externalNodesChange) {
+            externalNodesChange(updatedNodes);
+          }
+
+          setNodeStyleDialogOpen(false);
+          setSnackbarMessage(t('flow.nodeStyleUpdated') || 'Node style updated');
+          setSnackbarSeverity('success');
+          setSnackbarOpen(true);
+        }}
+      />
+
+      {/* Edge Style Dialog */}
+      <EdgeStyleDialog
+        open={edgeStyleDialogOpen}
+        onClose={() => setEdgeStyleDialogOpen(false)}
+        edge={selectedEdge}
+        onSave={(edgeId, style) => {
+          const updatedEdges = edges.map(edge => {
+            if (edge.id === edgeId) {
+              return {
+                ...edge,
+                style: { ...edge.style, ...style },
+                animated: style.animated,
+                label: style.label,
+                type: style.type as EdgeType | undefined,
+              };
+            }
+            return edge;
+          });
+
+          if (externalEdgesChange) {
+            externalEdgesChange(updatedEdges as Edge[]);
+          }
+
+          setEdgeStyleDialogOpen(false);
+          setSnackbarMessage(t('flow.edgeStyleUpdated') || 'Edge style updated');
+          setSnackbarSeverity('success');
+          setSnackbarOpen(true);
+        }}
+      />
+
+      {/* Enhanced Mini Map */}
+      {showMiniMap && (
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 20,
+            left: 20,
+            zIndex: 5,
+            width: 200,
+            height: 150,
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: 1,
+            overflow: 'hidden',
+            boxShadow: theme.shadows[3],
+          }}
+        >
+          <EnhancedMiniMap
+            nodes={nodes}
+            edges={edges}
+            onNodeClick={(nodeId: string) => {
+              const node = nodes.find(n => n.id === nodeId);
+              if (node) {
+                setSelectedNode(node);
+                // Center the view on the selected node
+                reactFlowInstance?.fitView({
+                  padding: 0.5,
+                  includeHiddenNodes: false,
+                  nodes: [node],
+                });
+              }
+            }}
+          />
+        </Box>
+      )}
+
+      {/* Enhanced Zoom Controls */}
+      <EnhancedZoomControls
+        zoomIn={() => reactFlowInstance?.zoomIn()}
+        zoomOut={() => reactFlowInstance?.zoomOut()}
+        fitView={() => reactFlowInstance?.fitView({ padding: 0.2 })}
+        zoomLevel={zoomLevel}
+        onZoomChange={(zoom: number) => {
+          setZoomLevel(zoom);
+          reactFlowInstance?.zoomTo(zoom);
+        }}
+        showGrid={showGrid}
+        onToggleGrid={() => setShowGrid(!showGrid)}
+        showMiniMap={showMiniMap}
+        onToggleMiniMap={() => setShowMiniMap(!showMiniMap)}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+      />
+
+      {/* Linked Nodes Highlight */}
+      <LinkedNodesHighlight
+        nodes={nodes}
+        edges={edges}
+        linkedNodeIds={linkedNodeIds}
+        nodePositions={nodePositions}
+        onHighlightComplete={() => setLinkedNodeIds([])}
+      />
+
+      {/* Enhanced Controls Panel */}
+      <EnhancedControlsPanel
+        onAddNode={() => addNode(NodeType.IDEA)}
+        onDelete={() => {
+          if (selectedNode) {
+            handleNodeDeleteRequest(selectedNode.id);
+          }
+        }}
+        onSave={saveFlow}
+        onUndo={() => console.log('Undo')}
+        onRedo={() => console.log('Redo')}
+        onCopy={() => console.log('Copy')}
+        onPaste={() => console.log('Paste')}
+        onCut={() => console.log('Cut')}
+        onOpenNodeStyle={() => {
+          if (selectedNode) {
+            setNodeStyleDialogOpen(true);
+          } else {
+            setSnackbarMessage(t('flow.selectNodeFirst') || 'Please select a node first');
+            setSnackbarSeverity('info');
+            setSnackbarOpen(true);
+          }
+        }}
+        onOpenEdgeStyle={() => {
+          // Find if there's a selected edge
+          const selectedEdges = edges.filter(edge => edge.selected);
+          if (selectedEdges.length > 0) {
+            setSelectedEdge(selectedEdges[0]);
+            setEdgeStyleDialogOpen(true);
+          } else {
+            setSnackbarMessage(t('flow.selectEdgeFirst') || 'Please select an edge first');
+            setSnackbarSeverity('info');
+            setSnackbarOpen(true);
+          }
+        }}
+        onOpenSettings={() => {
+          // Open settings dialog
+          console.log('Open settings');
+        }}
+        hasSelection={!!selectedNode}
+        canUndo={false}
+        canRedo={false}
+        hasCopiedItems={false}
       />
     </Box>
   );

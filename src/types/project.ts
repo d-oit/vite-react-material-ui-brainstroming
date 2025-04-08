@@ -117,3 +117,69 @@ export const templateConfigs: Record<ProjectTemplate, TemplateConfig> = {
     guidance: ['Customize as needed'],
   },
 };
+
+export const DEFAULT_PROJECT_VERSION = '1.0.0';
+
+/**
+ * Creates an empty project with default values
+ * @param name Project name
+ * @param description Project description
+ * @param template Project template
+ * @returns A new empty project
+ */
+export function createEmptyProject(
+  name: string = 'New Project',
+  description: string = 'Project description',
+  template: ProjectTemplate = ProjectTemplate.CUSTOM
+): Project {
+  const now = new Date().toISOString();
+  const id = `project-${Math.random().toString(36).substring(2, 11)}`;
+
+  return {
+    id,
+    name,
+    description,
+    createdAt: now,
+    updatedAt: now,
+    version: DEFAULT_PROJECT_VERSION,
+    template,
+    nodes: [],
+    edges: [],
+    syncSettings: {
+      enableS3Sync: false,
+      syncFrequency: 'manual',
+    },
+  };
+}
+
+/**
+ * Validates if an object is a valid Project
+ * @param project Object to validate
+ * @returns True if the object is a valid Project
+ */
+export function isValidProject(project: unknown): project is Project {
+  try {
+    ProjectSchema.parse(project);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * Normalizes a project version string
+ * @param version Version string to normalize
+ * @returns Normalized version string
+ */
+export function normalizeProjectVersion(version: string): string {
+  // Simple normalization for now
+  if (!version) return DEFAULT_PROJECT_VERSION;
+
+  // Ensure it has at least major.minor.patch format
+  const parts = version.split('.');
+  while (parts.length < 3) {
+    parts.push('0');
+  }
+
+  return parts.slice(0, 3).join('.');
+}

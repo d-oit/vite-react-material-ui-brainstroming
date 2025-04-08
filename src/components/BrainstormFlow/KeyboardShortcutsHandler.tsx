@@ -1,4 +1,4 @@
-import { Help as HelpIcon } from '@mui/icons-material';
+import { Help as HelpIcon, Keyboard as KeyboardIcon } from '@mui/icons-material';
 import {
   Dialog,
   DialogTitle,
@@ -12,10 +12,12 @@ import {
   IconButton,
   Tooltip,
   useTheme,
+  Fab,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 
 import { useI18n } from '../../contexts/I18nContext';
+import KeyboardShortcutsOverlay from './KeyboardShortcutsOverlay';
 
 interface KeyboardShortcut {
   key: string;
@@ -70,6 +72,7 @@ export const KeyboardShortcutsHandler: React.FC<KeyboardShortcutsHandlerProps> =
   const { t } = useI18n();
   const theme = useTheme();
   const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false);
+  const [overlayOpen, setOverlayOpen] = useState(false);
 
   // Define keyboard shortcuts
   const shortcuts: KeyboardShortcut[] = [
@@ -172,6 +175,11 @@ export const KeyboardShortcutsHandler: React.FC<KeyboardShortcutsHandlerProps> =
       description: t('shortcuts.showShortcuts') || 'Show keyboard shortcuts',
       category: 'general',
       modifiers: { shift: true },
+    },
+    {
+      key: 'F1',
+      description: t('shortcuts.help') || 'Show help',
+      category: 'general',
     },
   ];
 
@@ -293,10 +301,19 @@ export const KeyboardShortcutsHandler: React.FC<KeyboardShortcutsHandlerProps> =
           }
         }
       } else if (event.key === 'Escape') {
-        if (onEscape) {
+        if (overlayOpen) {
+          setOverlayOpen(false);
+          event.preventDefault();
+        } else if (onEscape) {
           onEscape();
           event.preventDefault();
         }
+      } else if (event.key === '?' && event.shiftKey) {
+        setOverlayOpen(true);
+        event.preventDefault();
+      } else if (event.key === 'F1') {
+        setShortcutsDialogOpen(true);
+        event.preventDefault();
       }
     };
 
@@ -322,6 +339,9 @@ export const KeyboardShortcutsHandler: React.FC<KeyboardShortcutsHandlerProps> =
     onToggleChat,
     onToggleGrid,
     onToggleFullscreen,
+    overlayOpen,
+    setOverlayOpen,
+    setShortcutsDialogOpen,
   ]);
 
   // Format shortcut key for display
@@ -345,24 +365,25 @@ export const KeyboardShortcutsHandler: React.FC<KeyboardShortcutsHandlerProps> =
 
   return (
     <>
-      <Tooltip title={t('shortcuts.showShortcuts') || 'Show keyboard shortcuts'}>
-        <IconButton
+      {/* Keyboard Shortcuts Overlay */}
+      <KeyboardShortcutsOverlay open={overlayOpen} onClose={() => setOverlayOpen(false)} />
+
+      {/* Keyboard Shortcuts Button */}
+      <Tooltip title={t('shortcuts.showShortcuts') || 'Keyboard Shortcuts (Shift+?)'} arrow>
+        <Fab
           onClick={() => setShortcutsDialogOpen(true)}
           size="small"
+          color="primary"
           aria-label={t('shortcuts.showShortcuts') || 'Show keyboard shortcuts'}
           sx={{
             position: 'fixed',
             bottom: 16,
             left: 16,
-            backgroundColor: theme.palette.background.paper,
-            boxShadow: theme.shadows[2],
-            '&:hover': {
-              backgroundColor: theme.palette.action.hover,
-            },
+            boxShadow: theme.shadows[3],
           }}
         >
-          <HelpIcon />
-        </IconButton>
+          <KeyboardIcon />
+        </Fab>
       </Tooltip>
 
       <Dialog

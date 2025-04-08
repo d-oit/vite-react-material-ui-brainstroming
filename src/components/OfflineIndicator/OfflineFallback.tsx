@@ -127,14 +127,14 @@ export const OfflineFallback: React.FC<OfflineFallbackProps> = ({
           </>
         )}
 
-        {onRetry && (
+        {typeof onRetry === 'function' && (
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
             <Button
               variant="contained"
               color="primary"
               onClick={onRetry}
               startIcon={<SyncIcon />}
-              disabled={!offlineService.getOnlineStatus()}
+              disabled={offlineService.getOnlineStatus() !== true}
             >
               Try Again
             </Button>

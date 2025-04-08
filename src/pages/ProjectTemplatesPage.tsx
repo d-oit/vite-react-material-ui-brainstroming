@@ -62,8 +62,8 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
   const theme = useTheme();
   const { t: _t } = useI18n();
   const navigate = useNavigate();
-  const _isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  // Use isMobile for responsive layout adjustments
   const [templates, setTemplates] = useState<Project[]>(sampleTemplates);
   const [selectedTemplate, setSelectedTemplate] = useState<Project | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);

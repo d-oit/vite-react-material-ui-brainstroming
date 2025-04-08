@@ -33,13 +33,15 @@ interface RTLProviderProps {
  * based on the current language.
  */
 export const RTLProvider: React.FC<RTLProviderProps> = ({ children }) => {
-  const { language } = useI18n();
+  const { locale } = useI18n();
   const [isRtl, setIsRtl] = useState(false);
   const [cache, setCache] = useState(createLtrCache());
 
   // Update RTL state when language changes
   useEffect(() => {
-    const languageCode = language.split('-')[0];
+    if (!locale) return;
+
+    const languageCode = locale.split('-')[0];
     const newIsRtl = RTL_LANGUAGES.includes(languageCode);
 
     // Update document direction
@@ -50,7 +52,7 @@ export const RTLProvider: React.FC<RTLProviderProps> = ({ children }) => {
     // Update state
     setIsRtl(newIsRtl);
     setCache(newIsRtl ? createRtlCache() : createLtrCache());
-  }, [language]);
+  }, [locale]);
 
   return <CacheProvider value={cache}>{children}</CacheProvider>;
 };

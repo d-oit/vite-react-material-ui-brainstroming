@@ -8,6 +8,11 @@ interface NodeInlineEditorProps {
   nodeId: string;
 }
 
+/**
+ * NodeInlineEditor component for direct text editing on nodes
+ * Allows users to edit node text content directly on the canvas
+ * without opening a dialog
+ */
 export const NodeInlineEditor: React.FC<NodeInlineEditorProps> = ({
   initialText,
   onSave,
@@ -24,13 +29,20 @@ export const NodeInlineEditor: React.FC<NodeInlineEditorProps> = ({
       inputRef.current.focus();
       inputRef.current.select();
     }
-  }, []);
+
+    // Announce to screen readers that editing has started
+    const announceMessage = `Editing ${initialText.substring(0, 20)}${initialText.length > 20 ? '...' : ''}`;
+    const announcer = document.getElementById('screen-reader-announcer');
+    if (announcer) {
+      announcer.textContent = announceMessage;
+    }
+  }, [initialText]);
 
   const handleSave = () => {
     onSave(text);
   };
 
-  const handleKeyDown = e => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSave();

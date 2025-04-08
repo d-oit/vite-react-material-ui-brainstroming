@@ -17,7 +17,7 @@ export const useKeyboardNavigation = (
   onNodeSelect?: (nodeId: string) => void
 ) => {
   const findNodeElements = useCallback(() => {
-    if (!containerRef.current) return [];
+    if (containerRef.current === null) return [];
     return Array.from(containerRef.current.querySelectorAll<NodeElement>('.react-flow__node'));
   }, []);
 
@@ -90,7 +90,11 @@ export const useKeyboardNavigation = (
           break;
         case ' ':
         case 'Enter':
-          if (currentIndex >= 0) {
+          if (
+            typeof currentIndex === 'number' &&
+            currentIndex >= 0 &&
+            currentIndex < nodeElements.length
+          ) {
             e.preventDefault();
             updateNodeSelection(nodeElements[currentIndex]);
           }
@@ -99,7 +103,13 @@ export const useKeyboardNavigation = (
           return;
       }
 
-      if (nextIndex !== currentIndex && nextIndex >= 0) {
+      if (
+        typeof nextIndex === 'number' &&
+        typeof currentIndex === 'number' &&
+        nextIndex !== currentIndex &&
+        nextIndex >= 0 &&
+        nextIndex < nodeElements.length
+      ) {
         e.preventDefault();
         updateNodeSelection(nodeElements[nextIndex]);
       }
@@ -109,7 +119,7 @@ export const useKeyboardNavigation = (
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    if (container === null) return;
 
     // Set up initial accessibility attributes
     findNodeElements().forEach((nodeElement, index) => {

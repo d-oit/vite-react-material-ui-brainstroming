@@ -38,12 +38,12 @@ export const useS3Sync = ({ projectId, syncSettings, data }: UseS3SyncProps) => 
   };
 
   const sync = useCallback(async () => {
-    if (typeof syncSettings === 'undefined') {
+    if (typeof syncSettings !== 'object' || syncSettings === null) {
       return;
     }
 
     const { enableS3Sync, s3Path } = syncSettings;
-    const isEnabled = typeof enableS3Sync === 'boolean' && enableS3Sync;
+    const isEnabled = enableS3Sync === true;
     const hasPath = typeof s3Path === 'string' && s3Path.length > 0;
 
     if (!isEnabled || !hasPath) {
@@ -81,10 +81,10 @@ export const useS3Sync = ({ projectId, syncSettings, data }: UseS3SyncProps) => 
       console.error('S3 sync error:', error);
       setSyncStatus('error');
 
-      if (retryCount < MAX_RETRIES) {
+      if (typeof retryCount === 'number' && retryCount >= 0 && retryCount < MAX_RETRIES) {
         const backoffDelay = Math.pow(2, retryCount) * 1000;
         setTimeout(() => {
-          setRetryCount(prev => prev + 1);
+          setRetryCount(prev => (typeof prev === 'number' ? prev + 1 : 1));
           void sync();
         }, backoffDelay);
       }
@@ -99,9 +99,10 @@ export const useS3Sync = ({ projectId, syncSettings, data }: UseS3SyncProps) => 
     const { enableS3Sync, syncFrequency, intervalMinutes } = syncSettings;
     const isEnabled = typeof enableS3Sync === 'boolean' && enableS3Sync;
     const isIntervalSync = syncFrequency === 'interval';
-    const minutes = typeof intervalMinutes === 'number' ? intervalMinutes : 0;
+    const minutes =
+      typeof intervalMinutes === 'number' && !Number.isNaN(intervalMinutes) ? intervalMinutes : 0;
 
-    if (isEnabled && isIntervalSync && minutes > 0) {
+    if (isEnabled === true && isIntervalSync && minutes > 0) {
       const intervalId = setInterval(
         () => {
           void sync();

@@ -48,6 +48,7 @@ export const EnhancedControls: React.FC<EnhancedControlsProps> = ({
   onZoomChange,
   showGrid = true,
   canUndo = false,
+  onAccessibility,
   canRedo = false,
   isFullscreen = false,
   currentZoom = 1,

@@ -1,13 +1,3 @@
-import React from 'react';
-import {
-  Box,
-  IconButton,
-  SpeedDial,
-  SpeedDialAction,
-  SpeedDialIcon,
-  useTheme,
-  Tooltip,
-} from '@mui/material';
 import {
   ZoomIn as ZoomInIcon,
   ZoomOut as ZoomOutIcon,
@@ -22,6 +12,16 @@ import {
   GridOn as GridOnIcon,
   GridOff as GridOffIcon,
 } from '@mui/icons-material';
+import {
+  Box,
+  IconButton,
+  SpeedDial,
+  SpeedDialAction,
+  SpeedDialIcon,
+  useTheme,
+  Tooltip,
+} from '@mui/material';
+import React from 'react';
 
 import { useI18n } from '../../contexts/I18nContext';
 import { NodeType } from '../../types';
@@ -88,10 +88,18 @@ const MobileControls: React.FC<MobileControlsProps> = ({
       <IconButton onClick={onZoomIn} size="small" aria-label={t('brainstorm.zoomIn') || 'Zoom in'}>
         <ZoomInIcon />
       </IconButton>
-      <IconButton onClick={onZoomOut} size="small" aria-label={t('brainstorm.zoomOut') || 'Zoom out'}>
+      <IconButton
+        onClick={onZoomOut}
+        size="small"
+        aria-label={t('brainstorm.zoomOut') || 'Zoom out'}
+      >
         <ZoomOutIcon />
       </IconButton>
-      <IconButton onClick={onFitView} size="small" aria-label={t('brainstorm.fitView') || 'Fit view'}>
+      <IconButton
+        onClick={onFitView}
+        size="small"
+        aria-label={t('brainstorm.fitView') || 'Fit view'}
+      >
         <FitScreenIcon />
       </IconButton>
     </Box>

@@ -2,7 +2,8 @@ import { Box, Paper, Typography, Chip, CircularProgress, Snackbar, Alert } from 
 import { useState, useCallback, useMemo, useRef } from 'react';
 
 import type { Node, Edge } from '../../types';
-import type { ProjectTemplate, type SyncSettings, templateConfigs } from '../../types/project';
+import type { ProjectTemplate, SyncSettings } from '../../types/project';
+import { templateConfigs } from '../../types/project';
 import { EnhancedBrainstormFlow } from '../BrainstormFlow/EnhancedBrainstormFlow';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 

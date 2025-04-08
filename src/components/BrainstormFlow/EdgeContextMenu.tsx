@@ -20,6 +20,10 @@ interface EdgeContextMenuProps {
   onChangeType: (edge: Edge, type: 'straight' | 'curved') => void;
 }
 
+/**
+ * EdgeContextMenu component for displaying a context menu for edges
+ * Provides options for styling, changing edge type, and deleting edges
+ */
 export const EdgeContextMenu: React.FC<EdgeContextMenuProps> = ({
   edge,
   anchorPosition,
@@ -32,6 +36,7 @@ export const EdgeContextMenu: React.FC<EdgeContextMenuProps> = ({
   const theme = useTheme();
   const { t } = useI18n();
 
+  // Only render if we have an edge
   if (!edge) return null;
 
   return (

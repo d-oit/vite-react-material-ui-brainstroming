@@ -88,7 +88,7 @@ class PerformanceMonitoringService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     additionalMetadata?: Record<string, any>
   ): number {
-    if (!this.isEnabled || !id) return 0;
+    if (!this.isEnabled || typeof id !== 'string' || id.length === 0) return 0;
 
     const metric = this.activeMetrics.get(id);
     if (!metric) {
@@ -201,11 +201,11 @@ class PerformanceMonitoringService {
     name?: string
   ): React.FC<P> {
     let componentName = 'UnknownComponent';
-    if (name !== undefined && name !== '') {
+    if (typeof name === 'string' && name.length > 0) {
       componentName = name;
-    } else if (Component.displayName !== undefined && Component.displayName !== '') {
+    } else if (typeof Component.displayName === 'string' && Component.displayName.length > 0) {
       componentName = Component.displayName;
-    } else if (Component.name !== undefined && Component.name !== '') {
+    } else if (typeof Component.name === 'string' && Component.name.length > 0) {
       componentName = Component.name;
     }
     // Capture 'this' context for use in the wrapper
@@ -264,12 +264,14 @@ class PerformanceMonitoringService {
       // Sort by duration (descending)
       metrics
         .sort((a, b) => {
-          const durationA = a.duration ?? 0;
-          const durationB = b.duration ?? 0;
+          const durationA = typeof a.duration === 'number' ? a.duration : 0;
+          const durationB = typeof b.duration === 'number' ? b.duration : 0;
           return durationB - durationA;
         })
         .forEach(metric => {
-          console.log(`${metric.name}: ${metric.duration?.toFixed(2)}ms`, metric.metadata || '');
+          const duration =
+            typeof metric.duration === 'number' ? metric.duration.toFixed(2) : '0.00';
+          console.log(`${metric.name}: ${duration}ms`, metric.metadata ?? {});
         });
 
       console.groupEnd();
