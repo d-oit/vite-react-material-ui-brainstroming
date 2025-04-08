@@ -56,7 +56,7 @@ interface AppShellProps {
   onCreateNew?: () => void;
 }
 
-export const AppShell = ({
+const AppShell = ({
   children,
   title,
   loading = false,
@@ -202,7 +202,8 @@ export const AppShell = ({
 
       <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="body2" color="text.secondary">
-          {t('app.copyright', { year: new Date().getFullYear() }) || `© ${new Date().getFullYear()}`}
+          {t('app.copyright', { year: new Date().getFullYear() }) ||
+            `© ${new Date().getFullYear()}`}
         </Typography>
         <IconButton onClick={onThemeToggle} size="small">
           {isDarkMode ? <LightIcon /> : <DarkIcon />}
@@ -268,7 +269,7 @@ export const AppShell = ({
                 ml: 1,
               }}
             >
-              v{import.meta.env.VITE_APP_VERSION || '1.0.0'}
+              v{import.meta.env.VITE_APP_VERSION ? import.meta.env.VITE_APP_VERSION : '1.0.0'}
             </Typography>
           </Typography>
 
@@ -406,3 +407,5 @@ export const AppShell = ({
     </Box>
   );
 };
+
+export default AppShell;

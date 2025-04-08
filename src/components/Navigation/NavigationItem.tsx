@@ -11,15 +11,14 @@ import {
   ListItemText,
   useTheme,
 } from '@mui/material';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-import AccessibilityMenu from '../Accessibility/AccessibilityMenu';
-import AccessibilityOverlay from '../Accessibility/AccessibilityOverlay';
-import PerformanceProfiler from '../PerformanceProfiler';
 
 import { useNavigation } from '../../contexts/NavigationContext';
 import type { NavigationItem as NavigationItemType } from '../../types/navigation';
+
+import SidebarAccessibilityItem from './SidebarAccessibilityItem';
+import SidebarPerformanceItem from './SidebarPerformanceItem';
 
 interface NavigationItemProps {
   item: NavigationItemType;

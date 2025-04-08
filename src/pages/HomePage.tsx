@@ -3,7 +3,7 @@ import { Box, Typography, Button, Container, Stack, CircularProgress } from '@mu
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { AppShell } from '../components/Layout/AppShell';
+import AppShell from '../components/Layout/AppShell';
 import { useI18n } from '../contexts/I18nContext';
 import projectService from '../services/ProjectService';
 import { ProjectTemplate } from '../types/project';

@@ -28,7 +28,7 @@ import {
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 
-import { AppShell } from '../components/Layout/AppShell';
+import AppShell from '../components/Layout/AppShell';
 import { ColorSchemeManager } from '../components/Settings/ColorSchemeManager';
 import { LogViewer } from '../components/Settings/LogViewer';
 import { NodePreferencesManager } from '../components/Settings/NodePreferencesManager';

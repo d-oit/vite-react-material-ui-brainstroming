@@ -212,7 +212,7 @@ describe('S3Service', () => {
       // Override the implementation for this test
       const originalUploadProject = s3Service.uploadProject;
       s3Service.uploadProject = vi.fn().mockImplementation(async project => {
-        loggerService.info(`Project ${project.id} uploaded to S3 successfully`);
+        void loggerService.info(`Project ${project.id} uploaded to S3 successfully`);
         return { success: true };
       });
 
@@ -257,7 +257,7 @@ describe('S3Service', () => {
       // Override the implementation for this test
       const originalUploadProject = s3Service.uploadProject;
       s3Service.uploadProject = vi.fn().mockImplementation(async project => {
-        loggerService.info(`Project ${project.id} queued for upload to S3`);
+        void loggerService.info(`Project ${project.id} queued for upload to S3`);
         return { queued: true };
       });
 
@@ -308,7 +308,7 @@ describe('S3Service', () => {
       // Override the implementation for this test
       const originalUploadProject = s3Service.uploadProject;
       s3Service.uploadProject = vi.fn().mockImplementation(async () => {
-        loggerService.error('Error uploading project to S3', new Error('Upload failed'));
+        void loggerService.error('Error uploading project to S3', new Error('Upload failed'));
         return null;
       });
 
@@ -359,7 +359,7 @@ describe('S3Service', () => {
           name: 'Test Project',
           version: '1.0.0',
         };
-        loggerService.info('Project test-project downloaded from S3 successfully');
+        void loggerService.info('Project test-project downloaded from S3 successfully');
         return project;
       });
 
@@ -394,7 +394,7 @@ describe('S3Service', () => {
       // Mock the implementation for this test
       const originalDownloadProject = s3Service.downloadProject;
       s3Service.downloadProject = vi.fn().mockImplementation(() => {
-        loggerService.info('Project download skipped - offline');
+        void loggerService.info('Project download skipped - offline');
         return null;
       });
 
@@ -434,7 +434,7 @@ describe('S3Service', () => {
       // Override the implementation for this test
       const originalDownloadProject = s3Service.downloadProject;
       s3Service.downloadProject = vi.fn().mockImplementation(async () => {
-        loggerService.error('Error downloading project from S3', new Error('Test error'));
+        void loggerService.error('Error downloading project from S3', new Error('Test error'));
         return null;
       });
 

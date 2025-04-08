@@ -12,13 +12,13 @@ test.describe('Project Lifecycle', () => {
     await page.waitForTimeout(2000);
 
     // Verify that we're on the projects page
-    await expect(page.url()).toContain('/projects');
+    expect(page.url()).toContain('/projects');
 
     // Go back to the home page
     await page.goto('/');
 
     // Verify we're back on the home page
-    await expect(page.url()).toBe('http://localhost:5173/');
+    expect(page.url()).toBe('http://localhost:5173/');
   });
 
   test('should click the Quick Brainstorm button', async ({ page }) => {
@@ -32,7 +32,7 @@ test.describe('Project Lifecycle', () => {
     await page.waitForTimeout(2000);
 
     // Verify we're still on the home page
-    await expect(page.url()).toBe('http://localhost:5173/');
+    expect(page.url()).toBe('http://localhost:5173/');
   });
   test('should navigate to My Projects', async ({ page }) => {
     // Go to the home page
@@ -45,6 +45,6 @@ test.describe('Project Lifecycle', () => {
     await page.waitForTimeout(2000);
 
     // Verify that we're on the projects page
-    await expect(page.url()).toContain('/projects');
+    expect(page.url()).toContain('/projects');
   });
 });

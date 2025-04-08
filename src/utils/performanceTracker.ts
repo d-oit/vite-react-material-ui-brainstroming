@@ -7,6 +7,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+
 import { LoggerService } from '../services/LoggerService';
 
 // Define performance metric categories
@@ -108,10 +109,7 @@ class PerformanceTracker {
    * @param additionalMetadata Additional metadata to add
    * @returns The duration of the metric in milliseconds
    */
-  public endMeasure(
-    id: string,
-    additionalMetadata?: Record<string, any>
-  ): number {
+  public endMeasure(id: string, additionalMetadata?: Record<string, any>): number {
     if (!this.isEnabled || !id) return 0;
 
     const metric = this.activeMetrics.get(id);
@@ -157,7 +155,7 @@ class PerformanceTracker {
 
       const logCategory = categoryMap[metric.category] || 'performance';
 
-      this.logger.info(`Performance metric: ${metric.name}`, {
+      void this.logger.info(`Performance metric: ${metric.name}`, {
         category: logCategory,
         duration: metric.duration,
         metadata: metric.metadata,
@@ -199,7 +197,10 @@ class PerformanceTracker {
       } else if (metric.duration > PerformanceBudget.NETWORK.ACCEPTABLE) {
         level = 'ACCEPTABLE';
       }
-    } else if (category === MetricCategory.INTERACTION || category === PerformanceCategory.USER_INTERACTION) {
+    } else if (
+      category === MetricCategory.INTERACTION ||
+      category === PerformanceCategory.USER_INTERACTION
+    ) {
       threshold = PerformanceBudget.INTERACTION.ACCEPTABLE;
       if (metric.duration > PerformanceBudget.INTERACTION.POOR) {
         level = 'POOR';
@@ -461,15 +462,9 @@ export function useRenderPerformance(componentName: string): void {
  * @param componentName Name of the component
  * @param dependencies Dependencies array to control when to measure
  */
-export function useMountPerformance(
-  componentName: string,
-  dependencies: any[] = []
-): void {
+export function useMountPerformance(componentName: string, dependencies: any[] = []): void {
   useEffect(() => {
-    const id = performanceTracker.startMeasure(
-      `${componentName}_mount`,
-      MetricCategory.RENDER
-    );
+    const id = performanceTracker.startMeasure(`${componentName}_mount`, MetricCategory.RENDER);
 
     return () => {
       performanceTracker.endMeasure(id);
@@ -489,7 +484,7 @@ export function withPerformanceTracking<P extends object>(
 ): React.FC<P> {
   const displayName = name || Component.displayName || Component.name || 'Component';
 
-  const WrappedComponent: React.FC<P> = (props) => {
+  const WrappedComponent: React.FC<P> = props => {
     useRenderPerformance(displayName);
     return React.createElement(Component, props);
   };

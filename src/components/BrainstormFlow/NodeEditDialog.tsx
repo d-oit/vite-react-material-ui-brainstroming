@@ -106,7 +106,7 @@ const NodeEditDialog = ({
 
   const handleSave = () => {
     // Log the save operation
-    loggerService.info('Saving node', {
+    void loggerService.info('Saving node', {
       type,
       label,
       contentLength: content.length,

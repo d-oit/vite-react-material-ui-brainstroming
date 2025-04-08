@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import { Speed as SpeedIcon } from '@mui/icons-material';
+import { ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import React, { useState } from 'react';
 
 import PerformanceProfiler from '../PerformanceProfiler';
 
@@ -27,12 +27,7 @@ const SidebarPerformanceItem: React.FC = () => {
       </ListItem>
 
       {/* Performance Profiler Dialog */}
-      {open && (
-        <PerformanceProfiler 
-          open={open} 
-          onClose={handleClose} 
-        />
-      )}
+      {open && <PerformanceProfiler open={open} onClose={handleClose} />}
     </>
   );
 };

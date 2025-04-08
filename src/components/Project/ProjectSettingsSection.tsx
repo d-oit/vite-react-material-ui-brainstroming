@@ -77,7 +77,7 @@ export const ProjectSettingsSection = ({
         const isConfigured = process.env.VITE_AWS_S3_BUCKET && process.env.VITE_AWS_REGION;
         setIsS3Available(!!isConfigured);
       } catch (err) {
-        loggerService.error(
+        void loggerService.error(
           'Failed to check S3 configuration',
           err instanceof Error ? err : new Error(String(err))
         );
@@ -147,10 +147,10 @@ export const ProjectSettingsSection = ({
       const now = new Date().toISOString();
       setLastSyncTime(now);
       handleSyncSettingsChange({ lastSyncedAt: now });
-      loggerService.info('Project synced to S3', { projectId: project.id });
+      void loggerService.info('Project synced to S3', { projectId: project.id });
     } catch (err) {
       const errorMessage = 'Failed to sync project to S3';
-      loggerService.error(errorMessage, err instanceof Error ? err : new Error(String(err)));
+      void loggerService.error(errorMessage, err instanceof Error ? err : new Error(String(err)));
       showError(errorMessage);
     } finally {
       setIsSyncing(false);
@@ -179,10 +179,10 @@ export const ProjectSettingsSection = ({
         URL.revokeObjectURL(url);
       }, 100);
 
-      loggerService.info('Project exported to file', { projectId: project.id });
+      void loggerService.info('Project exported to file', { projectId: project.id });
     } catch (err) {
       const errorMessage = 'Failed to export project';
-      loggerService.error(errorMessage, err instanceof Error ? err : new Error(String(err)));
+      void loggerService.error(errorMessage, err instanceof Error ? err : new Error(String(err)));
       showError(errorMessage);
     } finally {
       setExportLoading(false);
@@ -228,10 +228,10 @@ export const ProjectSettingsSection = ({
             };
 
             onSave(updatedProject);
-            loggerService.info('Project imported from file', { projectId: project.id });
+            void loggerService.info('Project imported from file', { projectId: project.id });
           } catch (err) {
             const errorMessage = 'Failed to import project: Invalid file format';
-            loggerService.error(errorMessage, err instanceof Error ? err : new Error(String(err)));
+            void loggerService.error(errorMessage, err instanceof Error ? err : new Error(String(err)));
             showError(errorMessage);
           } finally {
             setImportLoading(false);
@@ -250,7 +250,7 @@ export const ProjectSettingsSection = ({
       input.click();
     } catch (err) {
       const errorMessage = 'Failed to import project';
-      loggerService.error(errorMessage, err instanceof Error ? err : new Error(String(err)));
+      void loggerService.error(errorMessage, err instanceof Error ? err : new Error(String(err)));
       showError(errorMessage);
       setImportLoading(false);
     }
@@ -288,11 +288,11 @@ export const ProjectSettingsSection = ({
 
         onSave(updatedProject);
         setLastSyncTime(updatedProject.syncSettings.lastSyncedAt);
-        loggerService.info('Project imported from S3', { projectId: project.id });
+        void loggerService.info('Project imported from S3', { projectId: project.id });
       }
     } catch (err) {
       const errorMessage = 'Failed to import project from S3';
-      loggerService.error(errorMessage, err instanceof Error ? err : new Error(String(err)));
+      void loggerService.error(errorMessage, err instanceof Error ? err : new Error(String(err)));
       showError(errorMessage);
     } finally {
       setImportLoading(false);

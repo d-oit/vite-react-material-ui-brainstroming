@@ -82,25 +82,28 @@ const MobileControls: React.FC<MobileControlsProps> = ({
         borderRadius: 20, // More rounded for touch
         boxShadow: theme.shadows[3],
         p: 0.5,
-        zIndex: 900,
+        zIndex: 1000,
+        '& .MuiIconButton-root': {
+          color: theme.palette.text.primary,
+        },
       }}
     >
       <IconButton onClick={onZoomIn} size="small" aria-label={t('brainstorm.zoomIn') || 'Zoom in'}>
-        <ZoomInIcon />
+        <ZoomInIcon fontSize="small" />
       </IconButton>
       <IconButton
         onClick={onZoomOut}
         size="small"
         aria-label={t('brainstorm.zoomOut') || 'Zoom out'}
       >
-        <ZoomOutIcon />
+        <ZoomOutIcon fontSize="small" />
       </IconButton>
       <IconButton
         onClick={onFitView}
         size="small"
         aria-label={t('brainstorm.fitView') || 'Fit view'}
       >
-        <FitScreenIcon />
+        <FitScreenIcon fontSize="small" />
       </IconButton>
     </Box>
   );
@@ -205,9 +208,11 @@ const MobileControls: React.FC<MobileControlsProps> = ({
           position: 'absolute',
           bottom: 16,
           right: 16,
+          zIndex: 1000,
           '& .MuiSpeedDial-fab': {
             width: 48,
             height: 48,
+            boxShadow: theme.shadows[3],
           },
         }}
         icon={<SpeedDialIcon />}

@@ -22,7 +22,7 @@ export const Drawer = ({ open, onClose }: DrawerProps) => {
             d.o.it.brainstorming
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            v{import.meta.env.VITE_PROJECT_VERSION || '0.1.0'}
+            v{import.meta.env.VITE_PROJECT_VERSION ? import.meta.env.VITE_PROJECT_VERSION : '0.1.0'}
           </Typography>
         </Box>
         <Divider />

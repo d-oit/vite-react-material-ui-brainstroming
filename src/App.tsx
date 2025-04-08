@@ -9,8 +9,8 @@ import { registerSW } from 'virtual:pwa-register';
 // Import all styles
 import './styles';
 
-import AccessibilityMenu from './components/Accessibility/AccessibilityMenu';
-import AccessibilityOverlay from './components/Accessibility/AccessibilityOverlay';
+import _AccessibilityMenu from './components/Accessibility/AccessibilityMenu';
+import _AccessibilityOverlay from './components/Accessibility/AccessibilityOverlay';
 import AccessibilityProvider from './components/Accessibility/AccessibilityProvider';
 import ScreenReaderAnnouncer from './components/Accessibility/ScreenReaderAnnouncer';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
@@ -18,7 +18,7 @@ import RTLProvider from './components/I18n/RTLProvider';
 import _OfflineFallback from './components/OfflineIndicator/OfflineFallback';
 import _OfflineIndicator from './components/OfflineIndicator/OfflineIndicator';
 import withOfflineFallback from './components/OfflineIndicator/withOfflineFallback';
-import PerformanceProfiler from './components/PerformanceProfiler';
+import _PerformanceProfiler from './components/PerformanceProfiler';
 import CSPMeta from './components/Security/CSPMeta';
 import LoadingFallback from './components/UI/LoadingFallback';
 import { ActionFeedbackProvider } from './contexts/ActionFeedbackContext';
@@ -146,11 +146,17 @@ const AppWithTheme = () => {
   };
 
   const handleUpdateApp = () => {
-    if (typeof updateSWFunction === 'function') {
-      void updateSWFunction(true).catch(error => {
-        console.error('Failed to update application:', error);
-       loggerService.error('Failed to update application', error);
-      });
+    try {
+      if (typeof updateSWFunction === 'function') {
+        try {
+          updateSWFunction(true);
+        } catch (error) {
+          console.error('Failed to update application:', error);
+          void loggerService.error('Failed to update application', error instanceof Error ? error : new Error(String(error)));
+        }
+      }
+    } catch (error) {
+      console.error('Error updating application:', error);
     }
   };
 
@@ -229,7 +235,15 @@ const AppWithTheme = () => {
     void initializeServices();
     // Clean up on unmount
     return () => {
-      void offlineService.stopAutoSync();
+      // Only try to stop auto sync if the service is initialized
+      try {
+        if (offlineService && typeof offlineService.stopAutoSync === 'function') {
+          // stopAutoSync returns void, not a Promise
+          offlineService.stopAutoSync();
+        }
+      } catch (error) {
+        console.error('Error during cleanup:', error);
+      }
     };
   }, []);
 
@@ -279,7 +293,10 @@ const AppWithTheme = () => {
                   <Route
                     path="/performance"
                     element={
-                      <PerformancePage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
+                      <PerformancePage
+                        onThemeToggle={toggleThemeMode}
+                        isDarkMode={mode === 'dark'}
+                      />
                     }
                   />
                   {/* Removed standalone brainstorming route - now using quick project creation */}

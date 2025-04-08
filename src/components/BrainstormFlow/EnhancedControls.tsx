@@ -97,14 +97,14 @@ export const EnhancedControls: React.FC<EnhancedControlsProps> = ({
       sx={{
         position: 'absolute',
         ...getPositionStyles(),
-        zIndex: 5,
+        zIndex: 10,
         display: 'flex',
         flexDirection: 'column',
         gap: 0.5,
         backgroundColor: theme.palette.background.paper,
-        borderRadius: 1,
+        borderRadius: 2,
         padding: 0.5,
-        boxShadow: 2,
+        boxShadow: theme => theme.shadows[3],
       }}
     >
       {onSave && (

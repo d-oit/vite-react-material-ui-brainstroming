@@ -97,10 +97,10 @@ export const SettingsExportImport = () => {
       });
 
       // Log the export
-      loggerService.info('Settings exported successfully');
+      void loggerService.info('Settings exported successfully');
     } catch (error) {
       console.error('Failed to export settings:', error);
-      loggerService.error(
+      void loggerService.error(
         'Failed to export settings',
         error instanceof Error ? error : new Error(String(error))
       );

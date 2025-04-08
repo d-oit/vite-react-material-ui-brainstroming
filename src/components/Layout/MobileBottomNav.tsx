@@ -30,7 +30,16 @@ export const MobileBottomNav = ({ onMenuClick }: MobileBottomNavProps) => {
   };
 
   return (
-    <Box sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: theme.zIndex.appBar - 1, height: '64px' }}>
+    <Box
+      sx={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: theme.zIndex.appBar - 1,
+        height: '64px',
+      }}
+    >
       {/* Floating action button for quick create */}
       <Fab
         color="primary"

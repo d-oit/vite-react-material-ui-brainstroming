@@ -103,7 +103,7 @@ describe('Performance Monitoring', () => {
   describe('Method Decorator', () => {
     it('should create a method decorator that measures performance', () => {
       // Skip decorator tests in environments that don't support them
-      if (typeof Reflect === 'undefined' || !Reflect.metadata) {
+      if (typeof Reflect === 'undefined' || Reflect.metadata === undefined) {
         return;
       }
 
@@ -151,7 +151,7 @@ describe('Performance Monitoring', () => {
 
     it('should handle async methods', async () => {
       // Skip decorator tests in environments that don't support them
-      if (typeof Reflect === 'undefined' || !Reflect.metadata) {
+      if (typeof Reflect === 'undefined' || Reflect.metadata === undefined) {
         return;
       }
 

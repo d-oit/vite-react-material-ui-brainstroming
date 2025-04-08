@@ -126,8 +126,8 @@ export async function decrypt<T>(encryptedData: string, password: string): Promi
 export function isEncryptionAvailable(): boolean {
   return (
     typeof window !== 'undefined' &&
-    window.crypto &&
-    window.crypto.subtle &&
+    window.crypto !== undefined &&
+    window.crypto.subtle !== undefined &&
     typeof window.crypto.subtle.encrypt === 'function'
   );
 }

@@ -164,6 +164,8 @@ const lightThemeOptions: ThemeOptions = {
       styleOverrides: {
         '*': {
           boxSizing: 'border-box',
+          margin: 0,
+          padding: 0,
         },
         html: {
           MozOsxFontSmoothing: 'grayscale',
@@ -172,6 +174,7 @@ const lightThemeOptions: ThemeOptions = {
           flexDirection: 'column',
           minHeight: '100%',
           width: '100%',
+          overflowX: 'hidden',
         },
         body: {
           display: 'flex',
@@ -179,6 +182,7 @@ const lightThemeOptions: ThemeOptions = {
           flexDirection: 'column',
           minHeight: '100%',
           width: '100%',
+          overflowX: 'hidden',
         },
         '#root': {
           display: 'flex',
@@ -186,6 +190,7 @@ const lightThemeOptions: ThemeOptions = {
           flexDirection: 'column',
           height: '100%',
           width: '100%',
+          position: 'relative',
         },
       },
     },
@@ -276,9 +281,19 @@ const lightThemeOptions: ThemeOptions = {
       styleOverrides: {
         root: {
           backgroundImage: 'none',
+          overflow: 'hidden',
         },
         rounded: {
           borderRadius: 12,
+        },
+        elevation1: {
+          boxShadow: '0 2px 4px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.07)',
+        },
+        elevation2: {
+          boxShadow: '0 3px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05)',
+        },
+        elevation3: {
+          boxShadow: '0 4px 8px rgba(0,0,0,0.09), 0 2px 4px rgba(0,0,0,0.06)',
         },
       },
     },
@@ -311,6 +326,8 @@ const lightThemeOptions: ThemeOptions = {
       styleOverrides: {
         paper: {
           backgroundColor: '#ffffff',
+          borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+          zIndex: 1200,
         },
       },
     },
@@ -345,6 +362,8 @@ const lightThemeOptions: ThemeOptions = {
       styleOverrides: {
         paper: {
           borderRadius: 12,
+          overflow: 'hidden',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
         },
       },
     },
@@ -360,6 +379,23 @@ const lightThemeOptions: ThemeOptions = {
       styleOverrides: {
         root: {
           borderColor: 'rgba(0, 0, 0, 0.12)',
+          margin: '8px 0',
+        },
+      },
+    },
+    MuiPopover: {
+      styleOverrides: {
+        paper: {
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          borderRadius: 8,
+          overflow: 'hidden',
+        },
+      },
+    },
+    MuiBackdrop: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
         },
       },
     },
@@ -419,10 +455,46 @@ const darkThemeOptions: ThemeOptions = {
     borderRadius: 8,
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        '*': {
+          boxSizing: 'border-box',
+          margin: 0,
+          padding: 0,
+        },
+        html: {
+          MozOsxFontSmoothing: 'grayscale',
+          WebkitFontSmoothing: 'antialiased',
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100%',
+          width: '100%',
+          overflowX: 'hidden',
+        },
+        body: {
+          display: 'flex',
+          flex: '1 1 auto',
+          flexDirection: 'column',
+          minHeight: '100%',
+          width: '100%',
+          overflowX: 'hidden',
+        },
+        '#root': {
+          display: 'flex',
+          flex: '1 1 auto',
+          flexDirection: 'column',
+          height: '100%',
+          width: '100%',
+          position: 'relative',
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: {
           textTransform: 'none',
+          borderRadius: 8,
+          fontWeight: 500,
         },
       },
     },
@@ -430,6 +502,19 @@ const darkThemeOptions: ThemeOptions = {
       styleOverrides: {
         root: {
           backgroundImage: 'none',
+          overflow: 'hidden',
+        },
+        rounded: {
+          borderRadius: 12,
+        },
+        elevation1: {
+          boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.3)',
+        },
+        elevation2: {
+          boxShadow: '0 3px 6px rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.2)',
+        },
+        elevation3: {
+          boxShadow: '0 4px 8px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.25)',
         },
       },
     },
@@ -444,6 +529,8 @@ const darkThemeOptions: ThemeOptions = {
       styleOverrides: {
         paper: {
           backgroundColor: '#1e1e1e',
+          borderRight: '1px solid rgba(255, 255, 255, 0.12)',
+          zIndex: 1200,
         },
       },
     },
@@ -466,6 +553,39 @@ const darkThemeOptions: ThemeOptions = {
           '&:hover': {
             boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
           },
+        },
+      },
+    },
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          borderRadius: 12,
+          overflow: 'hidden',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+        },
+      },
+    },
+    MuiDivider: {
+      styleOverrides: {
+        root: {
+          borderColor: 'rgba(255, 255, 255, 0.12)',
+          margin: '8px 0',
+        },
+      },
+    },
+    MuiPopover: {
+      styleOverrides: {
+        paper: {
+          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          borderRadius: 8,
+          overflow: 'hidden',
+        },
+      },
+    },
+    MuiBackdrop: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
         },
       },
     },

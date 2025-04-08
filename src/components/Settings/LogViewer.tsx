@@ -86,7 +86,7 @@ export const LogViewer = () => {
 
   // Load logs on mount and when filter changes
   useEffect(() => {
-    loadLogs();
+    void loadLogs();
   }, [loadLogs]);
 
   // Handle page change
@@ -109,14 +109,14 @@ export const LogViewer = () => {
   // Handle search
   const handleSearch = () => {
     setPage(0);
-    loadLogs();
+    void loadLogs();
   };
 
   // Handle clear search
   const handleClearSearch = () => {
     setSearchTerm('');
     setPage(0);
-    loadLogs();
+    void loadLogs();
   };
 
   // Handle log deletion
@@ -187,7 +187,7 @@ export const LogViewer = () => {
           <Button
             variant="outlined"
             startIcon={<RefreshIcon />}
-            onClick={loadLogs}
+            onClick={() => void loadLogs()}
             disabled={loading}
           >
             Refresh
@@ -316,7 +316,7 @@ export const LogViewer = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleDeleteLogs} color="error">
+          <Button onClick={async () => { await handleDeleteLogs(); }} color="error">
             Delete
           </Button>
         </DialogActions>

@@ -207,7 +207,11 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
                   theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200],
               },
             }}
-            aria-label={expanded ? t('flow.collapseMiniMap') || 'Collapse mini map' : t('flow.expandMiniMap') || 'Expand mini map'}
+            aria-label={
+              expanded
+                ? t('flow.collapseMiniMap') || 'Collapse mini map'
+                : t('flow.expandMiniMap') || 'Expand mini map'
+            }
             aria-expanded={expanded}
             aria-controls="minimap-container"
           >

@@ -69,7 +69,7 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
 
   // Find target element
   const findTargetElement = useCallback(() => {
-    if (!step) return null;
+    if (step === undefined || step === null) return null;
     return document.querySelector(step.target) as HTMLElement;
   }, [step]);
 
@@ -139,7 +139,7 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
 
   // Update target element and position when step changes
   useEffect(() => {
-    if (!isOpen || !step) return;
+    if (!isOpen || step === undefined || step === null) return;
 
     const element = findTargetElement();
     setTargetElement(element);
@@ -235,7 +235,7 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
     onClose();
   };
 
-  if (!isOpen || !step) return null;
+  if (!isOpen || step === undefined || step === null) return null;
 
   return (
     <Portal>

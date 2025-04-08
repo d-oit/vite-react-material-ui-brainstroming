@@ -85,7 +85,7 @@ export function getCSPDirectives(): CSPDirectives {
       const directiveKey = key as keyof typeof directives;
       // Safe to use directiveKey as it's validated through type assertion
       // eslint-disable-next-line security/detect-object-injection
-      directives[directiveKey] = [...(directives[directiveKey] || []), ...values];
+      directives[directiveKey] = [...(directives[directiveKey] ?? []), ...values];
     });
   } else {
     // Merge production directives
@@ -94,7 +94,7 @@ export function getCSPDirectives(): CSPDirectives {
       const directiveKey = key as keyof typeof directives;
       // Safe to use directiveKey as it's validated through type assertion
       // eslint-disable-next-line security/detect-object-injection
-      directives[directiveKey] = [...(directives[directiveKey] || []), ...values];
+      directives[directiveKey] = [...(directives[directiveKey] ?? []), ...values];
     });
   }
 

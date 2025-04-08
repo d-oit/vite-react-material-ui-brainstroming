@@ -56,7 +56,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
   };
 
   useEffect(() => {
-    loadProjects();
+    void loadProjects();
   }, []);
 
   const handleCreateProject = async (
@@ -245,8 +245,8 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
                 project={project}
                 onDelete={id => openConfirmDialog('delete', id)}
                 onArchive={id => openConfirmDialog('archive', id)}
-                onSync={handleSyncToS3}
-                onPin={handlePinProject}
+                onSync={id => void handleSyncToS3(id)}
+                onPin={(id, isPinned) => void handlePinProject(id, isPinned)}
               />
             </Box>
           ))}
@@ -262,7 +262,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
       >
         <DialogContent>
           <ProjectCreateForm
-            onSubmit={handleCreateProject}
+            onSubmit={async (data) => { await handleCreateProject(data); }}
             onCancel={() => setCreateDialogOpen(false)}
             loading={loading}
           />
@@ -282,7 +282,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
         <DialogActions>
           <Button onClick={() => setConfirmDialogOpen(false)}>Cancel</Button>
           <Button
-            onClick={handleConfirmAction}
+            onClick={() => void handleConfirmAction()}
             color={actionType === 'delete' ? 'error' : 'primary'}
             // Removed autoFocus for accessibility
           >

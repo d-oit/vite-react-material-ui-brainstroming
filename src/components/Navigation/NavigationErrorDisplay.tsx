@@ -42,7 +42,7 @@ const NavigationErrorDisplay = ({ error }: NavigationErrorDisplayProps) => {
             <Button
               size="small"
               startIcon={<RefreshIcon />}
-              onClick={retryLoading}
+              onClick={() => void retryLoading()}
               variant="outlined"
               color={error.severity === 'error' ? 'error' : 'warning'}
             >

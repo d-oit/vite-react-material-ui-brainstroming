@@ -243,7 +243,7 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative', overflow: 'hidden' }}>
       <Box
         sx={{
           p: 2,
@@ -256,6 +256,11 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
             theme.palette.mode === 'dark'
               ? 'linear-gradient(to right, rgba(25,118,210,0.1), rgba(25,118,210,0))'
               : 'linear-gradient(to right, rgba(25,118,210,0.05), rgba(25,118,210,0))',
+          zIndex: 10,
+          flexShrink: 0,
+          position: 'sticky',
+          top: 0,
+          backgroundColor: theme => theme.palette.background.paper,
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -327,6 +332,7 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
             theme.palette.mode === 'dark'
               ? theme.palette.background.default
               : theme.palette.grey[50],
+          scrollBehavior: 'smooth',
         }}
       >
         {messages.length === 0 && !nodeSuggestion ? (
@@ -474,6 +480,10 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
           borderTop: 1,
           borderColor: 'divider',
           backgroundColor: theme => theme.palette.background.paper,
+          zIndex: 10,
+          flexShrink: 0,
+          position: 'sticky',
+          bottom: 0,
         }}
       >
         <TextField
@@ -487,7 +497,7 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyPress} // Using onKeyDown instead of deprecated onKeyPress
           multiline
-          maxRows={4}
+          maxRows={3}
           disabled={isLoading || isGeneratingNodes || !settings.openRouterApiKey || !isOnline}
           sx={{
             flexGrow: 1,
@@ -497,6 +507,10 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
               '&.Mui-focused': {
                 boxShadow: '0 0 0 2px rgba(25, 118, 210, 0.2)',
               },
+            },
+            '& .MuiFormHelperText-root': {
+              margin: '4px 0 0 0',
+              fontSize: '0.7rem',
             },
           }}
           helperText={
@@ -518,7 +532,7 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
             {t('chat.clear')}
           </Button>
 
-          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', alignItems: 'flex-start' }}>
             {/* Node generation button - only show if onAddNodes is provided */}
             {onAddNodes !== undefined && (
               <Tooltip
@@ -538,9 +552,9 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
                       settings.openRouterApiKey === '' ||
                       isOnline !== true
                     }
-                    sx={{ borderRadius: '8px' }}
+                    sx={{ borderRadius: '8px', minWidth: '40px', height: '40px', p: 1 }}
                   >
-                    {isGeneratingNodes ? <CircularProgress size={24} /> : <PsychologyIcon />}
+                    {isGeneratingNodes ? <CircularProgress size={20} /> : <PsychologyIcon />}
                   </Button>
                 </span>
               </Tooltip>
@@ -560,7 +574,7 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
                 settings.openRouterApiKey === '' ||
                 isOnline !== true
               }
-              sx={{ borderRadius: '8px' }}
+              sx={{ borderRadius: '8px', height: '40px' }}
             >
               {t('chat.send')}
             </Button>
@@ -568,13 +582,7 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
         </Box>
       </Box>
 
-      {messages.length > 0 && (
-        <Box sx={{ p: 1, display: 'flex', justifyContent: 'center' }}>
-          <Button size="small" onClick={clearChat}>
-            {t('chat.clearChat')}
-          </Button>
-        </Box>
-      )}
+
     </Box>
   );
 };

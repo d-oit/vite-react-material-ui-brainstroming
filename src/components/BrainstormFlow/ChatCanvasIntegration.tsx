@@ -451,7 +451,7 @@ export const useChatCanvasIntegration = (props: ChatCanvasIntegrationProps) => {
       const instance = React.createElement(ChatCanvasIntegration, {
         ...props,
         ref: (ref: React.RefObject<typeof ChatCanvasIntegration>) => {
-          if (ref && typeof ref === 'object' && 'handleOpenNodeToMessageDialog' in ref) {
+          if (ref !== null && typeof ref === 'object' && 'handleOpenNodeToMessageDialog' in ref) {
             (
               ref as unknown as { handleOpenNodeToMessageDialog: (node: Node) => void }
             ).handleOpenNodeToMessageDialog(node);
@@ -464,7 +464,7 @@ export const useChatCanvasIntegration = (props: ChatCanvasIntegrationProps) => {
       const instance = React.createElement(ChatCanvasIntegration, {
         ...props,
         ref: (ref: React.RefObject<typeof ChatCanvasIntegration>) => {
-          if (ref && typeof ref === 'object' && 'handleOpenMessageToNodeDialog' in ref) {
+          if (ref !== null && typeof ref === 'object' && 'handleOpenMessageToNodeDialog' in ref) {
             (
               ref as unknown as { handleOpenMessageToNodeDialog: (message: ChatMessage) => void }
             ).handleOpenMessageToNodeDialog(message);

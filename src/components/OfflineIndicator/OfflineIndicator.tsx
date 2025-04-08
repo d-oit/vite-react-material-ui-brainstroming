@@ -298,7 +298,7 @@ export const OfflineIndicator = ({
         <DialogActions>
           <Button onClick={() => setSyncDialogOpen(false)}>Cancel</Button>
           <Button
-            onClick={handleSyncClick}
+            onClick={() => void handleSyncClick()}
             variant="contained"
             disabled={syncInProgress || !isOnline}
             startIcon={syncInProgress ? <CircularProgress size={20} /> : <SyncIcon />}

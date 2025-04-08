@@ -24,7 +24,7 @@ import { useParams } from 'react-router-dom';
 import KeyboardShortcutsHandler from '../components/BrainstormFlow/KeyboardShortcutsHandler';
 import { ChatInterface } from '../components/Chat/ChatInterface';
 import HelpOverlay from '../components/Help/HelpOverlay';
-import { AppShell } from '../components/Layout/AppShell';
+import AppShell from '../components/Layout/AppShell';
 import { ProjectBrainstormingSection } from '../components/Project/ProjectBrainstormingSection';
 import ProjectSettingsSection from '../components/Project/ProjectSettingsSection';
 import { useProject } from '../hooks/useProject';

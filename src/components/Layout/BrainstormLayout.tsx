@@ -50,10 +50,7 @@ function TabPanel(props: TabPanelProps) {
       {...other}
     >
       {value === index && (
-        <Box
-          sx={{ height: '100%' }}
-          tabIndex={value === index ? 0 : -1}
-        >
+        <Box sx={{ height: '100%' }} tabIndex={value === index ? 0 : -1}>
           {children}
         </Box>
       )}
@@ -94,6 +91,9 @@ export const BrainstormLayout = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Adjust sidebar width based on screen size
+  const sidebarWidth = isLargeScreen ? 400 : isTablet ? 350 : 320;
+
   // Auto-hide controls after 3 seconds of inactivity
   useEffect(() => {
     if (showControls) {
@@ -132,7 +132,7 @@ export const BrainstormLayout = ({
     setSidebarTab(newValue);
   };
 
-  const sidebarWidth = isLargeScreen ? 400 : 320;
+  // Sidebar width is defined above
 
   return (
     <Box
@@ -183,28 +183,16 @@ export const BrainstormLayout = ({
                   p: 0.5,
                   zIndex: 900,
                   // Ensure it doesn't overlap with the minimap
-                  marginLeft: 60,
+                  marginLeft: 0,
                 }}
               >
-                <IconButton
-                  onClick={onZoomIn}
-                  size="small"
-                  aria-label={t('brainstorm.zoomIn')}
-                >
+                <IconButton onClick={onZoomIn} size="small" aria-label={t('brainstorm.zoomIn')}>
                   <ZoomInIcon />
                 </IconButton>
-                <IconButton
-                  onClick={onZoomOut}
-                  size="small"
-                  aria-label={t('brainstorm.zoomOut')}
-                >
+                <IconButton onClick={onZoomOut} size="small" aria-label={t('brainstorm.zoomOut')}>
                   <ZoomOutIcon />
                 </IconButton>
-                <IconButton
-                  onClick={onFitView}
-                  size="small"
-                  aria-label={t('brainstorm.fitView')}
-                >
+                <IconButton onClick={onFitView} size="small" aria-label={t('brainstorm.fitView')}>
                   <FitScreenIcon />
                 </IconButton>
               </Box>
@@ -235,14 +223,14 @@ export const BrainstormLayout = ({
                     <Tab
                       icon={<ChatIcon />}
                       label={t('chat.title')}
-                      id={`sidebar-tab-0`}
-                      aria-controls={`sidebar-tabpanel-0`}
+                      id="sidebar-tab-0"
+                      aria-controls="sidebar-tabpanel-0"
                     />
                     <Tab
                       icon={<HistoryIcon />}
                       label={t('gitHistory.title')}
-                      id={`sidebar-tab-1`}
-                      aria-controls={`sidebar-tabpanel-1`}
+                      id="sidebar-tab-1"
+                      aria-controls="sidebar-tabpanel-1"
                     />
                   </Tabs>
                 </Box>
@@ -259,7 +247,7 @@ export const BrainstormLayout = ({
             </Drawer>
           </>
         ) : (
-          <Box sx={{ display: 'flex', height: '100%', width: '100%' }}>
+          <Box sx={{ display: 'flex', height: '100%', width: '100%', overflow: 'hidden' }}>
             <Box
               sx={{
                 flex: sidebarOpen ? `0 0 calc(100% - ${sidebarWidth}px)` : 1,
@@ -269,6 +257,7 @@ export const BrainstormLayout = ({
                   easing: theme.transitions.easing.sharp,
                   duration: theme.transitions.duration.standard,
                 }),
+                overflow: 'hidden',
               }}
             >
               {mainContent}
@@ -293,11 +282,7 @@ export const BrainstormLayout = ({
                   }}
                 >
                   <Tooltip title={t('brainstorm.zoomIn')}>
-                    <IconButton
-                      onClick={onZoomIn}
-                      size="small"
-                      aria-label={t('brainstorm.zoomIn')}
-                    >
+                    <IconButton onClick={onZoomIn} size="small" aria-label={t('brainstorm.zoomIn')}>
                       <ZoomInIcon />
                     </IconButton>
                   </Tooltip>
@@ -331,12 +316,14 @@ export const BrainstormLayout = ({
                   borderLeft: `1px solid ${theme.palette.divider}`,
                   display: 'flex',
                   flexDirection: 'column',
+                  overflow: 'hidden',
+                  flexShrink: 0,
                 }}
                 id="sidebar-panel"
                 aria-label={t('common.sidebar')}
                 role="complementary"
               >
-                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', flexShrink: 0 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Tabs
                       value={sidebarTab}
@@ -376,7 +363,7 @@ export const BrainstormLayout = ({
           display: 'flex',
           flexDirection: 'column',
           gap: 2,
-          zIndex: 1000,
+          zIndex: theme.zIndex.fab,
           transition: theme.transitions.create('right', {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.standard,
@@ -405,7 +392,9 @@ export const BrainstormLayout = ({
               color="default"
               size="medium"
               onClick={toggleFullscreen}
-              aria-label={isFullscreen ? t('brainstorm.exitFullscreen') : t('brainstorm.fullscreen')}
+              aria-label={
+                isFullscreen ? t('brainstorm.exitFullscreen') : t('brainstorm.fullscreen')
+              }
               aria-pressed={isFullscreen}
             >
               {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
@@ -450,3 +439,4 @@ export const BrainstormLayout = ({
     </Box>
   );
 };
+

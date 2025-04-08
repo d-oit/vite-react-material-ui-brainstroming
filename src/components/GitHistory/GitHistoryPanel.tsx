@@ -228,7 +228,7 @@ export const GitHistoryPanel = ({ project, onProjectUpdate }: GitHistoryPanelPro
             {t('common.cancel')}
           </Button>
           <Button
-            onClick={handleCommit}
+            onClick={() => void handleCommit()}
             variant="contained"
             disabled={loading || !commitMessage.trim()}
             startIcon={loading ? <CircularProgress size={20} /> : <SaveIcon />}

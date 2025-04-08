@@ -60,7 +60,7 @@ export const ProjectArchivePanel: React.FC<ProjectArchivePanelProps> = ({ onRefr
   };
 
   useEffect(() => {
-    loadArchivedProjects();
+    void loadArchivedProjects();
   }, []);
 
   const handleUnarchive = async (projectId: string) => {
@@ -221,7 +221,7 @@ export const ProjectArchivePanel: React.FC<ProjectArchivePanelProps> = ({ onRefr
         <DialogActions>
           <Button onClick={() => setConfirmDialogOpen(false)}>Cancel</Button>
           <Button
-            onClick={handleConfirmAction}
+            onClick={() => void handleConfirmAction()}
             color={actionType === 'delete' ? 'error' : 'primary'}
             // Removed autoFocus for accessibility
           >

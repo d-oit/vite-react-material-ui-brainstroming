@@ -57,7 +57,7 @@ export const ProjectHistoryPanel: React.FC<ProjectHistoryPanelProps> = ({
       }
     };
 
-    loadHistory();
+    void loadHistory();
   }, [projectId, limit]);
 
   const getActionIcon = (action: string) => {

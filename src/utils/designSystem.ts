@@ -1,6 +1,6 @@
 /**
  * Design System Utilities
- * 
+ *
  * This file contains utilities for working with the design system,
  * including theme helpers, spacing utilities, and responsive design tools.
  */
@@ -68,10 +68,17 @@ export const ZIndex = {
   BACKGROUND: -1,
   DEFAULT: 0,
   CONTENT: 1,
-  OVERLAY: 10,
-  MODAL: 100,
-  TOOLTIP: 1000,
-  NOTIFICATION: 1100,
+  CANVAS: 5,
+  TOOLBAR: 10,
+  CONTROLS: 20,
+  OVERLAY: 50,
+  DRAWER: 1200,
+  MODAL: 1300,
+  TOOLTIP: 1400,
+  NOTIFICATION: 1500,
+  POPOVER: 1600,
+  SNACKBAR: 1700,
+  FAB: 1800,
 };
 
 /**
@@ -143,7 +150,9 @@ export function getResponsiveStyles(styles: {
 
   Object.entries(breakpointStyles).forEach(([breakpoint, style]) => {
     if (style) {
-      result[`@media (min-width: ${Breakpoints[breakpoint.toUpperCase() as keyof typeof Breakpoints]}px)`] = style;
+      result[
+        `@media (min-width: ${Breakpoints[breakpoint.toUpperCase() as keyof typeof Breakpoints]}px)`
+      ] = style;
     }
   });
 
@@ -164,11 +173,7 @@ export function getColorWithOpacity(color: string, opacity: number): string {
       const formattedHex = hex.replace(shorthandRegex, (_, r, g, b) => r + r + g + g + b + b);
       const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(formattedHex);
       return result
-        ? [
-            parseInt(result[1], 16),
-            parseInt(result[2], 16),
-            parseInt(result[3], 16),
-          ]
+        ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)]
         : [0, 0, 0];
     };
 

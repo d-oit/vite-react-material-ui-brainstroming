@@ -228,7 +228,7 @@ test.describe('Project Management', () => {
       await page.waitForTimeout(1000);
 
       // Verify that we're back on the projects page
-      await expect(page.url()).toContain('/projects');
+      expect(page.url()).toContain('/projects');
 
       // Verify that the project is no longer visible
       await expect(page.getByText(projectName)).not.toBeVisible();

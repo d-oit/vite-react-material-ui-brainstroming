@@ -196,7 +196,7 @@ export const NetworkInfoDialog: React.FC<NetworkInfoDialogProps> = ({ open, onCl
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h6">Network Status</Typography>
           <Tooltip title="Refresh network status">
-            <IconButton onClick={handleRefresh} size="small">
+            <IconButton onClick={() => void handleRefresh()} size="small">
               <RefreshIcon />
             </IconButton>
           </Tooltip>
@@ -370,7 +370,7 @@ export const NetworkInfoDialog: React.FC<NetworkInfoDialogProps> = ({ open, onCl
       </DialogContent>
       <DialogActions>
         {offlineService.getPendingOperationsCount() > 0 && isOnline && (
-          <Button onClick={() => offlineService.processSyncQueue()} color="primary">
+          <Button onClick={() => void offlineService.processSyncQueue()} color="primary">
             Sync Now
           </Button>
         )}

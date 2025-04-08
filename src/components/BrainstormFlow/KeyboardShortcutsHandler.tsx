@@ -357,7 +357,7 @@ export const KeyboardShortcutsHandler: React.FC<KeyboardShortcutsHandlerProps> =
 
   // Group shortcuts by category
   const groupedShortcuts = shortcuts.reduce<Record<string, KeyboardShortcut[]>>((acc, shortcut) => {
-    if (!acc[shortcut.category]) {
+    if (acc[shortcut.category] === undefined) {
       acc[shortcut.category] = [];
     }
     acc[shortcut.category].push(shortcut);

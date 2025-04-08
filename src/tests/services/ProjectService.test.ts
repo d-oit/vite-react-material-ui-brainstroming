@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-import gitService from '../../services/GitService';
+import _gitService from '../../services/GitService';
 import indexedDBService from '../../services/IndexedDBService';
 import loggerService from '../../services/LoggerService';
-import offlineService from '../../services/OfflineService';
+import _offlineService from '../../services/OfflineService';
 import { ProjectService } from '../../services/ProjectService';
-import s3Service from '../../services/S3Service';
+import _s3Service from '../../services/S3Service';
 import type { Project, ProjectHistoryEntry } from '../../types';
 import { ProjectTemplate } from '../../types/project';
 

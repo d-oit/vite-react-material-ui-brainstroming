@@ -23,7 +23,7 @@ import {
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { AppShell } from '../components/Layout/AppShell';
+import AppShell from '../components/Layout/AppShell';
 import { useI18n } from '../contexts/I18nContext';
 import { projectTemplates, createProjectFromTemplate } from '../data/projectTemplates';
 import projectService from '../services/ProjectService';

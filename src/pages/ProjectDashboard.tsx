@@ -3,7 +3,7 @@ import { Box, Container, Paper, Tabs, Tab, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { AppShell } from '../components/Layout/AppShell';
+import AppShell from '../components/Layout/AppShell';
 import ProjectArchivePanel from '../components/ProjectArchive/ProjectArchivePanel';
 import ProjectList from '../components/ProjectList/ProjectList';
 import type { Project } from '../types';

@@ -98,7 +98,7 @@ describe('LoggerService', () => {
 
       // Override the implementation for this test
       const originalLog = loggerService.log;
-      loggerService.log = vi.fn().mockImplementation(async (level, message, meta) => {
+      loggerService.log = vi.fn().mockImplementation(async (level, message, _meta) => {
         if (level === 'error') {
           await indexedDBService.log(level, message, expect.any(Object));
         }
@@ -129,7 +129,7 @@ describe('LoggerService', () => {
       loggerService.configure({ enabled: false });
 
       // Call the method
-      loggerService.info('Test message');
+      void loggerService.info('Test message');
 
       // Verify that nothing was logged
       expect(indexedDBService.log).not.toHaveBeenCalled();
@@ -154,7 +154,7 @@ describe('LoggerService', () => {
       });
 
       // Call the method
-      const logs = await loggerService.getLogs();
+      const _logs = await loggerService.getLogs();
 
       // Verify the result
       expect(indexedDBService.getLogs).toHaveBeenCalledWith(undefined, 100);
@@ -179,7 +179,7 @@ describe('LoggerService', () => {
       });
 
       // Call the method
-      const logs = await loggerService.getLogs('error');
+      const _logs = await loggerService.getLogs('error');
 
       // Verify the result
       expect(indexedDBService.getLogs).toHaveBeenCalledWith('error', 100);
@@ -204,7 +204,7 @@ describe('LoggerService', () => {
       });
 
       // Call the method
-      const logs = await loggerService.getLogs(undefined, 10);
+      const _logs = await loggerService.getLogs(undefined, 10);
 
       // Verify the result
       expect(indexedDBService.getLogs).toHaveBeenCalledWith(undefined, 10);
@@ -311,7 +311,7 @@ describe('LoggerService', () => {
 
       // Call the method
       // Using log method directly to avoid testing-library/no-debugging-utils warning
-      loggerService.log('debug', 'Debug message', { category: 'test' });
+      void loggerService.log('debug', 'Debug message', { category: 'test' });
 
       // Verify the result
       expect(logSpy).toHaveBeenCalledWith('debug', 'Debug message', { category: 'test' });
@@ -322,7 +322,7 @@ describe('LoggerService', () => {
       const logSpy = vi.spyOn(loggerService, 'log');
 
       // Call the method
-      loggerService.info('Info message', { category: 'test' });
+      void loggerService.info('Info message', { category: 'test' });
 
       // Verify the result
       expect(logSpy).toHaveBeenCalledWith('info', 'Info message', { category: 'test' });
@@ -333,7 +333,7 @@ describe('LoggerService', () => {
       const logSpy = vi.spyOn(loggerService, 'log');
 
       // Call the method
-      loggerService.warn('Warning message', { category: 'test' });
+      void loggerService.warn('Warning message', { category: 'test' });
 
       // Verify the result
       expect(logSpy).toHaveBeenCalledWith('warn', 'Warning message', { category: 'test' });
@@ -345,7 +345,7 @@ describe('LoggerService', () => {
 
       // Call the method
       const error = new Error('Test error');
-      loggerService.error('Error message', error);
+      void loggerService.error('Error message', error);
 
       // Verify the result
       // The error object is transformed in the error method, so we need to check differently

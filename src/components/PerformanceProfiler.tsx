@@ -75,7 +75,7 @@ interface PerformanceProfilerProps {
 
 const PerformanceProfiler: React.FC<PerformanceProfilerProps> = ({
   open: externalOpen,
-  onClose
+  onClose,
 }) => {
   // Use internal state if no external open prop is provided
   const [internalOpen, setInternalOpen] = useState(false);

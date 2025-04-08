@@ -65,7 +65,7 @@ export default function GitHistoryViewer({ projectId }: GitHistoryViewerProps) {
       setLoading(false);
     };
 
-    loadHistory();
+    void loadHistory();
   }, [projectId]);
 
   const formatDate = (dateString: string) => {

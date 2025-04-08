@@ -595,7 +595,7 @@ export const ColorSchemeManager = () => {
         open={editDialogOpen}
         scheme={currentScheme}
         onClose={() => setEditDialogOpen(false)}
-        onSave={handleSaveScheme}
+        onSave={async (scheme) => { await handleSaveScheme(scheme); }}
       />
 
       {/* Delete Confirmation Dialog */}
@@ -603,7 +603,7 @@ export const ColorSchemeManager = () => {
         open={deleteDialogOpen}
         schemeName={currentScheme?.name || ''}
         onClose={() => setDeleteDialogOpen(false)}
-        onConfirm={handleConfirmDelete}
+        onConfirm={async () => { await handleConfirmDelete(); }}
       />
 
       {/* Snackbar for notifications */}

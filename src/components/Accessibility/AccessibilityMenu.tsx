@@ -36,8 +36,8 @@ interface AccessibilityMenuProps {
 
 export const AccessibilityMenu = ({
   position = 'bottom-left',
-  open = false,
-  onClose
+  _open = false,
+  onClose,
 }: AccessibilityMenuProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { settings, updateSettings } = useSettings();
