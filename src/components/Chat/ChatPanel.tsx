@@ -34,9 +34,10 @@ interface ChatPanelProps {
   projectId?: string;
   projectContext?: Record<string, unknown>;
   onAddNodes?: (nodes: NodeData[]) => void;
+  onClose?: () => void;
 }
 
-const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) => {
+const ChatPanel = ({ projectId, projectContext, onAddNodes, onClose }: ChatPanelProps) => {
   const { settings } = useSettings();
   const { t } = useI18n();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -589,3 +590,4 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
 
 export const MemoizedChatPanel = memo(ChatPanel);
 export { ChatPanel };
+
