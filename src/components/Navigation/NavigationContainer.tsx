@@ -105,6 +105,10 @@ const NavigationContainer = ({ open, onClose, ariaLabelledby }: NavigationContai
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
           }),
+          // Ensure drawer appears below AppBar but above main content
+          marginTop: '64px', // AppBar height
+          height: 'calc(100% - 64px)',
+          zIndex: theme.zIndex.appBar - 1, // Below AppBar but above main content
         },
       }}
       aria-labelledby={ariaLabelledby}

@@ -47,7 +47,7 @@ interface AccessibilityOverlayProps {
 
 export const AccessibilityOverlay: React.FC<AccessibilityOverlayProps> = ({ onApplySettings }) => {
   // Theme is used for styling references
-  const _theme = useTheme();
+  const theme = useTheme();
   const { t } = useI18n();
   const { accessibilityPreferences, updateAccessibilityPreferences } = useSettings();
 
@@ -111,9 +111,9 @@ export const AccessibilityOverlay: React.FC<AccessibilityOverlayProps> = ({ onAp
           onClick={handleOpen}
           sx={{
             position: 'fixed',
-            bottom: 16,
+            bottom: 80, // Adjusted to prevent overlap with bottom navigation
             right: 16,
-            zIndex: 1000,
+            zIndex: theme.zIndex.appBar - 2, // Below AppBar and drawer but above content
           }}
         >
           <AccessibilityIcon />

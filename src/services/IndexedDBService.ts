@@ -1,6 +1,26 @@
 import { NodeType } from '../types';
 import { encrypt, decrypt, isEncryptionAvailable } from '../utils/encryption';
 
+export interface Project {
+  id: string;
+  name: string;
+  description?: string;
+  isArchived?: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lastAccessedAt?: string;
+  tags?: string[];
+}
+
+export interface ProjectHistoryEntry {
+  id: string;
+  projectId: string;
+  action: string;
+  timestamp: string;
+  data?: unknown;
+  userId?: string;
+}
+
 // Database configuration
 const DB_NAME = 'doitBrainstorming';
 const DB_VERSION = 3; // Increased for schema migration
@@ -84,14 +104,15 @@ export class IndexedDBService {
   private encryptionPassword: string | null = null;
   private encryptionAvailable = isEncryptionAvailable();
   private fallbackStorage: Map<string, unknown> = new Map();
-  private isIndexedDBSupported = typeof window !== 'undefined' && !!window.indexedDB;
+  private isIndexedDBSupported =
+    typeof window !== 'undefined' && window.indexedDB !== undefined && window.indexedDB !== null;
 
   private constructor() {
     // Private constructor for singleton
   }
 
   public static getInstance(): IndexedDBService {
-    if (!IndexedDBService.instance) {
+    if (IndexedDBService.instance === undefined || IndexedDBService.instance === null) {
       IndexedDBService.instance = new IndexedDBService();
     }
     return IndexedDBService.instance;
@@ -166,7 +187,8 @@ export class IndexedDBService {
 
           // Set up error handler for database
           this.db.onerror = event => {
-            console.error('IndexedDB error:', (event.target as IDBDatabase).error);
+            const target = event.target as IDBOpenDBRequest;
+            console.error('IndexedDB error:', target.error?.message ?? 'Unknown error');
           };
 
           // Test database by writing and reading a small value
@@ -201,21 +223,19 @@ export class IndexedDBService {
     // This is a best-effort detection, not 100% reliable
     try {
       // Safari private mode detection
-      if (window.safari) {
-        const storage = window.localStorage;
-        if (storage) {
-          storage.setItem('test', '1');
-          storage.removeItem('test');
-        } else {
-          return true; // localStorage is null in Safari private mode
-        }
+      // Try to write to localStorage as a test
+      const storage = window.localStorage;
+      if (typeof storage === 'undefined' || storage === null) {
+        return true; // localStorage is not available, likely private mode
       }
+      storage.setItem('test', '1');
+      storage.removeItem('test');
 
       // Firefox private mode detection (old method)
       if (navigator.userAgent.includes('Firefox')) {
-        // In Firefox private mode, indexedDB.open returns null
-        const db = window.indexedDB.open('test');
-        if (!db) {
+        // In Firefox private mode, indexedDB.open returns undefined
+        const testDb = window.indexedDB.open('test');
+        if (typeof testDb === 'undefined') {
           return true;
         }
       }
@@ -277,7 +297,14 @@ export class IndexedDBService {
 
           request.onsuccess = () => {
             const data = request.result;
-            resolve(data && data.value && data.value.timestamp === testValue.timestamp);
+            resolve(
+              typeof data === 'object' &&
+                data !== null &&
+                typeof data.value === 'object' &&
+                data.value !== null &&
+                typeof data.value.timestamp === 'number' &&
+                data.value.timestamp === testValue.timestamp
+            );
           };
 
           request.onerror = () => {
@@ -603,9 +630,8 @@ export class IndexedDBService {
    */
   public async getColorScheme(id: string): Promise<ColorScheme | null> {
     const initialized = await this.init();
-
     // Use fallback storage if IndexedDB is not available
-    if (!initialized || !this.db) {
+    if (initialized === false || this.db === null) {
       console.warn(`Using fallback storage for getColorScheme(${id})`);
 
       // Try to get from fallback storage
@@ -635,14 +661,19 @@ export class IndexedDBService {
 
       return null;
     }
-
     return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+
       const transaction = this.db.transaction(STORES.COLORS, 'readonly');
       const store = transaction.objectStore(STORES.COLORS);
       const request = store.get(id);
 
       request.onsuccess = () => {
-        resolve(request.result || null);
+        const result = request.result;
+        resolve(result === undefined ? null : result);
       };
 
       request.onerror = event => {
@@ -689,10 +720,15 @@ export class IndexedDBService {
     }
 
     return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+
       const transaction = this.db.transaction(STORES.COLORS, 'readonly');
       const store = transaction.objectStore(STORES.COLORS);
       const index = store.index('isDefault');
-      const request = index.get(true);
+      const request = index.get(1); // Use 1 instead of true for IDBValidKey
 
       request.onsuccess = () => {
         resolve(request.result || null);

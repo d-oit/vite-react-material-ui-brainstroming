@@ -121,11 +121,11 @@ export class OfflineService {
     }
 
     // Do an immediate check
-    this.checkActualConnectivity();
+    void this.checkActualConnectivity();
 
     // Set up interval for regular checks
     this.networkCheckIntervalId = window.setInterval(() => {
-      this.checkActualConnectivity();
+      void this.checkActualConnectivity();
     }, this.networkCheckInterval);
   }
 
@@ -185,7 +185,7 @@ export class OfflineService {
       if (isOnline && !this.isOnline) {
         this.isOnline = true;
         this.notifyListeners();
-        this.processSyncQueue();
+        void this.processSyncQueue();
       } else if (!isOnline && this.isOnline) {
         // If we're now offline and we weren't before, update status
         this.isOnline = false;
@@ -193,7 +193,7 @@ export class OfflineService {
       }
 
       return isOnline;
-    } catch (_error) {
+    } catch {
       // If the request was aborted due to timeout, mark as unreliable
       // Check if it's a timeout error
       // const isTimeout = error instanceof DOMException && error.name === 'AbortError';
@@ -215,7 +215,7 @@ export class OfflineService {
   }
 
   public static getInstance(): OfflineService {
-    if (!OfflineService.instance) {
+    if (OfflineService.instance === undefined || OfflineService.instance === null) {
       OfflineService.instance = new OfflineService();
     }
     return OfflineService.instance;
@@ -271,7 +271,7 @@ export class OfflineService {
 
     // If we're online, try to sync immediately
     if (this.isOnline && !this.syncInProgress) {
-      this.processSyncQueue();
+      void this.processSyncQueue();
     }
   }
 
@@ -285,7 +285,7 @@ export class OfflineService {
 
     this.syncIntervalId = window.setInterval(() => {
       if (this.isOnline && !this.syncInProgress) {
-        this.processSyncQueue();
+        void this.processSyncQueue();
       }
     }, this.syncInterval);
   }
@@ -380,7 +380,9 @@ export class OfflineService {
 
       // If there are still operations in the queue, try again later
       if (this.syncQueue.length > 0 && this.isOnline) {
-        setTimeout(() => this.processSyncQueue(), 5000);
+        setTimeout(() => {
+          void this.processSyncQueue();
+        }, 5000);
       }
     }
   }
@@ -432,7 +434,7 @@ export class OfflineService {
 
       // If we're back online, process the sync queue
       if (this.isOnline) {
-        this.processSyncQueue();
+        void this.processSyncQueue();
       }
     }
   }
@@ -501,11 +503,15 @@ export class OfflineService {
     );
 
     // Determine if the connection is metered
-    if (
-      'connection' in navigator &&
-      'saveData' in (navigator as { connection: { saveData?: boolean } }).connection
-    ) {
-      this.currentNetworkStatus.isMetered = true;
+    if ('connection' in navigator) {
+      const connection = (navigator as { connection?: { saveData?: boolean } }).connection;
+      if (
+        connection !== undefined &&
+        connection !== null &&
+        typeof connection.saveData === 'boolean'
+      ) {
+        this.currentNetworkStatus.isMetered = connection.saveData;
+      }
     }
 
     // Determine reliability based on connection type and speed
@@ -516,10 +522,16 @@ export class OfflineService {
         this.currentNetworkStatus.effectiveType === '2g'
       ) {
         this.currentNetworkStatus.isReliable = false;
-      } else if (this.currentNetworkStatus.downlink && this.currentNetworkStatus.downlink < 0.5) {
+      } else if (
+        typeof this.currentNetworkStatus.downlink === 'number' &&
+        this.currentNetworkStatus.downlink < 0.5
+      ) {
         // Less than 0.5 Mbps is considered unreliable
         this.currentNetworkStatus.isReliable = false;
-      } else if (this.currentNetworkStatus.rtt && this.currentNetworkStatus.rtt > 1000) {
+      } else if (
+        typeof this.currentNetworkStatus.rtt === 'number' &&
+        this.currentNetworkStatus.rtt > 1000
+      ) {
         // RTT > 1000ms is considered unreliable
         this.currentNetworkStatus.isReliable = false;
       }
@@ -535,7 +547,7 @@ export class OfflineService {
     });
 
     // Dispatch a custom event for components that aren't directly connected
-    if (typeof window !== 'undefined' && window.dispatchEvent) {
+    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
       const event = new CustomEvent('network-status-change', {
         detail: { status: this.currentNetworkStatus },
       });
@@ -548,7 +560,7 @@ export class OfflineService {
    */
   private calculateSignalStrength(effectiveType: string, downlink?: number): number {
     // If no data available, return undefined
-    if (effectiveType === 'unknown' && !downlink) return 0;
+    if (effectiveType === 'unknown' && typeof downlink !== 'number') return 0;
 
     // Base signal strength on effective connection type
     switch (effectiveType) {
@@ -562,7 +574,7 @@ export class OfflineService {
         return 4;
       default:
         // Fallback to downlink-based calculation if available
-        if (downlink) {
+        if (typeof downlink === 'number') {
           if (downlink < 0.5) return 1; // Very slow
           if (downlink < 1) return 2; // Slow
           if (downlink < 5) return 3; // Medium

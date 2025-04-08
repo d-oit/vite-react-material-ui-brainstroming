@@ -27,8 +27,8 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 
-import { useThemeMode } from '@/hooks/useThemeMode';
-import { ThemeMode } from '@/types';
+import { useThemeMode } from '../../hooks/useThemeMode';
+import { ThemeMode } from '../../types';
 
 interface AppBarProps {
   title: string;
@@ -70,7 +70,7 @@ export const AppBar = ({ title, onMenuClick }: AppBarProps) => {
   return (
     <MuiAppBar
       position="fixed"
-      elevation={0}
+      elevation={4}
       sx={{
         borderBottom: `1px solid ${theme.palette.divider}`,
         backgroundColor: theme.palette.background.paper,
@@ -79,6 +79,8 @@ export const AppBar = ({ title, onMenuClick }: AppBarProps) => {
           easing: theme.transitions.easing.sharp,
           duration: theme.transitions.duration.leavingScreen,
         }),
+        zIndex: theme.zIndex.appBar, // Ensure AppBar is always on top
+        height: '64px', // Fixed height for consistency
       }}
     >
       <Toolbar>
@@ -266,20 +268,22 @@ export const AppBar = ({ title, onMenuClick }: AppBarProps) => {
             }}
             open={Boolean(anchorEl)}
             onClose={handleClose}
-            PaperProps={{
-              elevation: 2,
-              sx: {
-                minWidth: 180,
-                borderRadius: 2,
-                mt: 1,
-                '& .MuiMenuItem-root': {
-                  px: 2,
-                  py: 1,
-                  borderRadius: 1,
-                  mx: 0.5,
-                  my: 0.25,
-                  '&:hover': {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+            slotProps={{
+              paper: {
+                elevation: 2,
+                sx: {
+                  minWidth: 180,
+                  borderRadius: 2,
+                  mt: 1,
+                  '& .MuiMenuItem-root': {
+                    px: 2,
+                    py: 1,
+                    borderRadius: 1,
+                    mx: 0.5,
+                    my: 0.25,
+                    '&:hover': {
+                      backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                    },
                   },
                 },
               },
@@ -328,13 +332,15 @@ export const AppBar = ({ title, onMenuClick }: AppBarProps) => {
             }}
             open={Boolean(notificationsAnchorEl)}
             onClose={handleNotificationsClose}
-            PaperProps={{
-              elevation: 2,
-              sx: {
-                width: 320,
-                maxHeight: 400,
-                borderRadius: 2,
-                mt: 1,
+            slotProps={{
+              paper: {
+                elevation: 2,
+                sx: {
+                  width: 320,
+                  maxHeight: 400,
+                  borderRadius: 2,
+                  mt: 1,
+                },
               },
             }}
           >

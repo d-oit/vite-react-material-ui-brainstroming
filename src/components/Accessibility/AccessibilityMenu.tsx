@@ -132,18 +132,18 @@ export const AccessibilityMenu = ({ position = 'bottom-left' }: AccessibilityMen
     }
   };
 
-  // Position styles
+  // Position styles with adjustments to prevent overlap
   const getPositionStyles = () => {
     switch (position) {
       case 'top-right':
-        return { top: 16, right: 16 };
+        return { top: 80, right: 16 }; // Below AppBar
       case 'bottom-right':
-        return { bottom: 16, right: 16 };
+        return { bottom: 80, right: 16 }; // Above bottom navigation
       case 'top-left':
-        return { top: 16, left: 16 };
+        return { top: 80, left: 16 }; // Below AppBar
       case 'bottom-left':
       default:
-        return { bottom: 16, left: 16 };
+        return { bottom: 80, left: 16 }; // Above bottom navigation
     }
   };
 
@@ -246,9 +246,12 @@ export const AccessibilityMenu = ({ position = 'bottom-left' }: AccessibilityMen
             sx={{
               backgroundColor: theme.palette.background.paper,
               boxShadow: theme.shadows[3],
+              width: 40,
+              height: 40,
               '&:hover': {
                 backgroundColor: theme.palette.background.default,
               },
+              zIndex: theme.zIndex.appBar - 2, // Below AppBar and drawer but above content
             }}
           >
             <AccessibilityIcon />
@@ -269,10 +272,12 @@ export const AccessibilityMenu = ({ position = 'bottom-left' }: AccessibilityMen
           vertical: position.includes('top') ? 'top' : 'bottom',
           horizontal: position.includes('right') ? 'right' : 'left',
         }}
-        PaperProps={{
-          sx: {
-            width: 320,
-            p: 2,
+        slotProps={{
+          paper: {
+            sx: {
+              width: 320,
+              p: 2,
+            },
           },
         }}
       >

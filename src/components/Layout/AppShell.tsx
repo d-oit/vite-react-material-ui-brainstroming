@@ -195,7 +195,7 @@ export const AppShell = ({
 
       <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="body2" color="text.secondary">
-          v{import.meta.env.VITE_APP_VERSION || '1.0.0'}
+          {t('app.copyright', { year: new Date().getFullYear() }) || `© ${new Date().getFullYear()}`}
         </Typography>
         <IconButton onClick={onThemeToggle} size="small">
           {isDarkMode ? <LightIcon /> : <DarkIcon />}
@@ -219,6 +219,7 @@ export const AppShell = ({
               ? theme.palette.background.default
               : theme.palette.primary.main,
           backdropFilter: 'blur(8px)',
+          height: 64, // Fixed height for consistency
           ...(theme.palette.mode === 'light' && {
             boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
           }),
@@ -244,9 +245,24 @@ export const AppShell = ({
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
             }}
           >
             {title || t('app.title')}
+            {/* Version info moved to header for better visibility */}
+            <Typography
+              variant="caption"
+              component="span"
+              sx={{
+                opacity: 0.7,
+                display: { xs: 'none', sm: 'inline' },
+                ml: 1,
+              }}
+            >
+              v{import.meta.env.VITE_APP_VERSION || '1.0.0'}
+            </Typography>
           </Typography>
 
           {/* Network status icon in header */}
@@ -275,6 +291,8 @@ export const AppShell = ({
           sx={{
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
+              top: 64, // Position below app bar
+              height: 'calc(100% - 64px)', // Adjust height to account for app bar
             },
           }}
         >
@@ -292,6 +310,8 @@ export const AppShell = ({
             '& .MuiDrawer-paper': {
               width: 280,
               boxSizing: 'border-box',
+              top: 64, // Position below app bar
+              height: 'calc(100% - 64px)', // Adjust height to account for app bar
             },
           }}
         >

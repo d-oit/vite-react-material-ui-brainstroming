@@ -323,6 +323,10 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
           display: 'flex',
           flexDirection: 'column',
           gap: 2,
+          backgroundColor: theme =>
+            theme.palette.mode === 'dark'
+              ? theme.palette.background.default
+              : theme.palette.grey[50],
         }}
       >
         {messages.length === 0 && !nodeSuggestion ? (
@@ -461,7 +465,17 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
 
       <Divider />
 
-      <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+      <Box
+        sx={{
+          p: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1,
+          borderTop: 1,
+          borderColor: 'divider',
+          backgroundColor: theme => theme.palette.background.paper,
+        }}
+      >
         <TextField
           fullWidth
           placeholder={

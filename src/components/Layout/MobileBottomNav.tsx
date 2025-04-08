@@ -30,7 +30,7 @@ export const MobileBottomNav = ({ onMenuClick }: MobileBottomNavProps) => {
   };
 
   return (
-    <Box sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: theme.zIndex.appBar }}>
+    <Box sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: theme.zIndex.appBar - 1, height: '64px' }}>
       {/* Floating action button for quick create */}
       <Fab
         color="primary"
@@ -41,7 +41,7 @@ export const MobileBottomNav = ({ onMenuClick }: MobileBottomNavProps) => {
           top: -28,
           left: '50%',
           transform: 'translateX(-50%)',
-          zIndex: theme.zIndex.appBar + 1,
+          zIndex: theme.zIndex.appBar, // Same as AppBar to ensure it's above other elements
           boxShadow: theme.shadows[4],
           transition: theme.transitions.create(['transform', 'box-shadow'], {
             duration: '250ms',

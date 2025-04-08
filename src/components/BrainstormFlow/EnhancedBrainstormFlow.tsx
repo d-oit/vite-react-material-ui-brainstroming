@@ -949,18 +949,18 @@ const FlowContent = ({
         </ReactFlowComponents>
       </Suspense>
 
-      {/* Chat Panel */}
+      {/* Chat Panel - Repositioned to avoid overlaps */}
       <Box
         sx={{
           position: 'absolute',
           right: 16,
-          bottom: 16,
+          bottom: 80, // Increased to avoid overlap with controls
           width: showChat ? { xs: '90vw', sm: 350 } : 'auto',
-          height: showChat ? { xs: '70vh', sm: 500 } : 'auto',
+          height: showChat ? { xs: '60vh', sm: 450 } : 'auto', // Reduced height to avoid overlaps
           maxWidth: showChat ? { xs: 'calc(100vw - 32px)', sm: 350 } : 'auto',
-          maxHeight: showChat ? { xs: 'calc(100vh - 120px)', sm: 500 } : 'auto',
+          maxHeight: showChat ? { xs: 'calc(100vh - 160px)', sm: 450 } : 'auto', // Increased bottom margin
           transition: 'all 0.3s ease',
-          zIndex: 5,
+          zIndex: 950, // Increased to be above other elements but below FABs
           display: 'flex',
           flexDirection: 'column',
         }}
@@ -1243,18 +1243,18 @@ const FlowContent = ({
         }}
       />
 
-      {/* Enhanced Mini Map */}
+      {/* Enhanced Mini Map - Repositioned to avoid overlaps */}
       {showMiniMap && (
         <Box
           sx={{
             position: 'absolute',
-            bottom: 20,
+            bottom: 80, // Increased to avoid overlap with controls
             left: 20,
             zIndex: 5,
             width: 200,
             height: 150,
             border: `1px solid ${theme.palette.divider}`,
-            borderRadius: 1,
+            borderRadius: 8, // Increased for better visual appearance
             overflow: 'hidden',
             boxShadow: theme.shadows[3],
           }}

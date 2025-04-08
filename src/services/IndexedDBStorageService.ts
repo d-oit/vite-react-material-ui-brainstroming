@@ -15,7 +15,7 @@ interface PendingChange {
   id: string;
   type: 'create' | 'update' | 'delete';
   timestamp: number;
-  data: any;
+  data: Project | { id: string }; // Can be a full project or just an ID for delete
   retryCount: number;
 }
 
@@ -28,13 +28,16 @@ class IndexedDBStorageService implements StorageManager {
   private readonly PENDING_CHANGES_STORE = 'pendingChanges';
 
   private constructor() {
-    this.initDB().catch(error => {
+    void this.initDB().catch(error => {
       loggerService.error('Failed to initialize IndexedDB', error);
     });
   }
 
   public static getInstance(): IndexedDBStorageService {
-    if (IndexedDBStorageService.instance == null) {
+    if (
+      IndexedDBStorageService.instance === undefined ||
+      IndexedDBStorageService.instance === null
+    ) {
       IndexedDBStorageService.instance = new IndexedDBStorageService();
     }
     return IndexedDBStorageService.instance;
@@ -105,7 +108,14 @@ class IndexedDBStorageService implements StorageManager {
       return new Promise((resolve, reject) => {
         const request = store.get(id);
         request.onerror = () => reject(new Error('Failed to get project'));
-        request.onsuccess = () => resolve(request.result);
+        request.onsuccess = () => {
+          const result = request.result;
+          if (result === undefined) {
+            reject(new Error(`Project with ID ${id} not found`));
+          } else {
+            resolve(result as Project);
+          }
+        };
       });
     } catch (error) {
       loggerService.error(
@@ -122,7 +132,10 @@ class IndexedDBStorageService implements StorageManager {
       return new Promise((resolve, reject) => {
         const request = store.getAll();
         request.onerror = () => reject(new Error('Failed to list projects'));
-        request.onsuccess = () => resolve(request.result);
+        request.onsuccess = () => {
+          const result = request.result;
+          resolve(result === undefined ? [] : (result as Project[]));
+        };
       });
     } catch (error) {
       loggerService.error(
@@ -175,7 +188,10 @@ class IndexedDBStorageService implements StorageManager {
       const changes = await new Promise<PendingChange[]>((resolve, reject) => {
         const request = store.getAll();
         request.onerror = () => reject(new Error('Failed to get pending changes'));
-        request.onsuccess = () => resolve(request.result);
+        request.onsuccess = () => {
+          const result = request.result;
+          resolve(result === undefined ? [] : (result as PendingChange[]));
+        };
       });
 
       for (const change of changes) {
@@ -183,10 +199,10 @@ class IndexedDBStorageService implements StorageManager {
           switch (change.type) {
             case 'create':
             case 'update':
-              await this.saveProject(change.data);
+              await this.saveProject(change.data as Project);
               break;
             case 'delete':
-              await this.deleteProject(change.id);
+              await this.deleteProject((change.data as { id: string }).id);
               break;
           }
 
@@ -204,7 +220,9 @@ class IndexedDBStorageService implements StorageManager {
           // Increment retry count
           change.retryCount++;
           if (change.retryCount <= 3) {
-            await this.queueChange(change);
+            void this.queueChange(change).catch(queueError => {
+              loggerService.error(`Failed to re-queue change for project ${change.id}`, queueError);
+            });
           } else {
             loggerService.error(`Giving up on change for project ${change.id} after 3 retries`);
           }

@@ -7,6 +7,8 @@ import {
   ZoomIn as ZoomInIcon,
   ZoomOut as ZoomOutIcon,
   FitScreen as FitScreenIcon,
+  Fullscreen as FullscreenIcon,
+  FullscreenExit as FullscreenExitIcon,
 } from '@mui/icons-material';
 import {
   Box,
@@ -20,6 +22,8 @@ import {
   Fab,
   Zoom,
   Tooltip,
+  Badge,
+  CircularProgress,
 } from '@mui/material';
 import type { ReactNode } from 'react';
 import { useState, useEffect } from 'react';
@@ -73,11 +77,14 @@ export const BrainstormLayout = ({
   const theme = useTheme();
   const { t } = useI18n();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
 
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [sidebarTab, setSidebarTab] = useState(0);
   const [showControls, setShowControls] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Auto-hide controls after 3 seconds of inactivity
   useEffect(() => {
@@ -98,6 +105,21 @@ export const BrainstormLayout = ({
     setSidebarOpen(prev => !prev);
   };
 
+  const toggleFullscreen = () => {
+    setIsFullscreen(prev => !prev);
+  };
+
+  const handleSave = () => {
+    if (onSave) {
+      setIsSaving(true);
+      // Simulate saving process
+      setTimeout(() => {
+        onSave();
+        setIsSaving(false);
+      }, 800);
+    }
+  };
+
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setSidebarTab(newValue);
   };
@@ -109,8 +131,17 @@ export const BrainstormLayout = ({
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100%',
+        height: isFullscreen ? '100vh' : '100%',
         position: 'relative',
+        ...(isFullscreen && {
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: theme.zIndex.drawer + 1,
+          backgroundColor: theme.palette.background.default,
+        }),
       }}
       onMouseMove={handleMouseMove}
     >
@@ -143,6 +174,8 @@ export const BrainstormLayout = ({
                   boxShadow: theme.shadows[3],
                   p: 0.5,
                   zIndex: 900,
+                  // Ensure it doesn't overlap with the minimap
+                  marginLeft: 60,
                 }}
               >
                 <IconButton onClick={onZoomIn} size="small">
@@ -165,7 +198,10 @@ export const BrainstormLayout = ({
                 '& .MuiDrawer-paper': {
                   width: '80%',
                   maxWidth: 400,
+                  height: isFullscreen ? '100vh' : 'calc(100vh - 64px)', // Adjust for app bar
+                  top: isFullscreen ? 0 : 64, // Position below app bar when not in fullscreen
                 },
+                zIndex: theme.zIndex.drawer,
               }}
             >
               <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -202,7 +238,7 @@ export const BrainstormLayout = ({
             >
               {mainContent}
 
-              {/* Desktop zoom controls */}
+              {/* Desktop zoom controls - repositioned to avoid overlap with minimap */}
               <Zoom in={showControls}>
                 <Box
                   sx={{
@@ -217,6 +253,8 @@ export const BrainstormLayout = ({
                     boxShadow: theme.shadows[3],
                     p: 0.5,
                     zIndex: 900, // Ensure it's below FABs but above the canvas
+                    // Ensure it doesn't overlap with the minimap
+                    marginLeft: isLargeScreen ? 120 : isTablet ? 80 : 0,
                   }}
                 >
                   <Tooltip title={t('brainstorm.zoomIn')}>
@@ -279,33 +317,40 @@ export const BrainstormLayout = ({
         )}
       </Paper>
 
-      {/* Floating action buttons - repositioned to avoid overlap */}
+      {/* Action buttons - repositioned to avoid overlap with chat panel */}
       <Box
         sx={{
           position: 'fixed',
           bottom: 16,
-          right: 16,
+          right: sidebarOpen ? `calc(${sidebarWidth}px + 24px)` : 16, // Adjust position based on sidebar
           display: 'flex',
           flexDirection: 'column',
           gap: 2,
           zIndex: 1000,
+          transition: theme.transitions.create('right', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.standard,
+          }),
         }}
       >
         {onSave && (
-          <Tooltip title={t('common.save')}>
-            <Fab color="primary" size="medium" onClick={onSave}>
-              <SaveIcon />
+          <Tooltip title={isSaving ? t('common.saving') : t('common.save')}>
+            <Fab
+              color="primary"
+              size="medium"
+              onClick={handleSave}
+              disabled={isSaving}
+            >
+              {isSaving ? <CircularProgress size={24} color="inherit" /> : <SaveIcon />}
             </Fab>
           </Tooltip>
         )}
 
-        {!sidebarOpen && (
-          <Tooltip title={t('chat.openAssistant')}>
-            <Fab color="secondary" size="medium" onClick={toggleSidebar}>
-              <ChatIcon />
-            </Fab>
-          </Tooltip>
-        )}
+        <Tooltip title={isFullscreen ? t('brainstorm.exitFullscreen') : t('brainstorm.fullscreen')}>
+          <Fab color="default" size="medium" onClick={toggleFullscreen}>
+            {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+          </Fab>
+        </Tooltip>
 
         {/* Add button for creating new nodes */}
         <Tooltip title={t('brainstorm.addNode')}>
@@ -313,6 +358,17 @@ export const BrainstormLayout = ({
             <AddIcon />
           </Fab>
         </Tooltip>
+
+        {/* Chat button - only show when sidebar is closed */}
+        {!sidebarOpen && (
+          <Tooltip title={t('chat.openAssistant')}>
+            <Fab color="secondary" size="medium" onClick={toggleSidebar}>
+              <Badge color="error" variant="dot" invisible={true}>
+                <ChatIcon />
+              </Badge>
+            </Fab>
+          </Tooltip>
+        )}
       </Box>
     </Box>
   );

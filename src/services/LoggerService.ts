@@ -37,9 +37,16 @@ export class LoggerService {
   private defaultContext: Partial<StructuredLogContext> = {};
   private consoleLoggingEnabled: boolean = true;
 
+  private pendingLogs: Array<{
+    level: LogLevel;
+    message: string;
+    context?: Partial<StructuredLogContext>;
+  }> = [];
+  private isInitialized = false;
+
   private constructor() {
     // Get application version from environment
-    this.applicationVersion = import.meta.env.VITE_PROJECT_VERSION || '0.1.0';
+    this.applicationVersion = import.meta.env.VITE_PROJECT_VERSION ?? '0.1.0';
 
     // Generate a session ID
     this.sessionId = crypto.randomUUID();
@@ -49,6 +56,16 @@ export class LoggerService {
       sessionId: this.sessionId,
       appVersion: this.applicationVersion,
     };
+  }
+
+  /**
+   * Initialize the logger service
+   * @returns Promise that resolves when initialization is complete
+   */
+  public async initialize(): Promise<void> {
+    if (this.isInitialized) {
+      return;
+    }
 
     // Set up periodic log cleanup
     this.setupLogCleanup();
@@ -56,8 +73,18 @@ export class LoggerService {
     // Set up global error handlers
     this.setupGlobalErrorHandlers();
 
-    // Log application start
-    this.info('Application started', { category: 'app' });
+    this.isInitialized = true;
+
+    // Process any pending logs
+    while (this.pendingLogs.length > 0) {
+      const log = this.pendingLogs.shift();
+      if (log) {
+        await this.log(log.level, log.message, log.context);
+      }
+    }
+
+    // Log application start after initialization
+    await this.info('Application started', { category: 'app' });
   }
 
   /**
@@ -71,12 +98,12 @@ export class LoggerService {
         const message = error instanceof Error ? error.message : String(error);
         const stack = error instanceof Error ? error.stack : undefined;
 
-        this.error('Unhandled promise rejection', {
+        void this.error('Unhandled promise rejection', undefined, {
           category: 'app',
-          error: message,
-          stack,
-          type: 'unhandledrejection',
-        });
+          errorMessage: message,
+          errorStack: stack,
+          errorType: 'unhandledrejection',
+        }).catch(console.error);
       });
 
       // Handle uncaught errors
@@ -86,15 +113,15 @@ export class LoggerService {
           return;
         }
 
-        this.error('Uncaught error', {
+        void this.error('Uncaught error', event.error, {
           category: 'app',
-          error: event.message,
-          filename: event.filename,
-          lineno: event.lineno,
-          colno: event.colno,
-          stack: event.error?.stack,
-          type: 'uncaughterror',
-        });
+          errorLocation: {
+            filename: event.filename,
+            lineno: event.lineno,
+            colno: event.colno,
+          },
+          errorType: 'uncaughterror',
+        }).catch(console.error);
       });
     }
   }
@@ -124,7 +151,7 @@ export class LoggerService {
   }
 
   public static getInstance(): LoggerService {
-    if (!LoggerService.instance) {
+    if (LoggerService.instance === undefined || LoggerService.instance === null) {
       LoggerService.instance = new LoggerService();
     }
     return LoggerService.instance;
@@ -181,8 +208,8 @@ export class LoggerService {
    * @param message Log message
    * @param context Additional context
    */
-  public debug(message: string, context?: Partial<StructuredLogContext>): void {
-    this.log('debug', message, context);
+  public async debug(message: string, context?: Partial<StructuredLogContext>): Promise<void> {
+    await this.log('debug', message, context);
   }
 
   /**
@@ -190,8 +217,8 @@ export class LoggerService {
    * @param message Log message
    * @param context Additional context
    */
-  public info(message: string, context?: Partial<StructuredLogContext>): void {
-    this.log('info', message, context);
+  public async info(message: string, context?: Partial<StructuredLogContext>): Promise<void> {
+    await this.log('info', message, context);
   }
 
   /**
@@ -199,8 +226,8 @@ export class LoggerService {
    * @param message Log message
    * @param context Additional context
    */
-  public warn(message: string, context?: Partial<StructuredLogContext>): void {
-    this.log('warn', message, context);
+  public async warn(message: string, context?: Partial<StructuredLogContext>): Promise<void> {
+    await this.log('warn', message, context);
   }
 
   /**
@@ -209,7 +236,11 @@ export class LoggerService {
    * @param error Error object
    * @param context Additional context
    */
-  public error(message: string, error?: Error, context?: Partial<StructuredLogContext>): void {
+  public async error(
+    message: string,
+    error?: Error,
+    context?: Partial<StructuredLogContext>
+  ): Promise<void> {
     const errorContext = error
       ? {
           ...context,
@@ -219,7 +250,7 @@ export class LoggerService {
         }
       : context;
 
-    this.log('error', message, errorContext);
+    await this.log('error', message, errorContext);
   }
 
   /**
@@ -228,7 +259,11 @@ export class LoggerService {
    * @param error Error object
    * @param context Additional context
    */
-  public critical(message: string, error?: Error, context?: Partial<StructuredLogContext>): void {
+  public async critical(
+    message: string,
+    error?: Error,
+    context?: Partial<StructuredLogContext>
+  ): Promise<void> {
     const errorContext = error
       ? {
           ...context,
@@ -238,7 +273,7 @@ export class LoggerService {
         }
       : context;
 
-    this.log('critical', message, errorContext);
+    await this.log('critical', message, errorContext);
   }
 
   /**
@@ -247,11 +282,25 @@ export class LoggerService {
    * @param message Log message
    * @param context Additional context
    */
-  public log(level: LogLevel, message: string, context?: Partial<StructuredLogContext>): void {
+  public async log(
+    level: LogLevel,
+    message: string,
+    context?: Partial<StructuredLogContext>
+  ): Promise<void> {
     if (!this.isEnabled) return;
 
     // Check if we should log this level
     if (!this.shouldLogLevel(level)) return;
+
+    // If not initialized, queue the log
+    if (!this.isInitialized) {
+      this.pendingLogs.push({ level, message, context });
+      // Log to console even if not initialized
+      if (this.consoleLoggingEnabled) {
+        this.logToConsole(level, message, this.mergeContext(context));
+      }
+      return;
+    }
 
     // Merge with default context
     const mergedContext = this.mergeContext(context);
@@ -261,16 +310,20 @@ export class LoggerService {
       this.logToConsole(level, message, mergedContext);
     }
 
-    // Log to IndexedDB
-    this.logToIndexedDB(level, message, mergedContext);
+    try {
+      // Log to IndexedDB
+      await this.logToIndexedDB(level, message, mergedContext);
 
-    // If we have a remote endpoint and it's an error or critical, try to send it immediately
-    if (
-      this.remoteLoggingEndpoint &&
-      (level === 'error' || level === 'critical') &&
-      offlineService.getOnlineStatus()
-    ) {
-      this.sendLogToRemote(level, message, mergedContext);
+      // If we have a remote endpoint and it's an error or critical, try to send it immediately
+      if (
+        this.remoteLoggingEndpoint &&
+        (level === 'error' || level === 'critical') &&
+        offlineService.getOnlineStatus()
+      ) {
+        await this.sendLogToRemote(level, message, mergedContext);
+      }
+    } catch (error) {
+      console.error('Failed to log:', error);
     }
   }
 
@@ -283,12 +336,11 @@ export class LoggerService {
   public async getLogs(level?: LogLevel, limit = 100): Promise<LogEntry[]> {
     try {
       const initialized = await indexedDBService.init();
-      if (initialized) {
+      if (initialized === true) {
         return await indexedDBService.getLogs(level, limit);
-      } else {
-        console.warn('IndexedDB not available, returning empty logs array');
-        return [];
       }
+      console.warn('IndexedDB not available, returning empty logs array');
+      return [];
     } catch (error) {
       console.error('Failed to get logs from IndexedDB:', error);
       return [];
@@ -303,8 +355,8 @@ export class LoggerService {
   public async clearLogs(olderThan?: Date): Promise<void> {
     try {
       const initialized = await indexedDBService.init();
-      if (initialized) {
-        await indexedDBService.clearLogs(olderThan);
+      if (initialized === true) {
+        void (await indexedDBService.clearLogs(olderThan));
       } else {
         console.warn('IndexedDB not available, skipping log cleanup');
       }
@@ -333,7 +385,7 @@ export class LoggerService {
       // Combine logs
       const logs = [...errorLogs, ...warnLogs, ...infoLogs];
 
-      if (logs.length === 0) {
+      if (!Array.isArray(logs) || logs.length === 0) {
         return;
       }
 
@@ -425,13 +477,13 @@ export class LoggerService {
   ): Promise<void> {
     try {
       const initialized = await indexedDBService.init();
-      if (initialized) {
-        await indexedDBService.log(level, message, {
+      if (initialized === true) {
+        void (await indexedDBService.log(level, message, {
           ...context,
           appVersion: this.applicationVersion,
           userAgent: navigator.userAgent,
           url: window.location.href,
-        });
+        }));
       } else {
         // If IndexedDB is not available, just log to console
         if (level === 'error' || level === 'warn') {
@@ -502,7 +554,7 @@ export class LoggerService {
         clearTimeout(timeoutId);
 
         // Check if the response is successful
-        if (!response.ok) {
+        if (response.ok !== true) {
           throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
         }
 
@@ -595,7 +647,7 @@ export class LoggerService {
           clearTimeout(timeoutId);
 
           // Check if the response is successful
-          if (!response.ok) {
+          if (response.ok !== true) {
             throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
           }
 
@@ -651,7 +703,7 @@ export class LoggerService {
 
     // Also clean up logs on startup
     const cutoffDate = new Date(Date.now() - this.maxLogAge);
-    this.clearLogs(cutoffDate).catch(error => {
+    void this.clearLogs(cutoffDate).catch(error => {
       console.error('Failed to clean up old logs on startup:', error);
     });
   }

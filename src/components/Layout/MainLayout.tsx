@@ -23,7 +23,7 @@ export const MainLayout = ({ children, title = 'd.o.it.brainstorming' }: MainLay
   const drawerWidth = 240;
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
       <CssBaseline />
 
       <AppBar title={title} onMenuClick={handleDrawerToggle} />
@@ -35,16 +35,19 @@ export const MainLayout = ({ children, title = 'd.o.it.brainstorming' }: MainLay
         sx={{
           flexGrow: 1,
           p: 3,
-          width: { sm: `calc(100% - ${drawerOpen ? drawerWidth : 0}px)` },
-          ml: { sm: drawerOpen ? `${drawerWidth}px` : 0 },
+          width: '100%', // Always take full width since drawer overlays content
           transition: theme.transitions.create(['margin', 'width'], {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
           }),
           pb: isMobile ? 7 : 3, // Add padding at the bottom for mobile navigation
+          mt: '64px', // Match AppBar height
+          height: 'calc(100vh - 64px)', // Full height minus AppBar
+          overflow: 'auto', // Enable scrolling for content
+          position: 'relative', // For proper z-index stacking
+          zIndex: 1, // Lower than AppBar and Drawer
         }}
       >
-        <Toolbar /> {/* This adds space below the AppBar */}
         {children}
       </Box>
 

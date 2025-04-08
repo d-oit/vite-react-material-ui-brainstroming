@@ -18,7 +18,21 @@ const FlowToolbar = memo(
     const { t } = useI18n();
 
     return (
-      <Box sx={{ position: 'absolute', top: 10, right: 10, zIndex: 4 }}>
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 10,
+          right: 10,
+          zIndex: 4,
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 1,
+          backgroundColor: theme => theme.palette.background.paper,
+          borderRadius: 2,
+          padding: 0.5,
+          boxShadow: theme => theme.shadows[2],
+        }}
+      >
         <Tooltip title={t('brainstorm.zoomIn')}>
           <IconButton onClick={onZoomIn} size="large">
             <ZoomIn />

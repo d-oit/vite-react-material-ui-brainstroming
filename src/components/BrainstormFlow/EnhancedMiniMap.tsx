@@ -72,18 +72,18 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
   const defaultNodeStrokeColor =
     theme.palette.mode === 'dark' ? theme.palette.grey[300] : theme.palette.grey[700];
 
-  // Calculate position styles
+  // Calculate position styles with improved positioning to avoid overlaps
   const getPositionStyles = () => {
     switch (position) {
       case 'top-left':
-        return { top: 10, left: 10 };
+        return { top: 20, left: 20 };
       case 'top-right':
-        return { top: 10, right: 10 };
+        return { top: 20, right: 20 };
       case 'bottom-right':
-        return { bottom: 10, right: 10 };
+        return { bottom: 80, right: 20 }; // Increased bottom margin to avoid toolbar overlap
       case 'bottom-left':
       default:
-        return { bottom: 10, left: 10 };
+        return { bottom: 80, left: 20 }; // Increased bottom margin to avoid toolbar overlap
     }
   };
 
@@ -243,6 +243,8 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
           width: expanded ? 240 : 160,
           height: expanded ? 180 : 120,
           transition: 'width 0.3s ease, height 0.3s ease',
+          boxShadow: '0 4px 8px rgba(0,0,0,0.15)', // Add shadow for better visibility
+          borderRadius: 4, // Rounded corners
         }}
       />
     </Box>
