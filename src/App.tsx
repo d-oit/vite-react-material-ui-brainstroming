@@ -145,7 +145,7 @@ const AppWithTheme = () => {
   };
 
   const handleUpdateApp = () => {
-    if (updateSWFunction) {
+    if (typeof updateSWFunction === 'function') {
       void updateSWFunction(true);
     }
   };

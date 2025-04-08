@@ -150,9 +150,9 @@ const KeyboardShortcutsOverlay: React.FC<KeyboardShortcutsOverlayProps> = ({ ope
             p: 3,
             position: 'relative',
             backgroundColor:
-            theme.palette.mode === 'dark'
-              ? 'rgba(30, 30, 30, 0.95)'
-              : 'rgba(255, 255, 255, 0.95)',
+              theme.palette.mode === 'dark'
+                ? 'rgba(30, 30, 30, 0.95)'
+                : 'rgba(255, 255, 255, 0.95)',
           }}
           onClick={e => e.stopPropagation()}
         >
@@ -177,7 +177,13 @@ const KeyboardShortcutsOverlay: React.FC<KeyboardShortcutsOverlayProps> = ({ ope
 
           <Divider sx={{ mb: 3 }} />
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
+              gap: 3,
+            }}
+          >
             {shortcuts.map(category => (
               <Box key={category.category}>
                 <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>

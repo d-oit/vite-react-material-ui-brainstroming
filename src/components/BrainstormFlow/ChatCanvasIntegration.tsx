@@ -116,7 +116,8 @@ const ChatCanvasIntegration: React.FC<ChatCanvasIntegrationProps> = ({
           <DialogTitle>{t('flow.linkNodeToMessage') || 'Link Node to Chat Message'}</DialogTitle>
           <DialogContent dividers>
             <Typography variant="subtitle1" gutterBottom>
-              <strong>{t('flow.selectedNode') || 'Selected Node'}:</strong> {selectedNode.data.label}
+              <strong>{t('flow.selectedNode') || 'Selected Node'}:</strong>{' '}
+              {selectedNode.data.label}
             </Typography>
 
             {linkedMessages.length > 0 && (
@@ -255,10 +256,7 @@ const ChatCanvasIntegration: React.FC<ChatCanvasIntegrationProps> = ({
                         </Button>
                       }
                     >
-                      <ListItemText
-                        primary={node.data.label}
-                        secondary={node.type}
-                      />
+                      <ListItemText primary={node.data.label} secondary={node.type} />
                     </ListItem>
                   ))}
                 </List>
@@ -300,10 +298,7 @@ const ChatCanvasIntegration: React.FC<ChatCanvasIntegrationProps> = ({
                           <LinkIcon />
                         )}
                       </ListItemIcon>
-                      <ListItemText
-                        primary={node.data.label}
-                        secondary={node.type}
-                      />
+                      <ListItemText primary={node.data.label} secondary={node.type} />
                     </ListItemButton>
                   );
                 })
@@ -364,7 +359,7 @@ const ChatCanvasIntegration: React.FC<ChatCanvasIntegrationProps> = ({
             '& .MuiBadge-badge': {
               right: -3,
               top: 3,
-            }
+            },
           }}
         >
           <ChatIcon color="action" fontSize="small" />
@@ -390,10 +385,7 @@ const ChatCanvasIntegration: React.FC<ChatCanvasIntegrationProps> = ({
             <List dense sx={{ maxHeight: '200px', overflow: 'auto' }}>
               {linkedNodes.map(node => (
                 <ListItem key={node.id} sx={{ py: 0 }}>
-                  <ListItemText
-                    primary={node.data.label}
-                    secondary={node.type}
-                  />
+                  <ListItemText primary={node.data.label} secondary={node.type} />
                 </ListItem>
               ))}
             </List>
@@ -407,7 +399,7 @@ const ChatCanvasIntegration: React.FC<ChatCanvasIntegrationProps> = ({
             '& .MuiBadge-badge': {
               right: -3,
               top: 3,
-            }
+            },
           }}
         >
           <LinkIcon color="action" fontSize="small" />
@@ -418,17 +410,10 @@ const ChatCanvasIntegration: React.FC<ChatCanvasIntegrationProps> = ({
 
   return (
     <>
-      <Dialog
-        open={linkDialogOpen}
-        onClose={handleCloseLinkDialog}
-        maxWidth="md"
-        fullWidth
-      >
+      <Dialog open={linkDialogOpen} onClose={handleCloseLinkDialog} maxWidth="md" fullWidth>
         {renderDialogContent()}
         <DialogActions>
-          <Button onClick={handleCloseLinkDialog}>
-            {t('common.close') || 'Close'}
-          </Button>
+          <Button onClick={handleCloseLinkDialog}>{t('common.close') || 'Close'}</Button>
         </DialogActions>
       </Dialog>
 
@@ -467,7 +452,9 @@ export const useChatCanvasIntegration = (props: ChatCanvasIntegrationProps) => {
         ...props,
         ref: (ref: React.RefObject<typeof ChatCanvasIntegration>) => {
           if (ref && typeof ref === 'object' && 'handleOpenNodeToMessageDialog' in ref) {
-            (ref as unknown as { handleOpenNodeToMessageDialog: (node: Node) => void }).handleOpenNodeToMessageDialog(node);
+            (
+              ref as unknown as { handleOpenNodeToMessageDialog: (node: Node) => void }
+            ).handleOpenNodeToMessageDialog(node);
           }
         },
       });
@@ -478,7 +465,9 @@ export const useChatCanvasIntegration = (props: ChatCanvasIntegrationProps) => {
         ...props,
         ref: (ref: React.RefObject<typeof ChatCanvasIntegration>) => {
           if (ref && typeof ref === 'object' && 'handleOpenMessageToNodeDialog' in ref) {
-            (ref as unknown as { handleOpenMessageToNodeDialog: (message: ChatMessage) => void }).handleOpenMessageToNodeDialog(message);
+            (
+              ref as unknown as { handleOpenMessageToNodeDialog: (message: ChatMessage) => void }
+            ).handleOpenMessageToNodeDialog(message);
           }
         },
       });
@@ -497,9 +486,7 @@ export const useChatCanvasIntegration = (props: ChatCanvasIntegrationProps) => {
         <Tooltip
           title={
             <>
-              <Typography variant="subtitle2">
-                {`${messages.length} linked message(s)`}
-              </Typography>
+              <Typography variant="subtitle2">{`${messages.length} linked message(s)`}</Typography>
               <List dense sx={{ maxHeight: '200px', overflow: 'auto' }}>
                 {messages.map(message => (
                   <ListItem key={message.id} sx={{ py: 0 }}>
@@ -533,7 +520,7 @@ export const useChatCanvasIntegration = (props: ChatCanvasIntegrationProps) => {
               '& .MuiBadge-badge': {
                 right: -3,
                 top: 3,
-              }
+              },
             }}
           >
             <ChatIcon color="action" fontSize="small" />
@@ -554,16 +541,11 @@ export const useChatCanvasIntegration = (props: ChatCanvasIntegrationProps) => {
         <Tooltip
           title={
             <>
-              <Typography variant="subtitle2">
-                {`${nodes.length} linked node(s)`}
-              </Typography>
+              <Typography variant="subtitle2">{`${nodes.length} linked node(s)`}</Typography>
               <List dense sx={{ maxHeight: '200px', overflow: 'auto' }}>
                 {nodes.map(node => (
                   <ListItem key={node.id} sx={{ py: 0 }}>
-                    <ListItemText
-                      primary={node.data.label}
-                      secondary={node.type}
-                    />
+                    <ListItemText primary={node.data.label} secondary={node.type} />
                   </ListItem>
                 ))}
               </List>
@@ -577,7 +559,7 @@ export const useChatCanvasIntegration = (props: ChatCanvasIntegrationProps) => {
               '& .MuiBadge-badge': {
                 right: -3,
                 top: 3,
-              }
+              },
             }}
           >
             <LinkIcon color="action" fontSize="small" />

@@ -17,6 +17,7 @@ import {
 import React, { useEffect, useState } from 'react';
 
 import { useI18n } from '../../contexts/I18nContext';
+
 import KeyboardShortcutsOverlay from './KeyboardShortcutsOverlay';
 
 interface KeyboardShortcut {

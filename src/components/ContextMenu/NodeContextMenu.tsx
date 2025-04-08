@@ -6,9 +6,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import LinkIcon from '@mui/icons-material/Link';
 import React from 'react';
 
-import { Node } from '../../types/models';
+import type { Node } from '../../types/models';
 
-import ContextMenu, { ContextMenuItem } from './ContextMenu';
+import type { ContextMenuItem } from './ContextMenu';
+import ContextMenu from './ContextMenu';
 
 interface NodeContextMenuProps {
   node: Node;

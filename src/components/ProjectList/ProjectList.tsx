@@ -231,7 +231,14 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
           </Button>
         </Box>
       ) : (
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 3, width: '100%' }}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+            gap: 3,
+            width: '100%',
+          }}
+        >
           {projects.map(project => (
             <Box key={project.id}>
               <ProjectCard

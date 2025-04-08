@@ -1,4 +1,5 @@
-import { Menu, MenuProps, MenuItem, ListItemIcon, ListItemText, Divider } from '@mui/material';
+import type { MenuProps } from '@mui/material';
+import { Menu, MenuItem, ListItemIcon, ListItemText, Divider } from '@mui/material';
 import React from 'react';
 
 export interface ContextMenuItem {

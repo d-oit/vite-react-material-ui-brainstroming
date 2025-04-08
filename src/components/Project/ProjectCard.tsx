@@ -150,15 +150,19 @@ export const ProjectCard = ({ project, onDelete, onArchive, onSync, onPin }: Pro
         </IconButton>
       </Tooltip>
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', p: 2, pb: 0 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          p: 2,
+          pb: 0,
+        }}
+      >
         <Typography variant="h6" noWrap sx={{ fontWeight: 600 }}>
           {project.name}
         </Typography>
-        <IconButton
-          aria-label="settings"
-          onClick={handleMenuOpen}
-          size="small"
-        >
+        <IconButton aria-label="settings" onClick={handleMenuOpen} size="small">
           <MoreVertIcon />
         </IconButton>
       </Box>

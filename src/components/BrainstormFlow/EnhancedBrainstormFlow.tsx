@@ -48,6 +48,7 @@ import { MemoizedChatPanel } from '../Chat/ChatPanel';
 
 // Import components needed for the flow
 import AccessibilityPanel from './AccessibilityPanel';
+import EdgeStyleDialog from './EdgeStyleDialog';
 import EditableNode from './EditableNode';
 import EnhancedControls from './EnhancedControls';
 import EnhancedControlsPanel from './EnhancedControlsPanel';
@@ -57,7 +58,6 @@ import FlowContextMenuHandler from './FlowContextMenuHandler';
 import KeyboardShortcutsDialog from './KeyboardShortcutsDialog';
 import KeyboardShortcutsHandler from './KeyboardShortcutsHandler';
 import KeyboardShortcutsOverlay from './KeyboardShortcutsOverlay';
-import EdgeStyleDialog from './EdgeStyleDialog';
 import LinkedNodesHighlight from './LinkedNodesHighlight';
 import MobileControls from './MobileControls';
 import NodeStyleDialog from './NodeStyleDialog';

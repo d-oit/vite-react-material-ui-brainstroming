@@ -3,9 +3,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import React from 'react';
 
-import { Edge } from '../../types/models';
+import type { Edge } from '../../types/models';
 
-import ContextMenu, { ContextMenuItem } from './ContextMenu';
+import type { ContextMenuItem } from './ContextMenu';
+import ContextMenu from './ContextMenu';
 
 interface EdgeContextMenuProps {
   edge: Edge;

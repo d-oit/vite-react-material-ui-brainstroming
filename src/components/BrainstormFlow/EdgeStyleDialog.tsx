@@ -138,7 +138,9 @@ export const EdgeStyleDialog: React.FC<EdgeStyleDialogProps> = ({
                 <MenuItem value="default">{t('flow.edgeTypeDefault') ?? 'Default'}</MenuItem>
                 <MenuItem value="straight">{t('flow.edgeTypeStraight') ?? 'Straight'}</MenuItem>
                 <MenuItem value="step">{t('flow.edgeTypeStep') ?? 'Step'}</MenuItem>
-                <MenuItem value="smoothstep">{t('flow.edgeTypeSmoothStep') ?? 'Smooth Step'}</MenuItem>
+                <MenuItem value="smoothstep">
+                  {t('flow.edgeTypeSmoothStep') ?? 'Smooth Step'}
+                </MenuItem>
                 <MenuItem value="bezier">{t('flow.edgeTypeBezier') ?? 'Bezier'}</MenuItem>
               </Select>
             </FormControl>
@@ -166,8 +168,12 @@ export const EdgeStyleDialog: React.FC<EdgeStyleDialogProps> = ({
                 <MenuItem value="">{t('flow.edgeLabelNone') ?? 'None'}</MenuItem>
                 <MenuItem value="connects">{t('flow.edgeLabelConnects') ?? 'Connects'}</MenuItem>
                 <MenuItem value="leads to">{t('flow.edgeLabelLeadsTo') ?? 'Leads to'}</MenuItem>
-                <MenuItem value="depends on">{t('flow.edgeLabelDependsOn') ?? 'Depends on'}</MenuItem>
-                <MenuItem value="relates to">{t('flow.edgeLabelRelatesTo') ?? 'Relates to'}</MenuItem>
+                <MenuItem value="depends on">
+                  {t('flow.edgeLabelDependsOn') ?? 'Depends on'}
+                </MenuItem>
+                <MenuItem value="relates to">
+                  {t('flow.edgeLabelRelatesTo') ?? 'Relates to'}
+                </MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -210,7 +216,9 @@ export const EdgeStyleDialog: React.FC<EdgeStyleDialogProps> = ({
                 markerEnd={animated ? 'url(#arrowhead)' : undefined}
               />
               {label && (
-                <text x="100" y="40" textAnchor="middle" fill={strokeColor} fontSize="12">{label}</text>
+                <text x="100" y="40" textAnchor="middle" fill={strokeColor} fontSize="12">
+                  {label}
+                </text>
               )}
             </svg>
           </Box>

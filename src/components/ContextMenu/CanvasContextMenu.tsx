@@ -4,7 +4,8 @@ import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import MapIcon from '@mui/icons-material/Map';
 import React from 'react';
 
-import ContextMenu, { ContextMenuItem } from './ContextMenu';
+import type { ContextMenuItem } from './ContextMenu';
+import ContextMenu from './ContextMenu';
 
 interface CanvasContextMenuProps {
   position: { x: number; y: number } | null;

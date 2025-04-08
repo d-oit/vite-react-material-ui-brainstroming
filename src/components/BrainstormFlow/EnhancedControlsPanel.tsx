@@ -262,13 +262,13 @@ const EnhancedControlsPanel: React.FC<EnhancedControlsPanelProps> = ({
           };
 
           return (
-            <Box key={name} sx={{ opacity: disabled ? 0.5 : 1, pointerEvents: disabled ? 'none' : 'auto' }}>
+            <Box
+              key={name}
+              sx={{ opacity: disabled ? 0.5 : 1, pointerEvents: disabled ? 'none' : 'auto' }}
+            >
               <Tooltip title={tooltip} placement="right">
                 <span>
-                  <SpeedDialAction
-                    icon={icon}
-                    onClick={onClick}
-                  />
+                  <SpeedDialAction icon={icon} onClick={onClick} />
                 </span>
               </Tooltip>
             </Box>

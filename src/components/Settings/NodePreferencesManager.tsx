@@ -310,7 +310,14 @@ export const NodePreferencesManager = () => {
         Customize Sizes
       </Typography>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 3, width: '100%' }}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+          gap: 3,
+          width: '100%',
+        }}
+      >
         {(['small', 'medium', 'large'] as const).map(size => (
           <Box key={size}>
             <Card>
@@ -384,7 +391,15 @@ export const NodePreferencesManager = () => {
         color for nodes of each type.
       </Typography>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 3, mb: 4, width: '100%' }}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+          gap: 3,
+          mb: 4,
+          width: '100%',
+        }}
+      >
         {Object.values(NodeType).map(nodeType => {
           const nodeTypeLabel = nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
           const currentColor = localPreferences.customColors?.[nodeType] || '#e3f2fd';
