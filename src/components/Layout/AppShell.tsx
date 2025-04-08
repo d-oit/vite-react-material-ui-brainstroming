@@ -40,6 +40,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import SkipLink from '../Accessibility/SkipLink';
+import LanguageSelector from '../I18n/LanguageSelector';
 import NetworkInfoDialog from '../OfflineIndicator/NetworkInfoDialog';
 import NetworkStatusIcon from '../OfflineIndicator/NetworkStatusIcon';
 import _OfflineIndicator from '../OfflineIndicator/OfflineIndicator';
@@ -250,6 +251,9 @@ export const AppShell = ({
 
           {/* Network status icon in header */}
           <NetworkStatusIcon onClick={() => setNetworkInfoDialogOpen(true)} />
+
+          {/* Language selector */}
+          <LanguageSelector variant="icon" size="small" />
 
           {!isMobile && (
             <IconButton color="inherit" onClick={onThemeToggle}>

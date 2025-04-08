@@ -139,7 +139,7 @@ test.describe('Basic Application Flow', () => {
 
     // Check that the theme was changed
     const body = await page.locator('body');
-    await expect(body).toHaveClass(/dark/);
+    expect(await body.getAttribute('class')).toMatch(/dark/);
 
     // Change the theme back to light
     await page.click('text=Light');

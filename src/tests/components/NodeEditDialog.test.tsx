@@ -1,19 +1,10 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { MemoizedNodeEditDialog as NodeEditDialog } from '../../components/BrainstormFlow/NodeEditDialog';
-import { I18nProvider } from '../../contexts/I18nContext';
-import { SettingsProvider } from '../../contexts/SettingsContext';
 import { NodeType } from '../../types';
-
-// Wrap component with required providers
-const renderWithProviders = (ui: React.ReactElement) => {
-  return render(
-    <I18nProvider>
-      <SettingsProvider>{ui}</SettingsProvider>
-    </I18nProvider>
-  );
-};
+import type { NodeData, NodeSize } from '../../types';
+import { render } from '../test-utils';
 
 describe('NodeEditDialog', () => {
   const mockOnClose = vi.fn();
@@ -25,20 +16,25 @@ describe('NodeEditDialog', () => {
 
   it('renders with the correct initial values', () => {
     // Render the component
-    renderWithProviders(
+    const initialData: NodeData = {
+      id: 'node-1',
+      title: 'Test Node',
+      label: 'Test Node',
+      content: 'This is a test node',
+      tags: ['tag1', 'tag2'],
+      color: '#e3f2fd',
+      size: 'medium' as NodeSize,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    render(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        initialValues={{
-          id: 'node-1',
-          type: NodeType.IDEA,
-          label: 'Test Node',
-          content: 'This is a test node',
-          tags: ['tag1', 'tag2'],
-          color: '#e3f2fd',
-          size: 'medium',
-        }}
+        initialData={initialData}
+        initialType={NodeType.IDEA}
       />
     );
 
@@ -56,20 +52,25 @@ describe('NodeEditDialog', () => {
 
   it('calls onSave with the updated values when the save button is clicked', async () => {
     // Render the component
-    renderWithProviders(
+    const initialData: NodeData = {
+      id: 'node-1',
+      title: 'Test Node',
+      label: 'Test Node',
+      content: 'This is a test node',
+      tags: ['tag1', 'tag2'],
+      color: '#e3f2fd',
+      size: 'medium' as NodeSize,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    render(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        initialValues={{
-          id: 'node-1',
-          type: NodeType.IDEA,
-          label: 'Test Node',
-          content: 'This is a test node',
-          tags: ['tag1', 'tag2'],
-          color: '#e3f2fd',
-          size: 'medium',
-        }}
+        initialData={initialData}
+        initialType={NodeType.IDEA}
       />
     );
 
@@ -82,34 +83,38 @@ describe('NodeEditDialog', () => {
 
     // Check that onSave was called with the updated values
     await waitFor(() => {
-      expect(mockOnSave).toHaveBeenCalledWith({
-        id: 'node-1',
-        type: NodeType.IDEA,
-        label: 'Updated Title',
-        content: 'Updated content',
-        tags: ['tag1', 'tag2'],
-        color: '#e3f2fd',
-        size: 'medium',
-      });
+      expect(mockOnSave).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Updated Title',
+          content: 'Updated content',
+          tags: ['tag1', 'tag2'],
+        }),
+        NodeType.IDEA
+      );
     });
   });
 
   it('calls onClose when the cancel button is clicked', () => {
     // Render the component
-    renderWithProviders(
+    const initialData: NodeData = {
+      id: 'node-1',
+      title: 'Test Node',
+      label: 'Test Node',
+      content: 'This is a test node',
+      tags: [],
+      color: '#e3f2fd',
+      size: 'medium' as NodeSize,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    render(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        initialValues={{
-          id: 'node-1',
-          type: NodeType.IDEA,
-          label: 'Test Node',
-          content: 'This is a test node',
-          tags: [],
-          color: '#e3f2fd',
-          size: 'medium',
-        }}
+        initialData={initialData}
+        initialType={NodeType.IDEA}
       />
     );
 
@@ -122,20 +127,25 @@ describe('NodeEditDialog', () => {
 
   it('allows adding and removing tags', async () => {
     // Render the component
-    renderWithProviders(
+    const initialData: NodeData = {
+      id: 'node-1',
+      title: 'Test Node',
+      label: 'Test Node',
+      content: 'This is a test node',
+      tags: ['tag1'],
+      color: '#e3f2fd',
+      size: 'medium' as NodeSize,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    render(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        initialValues={{
-          id: 'node-1',
-          type: NodeType.IDEA,
-          label: 'Test Node',
-          content: 'This is a test node',
-          tags: ['tag1'],
-          color: '#e3f2fd',
-          size: 'medium',
-        }}
+        initialData={initialData}
+        initialType={NodeType.IDEA}
       />
     );
 
@@ -169,20 +179,25 @@ describe('NodeEditDialog', () => {
 
   it('allows changing the node type', async () => {
     // Render the component
-    renderWithProviders(
+    const initialData: NodeData = {
+      id: 'node-1',
+      title: 'Test Node',
+      label: 'Test Node',
+      content: 'This is a test node',
+      tags: [],
+      color: '#e3f2fd',
+      size: 'medium' as NodeSize,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    render(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        initialValues={{
-          id: 'node-1',
-          type: NodeType.IDEA,
-          label: 'Test Node',
-          content: 'This is a test node',
-          tags: [],
-          color: '#e3f2fd',
-          size: 'medium',
-        }}
+        initialData={initialData}
+        initialType={NodeType.IDEA}
       />
     );
 
@@ -205,20 +220,25 @@ describe('NodeEditDialog', () => {
 
   it('allows changing the node size', async () => {
     // Render the component
-    renderWithProviders(
+    const initialData: NodeData = {
+      id: 'node-1',
+      title: 'Test Node',
+      label: 'Test Node',
+      content: 'This is a test node',
+      tags: [],
+      color: '#e3f2fd',
+      size: 'medium' as NodeSize,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    render(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        initialValues={{
-          id: 'node-1',
-          type: NodeType.IDEA,
-          label: 'Test Node',
-          content: 'This is a test node',
-          tags: [],
-          color: '#e3f2fd',
-          size: 'medium',
-        }}
+        initialData={initialData}
+        initialType={NodeType.IDEA}
       />
     );
 
@@ -243,8 +263,20 @@ describe('NodeEditDialog', () => {
 
   it('renders in add mode when no initialValues are provided', () => {
     // Render the component in add mode
-    renderWithProviders(
-      <NodeEditDialog open={true} onClose={mockOnClose} onSave={mockOnSave} isAdd={true} />
+    render(
+      <NodeEditDialog
+        open={true}
+        onClose={mockOnClose}
+        onSave={mockOnSave}
+        initialData={{
+          id: 'new-node',
+          title: '',
+          content: '',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }}
+        initialType={NodeType.IDEA}
+      />
     );
 
     // Check that the dialog is rendered in add mode

@@ -61,17 +61,24 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
 
   // Load chat history from localStorage on mount
   useEffect(() => {
-    if (projectId) {
+    if (projectId !== undefined && projectId !== null && projectId !== '') {
       const storedMessages = localStorage.getItem(`chat_history_${projectId}`);
-      if (storedMessages) {
-        setMessages(JSON.parse(storedMessages));
+      try {
+        if (storedMessages !== null) {
+          const parsedMessages = JSON.parse(storedMessages);
+          if (Array.isArray(parsedMessages)) {
+            setMessages(parsedMessages);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading chat history:', error);
       }
     }
   }, [projectId]);
 
   // Save chat history to localStorage when messages change
   useEffect(() => {
-    if (projectId && messages.length > 0) {
+    if (projectId !== undefined && projectId !== null && projectId !== '' && messages.length > 0) {
       localStorage.setItem(`chat_history_${projectId}`, JSON.stringify(messages));
     }
   }, [messages, projectId]);
@@ -89,17 +96,21 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
   };
 
   const handleSendMessage = async () => {
-    if (!input.trim()) return;
+    if (input.trim() === '') return;
 
     // Check if online
-    if (!isOnline) {
-      setError(t('chat.offlineError') || 'Cannot send messages while offline');
+    if (isOnline !== true) {
+      setError(t('chat.offlineError') ?? 'Cannot send messages while offline');
       return;
     }
 
     // Check if API key is configured
-    if (!settings.openRouterApiKey) {
-      setError(t('chat.apiKeyMissing') || 'API key is not configured');
+    if (
+      settings.openRouterApiKey === undefined ||
+      settings.openRouterApiKey === null ||
+      settings.openRouterApiKey === ''
+    ) {
+      setError(t('chat.apiKeyMissing') ?? 'API key is not configured');
       return;
     }
 
@@ -128,10 +139,10 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
       console.error('Error sending message:', error);
 
       // Check if the error is due to being offline
-      if (!navigator.onLine) {
-        setError(t('chat.offlineError') || 'Cannot send messages while offline');
+      if (navigator.onLine !== true) {
+        setError(t('chat.offlineError') ?? 'Cannot send messages while offline');
       } else {
-        setError(t('chat.errorSendingMessage') || 'Error sending message');
+        setError(t('chat.errorSendingMessage') ?? 'Error sending message');
       }
     } finally {
       setIsLoading(false);
@@ -143,23 +154,27 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
    * Generate node suggestions from the current input
    */
   const handleGenerateNodes = async () => {
-    if (!input.trim() || isGeneratingNodes) return;
+    if (input.trim() === '' || isGeneratingNodes === true) return;
 
     // Check if online
-    if (!isOnline) {
-      setError(t('chat.offlineError') || 'Cannot generate nodes while offline');
+    if (isOnline !== true) {
+      setError(t('chat.offlineError') ?? 'Cannot generate nodes while offline');
       return;
     }
 
     // Check if API key is configured
-    if (!settings.openRouterApiKey) {
-      setError(t('chat.apiKeyMissing') || 'API key is not configured');
+    if (
+      settings.openRouterApiKey === undefined ||
+      settings.openRouterApiKey === null ||
+      settings.openRouterApiKey === ''
+    ) {
+      setError(t('chat.apiKeyMissing') ?? 'API key is not configured');
       return;
     }
 
     // Check if node generation is supported in this context
-    if (!onAddNodes) {
-      setError(t('chat.nodesNotSupported') || 'Node generation is not supported in this context');
+    if (onAddNodes === undefined || onAddNodes === null) {
+      setError(t('chat.nodesNotSupported') ?? 'Node generation is not supported in this context');
       return;
     }
 
@@ -174,11 +189,11 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
       console.error('Error generating nodes:', error);
 
       // Check if the error is due to being offline
-      if (!navigator.onLine) {
-        setError(t('chat.offlineError') || 'Cannot generate nodes while offline');
+      if (navigator.onLine !== true) {
+        setError(t('chat.offlineError') ?? 'Cannot generate nodes while offline');
       } else {
         setError(
-          t('chat.generateNodesError') ||
+          t('chat.generateNodesError') ??
             'An error occurred while generating nodes. Please try again.'
         );
       }
@@ -191,7 +206,7 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
    * Handle accepting a single node
    */
   const handleAcceptNode = (nodeData: NodeData) => {
-    if (onAddNodes) {
+    if (onAddNodes !== undefined && onAddNodes !== null) {
       onAddNodes([nodeData]);
     }
   };
@@ -199,9 +214,9 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
   /**
    * Handle accepting all nodes
    */
-  const handleAcceptAllNodes = (nodeDatas: NodeData[]) => {
-    if (onAddNodes) {
-      onAddNodes(nodeDatas);
+  const handleAcceptAllNodes = (nodeDataList: NodeData[]) => {
+    if (onAddNodes !== undefined && onAddNodes !== null) {
+      onAddNodes(nodeDataList);
     }
     setNodeSuggestion(null); // Clear suggestions after accepting all
   };
@@ -214,14 +229,14 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && e.shiftKey === false) {
       e.preventDefault();
-      handleSendMessage();
+      void handleSendMessage(); // Use void operator to explicitly ignore the promise
     }
   };
 
   const clearChat = () => {
-    if (projectId) {
+    if (projectId !== undefined && projectId !== null && projectId !== '') {
       localStorage.removeItem(`chat_history_${projectId}`);
     }
     setMessages([]);
@@ -427,7 +442,7 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
           </Box>
         )}
 
-        {error && (
+        {error !== undefined && error !== null && error !== '' ? (
           <Paper
             elevation={0}
             sx={{
@@ -439,7 +454,7 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
           >
             <Typography variant="body2">{error}</Typography>
           </Paper>
-        )}
+        ) : null}
 
         <div ref={messagesEndRef} />
       </Box>
@@ -456,7 +471,7 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
           }
           value={input}
           onChange={e => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyPress} // Using onKeyDown instead of deprecated onKeyPress
           multiline
           maxRows={4}
           disabled={isLoading || isGeneratingNodes || !settings.openRouterApiKey || !isOnline}
@@ -491,21 +506,23 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
 
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
             {/* Node generation button - only show if onAddNodes is provided */}
-            {onAddNodes && (
+            {onAddNodes !== undefined && (
               <Tooltip
-                title={t('chat.generateNodes') || 'Generate brainstorming nodes from your input'}
+                title={t('chat.generateNodes') ?? 'Generate brainstorming nodes from your input'}
               >
                 <span>
                   <Button
                     variant="outlined"
                     color="secondary"
-                    onClick={handleGenerateNodes}
+                    onClick={() => void handleGenerateNodes()} // Use void to explicitly ignore the promise
                     disabled={
-                      isLoading ||
-                      isGeneratingNodes ||
-                      !input.trim() ||
-                      !settings.openRouterApiKey ||
-                      !isOnline
+                      isLoading === true ||
+                      isGeneratingNodes === true ||
+                      input.trim() === '' ||
+                      settings.openRouterApiKey === undefined ||
+                      settings.openRouterApiKey === null ||
+                      settings.openRouterApiKey === '' ||
+                      isOnline !== true
                     }
                     sx={{ borderRadius: '8px' }}
                   >
@@ -519,13 +536,15 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes }: ChatPanelProps) =>
               variant="contained"
               color="primary"
               endIcon={<SendIcon />}
-              onClick={handleSendMessage}
+              onClick={() => void handleSendMessage()} // Use void to explicitly ignore the promise
               disabled={
-                isLoading ||
-                isGeneratingNodes ||
-                !input.trim() ||
-                !settings.openRouterApiKey ||
-                !isOnline
+                isLoading === true ||
+                isGeneratingNodes === true ||
+                input.trim() === '' ||
+                settings.openRouterApiKey === undefined ||
+                settings.openRouterApiKey === null ||
+                settings.openRouterApiKey === '' ||
+                isOnline !== true
               }
               sx={{ borderRadius: '8px' }}
             >

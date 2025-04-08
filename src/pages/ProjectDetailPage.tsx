@@ -1,4 +1,9 @@
-import { Save as SaveIcon, Chat as ChatIcon, Close as CloseIcon } from '@mui/icons-material';
+import {
+  Save as SaveIcon,
+  Chat as ChatIcon,
+  Close as CloseIcon,
+  Add as AddIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -16,7 +21,9 @@ import {
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
+import KeyboardShortcutsHandler from '../components/BrainstormFlow/KeyboardShortcutsHandler';
 import { ChatInterface } from '../components/Chat/ChatInterface';
+import HelpOverlay from '../components/Help/HelpOverlay';
 import { AppShell } from '../components/Layout/AppShell';
 import { ProjectBrainstormingSection } from '../components/Project/ProjectBrainstormingSection';
 import ProjectSettingsSection from '../components/Project/ProjectSettingsSection';
@@ -70,7 +77,7 @@ const ProjectDetailPage = () => {
     if (project !== null && project !== undefined) {
       setNodes(updatedNodes);
       setEdges(updatedEdges);
-  
+
       // Create updated project with new nodes and edges
       const _updatedProject = {
         ...project,
@@ -122,7 +129,8 @@ const ProjectDetailPage = () => {
         <Container maxWidth="lg">
           <Paper sx={{ p: 3 }}>
             <Typography color="error" variant="h6">
-              Error: {error !== null && error !== undefined && error !== '' ? error : 'Project not found'}
+              Error:{' '}
+              {error !== null && error !== undefined && error !== '' ? error : 'Project not found'}
             </Typography>
           </Paper>
         </Container>
@@ -280,7 +288,7 @@ const ProjectDetailPage = () => {
                 ...updatedProject,
                 updatedAt: new Date().toISOString(),
               };
-  
+
               // Update local state
               setNodes(mergedProject.nodes);
               setEdges(mergedProject.edges);
@@ -328,6 +336,75 @@ const ProjectDetailPage = () => {
           <SaveIcon />
         </IconButton>
       </Box>
+
+      {/* Keyboard shortcuts handler */}
+      <KeyboardShortcutsHandler
+        onSave={() => void saveProject()}
+        onZoomIn={() => console.log('Zoom in')}
+        onZoomOut={() => console.log('Zoom out')}
+        onFitView={() => console.log('Fit view')}
+        onUndo={() => console.log('Undo')}
+        onRedo={() => console.log('Redo')}
+        onDelete={() => console.log('Delete')}
+        onAddNode={() => console.log('Add node')}
+        onToggleChat={toggleChat}
+        disabled={tabValue !== 1} // Only enable shortcuts in brainstorming tab
+      />
+
+      {/* Help overlay */}
+      <HelpOverlay
+        tours={[
+          {
+            id: 'brainstorming-tour',
+            title: 'Brainstorming Canvas Tour',
+            description: 'Learn how to use the brainstorming canvas to organize your ideas.',
+            steps: [
+              {
+                target: '.react-flow__pane',
+                title: 'Canvas',
+                content:
+                  'This is your brainstorming canvas. You can add nodes, connect them, and organize your ideas here.',
+                placement: 'bottom',
+              },
+              {
+                target: '.react-flow__node',
+                title: 'Nodes',
+                content:
+                  'These are your idea nodes. Double-click to edit them directly, or use the edit button to open the editor.',
+                placement: 'right',
+              },
+              {
+                target: '.react-flow__handle',
+                title: 'Handles',
+                content:
+                  'Drag from these handles to connect nodes and create relationships between ideas.',
+                placement: 'bottom',
+              },
+            ],
+          },
+        ]}
+        tips={[
+          {
+            id: 'keyboard-shortcuts',
+            title: 'Use Keyboard Shortcuts',
+            content: 'Press Shift+? to see all available keyboard shortcuts for faster workflow.',
+            category: 'Productivity',
+          },
+          {
+            id: 'direct-editing',
+            title: 'Edit Nodes Directly',
+            content: 'Double-click on any node to edit its content directly on the canvas.',
+            category: 'Editing',
+          },
+          {
+            id: 'chat-assistant',
+            title: 'Use the AI Assistant',
+            content:
+              'The chat assistant can help generate ideas and provide suggestions for your brainstorming session.',
+            category: 'AI Features',
+          },
+        ]}
+      />
     </AppShell>
   );
 };

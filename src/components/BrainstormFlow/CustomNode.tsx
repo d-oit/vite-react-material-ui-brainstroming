@@ -51,14 +51,14 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
   const borderColor = getNodeBorderColor(backgroundColor);
 
   // Check if touch optimization is enabled
-  const isTouchOptimized = nodePreferences?.touchOptimized || false;
+  const isTouchOptimized = nodePreferences?.touchOptimized === true;
 
   // Calculate node size based on preferences, node data, and screen size
   const nodeSize = useMemo(() => {
     if (!nodePreferences) return { width: 200, fontSize: 1 };
 
     // Use node-specific size if available, otherwise use default
-    const size = data.size || nodePreferences.defaultSize;
+    const size = data.size !== undefined ? data.size : nodePreferences.defaultSize;
 
     // Ensure we have a valid size value
     const validSize = ['small', 'medium', 'large'].includes(size) ? size : 'medium';
@@ -273,7 +273,7 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
               <Chip
                 key={tag}
                 label={tag}
-                size={nodeSize.chipSize}
+                size={(nodeSize.chipSize as 'small' | 'medium') || 'small'}
                 sx={{
                   // Make chips more compact on mobile
                   ...(isMobile && {

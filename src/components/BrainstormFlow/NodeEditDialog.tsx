@@ -78,7 +78,7 @@ const NodeEditDialog = ({
       setContent(initialData.content);
       setTags(initialData.tags || []);
       setColor(initialData.color);
-      setSize(initialData.size || settings.preferredNodeSize);
+      setSize(initialData.size !== undefined ? initialData.size : settings.preferredNodeSize);
     } else {
       // Reset form for new node
       setLabel('');
@@ -110,8 +110,8 @@ const NodeEditDialog = ({
       type,
       label,
       contentLength: content.length,
-      tagsCount: tags.length,
-      hasColor: !!color,
+      tagsCount: Array.isArray(tags) ? tags.length : 0,
+      hasColor: color !== undefined && color !== null && color !== '',
       size,
     });
 
@@ -133,7 +133,7 @@ const NodeEditDialog = ({
   // Update color when node type changes
   useEffect(() => {
     // Only update color if it's not already set by the user
-    if (!color) {
+    if (color === undefined || color === null || color === '') {
       // Reset to use the default color for this type
       setColor(undefined);
     }
@@ -240,7 +240,7 @@ const NodeEditDialog = ({
                     value={size}
                     exclusive
                     onChange={(e, newSize) => {
-                      if (newSize) setSize(newSize);
+                      if (newSize !== null && newSize !== undefined) setSize(newSize);
                     }}
                     aria-label="Node size"
                     fullWidth
@@ -316,7 +316,7 @@ const NodeEditDialog = ({
                       <IconButton
                         size="small"
                         onClick={() => setColor(undefined)}
-                        disabled={!color}
+                        disabled={color === undefined || color === null || color === ''}
                         sx={{ ml: 'auto' }}
                         aria-label="Reset to default color"
                       >
@@ -333,7 +333,10 @@ const NodeEditDialog = ({
                       width: '100%',
                       height: 36,
                       borderRadius: 1,
-                      bgcolor: color || defaultNodeColor,
+                      bgcolor:
+                        color !== undefined && color !== null && color !== ''
+                          ? color
+                          : defaultNodeColor,
                       border: '1px solid rgba(0, 0, 0, 0.2)',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
@@ -349,7 +352,10 @@ const NodeEditDialog = ({
                         // Use native color picker on desktop
                         const input = document.createElement('input');
                         input.type = 'color';
-                        input.value = color || defaultNodeColor;
+                        input.value =
+                          color !== undefined && color !== null && color !== ''
+                            ? color
+                            : defaultNodeColor;
                         input.addEventListener('input', e => {
                           setColor((e.target as HTMLInputElement).value);
                         });
@@ -436,7 +442,8 @@ const NodeEditDialog = ({
                       ? nodePreferences.nodeSizes.medium.width
                       : nodePreferences.nodeSizes.large.width
                   : 200,
-                backgroundColor: color || defaultNodeColor,
+                backgroundColor:
+                  color !== undefined && color !== null && color !== '' ? color : defaultNodeColor,
                 borderLeft: `4px solid ${theme.palette.primary.main}`,
                 borderRadius: 1,
                 p: 1,

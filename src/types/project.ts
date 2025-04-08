@@ -2,7 +2,6 @@ import { z } from 'zod';
 
 import type { Node, Edge } from '.';
 
-
 export enum ProjectTemplate {
   SOFTWARE_DEVELOPMENT = 'software_development',
   MARKETING_CAMPAIGN = 'marketing_campaign',

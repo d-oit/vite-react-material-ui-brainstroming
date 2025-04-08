@@ -168,6 +168,49 @@ export class ProjectService {
   }
 
   /**
+   * Save a project directly
+   * @param project Project to save
+   * @returns Promise that resolves with the saved project
+   */
+  public async saveProject(project: Project): Promise<Project> {
+    const metricId = performanceMonitoring.startMeasure(
+      'ProjectService.saveProject',
+      PerformanceCategory.DATA_LOADING,
+      { projectId: project.id }
+    );
+
+    try {
+      // Ensure updatedAt is set
+      const projectToSave = {
+        ...project,
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Save to IndexedDB
+      await indexedDBService.saveProject(projectToSave);
+
+      // Add history entry
+      await indexedDBService.addProjectHistoryEntry({
+        projectId: projectToSave.id,
+        action: 'save',
+        timestamp: projectToSave.updatedAt,
+        details: { version: projectToSave.version },
+      });
+
+      loggerService.info(`Project saved: ${projectToSave.id} - ${projectToSave.name}`);
+      return projectToSave;
+    } catch (error) {
+      loggerService.error(
+        'Error saving project',
+        error instanceof Error ? error : new Error(String(error))
+      );
+      throw new Error('Failed to save project');
+    } finally {
+      performanceMonitoring.endMeasure(metricId);
+    }
+  }
+
+  /**
    * Update a project
    * @param projectOrId Project or project ID to update
    * @param updates Optional partial project updates (when providing ID as first parameter)
@@ -411,14 +454,27 @@ export class ProjectService {
    * @returns Array of project templates
    */
   public getProjectTemplates(): Project[] {
-    return Object.values(projectTemplates).map(template => ({
-      ...template,
-      id: `template-${template.template}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      version: 1,
-      isTemplate: true,
-    })) as Project[];
+    return Object.values(projectTemplates).map(template => {
+      // Create a properly typed Project object
+      const project = {
+        id: `template-${template.template}`,
+        name: template.name || 'Unnamed Template',
+        description: template.description || '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        version: '1.0.0', // Version must be a string according to the schema
+        nodes: template.nodes || [],
+        edges: template.edges || [],
+        isTemplate: true, // This is not in the Project type but used in the app
+        template: template.template || ProjectTemplate.CUSTOM, // Ensure template is never undefined
+        syncSettings: {
+          enableS3Sync: false,
+          syncFrequency: 'manual',
+        },
+      };
+      // Use type assertion to handle the isTemplate property
+      return project as Project;
+    });
   }
 
   /**

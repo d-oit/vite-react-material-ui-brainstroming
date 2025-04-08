@@ -51,13 +51,13 @@ export const AccessibilityMenu = ({ position = 'bottom-left' }: AccessibilityMen
   useEffect(() => {
     try {
       const savedSettings = localStorage.getItem('accessibility_settings');
-      if (savedSettings) {
+      if (savedSettings !== null && savedSettings !== '') {
         const parsed = JSON.parse(savedSettings);
-        setHighContrast(parsed.highContrast || false);
-        setReduceMotion(parsed.reduceMotion || false);
-        setEnhancedFocus(parsed.enhancedFocus || false);
-        setKeyboardNavigation(parsed.keyboardNavigation || false);
-        setScreenReaderOptimized(parsed.screenReaderOptimized || false);
+        setHighContrast(parsed.highContrast === true);
+        setReduceMotion(parsed.reduceMotion === true);
+        setEnhancedFocus(parsed.enhancedFocus === true);
+        setKeyboardNavigation(parsed.keyboardNavigation === true);
+        setScreenReaderOptimized(parsed.screenReaderOptimized === true);
 
         // Apply settings
         applyAccessibilitySettings(parsed);
@@ -76,35 +76,35 @@ export const AccessibilityMenu = ({ position = 'bottom-left' }: AccessibilityMen
     screenReaderOptimized?: boolean;
   }) => {
     // Apply high contrast
-    if (settings.highContrast) {
+    if (settings.highContrast === true) {
       document.documentElement.classList.add('high-contrast');
     } else {
       document.documentElement.classList.remove('high-contrast');
     }
 
     // Apply reduced motion
-    if (settings.reduceMotion) {
+    if (settings.reduceMotion === true) {
       document.documentElement.classList.add('reduce-motion');
     } else {
       document.documentElement.classList.remove('reduce-motion');
     }
 
     // Apply enhanced focus
-    if (settings.enhancedFocus) {
+    if (settings.enhancedFocus === true) {
       document.documentElement.classList.add('enhanced-focus');
     } else {
       document.documentElement.classList.remove('enhanced-focus');
     }
 
     // Apply keyboard navigation
-    if (settings.keyboardNavigation) {
+    if (settings.keyboardNavigation === true) {
       document.documentElement.classList.add('keyboard-navigation');
     } else {
       document.documentElement.classList.remove('keyboard-navigation');
     }
 
     // Apply screen reader optimizations
-    if (settings.screenReaderOptimized) {
+    if (settings.screenReaderOptimized === true) {
       document.documentElement.classList.add('screen-reader-optimized');
     } else {
       document.documentElement.classList.remove('screen-reader-optimized');

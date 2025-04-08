@@ -2,7 +2,7 @@
  * Performance monitoring utilities for the application
  */
 
-import { useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 
 import { LoggerService } from '../services/LoggerService';
 
@@ -40,7 +40,7 @@ class PerformanceMonitoringService {
   private logger: LoggerService;
 
   constructor() {
-    this.logger = new LoggerService('PerformanceMonitoring');
+    this.logger = LoggerService.getInstance();
   }
 
   /**
@@ -110,8 +110,17 @@ class PerformanceMonitoringService {
     this.activeMetrics.delete(id);
 
     // Log the metric
+    // Map performance category to log category
+    const categoryMap: Record<PerformanceCategory, 'performance' | 'network' | 'storage'> = {
+      [PerformanceCategory.RENDERING]: 'performance',
+      [PerformanceCategory.DATA_LOADING]: 'storage',
+      [PerformanceCategory.USER_INTERACTION]: 'performance',
+      [PerformanceCategory.NETWORK]: 'network',
+      [PerformanceCategory.STORAGE]: 'storage',
+    };
+
     this.logger.info(`Performance metric: ${metric.name}`, {
-      category: metric.category,
+      category: categoryMap[metric.category],
       duration: metric.duration,
       metadata: metric.metadata,
     });
@@ -172,7 +181,8 @@ class PerformanceMonitoringService {
           perfMonitor.endMeasure(metricId);
           return result;
         } catch (error) {
-          perfMonitor.endMeasure(metricId, { error: error.message });
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          perfMonitor.endMeasure(metricId, { error: errorMessage });
           throw error;
         }
       };
@@ -186,31 +196,41 @@ class PerformanceMonitoringService {
    * @param Component The React component to wrap
    * @param name Optional name for the metric (defaults to component display name)
    */
-  public wrapComponent<P>(Component: React.ComponentType<P>, name?: string): React.FC<P> {
-    const componentName = name || Component.displayName || Component.name || 'UnknownComponent';
+  public wrapComponent<P extends { [key: string]: unknown }>(
+    Component: React.ComponentType<P>,
+    name?: string
+  ): React.FC<P> {
+    let componentName = 'UnknownComponent';
+    if (name !== undefined && name !== '') {
+      componentName = name;
+    } else if (Component.displayName !== undefined && Component.displayName !== '') {
+      componentName = Component.displayName;
+    } else if (Component.name !== undefined && Component.name !== '') {
+      componentName = Component.name;
+    }
     // Capture 'this' context for use in the wrapper
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const perfMonitor = this;
 
     const WrappedComponent: React.FC<P> = props => {
-      const metricId = React.useRef<string>('');
+      const metricId = useRef<string>('');
 
-      React.useEffect(() => {
+      useEffect(() => {
         // Start measuring component render time
         metricId.current = perfMonitor.startMeasure(
           `${componentName}_render`,
           PerformanceCategory.RENDERING,
-          { props: Object.keys(props) }
+          { propKeys: Object.keys(props as object) }
         );
 
         return () => {
-          performanceService.endMeasure(metricId.current);
+          perfMonitor.endMeasure(metricId.current);
         };
         // We need to include props to properly track component re-renders
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [props]);
 
-      return React.createElement(Component, props);
+      return React.createElement<P>(Component, props);
     };
 
     WrappedComponent.displayName = `PerformanceMonitored(${componentName})`;
@@ -227,10 +247,11 @@ class PerformanceMonitoringService {
     // Group by category
     const categorized = this.metrics.reduce(
       (acc, metric) => {
-        if (!acc[metric.category]) {
-          acc[metric.category] = [];
+        const category = metric.category;
+        if (acc[category] === undefined) {
+          acc[category] = [];
         }
-        acc[metric.category].push(metric);
+        acc[category].push(metric);
         return acc;
       },
       {} as Record<string, PerformanceMetric[]>
@@ -242,7 +263,11 @@ class PerformanceMonitoringService {
 
       // Sort by duration (descending)
       metrics
-        .sort((a, b) => (b.duration || 0) - (a.duration || 0))
+        .sort((a, b) => {
+          const durationA = a.duration ?? 0;
+          const durationB = b.duration ?? 0;
+          return durationB - durationA;
+        })
         .forEach(metric => {
           console.log(`${metric.name}: ${metric.duration?.toFixed(2)}ms`, metric.metadata || '');
         });
@@ -293,11 +318,11 @@ export function measurePerformance(category: PerformanceCategory) {
  * @param Component The component to wrap
  * @param name Optional name for the metric
  */
-export function withPerformanceMonitoring<P>(
+export function withPerformanceMonitoring<P extends { [key: string]: unknown }>(
   Component: React.ComponentType<P>,
   name?: string
 ): React.FC<P> {
-  return performanceMonitoring.wrapComponent(Component, name);
+  return performanceMonitoring.wrapComponent<P>(Component, name);
 }
 
 export default performanceMonitoring;

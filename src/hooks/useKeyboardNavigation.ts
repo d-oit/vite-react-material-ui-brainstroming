@@ -1,4 +1,5 @@
-import { RefObject, useCallback, useEffect } from 'react';
+import type { RefObject } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import type { Node } from '../types/models';
 

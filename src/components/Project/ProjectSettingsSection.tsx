@@ -79,7 +79,7 @@ export const ProjectSettingsSection = ({
       }
     };
 
-    checkS3Config();
+    void checkS3Config();
   }, [project]);
 
   // Handle sync settings change
@@ -355,7 +355,7 @@ export const ProjectSettingsSection = ({
               <Button
                 variant="contained"
                 startIcon={isSyncing ? <CircularProgress size={20} /> : <CloudUploadIcon />}
-                onClick={handleManualSync}
+                onClick={() => void handleManualSync()}
                 disabled={isSyncing || isSaving || !isS3Available}
                 sx={{ mr: 2 }}
               >
@@ -386,7 +386,7 @@ export const ProjectSettingsSection = ({
               <Button
                 variant="outlined"
                 startIcon={exportLoading ? <CircularProgress size={20} /> : <DownloadIcon />}
-                onClick={handleExportToFile}
+                onClick={() => void handleExportToFile()}
                 disabled={exportLoading || isSaving}
               >
                 Export to File
@@ -394,7 +394,7 @@ export const ProjectSettingsSection = ({
               <Button
                 variant="outlined"
                 startIcon={importLoading ? <CircularProgress size={20} /> : <UploadIcon />}
-                onClick={handleImportFromFile}
+                onClick={() => void handleImportFromFile()}
                 disabled={importLoading || isSaving}
               >
                 Import from File
@@ -410,7 +410,7 @@ export const ProjectSettingsSection = ({
               <Button
                 variant="outlined"
                 startIcon={isSyncing ? <CircularProgress size={20} /> : <CloudUploadIcon />}
-                onClick={handleManualSync}
+                onClick={() => void handleManualSync()}
                 disabled={isSyncing || isSaving || !isS3Available}
               >
                 Export to S3
@@ -418,7 +418,7 @@ export const ProjectSettingsSection = ({
               <Button
                 variant="outlined"
                 startIcon={importLoading ? <CircularProgress size={20} /> : <CloudDownloadIcon />}
-                onClick={handleImportFromS3}
+                onClick={() => void handleImportFromS3()}
                 disabled={importLoading || isSaving || !isS3Available}
               >
                 Import from S3

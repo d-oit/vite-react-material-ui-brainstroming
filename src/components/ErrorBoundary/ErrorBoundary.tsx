@@ -62,7 +62,7 @@ class ErrorBoundaryClass extends Component<Props, State> {
 
     // Log to IndexedDB if available
     try {
-      indexedDBService.log('error', error.message, {
+      void indexedDBService.log('error', error.message, {
         stack: error.stack,
         componentStack: errorInfo.componentStack,
         timestamp: new Date().toISOString(),
@@ -97,7 +97,7 @@ class ErrorBoundaryClass extends Component<Props, State> {
   render(): ReactNode {
     if (this.state.hasError) {
       // If a custom fallback is provided, use it
-      if (this.props.fallback) {
+      if (this.props.fallback !== undefined && this.props.fallback !== null) {
         return this.props.fallback;
       }
 
@@ -120,7 +120,7 @@ class ErrorBoundaryClass extends Component<Props, State> {
               Something went wrong
             </Typography>
 
-            <Typography variant="body1" color="text.secondary" paragraph>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
               We&apos;re sorry, but an error occurred while rendering this page.
             </Typography>
 
@@ -128,10 +128,15 @@ class ErrorBoundaryClass extends Component<Props, State> {
 
             <Box sx={{ mb: 3 }}>
               <Typography variant="subtitle2" color="error" align="left">
-                Error: {this.state.error?.message || 'Unknown error'}
+                Error:{' '}
+                {this.state.error?.message !== undefined &&
+                this.state.error?.message !== null &&
+                this.state.error?.message !== ''
+                  ? this.state.error.message
+                  : 'Unknown error'}
               </Typography>
 
-              {this.state.errorInfo && (
+              {this.state.errorInfo !== undefined && this.state.errorInfo !== null && (
                 <Box
                   component="pre"
                   sx={{

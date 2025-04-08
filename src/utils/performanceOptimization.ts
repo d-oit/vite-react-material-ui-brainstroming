@@ -91,7 +91,7 @@ export function useLazyLoad<T>(
   const [error, setError] = useState<Error | null>(null);
 
   const loadComponent = async () => {
-    if (component || loading) return;
+    if (component !== null || loading === true) return;
 
     setLoading(true);
 
@@ -118,8 +118,8 @@ export function useLazyLoad<T>(
   };
 
   useEffect(() => {
-    if (options.immediate) {
-      loadComponent();
+    if (options.immediate === true) {
+      void loadComponent();
     }
   }, []);
 
@@ -284,7 +284,7 @@ export function useResource<T>(
   const [error, setError] = useState<Error | null>(null);
 
   const loadResource = async () => {
-    if (resource || loading) return;
+    if (resource !== null || loading === true) return;
 
     setLoading(true);
 
@@ -316,8 +316,8 @@ export function useResource<T>(
   };
 
   useEffect(() => {
-    if (options.immediate) {
-      loadResource();
+    if (options.immediate === true) {
+      void loadResource();
     }
   }, [resourceUrl]);
 

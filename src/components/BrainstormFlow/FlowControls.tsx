@@ -20,10 +20,10 @@ const FlowControls = memo(({ onSave, readOnly }: FlowControlsProps) => {
       }}
       showZoom={true}
       showFitView={true}
-      showInteractive={!readOnly}
+      showInteractive={readOnly !== true}
       position="bottom-right"
     >
-      {!readOnly && onSave && (
+      {readOnly !== true && onSave !== undefined && (
         <ControlButton onClick={onSave} title="Save changes">
           <SaveIcon />
         </ControlButton>

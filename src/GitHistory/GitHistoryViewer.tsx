@@ -59,7 +59,7 @@ export const GitHistoryViewer = ({ projectId }: GitHistoryViewerProps) => {
       }
     };
 
-    fetchHistory();
+    void fetchHistory(); // Use void to explicitly ignore the promise
   }, [projectId]);
 
   const handleCommitClick = async (commit: GitCommit) => {
@@ -67,10 +67,14 @@ export const GitHistoryViewer = ({ projectId }: GitHistoryViewerProps) => {
   };
 
   const handleCompareClick = (commit: GitCommit) => {
-    if (selectedCommit && selectedCommit.hash !== commit.hash) {
+    if (
+      selectedCommit !== null &&
+      selectedCommit !== undefined &&
+      selectedCommit.hash !== commit.hash
+    ) {
       setCompareCommit(commit);
       setCompareDialogOpen(true);
-      performComparison(selectedCommit.hash, commit.hash);
+      void performComparison(selectedCommit.hash, commit.hash); // Use void to explicitly ignore the promise
     }
   };
 
@@ -99,7 +103,7 @@ export const GitHistoryViewer = ({ projectId }: GitHistoryViewerProps) => {
     );
   }
 
-  if (error) {
+  if (error !== null && error !== undefined && error !== '') {
     return (
       <Box sx={{ p: 3 }}>
         <Typography color="error">{error}</Typography>
@@ -167,7 +171,7 @@ export const GitHistoryViewer = ({ projectId }: GitHistoryViewerProps) => {
       </Paper>
 
       <Paper sx={{ width: '60%', p: 2, height: '100%', overflow: 'auto' }}>
-        {selectedCommit ? (
+        {selectedCommit !== null && selectedCommit !== undefined ? (
           <Box>
             <Typography variant="h6" gutterBottom>
               Commit Details

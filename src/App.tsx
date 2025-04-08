@@ -6,8 +6,15 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 // They might be used in child components or for future implementation
 import { registerSW } from 'virtual:pwa-register';
 
+// Import all styles
+import './styles';
+
 import AccessibilityMenu from './components/Accessibility/AccessibilityMenu';
+import AccessibilityOverlay from './components/Accessibility/AccessibilityOverlay';
+import AccessibilityProvider from './components/Accessibility/AccessibilityProvider';
+import ScreenReaderAnnouncer from './components/Accessibility/ScreenReaderAnnouncer';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
+import RTLProvider from './components/I18n/RTLProvider';
 import _OfflineFallback from './components/OfflineIndicator/OfflineFallback';
 import _OfflineIndicator from './components/OfflineIndicator/OfflineIndicator';
 import withOfflineFallback from './components/OfflineIndicator/withOfflineFallback';
@@ -30,12 +37,14 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 
 // Lazy load Material UI components that are heavy
 // These components are used dynamically based on user interactions
+// These components are lazy loaded but not directly used in this file
+// They are kept for potential future use
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const Dialog = lazy(() => import('@mui/material/Dialog'));
+const _Dialog = lazy(() => import('@mui/material/Dialog'));
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const Drawer = lazy(() => import('@mui/material/Drawer'));
+const _Drawer = lazy(() => import('@mui/material/Drawer'));
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const AppBar = lazy(() => import('@mui/material/AppBar'));
+const _AppBar = lazy(() => import('@mui/material/AppBar'));
 
 // Define theme settings
 const getDesignTokens = (mode: PaletteMode): ThemeOptions => {
@@ -130,13 +139,14 @@ const AppWithTheme = () => {
   };
 
   // This function is defined but not currently used - kept for future implementation
-  const _toggleDrawer = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const __toggleDrawer = () => {
     setDrawerOpen(!drawerOpen);
   };
 
   const handleUpdateApp = () => {
     if (updateSWFunction) {
-      updateSWFunction(true);
+      void updateSWFunction(true);
     }
   };
 
@@ -177,8 +187,9 @@ const AppWithTheme = () => {
 
     // Register service worker for PWA
     try {
+      // Register service worker and store the function
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const updateSW = registerSW({
+      const _updateSW = registerSW({
         onNeedRefresh(updateFn) {
           // Store the update function for later use
           setUpdateSWFunction(() => updateFn);
@@ -261,11 +272,15 @@ const AppWithTheme = () => {
 
               {/* Offline indicator removed as per UI update plan */}
 
-              {/* Accessibility menu */}
+              {/* Accessibility components */}
               <AccessibilityMenu position="bottom-left" />
+              <AccessibilityOverlay />
 
               {/* Performance profiler */}
               <PerformanceProfiler />
+
+              {/* Screen reader announcer */}
+              <ScreenReaderAnnouncer messages={[]} politeness="polite" />
 
               {/* Update notification */}
               <Snackbar
@@ -295,7 +310,11 @@ const App = () => {
   return (
     <SettingsProvider>
       <I18nProvider initialLocale="en">
-        <AppWithTheme />
+        <RTLProvider>
+          <AccessibilityProvider>
+            <AppWithTheme />
+          </AccessibilityProvider>
+        </RTLProvider>
       </I18nProvider>
     </SettingsProvider>
   );

@@ -18,7 +18,7 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
 
   // Load project
   const loadProject = useCallback(async () => {
-    if (!projectId) return;
+    if (projectId === undefined || projectId === null || projectId === '') return;
 
     setLoading(true);
     setError(null);
@@ -27,7 +27,7 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
       // Try to load from S3, but don't fail if S3 is not configured
       try {
         const loadedProject = await downloadProject(projectId, version);
-        if (loadedProject) {
+        if (loadedProject !== null && loadedProject !== undefined) {
           setProject(loadedProject);
           return;
         }
@@ -47,7 +47,7 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
       // If we get here, either S3 failed or returned no project
       // Try to load from local storage as a fallback
       const localProject = await loadProjectFromLocalStorage(projectId);
-      if (localProject) {
+      if (localProject !== null && localProject !== undefined) {
         setProject(localProject);
       } else {
         setError('Project not found');
@@ -92,7 +92,7 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
 
   // Save project
   const saveProject = useCallback(async (): Promise<boolean> => {
-    if (!project) return false;
+    if (project === null || project === undefined) return false;
 
     setIsSaving(true);
     try {
@@ -147,13 +147,14 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
 
   // Create new version
   const createNewVersion = useCallback(async (): Promise<boolean> => {
-    if (!project) return false;
+    if (project === null || project === undefined) return false;
 
     setIsSaving(true);
     try {
       // Increment version number (assuming semver format)
       const versionParts = project.version.split('.');
-      const newMinorVersion = parseInt(versionParts[1] || '0') + 1;
+      const minorVersionStr = versionParts[1] ?? '0';
+      const newMinorVersion = parseInt(minorVersionStr, 10) + 1;
       const newVersion = `${versionParts[0]}.${newMinorVersion}.0`;
 
       const updatedProject: Project = {
@@ -192,7 +193,7 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
   // Add node
   const addNode = useCallback(
     (node: Omit<Node, 'id'>): string => {
-      if (!project) return '';
+      if (project === null || project === undefined) return '';
 
       const nodeId = uuidv4();
       const newNode: Node = {
@@ -200,8 +201,8 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
         id: nodeId,
       };
 
-      setProject(prev => {
-        if (!prev) return null;
+      setProject((prev: Project | null) => {
+        if (prev === null || prev === undefined) return null;
         return {
           ...prev,
           nodes: [...prev.nodes, newNode],
@@ -217,13 +218,15 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
   // Update node
   const updateNode = useCallback(
     (nodeId: string, updates: Partial<Node>): boolean => {
-      if (!project) return false;
+      if (project === null || project === undefined) return false;
 
-      setProject(prev => {
-        if (!prev) return null;
+      setProject((prev: Project | null) => {
+        if (prev === null || prev === undefined) return null;
         return {
           ...prev,
-          nodes: prev.nodes.map(node => (node.id === nodeId ? { ...node, ...updates } : node)),
+          nodes: prev.nodes.map((node: Node) =>
+            node.id === nodeId ? { ...node, ...updates } : node
+          ),
           updatedAt: new Date().toISOString(),
         };
       });
@@ -236,15 +239,17 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
   // Remove node
   const removeNode = useCallback(
     (nodeId: string): boolean => {
-      if (!project) return false;
+      if (project === null || project === undefined) return false;
 
-      setProject(prev => {
-        if (!prev) return null;
+      setProject((prev: Project | null) => {
+        if (prev === null || prev === undefined) return null;
         return {
           ...prev,
-          nodes: prev.nodes.filter(node => node.id !== nodeId),
+          nodes: prev.nodes.filter((node: Node) => node.id !== nodeId),
           // Also remove any edges connected to this node
-          edges: prev.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId),
+          edges: prev.edges.filter(
+            (edge: Edge) => edge.source !== nodeId && edge.target !== nodeId
+          ),
           updatedAt: new Date().toISOString(),
         };
       });
@@ -257,7 +262,7 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
   // Add edge
   const addEdge = useCallback(
     (edge: Omit<Edge, 'id'>): string => {
-      if (!project) return '';
+      if (project === null || project === undefined) return '';
 
       const edgeId = uuidv4();
       const newEdge: Edge = {
@@ -265,8 +270,8 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
         id: edgeId,
       };
 
-      setProject(prev => {
-        if (!prev) return null;
+      setProject((prev: Project | null) => {
+        if (prev === null || prev === undefined) return null;
         return {
           ...prev,
           edges: [...prev.edges, newEdge],
@@ -282,13 +287,15 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
   // Update edge
   const updateEdge = useCallback(
     (edgeId: string, updates: Partial<Edge>): boolean => {
-      if (!project) return false;
+      if (project === null || project === undefined) return false;
 
-      setProject(prev => {
-        if (!prev) return null;
+      setProject((prev: Project | null) => {
+        if (prev === null || prev === undefined) return null;
         return {
           ...prev,
-          edges: prev.edges.map(edge => (edge.id === edgeId ? { ...edge, ...updates } : edge)),
+          edges: prev.edges.map((edge: Edge) =>
+            edge.id === edgeId ? { ...edge, ...updates } : edge
+          ),
           updatedAt: new Date().toISOString(),
         };
       });
@@ -301,13 +308,13 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
   // Remove edge
   const removeEdge = useCallback(
     (edgeId: string): boolean => {
-      if (!project) return false;
+      if (project === null || project === undefined) return false;
 
-      setProject(prev => {
-        if (!prev) return null;
+      setProject((prev: Project | null) => {
+        if (prev === null || prev === undefined) return null;
         return {
           ...prev,
-          edges: prev.edges.filter(edge => edge.id !== edgeId),
+          edges: prev.edges.filter((edge: Edge) => edge.id !== edgeId),
           updatedAt: new Date().toISOString(),
         };
       });
@@ -319,10 +326,18 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
 
   // Auto-save effect
   useEffect(() => {
-    if (!autoSave || !project || loading || isSaving) return;
+    if (
+      autoSave === false ||
+      project === null ||
+      project === undefined ||
+      loading === true ||
+      isSaving === true
+    ) {
+      return;
+    }
 
     const timer = setTimeout(() => {
-      saveProject();
+      void saveProject(); // void operator to explicitly ignore the promise
     }, 5000); // Auto-save after 5 seconds of inactivity
 
     return () => clearTimeout(timer);
@@ -330,8 +345,8 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
 
   // Load project on mount
   useEffect(() => {
-    if (projectId) {
-      loadProject();
+    if (projectId !== undefined && projectId !== null && projectId !== '') {
+      void loadProject(); // void operator to explicitly ignore the promise
     }
   }, [projectId, loadProject]);
 

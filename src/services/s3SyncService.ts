@@ -15,7 +15,7 @@ export class S3SyncService {
   private retryDelayMs = 1000;
 
   async syncProject(project: Project): Promise<S3SyncResult> {
-    if (!project.syncSettings?.enableS3Sync) {
+    if (project.syncSettings?.enableS3Sync !== true) {
       return {
         success: false,
         message: 'S3 sync is not enabled for this project',
@@ -43,7 +43,7 @@ export class S3SyncService {
   }
 
   async getSyncStatus(project: Project): Promise<S3SyncResult> {
-    if (!project.syncSettings?.enableS3Sync) {
+    if (project.syncSettings?.enableS3Sync !== true) {
       return {
         success: false,
         message: 'S3 sync is not enabled',
@@ -55,9 +55,10 @@ export class S3SyncService {
       const lastSynced = project.syncSettings.lastSyncedAt;
       return {
         success: true,
-        message: lastSynced
-          ? `Last synced at ${new Date(lastSynced).toLocaleString()}`
-          : 'Never synced',
+        message:
+          typeof lastSynced === 'string' && lastSynced.length > 0
+            ? `Last synced at ${new Date(lastSynced).toLocaleString()}`
+            : 'Never synced',
         timestamp: new Date().toISOString(),
       };
     } catch (error) {
@@ -71,7 +72,7 @@ export class S3SyncService {
   }
 
   private async validateS3Settings(settings: SyncSettings): Promise<void> {
-    if (!settings.s3Path) {
+    if (settings.s3Path == null || settings.s3Path === '') {
       throw new Error('S3 path is not configured');
     }
 
@@ -109,7 +110,7 @@ export class S3SyncService {
       });
 
       // Update last synced timestamp
-      if (project.syncSettings) {
+      if (project.syncSettings != null) {
         project.syncSettings.lastSyncedAt = new Date().toISOString();
       }
     } catch (error) {

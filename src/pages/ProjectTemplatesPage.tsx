@@ -25,8 +25,10 @@ import { useNavigate } from 'react-router-dom';
 
 import { AppShell } from '../components/Layout/AppShell';
 import { useI18n } from '../contexts/I18nContext';
+import { projectTemplates, createProjectFromTemplate } from '../data/projectTemplates';
 import projectService from '../services/ProjectService';
 import type { Project } from '../types';
+import { ProjectTemplate } from '../types/project';
 
 // Sample template thumbnails
 const templateImages = [
@@ -37,64 +39,19 @@ const templateImages = [
   '/templates/kanban.png',
 ];
 
-// Sample templates
-const sampleTemplates: Project[] = [
-  {
-    id: 'template-blank',
-    name: 'Blank Canvas',
-    description: 'Start with a clean slate for any type of brainstorming session.',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    version: 1,
-    nodes: [],
-    edges: [],
-    isTemplate: true,
-  },
-  {
-    id: 'template-business-model',
-    name: 'Business Model Canvas',
-    description: 'Visualize your business model with this structured template.',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    version: 1,
-    nodes: [],
-    edges: [],
-    isTemplate: true,
-  },
-  {
-    id: 'template-swot',
-    name: 'SWOT Analysis',
-    description: 'Analyze Strengths, Weaknesses, Opportunities, and Threats.',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    version: 1,
-    nodes: [],
-    edges: [],
-    isTemplate: true,
-  },
-  {
-    id: 'template-mind-map',
-    name: 'Mind Map',
-    description: 'Organize ideas around a central concept with this mind mapping template.',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    version: 1,
-    nodes: [],
-    edges: [],
-    isTemplate: true,
-  },
-  {
-    id: 'template-kanban',
-    name: 'Kanban Board',
-    description: 'Visualize your workflow with To Do, In Progress, and Done columns.',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    version: 1,
-    nodes: [],
-    edges: [],
-    isTemplate: true,
-  },
-];
+// Convert project templates to Project array
+const sampleTemplates: Project[] = Object.values(projectTemplates).map((template, index) => ({
+  id: `template-${Object.keys(projectTemplates)[index]}`,
+  name: template.name || 'Unnamed Template',
+  description: template.description || '',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  version: 1,
+  nodes: template.nodes || [],
+  edges: template.edges || [],
+  isTemplate: true,
+  template: template.template,
+}));
 
 interface ProjectTemplatesPageProps {
   onThemeToggle: () => void;
@@ -117,16 +74,31 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
   const [loading, setLoading] = useState(false);
   const [_error, setError] = useState<string | null>(null);
 
-  const handleCreateFromTemplate = async () => {
+  const handleCreateFromTemplate = async (): Promise<void> => {
     if (!selectedTemplate || !newProjectName.trim()) return;
 
     try {
       setLoading(true);
       // Create a new project based on the template
-      const newProject = await projectService.createProject(
-        newProjectName,
-        newProjectDescription || selectedTemplate.description
-      );
+      let newProject;
+
+      if (selectedTemplate?.template) {
+        // Use the template type if available
+        newProject = createProjectFromTemplate(
+          selectedTemplate.template,
+          newProjectName,
+          newProjectDescription || selectedTemplate.description || ''
+        );
+
+        // Save the project to the database
+        newProject = await projectService.saveProject(newProject);
+      } else {
+        // Fallback to simple project creation
+        newProject = await projectService.createProject(
+          newProjectName,
+          newProjectDescription || selectedTemplate?.description || ''
+        );
+      }
 
       // Navigate to the new project
       navigate(`/projects/${newProject.id}`);
@@ -336,7 +308,7 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
           <DialogActions>
             <Button onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
             <Button
-              onClick={handleCreateFromTemplate}
+              onClick={() => void handleCreateFromTemplate()}
               variant="contained"
               disabled={!newProjectName.trim() || loading}
             >

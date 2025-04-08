@@ -34,7 +34,7 @@ const FlowToolbar = memo(
             <FitScreen />
           </IconButton>
         </Tooltip>
-        {!readOnly && (
+        {readOnly !== true && (
           <Tooltip title={t('brainstorm.addNode')}>
             <IconButton onClick={() => onAddNode(NodeType.IDEA)} size="large">
               <Add />

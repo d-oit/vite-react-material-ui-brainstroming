@@ -10,7 +10,8 @@ interface ChatInterfaceProps {
 
 export function ChatInterface({ projectId }: ChatInterfaceProps) {
   // Create a simple project context object
-  const projectContext = projectId ? { projectId } : undefined;
+  const projectContext =
+    projectId !== undefined && projectId !== null && projectId !== '' ? { projectId } : undefined;
 
   // Optional handler for adding nodes (not used in standalone chat)
   const handleAddNodes = (nodes: NodeData[]) => {

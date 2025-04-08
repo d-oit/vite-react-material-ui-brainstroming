@@ -30,11 +30,6 @@ import type {
   Connection,
   ReactFlowInstance,
   XYPosition,
-  // These types are imported for type definitions but not directly used
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  NodeChange,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  EdgeChange,
   OnNodesChange,
   OnEdgesChange,
   Background as ReactFlowBackground,
@@ -46,17 +41,24 @@ import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import loggerService from '../../services/LoggerService';
 import type { NodeData, Node, Edge } from '../../types';
-import { NodeType } from '../../types';
+import { NodeType, EdgeType } from '../../types';
 // Import performance monitoring utilities
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { useRenderPerformance } from '../../utils/performanceMonitoring';
+// Performance monitoring is disabled for now but will be used in future optimizations
 import { MemoizedChatPanel } from '../Chat/ChatPanel';
 
-import CustomNode from './CustomNode';
-import { MemoizedNodeEditDialog } from './NodeEditDialog';
+// Import components needed for the flow
+import AccessibilityPanel from './AccessibilityPanel';
+import EditableNode from './EditableNode';
+import EnhancedControls from './EnhancedControls';
+import FlowContextMenuHandler from './FlowContextMenuHandler';
+import KeyboardShortcutsDialog from './KeyboardShortcutsDialog';
+import KeyboardShortcutsHandler from './KeyboardShortcutsHandler';
+import MobileControls from './MobileControls';
+import ResponsiveNodeEditDialog from './ResponsiveNodeEditDialog';
+// NodeStyleDialog will be used in future implementations
 
 // Lazy load React Flow components and CSS with preloading hints
-const ReactFlowModule = lazy(() => {
+const ReactFlowModule = lazy(async () => {
   // Add preload hints for better performance
   const cssLink = document.createElement('link');
   cssLink.rel = 'preload';
@@ -112,10 +114,10 @@ const ReactFlowComponents = ({ children }: ReactFlowComponentsProps) => (
 
 // Define custom node types
 const nodeTypes: NodeTypes = {
-  [NodeType.IDEA]: CustomNode,
-  [NodeType.TASK]: CustomNode,
-  [NodeType.NOTE]: CustomNode,
-  [NodeType.RESOURCE]: CustomNode,
+  [NodeType.IDEA]: EditableNode,
+  [NodeType.TASK]: EditableNode,
+  [NodeType.NOTE]: EditableNode,
+  [NodeType.RESOURCE]: EditableNode,
 };
 
 interface EnhancedBrainstormFlowProps {
@@ -140,9 +142,7 @@ export { EnhancedBrainstormFlow };
 
 // This is the inner component that uses the ReactFlow hooks
 // Split into smaller components for better maintainability
-const FlowToolbar = lazy(() => import('./FlowToolbar'));
-const FlowControls = lazy(() => import('./FlowControls'));
-const FlowChat = lazy(() => import('./FlowChat'));
+// These components will be used in future implementations
 
 const FlowContent = ({
   initialNodes = [],
@@ -160,41 +160,31 @@ const FlowContent = ({
   const isInitialized = useRef(false);
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
 
-  // Use reducers for complex state management
-  const [flowState, dispatch] = useReducer(flowReducer, {
-    nodes: [],
-    edges: initialEdges || [],
-    nodeEditOpen: false,
-    selectedNode: null,
-    snackbarOpen: false,
-    snackbarMessage: '',
-    snackbarSeverity: 'info' as 'success' | 'error' | 'info',
-    deleteConfirmOpen: false,
-    nodeToDelete: null,
-    showChat: false,
-  });
+  // State for nodes and edges
+  const [nodes, setNodes] = useState<Node[]>(initialNodes || []);
+  const [edges, setEdges] = useState<Edge[]>(initialEdges || []);
 
-  // Use virtualization for large node lists
-  const virtualizedNodes = useVirtualization(flowState.nodes, {
-    itemHeight: 100,
-    overscan: 5,
-  });
+  // State for node editing and styling
+  const [nodeEditOpen, setNodeEditOpen] = useState(false);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
 
-  // These will be initialized when ReactFlow is loaded
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [reactFlowHooks, setReactFlowHooks] = useState<{
-    useNodesState: unknown;
-    useEdgesState: unknown;
-    useReactFlow: unknown;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    addEdge: (params: any, edges: any) => any;
-    onNodesChange: null;
-    onEdgesChange: null;
-    fitView: null;
-    zoomIn: null;
-    zoomOut: null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  }>({} as any);
+  // State for snackbar notifications
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'info'>('info');
+
+  // State for accessibility panel and keyboard shortcuts dialog
+  const [accessibilityPanelOpen, setAccessibilityPanelOpen] = useState(false);
+  const [keyboardShortcutsOpen, setKeyboardShortcutsOpen] = useState(false);
+
+  // State for delete confirmation
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [nodeToDelete, setNodeToDelete] = useState<string | null>(null);
+
+  // State for chat panel
+  const [showChat, setShowChat] = useState(false);
+
+  // ReactFlow hooks will be used in future optimizations
 
   // References to ReactFlow functions
   const [fitView, setFitView] = useState<
@@ -266,23 +256,15 @@ const FlowContent = ({
       }
 
       // Create new edge with unique ID and animation
-      const newEdge = {
-        ...connection,
+      const newEdge: Edge = {
         id: `edge-${connection.source}-${connection.target}-${Date.now()}`,
-        type: 'smoothstep',
+        source: connection.source,
+        target: connection.target,
+        type: EdgeType.SMOOTHSTEP,
         animated: true, // Add animation to make it more visible
-        style: { stroke: '#2196f3', strokeWidth: 2 }, // Add styling
       };
 
-      // Use the addEdge function from reactFlowHooks if available
-      if (reactFlowHooks.addEdge) {
-        const updatedEdges = reactFlowHooks.addEdge(newEdge, edges);
-        setEdges(updatedEdges);
-
-        if (externalEdgesChange) {
-          externalEdgesChange(updatedEdges);
-        }
-      } else {
+      // Add the new edge to the edges array
         // Fallback if addEdge is not available yet
         const updatedEdges = [...edges, newEdge];
         setEdges(updatedEdges);
@@ -294,7 +276,7 @@ const FlowContent = ({
 
       showSnackbar(t('brainstorm.edgeCreated') || 'Connection created', 'success');
     },
-    [edges, setEdges, externalEdgesChange, t, reactFlowHooks]
+    [edges, setEdges, externalEdgesChange, t]
   );
 
   // Handle node click
@@ -327,15 +309,17 @@ const FlowContent = ({
 
   // Handle node edit
   const handleNodeEdit = useCallback(
-    (nodeData: NodeData) => {
-      if (!selectedNode) return;
-
+    (nodeId: string, newData: { label: string; content: string; tags?: string[] }) => {
       const updatedNodes = nodes.map(node => {
-        if (node.id === selectedNode.id) {
+        if (node.id === nodeId) {
           return {
             ...node,
             data: {
-              ...nodeData,
+              ...node.data,
+              label: newData.label,
+              content: newData.content,
+              tags: newData.tags || [],
+              updatedAt: new Date().toISOString(),
               onEdit: node.data.onEdit,
               onDelete: node.data.onDelete,
             },
@@ -354,7 +338,7 @@ const FlowContent = ({
 
       showSnackbar(t('brainstorm.nodeUpdated'), 'success');
     },
-    [nodes, selectedNode, setNodes, externalNodesChange, t]
+    [nodes, setNodes, externalNodesChange, t]
   );
 
   // Handle node delete
@@ -427,7 +411,7 @@ const FlowContent = ({
 
       // Check if skipDeleteConfirmation is enabled in settings
       const skipConfirmation =
-        process.env.VITE_SKIP_DELETE_CONFIRMATION === 'true' || settings.skipDeleteConfirmation;
+        process.env.VITE_SKIP_DELETE_CONFIRMATION === 'true' || Boolean(settings.skipDeleteConfirmation);
 
       if (skipConfirmation) {
         handleNodeDelete(nodeId);
@@ -454,15 +438,45 @@ const FlowContent = ({
             }
           },
           onDelete: handleNodeDeleteRequest,
+          // Add handler for direct editing
+          onSaveDirectEdit: (id: string, newData: { label: string; content: string }) => {
+            const updatedNodes = nodes.map(n => {
+              if (n.id === id) {
+                return {
+                  ...n,
+                  data: {
+                    ...n.data,
+                    label: newData.label,
+                    content: newData.content,
+                    updatedAt: new Date().toISOString(),
+                  },
+                };
+              }
+              return n;
+            });
+
+            setNodes(updatedNodes);
+
+            if (externalNodesChange) {
+              externalNodesChange(updatedNodes as Node[]);
+            }
+
+            // Log the update
+            loggerService.info('Node directly edited', {
+              nodeId: id,
+              newLabel: newData.label,
+              contentLength: newData.content.length,
+            });
+          },
         },
       }));
     },
-    [nodes, handleNodeDeleteRequest]
+    [nodes, handleNodeDeleteRequest, setNodes, externalNodesChange]
   );
 
   // Add a new node
   const addNode = useCallback(
-    (type: NodeType = NodeType.IDEA) => {
+    (type: NodeType) => {
       if (readOnly || !reactFlowInstance) return;
 
       // Get the center position of the viewport
@@ -533,7 +547,7 @@ const FlowContent = ({
    */
   const handleAddNodesFromChat = useCallback(
     (nodeDatas: NodeData[]) => {
-      if (!reactFlowInstance || !nodeDatas.length) return;
+      if (!reactFlowInstance || nodeDatas.length === 0) return;
 
       // Get the current viewport
       const { x, y, zoom } = reactFlowInstance.getViewport();
@@ -592,7 +606,7 @@ const FlowContent = ({
         zoomIn: zoomIn,
         zoomOut: zoomOut,
         fitView: () => fitView({ padding: 0.2 }),
-        addNode,
+        addNode: (type?: NodeType) => addNode(type || NodeType.IDEA),
         saveFlow,
       };
     }
@@ -604,7 +618,7 @@ const FlowContent = ({
 
   // Process initial nodes to add event handlers
   useEffect(() => {
-    if (initialNodes.length > 0) {
+    if (initialNodes.length > 0 && Array.isArray(initialNodes)) {
       const processedNodes = processNodes(initialNodes);
       setNodes(processedNodes);
     }
@@ -713,12 +727,124 @@ const FlowContent = ({
                     zoomOnScroll={true}
                     panOnScroll={true}
                     panOnDrag={!isMobile}
+                    onNodeContextMenu={(event, node) => {
+                      if (readOnly) return;
+                      event.preventDefault();
+                      const nodeData = nodes.find(n => n.id === node.id);
+                      if (nodeData) {
+                        // The FlowContextMenuHandler will handle this event
+                      }
+                    }}
+                    onEdgeContextMenu={(event, edge) => {
+                      if (readOnly) return;
+                      event.preventDefault();
+                      const edgeData = edges.find(e => e.id === edge.id);
+                      if (edgeData) {
+                        // The FlowContextMenuHandler will handle this event
+                      }
+                    }}
+                    onPaneContextMenu={(event) => {
+                      if (readOnly) return;
+                      event.preventDefault();
+                      // The FlowContextMenuHandler will handle this event
+                    }}
                   >
+                    {/* Controls - different for mobile and desktop */}
+                    {isMobile ? (
+                      <MobileControls
+                        onZoomIn={() => reactFlowInstance?.zoomIn()}
+                        onZoomOut={() => reactFlowInstance?.zoomOut()}
+                        onFitView={() => reactFlowInstance?.fitView({ padding: 0.2 })}
+                        onToggleGrid={() => console.log('Toggle grid')}
+                        onUndo={() => console.log('Undo')}
+                        onRedo={() => console.log('Redo')}
+                        onSave={saveFlow}
+                        onAddNode={addNode}
+                        readOnly={readOnly}
+                      />
+                    ) : (
+                      <EnhancedControls
+                        onZoomIn={() => reactFlowInstance?.zoomIn()}
+                        onZoomOut={() => reactFlowInstance?.zoomOut()}
+                        onFitView={() => reactFlowInstance?.fitView({ padding: 0.2 })}
+                        onToggleGrid={() => console.log('Toggle grid')}
+                        onUndo={() => console.log('Undo')}
+                        onRedo={() => console.log('Redo')}
+                        onSave={saveFlow}
+                        onAccessibility={() => setAccessibilityPanelOpen(true)}
+                        position="bottom-right"
+                      />
+                    )}
                     <Background
                       color={theme.palette.mode === 'dark' ? '#555' : '#aaa'}
                       gap={isMobile ? 15 : 20}
                       size={isMobile ? 0.5 : 1}
                       variant={'dots' as BackgroundVariant}
+                    />
+
+                    {/* Context Menu Handler */}
+                    <FlowContextMenuHandler
+                      nodes={nodes}
+                      edges={edges}
+                      onNodesChange={setNodes}
+                      onEdgesChange={setEdges}
+                      onNodeEdit={(node) => {
+                        setSelectedNode(node);
+                        setNodeEditOpen(true);
+                      }}
+                      onNodeDelete={(node) => handleNodeDeleteRequest(node.id)}
+                      onNodeStyle={(node) => {
+                        setSelectedNode(node);
+                        // Node styling will be implemented in future updates
+                        console.log('Style node:', node);
+                      }}
+                      onAddChildNode={(node) => {
+                        // Process the node to add event handlers
+                        const childNode: Node = {
+                          id: `node-${Date.now()}`,
+                          type: node.type,
+                          position: {
+                            x: node.position.x + 150,
+                            y: node.position.y + 100,
+                          },
+                          data: {
+                            id: `data-${Date.now()}`,
+                            label: `Child of ${node.data.label}`,
+                            content: '',
+                            tags: [],
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString(),
+                            title: '',
+                            onEdit: (id: string) => {
+                              const selectedNode = nodes.find(n => n.id === id);
+                              if (selectedNode) {
+                                setSelectedNode(selectedNode);
+                                setNodeEditOpen(true);
+                              }
+                            },
+                            onDelete: (id: string) => {
+                              setNodeToDelete(id);
+                              setDeleteConfirmOpen(true);
+                            },
+                          },
+                        };
+
+                        const childEdge: Edge = {
+                          id: `edge-${Date.now()}`,
+                          source: node.id,
+                          target: childNode.id,
+                          type: EdgeType.SMOOTHSTEP,
+                          animated: false,
+                        };
+
+                        setNodes([...nodes, childNode]);
+                        setEdges([...edges, childEdge]);
+                      }}
+                      onLinkNodeToChat={(node) => {
+                        // This would be implemented when chat integration is added
+                        console.log('Link node to chat:', node);
+                      }}
+                      readOnly={readOnly}
                     />
 
                     {!isMobile && (
@@ -898,19 +1024,16 @@ const FlowContent = ({
         </DialogActions>
       </Dialog>
 
-      {/* Node edit dialog */}
-      {selectedNode && (
-        <MemoizedNodeEditDialog
-          open={nodeEditOpen}
-          onClose={() => {
-            setNodeEditOpen(false);
-            setSelectedNode(null);
-          }}
-          initialData={selectedNode.data}
-          initialType={selectedNode.type as NodeType}
-          onSave={handleNodeEdit}
-        />
-      )}
+      {/* Node edit dialog - Responsive version */}
+      <ResponsiveNodeEditDialog
+        open={nodeEditOpen}
+        onClose={() => {
+          setNodeEditOpen(false);
+          setSelectedNode(null);
+        }}
+        node={selectedNode}
+        onSave={handleNodeEdit}
+      />
 
       {/* Snackbar for notifications */}
       <Snackbar
@@ -928,6 +1051,65 @@ const FlowContent = ({
           {snackbarMessage}
         </Alert>
       </Snackbar>
+
+      {/* Keyboard Shortcuts Handler */}
+      <KeyboardShortcutsHandler
+        onZoomIn={() => reactFlowInstance?.zoomIn()}
+        onZoomOut={() => reactFlowInstance?.zoomOut()}
+        onFitView={() => reactFlowInstance?.fitView({ padding: 0.2 })}
+        onAddNode={addNode}
+        onSave={saveFlow}
+        onUndo={() => console.log('Undo')}
+        onRedo={() => console.log('Redo')}
+        onToggleGrid={() => console.log('Toggle grid')}
+        onDelete={() => {
+          if (selectedNode) {
+            handleNodeDeleteRequest(selectedNode.id);
+          }
+        }}
+        onHelp={() => setKeyboardShortcutsOpen(true)}
+        readOnly={readOnly}
+        disabled={false}
+      />
+
+      {/* Accessibility Panel */}
+      <AccessibilityPanel
+        open={accessibilityPanelOpen}
+        onClose={() => setAccessibilityPanelOpen(false)}
+        nodes={nodes}
+        onNodeSelect={(nodeId) => {
+          const node = nodes.find(n => n.id === nodeId);
+          if (node) {
+            setSelectedNode(node);
+            // Center the view on the selected node
+            reactFlowInstance?.fitView({
+              padding: 0.5,
+              includeHiddenNodes: false,
+              nodes: [node],
+            });
+          }
+        }}
+        onNodeEdit={(nodeId) => {
+          const node = nodes.find(n => n.id === nodeId);
+          if (node) {
+            setSelectedNode(node);
+            setNodeEditOpen(true);
+          }
+        }}
+        onNodeDelete={(nodeId) => handleNodeDeleteRequest(nodeId)}
+        onAddNode={addNode}
+        onZoomIn={() => reactFlowInstance?.zoomIn()}
+        onZoomOut={() => reactFlowInstance?.zoomOut()}
+        onFitView={() => reactFlowInstance?.fitView({ padding: 0.2 })}
+        selectedNodeId={selectedNode?.id || null}
+        readOnly={readOnly}
+      />
+
+      {/* Keyboard Shortcuts Dialog */}
+      <KeyboardShortcutsDialog
+        open={keyboardShortcutsOpen}
+        onClose={() => setKeyboardShortcutsOpen(false)}
+      />
     </Box>
   );
 };
