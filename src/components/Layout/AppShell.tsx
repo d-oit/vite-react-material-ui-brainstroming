@@ -335,14 +335,14 @@ const AppShell = ({
         aria-label="Main content"
         sx={{
           flexGrow: 1,
-          p: 0,
+          p: { xs: 1, sm: 2 }, // Reduced padding for better space utilization
           mt: '64px', // AppBar height
           // No margin transition needed for temporary drawer
           position: 'relative',
           display: 'flex',
           flexDirection: 'column',
           height: 'calc(100vh - 64px)', // Full height minus AppBar
-          overflow: 'hidden',
+          overflow: 'auto', // Changed from 'hidden' to 'auto' for better content handling
           '&:focus': {
             outline: 'none', // Remove outline when focused via skip link
           },

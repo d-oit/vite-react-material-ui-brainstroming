@@ -316,7 +316,12 @@ export const LogViewer = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-          <Button onClick={async () => { await handleDeleteLogs(); }} color="error">
+          <Button
+            onClick={async () => {
+              await handleDeleteLogs();
+            }}
+            color="error"
+          >
             Delete
           </Button>
         </DialogActions>

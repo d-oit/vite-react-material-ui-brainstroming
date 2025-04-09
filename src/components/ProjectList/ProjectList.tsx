@@ -262,7 +262,9 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
       >
         <DialogContent>
           <ProjectCreateForm
-            onSubmit={async (data) => { await handleCreateProject(data); }}
+            onSubmit={async data => {
+              await handleCreateProject(data);
+            }}
             onCancel={() => setCreateDialogOpen(false)}
             loading={loading}
           />

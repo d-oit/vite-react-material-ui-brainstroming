@@ -231,7 +231,10 @@ export const ProjectSettingsSection = ({
             void loggerService.info('Project imported from file', { projectId: project.id });
           } catch (err) {
             const errorMessage = 'Failed to import project: Invalid file format';
-            void loggerService.error(errorMessage, err instanceof Error ? err : new Error(String(err)));
+            void loggerService.error(
+              errorMessage,
+              err instanceof Error ? err : new Error(String(err))
+            );
             showError(errorMessage);
           } finally {
             setImportLoading(false);

@@ -2,6 +2,8 @@ import type { PaletteMode, ThemeOptions } from '@mui/material';
 import { ThemeProvider, CssBaseline, createTheme, Button, Snackbar, Alert } from '@mui/material';
 import { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+// Import our demo page
+import BrainstormDemoPage from './pages/BrainstormDemoPage';
 // Icons are imported but not used in this file
 // They might be used in child components or for future implementation
 import { registerSW } from 'virtual:pwa-register';
@@ -152,7 +154,10 @@ const AppWithTheme = () => {
           updateSWFunction(true);
         } catch (error) {
           console.error('Failed to update application:', error);
-          void loggerService.error('Failed to update application', error instanceof Error ? error : new Error(String(error)));
+          void loggerService.error(
+            'Failed to update application',
+            error instanceof Error ? error : new Error(String(error))
+          );
         }
       }
     } catch (error) {
@@ -299,7 +304,11 @@ const AppWithTheme = () => {
                       />
                     }
                   />
-                  {/* Removed standalone brainstorming route - now using quick project creation */}
+                  {/* Demo route for our redesigned UI */}
+                  <Route
+                    path="/brainstorm-demo"
+                    element={<BrainstormDemoPage />}
+                  />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </Suspense>

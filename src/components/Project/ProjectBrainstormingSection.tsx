@@ -1,5 +1,5 @@
 import { Box, Paper, Typography, Chip, CircularProgress, Snackbar, Alert } from '@mui/material';
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback, useMemo, useRef, Fragment } from 'react';
 
 import type { Node, Edge } from '../../types';
 import type { ProjectTemplate, SyncSettings } from '../../types/project';
@@ -130,45 +130,64 @@ export const ProjectBrainstormingSection = ({
   }, []);
 
   return (
-    <Paper
-      sx={{
-        height: 'calc(100vh - 200px)',
-        width: '100%',
-        position: 'relative',
-        overflow: 'hidden',
-        containIntrinsic: 'size layout',
-        willChange: 'transform',
-      }}
-      elevation={2}
-      role="region"
-      aria-label="Project Brainstorming"
-    >
-      <Box
+    <>
+      <Paper
         sx={{
           height: '100%',
           width: '100%',
+          position: 'relative',
+          overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
+          borderRadius: 1,
+          boxShadow: theme => theme.shadows[2],
         }}
+        elevation={0}
+        role="region"
+        aria-label="Project Brainstorming"
       >
+        {/* Header with workflow suggestions and sync status */}
         <Box
           sx={{
-            p: 2,
+            p: { xs: 1, sm: 2 },
             borderBottom: 1,
             borderColor: 'divider',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            flexWrap: { xs: 'wrap', sm: 'nowrap' },
+            gap: 1,
+            bgcolor: 'background.paper',
           }}
         >
-          <Typography variant="subtitle2" color="text.secondary">
+          <Typography
+            variant="subtitle2"
+            color="text.secondary"
+            sx={{
+              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+              flexShrink: 1,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: { xs: 'normal', sm: 'nowrap' },
+            }}
+          >
             Suggested workflow: {templateConfig.suggestedWorkflow.join(' → ')}
           </Typography>
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 1,
+              alignItems: 'center',
+              flexShrink: 0,
+              ml: 'auto',
+            }}
+          >
             {syncStatus === 'syncing' && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <CircularProgress size={16} />
-                <Typography variant="caption">Syncing...</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <CircularProgress size={14} />
+                <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>
+                  Syncing...
+                </Typography>
               </Box>
             )}
             {syncStatus === 'error' && (
@@ -178,6 +197,7 @@ export const ProjectBrainstormingSection = ({
                 size="small"
                 onClick={() => void sync()}
                 aria-label="Sync failed. Click to retry."
+                sx={{ height: 24, '& .MuiChip-label': { px: 1, fontSize: '0.7rem' } }}
               />
             )}
             {syncStatus === 'success' && typeof lastSyncTime === 'string' && (
@@ -186,17 +206,27 @@ export const ProjectBrainstormingSection = ({
                 color="success"
                 size="small"
                 aria-label={`Last successful sync at ${new Date(lastSyncTime).toLocaleTimeString()}`}
+                sx={{ height: 24, '& .MuiChip-label': { px: 1, fontSize: '0.7rem' } }}
               />
             )}
           </Box>
         </Box>
+
+        {/* Main content area with flow editor */}
         <Box
           sx={{
             flexGrow: 1,
             position: 'relative',
+            overflow: 'hidden',
             '& .react-flow__node': {
               willChange: 'transform',
               contain: 'layout style paint',
+            },
+            '& .react-flow__controls': {
+              bottom: 10,
+              right: 10,
+              left: 'auto',
+              top: 'auto',
             },
           }}
           ref={containerRef}
@@ -226,7 +256,8 @@ export const ProjectBrainstormingSection = ({
             />
           </ErrorBoundary>
         </Box>
-      </Box>
+      </Paper>
+
       <Snackbar
         open={typeof errorMessage === 'string' && errorMessage.length > 0}
         autoHideDuration={6000}
@@ -237,6 +268,6 @@ export const ProjectBrainstormingSection = ({
           {errorMessage}
         </Alert>
       </Snackbar>
-    </Paper>
+    </>
   );
 };

@@ -18,6 +18,7 @@ import {
   Paper,
   Typography,
   useTheme,
+  alpha,
 } from '@mui/material';
 import React, { useState } from 'react';
 
@@ -95,7 +96,9 @@ const EnhancedZoomControls: React.FC<EnhancedZoomControlsProps> = ({
             borderRadius: 2,
             width: 200,
             mb: 1,
-            backgroundColor: theme.palette.background.paper,
+            backgroundColor: alpha(theme.palette.background.paper, 0.95),
+            backdropFilter: 'blur(8px)',
+            boxShadow: theme.shadows[3],
           }}
         >
           <Typography variant="caption" gutterBottom>
@@ -113,69 +116,44 @@ const EnhancedZoomControls: React.FC<EnhancedZoomControlsProps> = ({
         </Paper>
       )}
 
-      {/* Zoom Controls */}
-      <ButtonGroup
-        variant="contained"
-        aria-label={t('flow.zoomControls') ?? 'Zoom Controls'}
+      {/* Additional Controls */}
+      <Paper
+        elevation={3}
         sx={{
-          backgroundColor: theme.palette.background.paper,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 0.5,
+          p: 0.5,
           borderRadius: 2,
+          backgroundColor: alpha(theme.palette.background.paper, 0.95),
+          backdropFilter: 'blur(8px)',
           boxShadow: theme.shadows[3],
-          '& .MuiButtonGroup-grouped': {
-            borderColor: theme.palette.divider,
-          },
         }}
       >
-        <Tooltip title={t('flow.zoomIn') ?? 'Zoom In (Ctrl+Plus)'}>
-          <IconButton onClick={zoomIn} size="small" color="inherit">
-            <ZoomInIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-
-        <Tooltip title={t('flow.zoomLevel') ?? 'Zoom Level'}>
-          <IconButton
-            onClick={() => setShowZoomSlider(!showZoomSlider)}
-            size="small"
-            color="inherit"
-            sx={{ px: 1, minWidth: 60 }}
-          >
-            <Typography variant="caption" fontWeight="bold">
-              {formatZoomLevel(zoomLevel)}
-            </Typography>
-          </IconButton>
-        </Tooltip>
-
-        <Tooltip title={t('flow.zoomOut') ?? 'Zoom Out (Ctrl+Minus)'}>
-          <IconButton onClick={zoomOut} size="small" color="inherit">
-            <ZoomOutIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-
-        <Tooltip title={t('flow.fitView') ?? 'Fit View (Ctrl+0)'}>
-          <IconButton onClick={fitView} size="small" color="inherit">
-            <FitViewIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-
-        {onToggleGrid && (
-          <Tooltip title={t('flow.toggleGrid') ?? 'Toggle Grid (Ctrl+G)'}>
-            <IconButton onClick={onToggleGrid} size="small" color="inherit">
-              {showGrid ? <GridOffIcon fontSize="small" /> : <GridOnIcon fontSize="small" />}
-            </IconButton>
-          </Tooltip>
-        )}
-
+        {/* MiniMap Toggle */}
         {onToggleMiniMap && (
-          <Tooltip title={t('flow.toggleMiniMap') ?? 'Toggle Mini Map (Ctrl+M)'}>
-            <IconButton onClick={onToggleMiniMap} size="small" color="inherit">
+          <Tooltip title={t('flow.toggleMiniMap') ?? 'Toggle Mini Map (Ctrl+M)'} placement="left">
+            <IconButton
+              onClick={onToggleMiniMap}
+              size="small"
+              color={showMiniMap ? 'primary' : 'default'}
+            >
               {showMiniMap ? <MapIcon fontSize="small" /> : <HideMapIcon fontSize="small" />}
             </IconButton>
           </Tooltip>
         )}
 
+        {/* Fullscreen Toggle */}
         {onToggleFullscreen && (
-          <Tooltip title={t('flow.toggleFullscreen') ?? 'Toggle Fullscreen (Ctrl+Shift+F)'}>
-            <IconButton onClick={onToggleFullscreen} size="small" color="inherit">
+          <Tooltip
+            title={t('flow.toggleFullscreen') ?? 'Toggle Fullscreen (Ctrl+Shift+F)'}
+            placement="left"
+          >
+            <IconButton
+              onClick={onToggleFullscreen}
+              size="small"
+              color={isFullscreen ? 'primary' : 'default'}
+            >
               {isFullscreen ? (
                 <FullscreenExitIcon fontSize="small" />
               ) : (
@@ -184,7 +162,31 @@ const EnhancedZoomControls: React.FC<EnhancedZoomControlsProps> = ({
             </IconButton>
           </Tooltip>
         )}
-      </ButtonGroup>
+
+        {/* Zoom Level Toggle */}
+        <Tooltip title={t('flow.zoomLevel') ?? 'Zoom Level'} placement="left">
+          <IconButton
+            onClick={() => setShowZoomSlider(!showZoomSlider)}
+            size="small"
+            color={showZoomSlider ? 'primary' : 'default'}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: 40,
+              width: 40,
+            }}
+          >
+            <Typography variant="caption" fontSize="0.7rem" lineHeight={1}>
+              ZOOM
+            </Typography>
+            <Typography variant="caption" fontWeight="bold" lineHeight={1}>
+              {formatZoomLevel(zoomLevel)}
+            </Typography>
+          </IconButton>
+        </Tooltip>
+      </Paper>
     </Box>
   );
 };

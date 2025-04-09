@@ -19,6 +19,8 @@ import {
   Avatar,
   Alert,
   Tooltip,
+  alpha,
+  useTheme,
 } from '@mui/material';
 import { useState, useEffect, useRef, memo } from 'react';
 
@@ -244,10 +246,18 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes, onClose }: ChatPanel
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative', overflow: 'hidden' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
       <Box
         sx={{
-          p: 2,
+          p: { xs: 1, sm: 2 },
           borderBottom: 1,
           borderColor: 'divider',
           display: 'flex',
@@ -264,28 +274,46 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes, onClose }: ChatPanel
           backgroundColor: theme => theme.palette.background.paper,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexGrow: 1 }}>
           <Avatar
             sx={{
               bgcolor: 'primary.main',
-              width: 36,
-              height: 36,
+              width: { xs: 32, sm: 36 },
+              height: { xs: 32, sm: 36 },
             }}
           >
             <BotIcon fontSize="small" />
           </Avatar>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.1rem' }}>
+          <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 600,
+                fontSize: { xs: '0.95rem', sm: '1.1rem' },
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
               {t('chat.title')}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
               {t('chat.poweredBy')} OpenRouter
             </Typography>
           </Box>
         </Box>
         {!isOnline && (
           <Tooltip title={t('chat.offlineMode') || 'Offline Mode - Chat functionality is limited'}>
-            <OfflineIcon color="warning" />
+            <OfflineIcon color="warning" fontSize="small" sx={{ ml: 1, flexShrink: 0 }} />
           </Tooltip>
         )}
       </Box>
@@ -325,15 +353,28 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes, onClose }: ChatPanel
         sx={{
           flexGrow: 1,
           overflow: 'auto',
-          p: 2,
+          p: { xs: 1, sm: 2 },
           display: 'flex',
           flexDirection: 'column',
-          gap: 2,
+          gap: { xs: 1.5, sm: 2 },
           backgroundColor: theme =>
             theme.palette.mode === 'dark'
               ? theme.palette.background.default
               : theme.palette.grey[50],
           scrollBehavior: 'smooth',
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: theme => alpha(theme.palette.primary.main, 0.2),
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: theme => alpha(theme.palette.primary.main, 0.3),
+          },
         }}
       >
         {messages.length === 0 && !nodeSuggestion ? (
@@ -474,17 +515,19 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes, onClose }: ChatPanel
 
       <Box
         sx={{
-          p: 2,
+          p: { xs: 1, sm: 2 },
           display: 'flex',
           flexDirection: 'column',
           gap: 1,
           borderTop: 1,
           borderColor: 'divider',
-          backgroundColor: theme => theme.palette.background.paper,
+          backgroundColor: theme => alpha(theme.palette.background.paper, 0.98),
+          backdropFilter: 'blur(8px)',
           zIndex: 10,
           flexShrink: 0,
           position: 'sticky',
           bottom: 0,
+          boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.05)',
         }}
       >
         <TextField
@@ -499,14 +542,16 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes, onClose }: ChatPanel
           onKeyDown={handleKeyPress} // Using onKeyDown instead of deprecated onKeyPress
           multiline
           maxRows={3}
+          size="small"
           disabled={isLoading || isGeneratingNodes || !settings.openRouterApiKey || !isOnline}
           sx={{
             flexGrow: 1,
             '& .MuiOutlinedInput-root': {
               borderRadius: '12px',
               transition: 'all 0.2s ease',
+              fontSize: { xs: '0.875rem', sm: '1rem' },
               '&.Mui-focused': {
-                boxShadow: '0 0 0 2px rgba(25, 118, 210, 0.2)',
+                boxShadow: theme => `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`,
               },
             },
             '& .MuiFormHelperText-root': {
@@ -519,21 +564,45 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes, onClose }: ChatPanel
           }
         />
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, mt: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            gap: 1,
+            mt: 1,
+            flexWrap: { xs: 'wrap', sm: 'nowrap' },
+          }}
+        >
           {/* Clear button */}
           <Button
             variant="text"
             color="inherit"
-            startIcon={<ClearIcon />}
+            startIcon={<ClearIcon fontSize="small" />}
             onClick={clearChat}
             disabled={messages.length === 0 || isLoading || isGeneratingNodes}
             size="small"
-            sx={{ flexGrow: 0 }}
+            sx={{
+              flexGrow: 0,
+              fontSize: { xs: '0.75rem', sm: '0.8125rem' },
+              order: { xs: 3, sm: 1 },
+              width: { xs: '100%', sm: 'auto' },
+              mt: { xs: 0.5, sm: 0 },
+            }}
           >
             {t('chat.clear')}
           </Button>
 
-          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', alignItems: 'flex-start' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 1,
+              justifyContent: 'flex-end',
+              alignItems: 'flex-start',
+              order: { xs: 1, sm: 2 },
+              width: { xs: '100%', sm: 'auto' },
+              flexWrap: { xs: 'wrap', sm: 'nowrap' },
+            }}
+          >
             {/* Node generation button - only show if onAddNodes is provided */}
             {onAddNodes !== undefined && (
               <Tooltip
@@ -553,9 +622,19 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes, onClose }: ChatPanel
                       settings.openRouterApiKey === '' ||
                       isOnline !== true
                     }
-                    sx={{ borderRadius: '8px', minWidth: '40px', height: '40px', p: 1 }}
+                    sx={{
+                      borderRadius: '8px',
+                      minWidth: '40px',
+                      height: '36px',
+                      p: 1,
+                      flex: { xs: '1 1 auto', sm: '0 0 auto' },
+                    }}
                   >
-                    {isGeneratingNodes ? <CircularProgress size={20} /> : <PsychologyIcon />}
+                    {isGeneratingNodes ? (
+                      <CircularProgress size={18} />
+                    ) : (
+                      <PsychologyIcon fontSize="small" />
+                    )}
                   </Button>
                 </span>
               </Tooltip>
@@ -564,7 +643,7 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes, onClose }: ChatPanel
             <Button
               variant="contained"
               color="primary"
-              endIcon={<SendIcon />}
+              endIcon={<SendIcon fontSize="small" />}
               onClick={() => void handleSendMessage()} // Use void to explicitly ignore the promise
               disabled={
                 isLoading === true ||
@@ -575,19 +654,22 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes, onClose }: ChatPanel
                 settings.openRouterApiKey === '' ||
                 isOnline !== true
               }
-              sx={{ borderRadius: '8px', height: '40px' }}
+              sx={{
+                borderRadius: '8px',
+                height: '36px',
+                flex: { xs: '1 1 auto', sm: '0 0 auto' },
+                boxShadow: theme => theme.shadows[2],
+                fontSize: { xs: '0.75rem', sm: '0.8125rem' },
+              }}
             >
               {t('chat.send')}
             </Button>
           </Box>
         </Box>
       </Box>
-
-
     </Box>
   );
 };
 
 export const MemoizedChatPanel = memo(ChatPanel);
 export { ChatPanel };
-

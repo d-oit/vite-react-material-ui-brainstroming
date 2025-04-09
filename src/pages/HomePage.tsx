@@ -1,4 +1,4 @@
-import { Dashboard as DashboardIcon, FolderOpen as ProjectsIcon } from '@mui/icons-material';
+import { Dashboard as DashboardIcon, FolderOpen as ProjectsIcon, BubbleChart as BrainstormIcon } from '@mui/icons-material';
 import { Box, Typography, Button, Container, Stack, CircularProgress } from '@mui/material';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -59,7 +59,7 @@ const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
           <Typography variant="body1" paragraph>
             Welcome to the d.o.it.brainstorming app!
           </Typography>
-          <Stack direction="row" spacing={2} justifyContent="center">
+          <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
             <Button
               variant="contained"
               color="primary"
@@ -87,6 +87,16 @@ const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
               ) : (
                 'Quick Brainstorm'
               )}
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              size="large"
+              component={Link}
+              to="/brainstorm-demo"
+              startIcon={<BrainstormIcon />}
+            >
+              UI Demo
             </Button>
           </Stack>
         </Box>

@@ -369,24 +369,6 @@ export const KeyboardShortcutsHandler: React.FC<KeyboardShortcutsHandlerProps> =
       {/* Keyboard Shortcuts Overlay */}
       <KeyboardShortcutsOverlay open={overlayOpen} onClose={() => setOverlayOpen(false)} />
 
-      {/* Keyboard Shortcuts Button */}
-      <Tooltip title={t('shortcuts.showShortcuts') || 'Keyboard Shortcuts (Shift+?)'} arrow>
-        <Fab
-          onClick={() => setShortcutsDialogOpen(true)}
-          size="small"
-          color="primary"
-          aria-label={t('shortcuts.showShortcuts') || 'Show keyboard shortcuts'}
-          sx={{
-            position: 'fixed',
-            bottom: 16,
-            left: 16,
-            boxShadow: theme.shadows[3],
-          }}
-        >
-          <KeyboardIcon />
-        </Fab>
-      </Tooltip>
-
       <Dialog
         open={shortcutsDialogOpen}
         onClose={() => setShortcutsDialogOpen(false)}

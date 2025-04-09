@@ -3,6 +3,7 @@ import {
   Chat as ChatIcon,
   Close as CloseIcon,
   Add as AddIcon,
+  Edit as EditIcon,
 } from '@mui/icons-material';
 import {
   Box,
@@ -17,8 +18,11 @@ import {
   Tab,
   Tabs,
   Container,
+  Fab,
+  Tooltip,
+  TextField,
 } from '@mui/material';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 
 import KeyboardShortcutsHandler from '../components/BrainstormFlow/KeyboardShortcutsHandler';
@@ -29,6 +33,7 @@ import { ProjectBrainstormingSection } from '../components/Project/ProjectBrains
 import ProjectSettingsSection from '../components/Project/ProjectSettingsSection';
 import { useProject } from '../hooks/useProject';
 import type { Node, Edge, Project } from '../types';
+import type { NodeSuggestion } from '../types/chat';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -56,10 +61,16 @@ const ProjectDetailPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [chatOpen, setChatOpen] = useState(!isMobile);
+  const [chatOpen, setChatOpen] = useState(false); // Chat closed by default
   const [_nodes, setNodes] = useState<Node[]>([]);
   const [_edges, setEdges] = useState<Edge[]>([]);
   const [tabValue, setTabValue] = useState(0);
+
+  // State for editable fields
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [editedName, setEditedName] = useState('');
+  const [editedDescription, setEditedDescription] = useState('');
 
   const { project, loading, error, isSaving, saveProject, createNewVersion } = useProject({
     projectId,
@@ -70,6 +81,8 @@ const ProjectDetailPage = () => {
     if (project !== null && project !== undefined) {
       setNodes(project.nodes);
       setEdges(project.edges);
+      setEditedName(project.name);
+      setEditedDescription(project.description || '');
     }
   }, [project]);
 
@@ -96,6 +109,40 @@ const ProjectDetailPage = () => {
       await createNewVersion();
     }
   };
+
+  // Function to save edited project details
+  const handleSaveProjectDetails = async () => {
+    if (project !== null && project !== undefined) {
+      const updatedProject = {
+        ...project,
+        name: editedName,
+        description: editedDescription,
+      };
+
+      // Save the project with updated details
+      await saveProject(updatedProject);
+
+      // Exit editing mode
+      setIsEditingName(false);
+      setIsEditingDescription(false);
+    }
+  };
+
+  // Function to handle adding nodes from chat suggestions
+  const handleAddNodesFromChat = useCallback(
+    (suggestions: NodeSuggestion[]) => {
+      if (!project) return;
+
+      // Implementation would go here - for now just log the suggestions
+      console.log('Adding nodes from chat suggestions:', suggestions);
+
+      // In a real implementation, you would:
+      // 1. Convert suggestions to actual nodes
+      // 2. Add them to the current nodes array
+      // 3. Update the project
+    },
+    [project]
+  );
 
   const toggleChat = () => {
     setChatOpen(prev => !prev);
@@ -144,11 +191,51 @@ const ProjectDetailPage = () => {
       onThemeToggle={() => {}}
       isDarkMode={theme.palette.mode === 'dark'}
     >
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box>
-          <Typography variant="h5" component="h1">
-            {project.name}
-          </Typography>
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, flexGrow: 1, mr: 2, mb: { xs: 2, sm: 0 } }}>
+          {isEditingName ? (
+            <TextField
+              fullWidth
+              variant="outlined"
+              size="small"
+              value={editedName}
+              onChange={e => setEditedName(e.target.value)}
+              autoFocus
+              onBlur={() => {
+                if (editedName.trim() !== '') {
+                  void handleSaveProjectDetails();
+                } else {
+                  setEditedName(project.name);
+                  setIsEditingName(false);
+                }
+              }}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && editedName.trim() !== '') {
+                  void handleSaveProjectDetails();
+                } else if (e.key === 'Escape') {
+                  setEditedName(project.name);
+                  setIsEditingName(false);
+                }
+              }}
+              InputProps={{
+                sx: { borderRadius: 1 },
+              }}
+            />
+          ) : (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography variant="h5" component="h1" sx={{ wordBreak: 'break-word' }}>
+                {project.name}
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={() => setIsEditingName(true)}
+                sx={{ ml: 1, color: 'primary.main' }}
+                aria-label="Edit project name"
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          )}
           <Typography variant="subtitle2" color="text.secondary">
             Version {project.version}
           </Typography>
@@ -162,6 +249,7 @@ const ProjectDetailPage = () => {
               void saveProject();
             }}
             disabled={isSaving}
+            size={isMobile ? 'small' : 'medium'}
           >
             {isSaving ? 'Saving...' : 'Save'}
           </Button>
@@ -172,20 +260,20 @@ const ProjectDetailPage = () => {
               void handleCreateNewVersion();
             }}
             disabled={isSaving}
+            size={isMobile ? 'small' : 'medium'}
           >
             New Version
           </Button>
 
-          {isMobile && (
-            <Button
-              variant="contained"
-              color="secondary"
-              startIcon={<ChatIcon />}
-              onClick={toggleChat}
-            >
-              Assistant
-            </Button>
-          )}
+          <Button
+            variant="contained"
+            color="secondary"
+            startIcon={<ChatIcon />}
+            onClick={toggleChat}
+            size={isMobile ? 'small' : 'medium'}
+          >
+            Assistant
+          </Button>
         </Box>
       </Box>
 
@@ -199,22 +287,92 @@ const ProjectDetailPage = () => {
 
       <TabPanel value={tabValue} index={0}>
         <Paper sx={{ p: 3, mb: 2 }}>
-          <Typography variant="h6" gutterBottom>
-            Project Details
-          </Typography>
-          <Typography variant="body1">
-            {project.description !== null &&
-            project.description !== undefined &&
-            project.description !== ''
-              ? project.description
-              : 'No description provided.'}
-          </Typography>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
+          >
+            <Typography variant="h6" sx={{ fontWeight: 'medium' }}>Project Details</Typography>
+            {isEditingDescription ? (
+              <Button
+                variant="contained"
+                size="small"
+                onClick={handleSaveProjectDetails}
+                startIcon={<SaveIcon />}
+                sx={{ boxShadow: theme => theme.shadows[2] }}
+              >
+                Save
+              </Button>
+            ) : (
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => setIsEditingDescription(true)}
+                startIcon={<EditIcon />}
+                sx={{ borderColor: 'primary.main' }}
+              >
+                Edit Description
+              </Button>
+            )}
+          </Box>
+
+          {isEditingDescription ? (
+            <TextField
+              fullWidth
+              multiline
+              rows={4}
+              variant="outlined"
+              value={editedDescription}
+              onChange={e => setEditedDescription(e.target.value)}
+              placeholder="Enter project description"
+              sx={{ mb: 2 }}
+              InputProps={{
+                sx: {
+                  borderRadius: 1,
+                  '&:focus-within': {
+                    borderColor: 'primary.main',
+                  },
+                },
+              }}
+            />
+          ) : (
+            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+              {project.description !== null &&
+              project.description !== undefined &&
+              project.description !== ''
+                ? project.description
+                : 'No description provided.'}
+            </Typography>
+          )}
         </Paper>
       </TabPanel>
 
       <TabPanel value={tabValue} index={1}>
-        {isMobile ? (
-          <>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: chatOpen ? { xs: '1fr', md: '1fr 350px' } : '1fr',
+            gridTemplateRows: chatOpen && isMobile ? '1fr 300px' : '1fr',
+            gap: 2,
+            height: { xs: 'calc(100vh - 200px)', md: 'calc(100vh - 180px)' },
+            position: 'relative',
+            transition: 'all 0.3s ease',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Main brainstorming area */}
+          <Box
+            sx={{
+              gridColumn: '1',
+              gridRow: '1',
+              height: '100%',
+              width: '100%',
+              overflow: 'hidden',
+              borderRadius: 1,
+              boxShadow: theme => theme.shadows[1],
+              border: '1px solid',
+              borderColor: 'divider',
+              bgcolor: 'background.paper',
+            }}
+          >
             <ProjectBrainstormingSection
               projectId={project.id}
               template={project.template}
@@ -223,56 +381,90 @@ const ProjectDetailPage = () => {
               syncSettings={project.syncSettings}
               readOnly={isSaving}
             />
+          </Box>
 
-            <Drawer
-              anchor="right"
-              open={chatOpen}
-              onClose={toggleChat}
+          {/* Chat panel with responsive design */}
+          {chatOpen && (
+            <Box
               sx={{
-                '& .MuiDrawer-paper': {
-                  width: '80%',
-                  maxWidth: 400,
-                },
+                gridColumn: { xs: '1', md: '2' },
+                gridRow: { xs: '2', md: '1' },
+                height: '100%',
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                borderRadius: 1,
+                overflow: 'hidden',
+                border: '1px solid',
+                borderColor: 'divider',
+                boxShadow: theme => theme.shadows[1],
+                bgcolor: 'background.paper',
               }}
             >
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
-                <IconButton onClick={toggleChat}>
-                  <CloseIcon />
+              {/* Chat header */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  p: 1.5,
+                  borderBottom: 1,
+                  borderColor: 'divider',
+                  bgcolor: theme =>
+                    theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                }}
+              >
+                <Typography variant="subtitle1" fontWeight="medium">
+                  AI Assistant
+                </Typography>
+                <IconButton
+                  size="small"
+                  onClick={toggleChat}
+                  aria-label="Close chat"
+                  sx={{ color: 'text.secondary' }}
+                >
+                  <CloseIcon fontSize="small" />
                 </IconButton>
               </Box>
 
-              <Box sx={{ height: 'calc(100% - 48px)' }}>
-                <ChatInterface />
+              {/* Chat content */}
+              <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+                <ChatInterface
+                  onAddNodes={handleAddNodesFromChat}
+                  projectContext={{
+                    projectId: project.id,
+                    projectName: project.name,
+                    projectDescription: project.description || '',
+                    template: project.template,
+                  }}
+                />
               </Box>
-            </Drawer>
-          </>
-        ) : (
-          <Box sx={{ display: 'flex', height: 'calc(100vh - 300px)' }}>
-            <Box sx={{ flex: chatOpen ? '0 0 70%' : '1 1 100%', pr: chatOpen ? 2 : 0 }}>
-              <ProjectBrainstormingSection
-                projectId={project.id}
-                template={project.template}
-                initialNodes={project.nodes}
-                initialEdges={project.edges}
-                syncSettings={project.syncSettings}
-                readOnly={isSaving}
-              />
             </Box>
+          )}
+        </Box>
 
-            {chatOpen && (
-              <Box sx={{ flex: '0 0 30%', position: 'relative' }}>
-                <Box sx={{ height: '100%', position: 'relative' }}>
-                  <IconButton
-                    sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}
-                    onClick={toggleChat}
-                  >
-                    <CloseIcon />
-                  </IconButton>
-                  <ChatInterface />
-                </Box>
-              </Box>
-            )}
-          </Box>
+        {/* Chat toggle button (only visible when chat is closed) */}
+        {!chatOpen && (
+          <Tooltip title="Open AI Assistant">
+            <Fab
+              color="secondary"
+              size="medium"
+              onClick={toggleChat}
+              sx={{
+                position: 'fixed',
+                bottom: 24,
+                right: 24,
+                zIndex: 1000,
+                boxShadow: theme => theme.shadows[4],
+                '&:hover': {
+                  backgroundColor: 'secondary.dark',
+                },
+              }}
+              aria-label="Open AI Assistant"
+            >
+              <ChatIcon />
+            </Fab>
+          </Tooltip>
         )}
       </TabPanel>
 

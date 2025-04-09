@@ -20,20 +20,30 @@ export function ChatInterface({ projectId }: ChatInterfaceProps) {
   };
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Paper
-        elevation={0}
-        sx={{ p: 2, flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+    <Box
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}
+    >
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          p: { xs: 1, sm: 2 },
+          pt: 0,
+        }}
       >
-        <Typography variant="h6" gutterBottom>
-          Chat Assistant
-        </Typography>
         <ChatPanel
           projectId={projectId}
           projectContext={projectContext}
           onAddNodes={handleAddNodes}
         />
-      </Paper>
+      </Box>
     </Box>
   );
 }
