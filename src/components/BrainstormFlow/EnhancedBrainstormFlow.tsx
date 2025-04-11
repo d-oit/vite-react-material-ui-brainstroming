@@ -77,7 +77,7 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
     if (reactFlowInstance) {
       const bounds = flowRef.current?.getBoundingClientRect();
       if (bounds) {
-        const position = reactFlowInstance.project({
+        const position = reactFlowInstance.screenToFlowPosition({
           x: event.clientX - bounds.left,
           y: event.clientY - bounds.top,
         });
@@ -107,8 +107,8 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
   }, [nodes, edges, handleSave]);
 
   return (
-    <div 
-      ref={flowRef} 
+    <div
+      ref={flowRef}
       style={{ width: '100%', height: '100%' }}
       onMouseMove={onMouseMove}
     >

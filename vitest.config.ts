@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
@@ -7,28 +7,28 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/tests/setup.ts'],
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
-    exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**', '**/playwright/**'],
-    pool: 'forks', // Use process isolation to avoid 'too many open files' error
-    poolOptions: {
-      threads: {
-        singleThread: true,
-      },
-      forks: {
-        isolate: true,
-      },
-    },
-    maxConcurrency: 1, // Run tests sequentially to avoid resource issues
+    setupFiles: ['./src/setupTests.ts'],
+    testTimeout: 10000,
+    include: [
+      'src/**/*.{test,spec}.{js,jsx,ts,tsx}',
+    ],
     coverage: {
+      provider: 'v8',
       reporter: ['text', 'json', 'html'],
       exclude: [
         'node_modules/',
-        'src/tests/setup.ts',
-        'src/tests/test-utils.tsx',
-        '**/*.d.ts',
-        '**/e2e/**',
-        '**/playwright/**',
+        'src/setupTests.ts',
+        'src/test.d.ts',
+        'src/**/*.d.ts',
+        'src/__mocks__/**',
+      ],
+    },
+    deps: {
+      inline: [
+        '@mui/material',
+        '@mui/icons-material',
+        '@emotion/react',
+        '@emotion/styled',
       ],
     },
   },

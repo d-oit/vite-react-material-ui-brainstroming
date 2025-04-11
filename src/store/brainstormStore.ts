@@ -1,5 +1,5 @@
 import { Edge, Node, XYPosition } from 'reactflow';
-import create from 'zustand';
+import { create } from 'zustand';
 import { CustomNode, CustomEdge, NodeData, NodeUpdate, NewNodeParams } from '../components/BrainstormFlow/types';
 
 interface BrainstormState {

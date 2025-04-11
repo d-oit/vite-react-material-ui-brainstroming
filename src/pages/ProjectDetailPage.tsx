@@ -442,30 +442,6 @@ const ProjectDetailPage = () => {
             </Box>
           )}
         </Box>
-
-        {/* Chat toggle button (only visible when chat is closed) */}
-        {!chatOpen && (
-          <Tooltip title="Open AI Assistant">
-            <Fab
-              color="secondary"
-              size="medium"
-              onClick={toggleChat}
-              sx={{
-                position: 'fixed',
-                bottom: 24,
-                right: 24,
-                zIndex: 1000,
-                boxShadow: theme => theme.shadows[4],
-                '&:hover': {
-                  backgroundColor: 'secondary.dark',
-                },
-              }}
-              aria-label="Open AI Assistant"
-            >
-              <ChatIcon />
-            </Fab>
-          </Tooltip>
-        )}
       </TabPanel>
 
       <TabPanel value={tabValue} index={2}>

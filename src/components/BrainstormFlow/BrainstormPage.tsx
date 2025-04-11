@@ -105,19 +105,6 @@ const BrainstormPage: React.FC<BrainstormPageProps> = ({
             </Paper>
           </Suspense>
         </BrainstormErrorBoundary>
-
-        <Fab
-          color="primary"
-          aria-label="save"
-          onClick={() => onSave?.(initialNodes, initialEdges)}
-          sx={{
-            position: 'absolute',
-            bottom: 24,
-            left: 24,
-          }}
-        >
-          <SaveIcon />
-        </Fab>
       </Box>
     </ContentLayout>
   );
