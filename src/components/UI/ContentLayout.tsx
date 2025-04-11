@@ -81,8 +81,10 @@ const ContentLayout: React.FC<ContentLayoutProps> = ({
             sx={{
               width: sidebarWidth,
               flexShrink: 0,
-              borderLeft: sidebarPosition === 'right' ? `1px solid ${theme.palette.divider}` : 'none',
-              borderRight: sidebarPosition === 'left' ? `1px solid ${theme.palette.divider}` : 'none',
+              borderLeft:
+                sidebarPosition === 'right' ? `1px solid ${theme.palette.divider}` : 'none',
+              borderRight:
+                sidebarPosition === 'left' ? `1px solid ${theme.palette.divider}` : 'none',
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',

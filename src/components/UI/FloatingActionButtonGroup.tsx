@@ -56,7 +56,11 @@ const FloatingActionButtonGroup: React.FC<FloatingActionButtonGroupProps> = ({
       }}
     >
       {buttons.map((button, index) => (
-        <Tooltip key={index} title={button.label} placement={position.includes('right') ? 'left' : 'right'}>
+        <Tooltip
+          key={index}
+          title={button.label}
+          placement={position.includes('right') ? 'left' : 'right'}
+        >
           <Fab
             color={button.color || 'primary'}
             size={button.size || 'medium'}

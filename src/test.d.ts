@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 import { jest } from '@jest/globals';
 
 declare global {
-  const jest: typeof import('@jest/globals')['jest'];
+  const jest: (typeof import('@jest/globals'))['jest'];
   namespace jest {
     interface Matchers<R> {
       toBeInTheDocument(): R;

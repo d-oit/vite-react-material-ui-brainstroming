@@ -1,13 +1,12 @@
 import '@testing-library/jest-dom';
-import { vi, beforeEach, afterEach } from 'vitest';
+import type { TestingLibraryMatchers } from '@testing-library/jest-dom/matchers';
 import { cleanup } from '@testing-library/react';
 import React from 'react';
 import type { ReactNode } from 'react';
-import type { TestingLibraryMatchers } from '@testing-library/jest-dom/matchers';
+import { vi, beforeEach, afterEach } from 'vitest';
 
 declare module 'vitest' {
-  interface Assertion<T = any>
-    extends TestingLibraryMatchers<typeof expect.stringContaining, T> {}
+  interface Assertion<T = any> extends TestingLibraryMatchers<typeof expect.stringContaining, T> {}
 }
 
 // Mock window.matchMedia
@@ -46,9 +45,13 @@ class MockIntersectionObserver implements IntersectionObserver {
   takeRecords = vi.fn();
 }
 
-window.IntersectionObserver = MockIntersectionObserver;
+Object.defineProperty(window, 'IntersectionObserver', {
+  writable: true,
+  configurable: true,
+  value: MockIntersectionObserver,
+});
 
-// Mock ResizeObserver
+// Mock ResizeObserver - Ensure this is correctly assigned globally
 class MockResizeObserver implements ResizeObserver {
   constructor() {
     this.observe = vi.fn();
@@ -61,7 +64,11 @@ class MockResizeObserver implements ResizeObserver {
   disconnect = vi.fn();
 }
 
-window.ResizeObserver = MockResizeObserver;
+Object.defineProperty(window, 'ResizeObserver', {
+  writable: true,
+  configurable: true,
+  value: MockResizeObserver,
+});
 
 // Mock fetch
 window.fetch = vi.fn();
@@ -73,28 +80,29 @@ const MockReactFlow = ({ children }: { children: ReactNode }) => {
 
 // Mock react-flow
 vi.mock('reactflow', async () => {
+  const actual = await vi.importActual('reactflow');
   return {
+    ...actual,
     ReactFlow: MockReactFlow,
     Background: () => null,
     Controls: () => null,
-    useNodesState: () => {
-      const [nodes, setNodes] = React.useState([]);
-      return [nodes, setNodes, vi.fn()];
-    },
-    useEdgesState: () => {
-      const [edges, setEdges] = React.useState([]);
-      return [edges, setEdges, vi.fn()];
-    },
+    useNodesState: () => [React.useState([])[0], vi.fn(), vi.fn()],
+    useEdgesState: () => [React.useState([])[0], vi.fn(), vi.fn()],
     MarkerType: {
       ArrowClosed: 'arrowclosed',
     },
   };
 });
 
-// Mock generateUniqueId
-vi.mock('./utils/idGenerator', () => ({
-  generateUniqueId: () => 'test-id',
-}));
+// Mock idGenerator - Keep actual isValidId, mock generateUniqueId with counter and better format
+vi.mock('./utils/idGenerator', async () => {
+  const actual = await vi.importActual<typeof import('./utils/idGenerator')>('./utils/idGenerator');
+  let counter = 0;
+  return {
+    ...actual, // Keep actual implementation for isValidId
+    generateUniqueId: vi.fn(() => `abc-${counter++}`), // Generate format closer to regex
+  };
+});
 
 // Clean up after each test
 afterEach(() => {

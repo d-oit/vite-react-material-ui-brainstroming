@@ -1,6 +1,8 @@
-import { render, RenderResult } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { vi, beforeEach, afterEach } from 'vitest';
-import React, { ReactElement } from 'react';
 
 import { I18nProvider } from '../../../contexts/I18nContext';
 import type { BrainstormNode } from '../types';
@@ -15,7 +17,8 @@ vi.mock('../../../utils/idGenerator', () => ({
 // Mock for ReactFlow
 vi.mock('reactflow', () => ({
   ...vi.importActual('reactflow'),
-  ReactFlow: ({ children }: { children: React.ReactNode }) => React.createElement('div', null, children),
+  ReactFlow: ({ children }: { children: React.ReactNode }) =>
+    React.createElement('div', null, children),
   Background: () => null,
   Controls: () => null,
   useNodesState: () => {
@@ -31,7 +34,7 @@ vi.mock('reactflow', () => ({
   },
 }));
 
-export const renderWithProviders = (ui: ReactElement): RenderResult => 
+export const renderWithProviders = (ui: ReactElement): RenderResult =>
   render(<I18nProvider initialLocale="en">{ui}</I18nProvider>);
 
 interface NodeMatchResult {

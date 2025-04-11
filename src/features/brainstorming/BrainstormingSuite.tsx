@@ -7,7 +7,7 @@ import { useI18n } from '../../contexts/I18nContext';
 import ComprehensiveBrainstorm from './ComprehensiveBrainstorm';
 import LLMChatPanel from './LLMChatPanel';
 import QuickBrainstorm from './QuickBrainstorm';
-import { BrainstormingProps, BrainstormSession, BrainstormNode } from './types';
+import type { BrainstormingProps, BrainstormSession, BrainstormNode } from './types';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -60,14 +60,17 @@ export default function BrainstormingSuite({ projectId, onSave, onClose }: Brain
     setActiveTab(0); // Switch to comprehensive view
   }, []);
 
-  const handleInsightGenerated = useCallback((insight: BrainstormNode) => {
-    if (session) {
-      void handleSave({
-        ...session,
-        nodes: [...session.nodes, insight],
-      });
-    }
-  }, [session, handleSave]);
+  const handleInsightGenerated = useCallback(
+    (insight: BrainstormNode) => {
+      if (session) {
+        void handleSave({
+          ...session,
+          nodes: [...session.nodes, insight],
+        });
+      }
+    },
+    [session, handleSave]
+  );
 
   return (
     <Paper

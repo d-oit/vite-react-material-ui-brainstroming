@@ -2,8 +2,8 @@ import type { PaletteMode, ThemeOptions } from '@mui/material';
 import { ThemeProvider, CssBaseline, createTheme, Button, Snackbar, Alert } from '@mui/material';
 import { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
 // Import our demo page
-import BrainstormDemoPage from './pages/BrainstormDemoPage';
 // Icons are imported but not used in this file
 // They might be used in child components or for future implementation
 import { registerSW } from 'virtual:pwa-register';
@@ -26,6 +26,7 @@ import LoadingFallback from './components/UI/LoadingFallback';
 import { ActionFeedbackProvider } from './contexts/ActionFeedbackContext';
 import { I18nProvider, useI18n } from './contexts/I18nContext';
 import { SettingsProvider } from './contexts/SettingsContext';
+import BrainstormDemoPage from './pages/BrainstormDemoPage';
 import indexedDBService from './services/IndexedDBService';
 import loggerService from './services/LoggerService';
 import offlineService from './services/OfflineService';
@@ -305,10 +306,7 @@ const AppWithTheme = () => {
                     }
                   />
                   {/* Demo route for our redesigned UI */}
-                  <Route
-                    path="/brainstorm-demo"
-                    element={<BrainstormDemoPage />}
-                  />
+                  <Route path="/brainstorm-demo" element={<BrainstormDemoPage />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </Suspense>

@@ -1,25 +1,23 @@
 import React, { useCallback, useRef, useMemo } from 'react';
+import type { ReactFlowInstance, Connection, NodeChange, EdgeChange } from 'reactflow';
 import ReactFlow, {
   Background,
   Controls,
   MiniMap,
-  ReactFlowInstance,
   OnNodesChange,
   OnEdgesChange,
   OnConnect,
   addEdge,
   applyNodeChanges,
   applyEdgeChanges,
-  Connection,
-  NodeChange,
-  EdgeChange,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
 import { useBrainstormStore } from '../../store/brainstormStore';
-import CustomNode from './nodes/CustomNode';
+
 import { FloatingControls } from './FloatingControls';
-import { CustomNode as CustomNodeType, CustomEdge } from './types';
+import CustomNode from './nodes/CustomNode';
+import type { CustomNode as CustomNodeType, CustomEdge } from './types';
 
 const nodeTypes = {
   idea: CustomNode,
@@ -47,44 +45,41 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
-      setNodes(currentNodes =>
-        applyNodeChanges(changes, currentNodes) as CustomNodeType[]
-      );
+      setNodes(currentNodes => applyNodeChanges(changes, currentNodes) as CustomNodeType[]);
     },
     [setNodes]
   );
 
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
-      setEdges(currentEdges =>
-        applyEdgeChanges(changes, currentEdges) as CustomEdge[]
-      );
+      setEdges(currentEdges => applyEdgeChanges(changes, currentEdges) as CustomEdge[]);
     },
     [setEdges]
   );
 
   const onConnect = useCallback(
     (connection: Connection) => {
-      setEdges(currentEdges =>
-        addEdge(connection, currentEdges) as CustomEdge[]
-      );
+      setEdges(currentEdges => addEdge(connection, currentEdges) as CustomEdge[]);
     },
     [setEdges]
   );
 
   // Track mouse position for new node placement
-  const onMouseMove = useCallback((event: React.MouseEvent) => {
-    if (reactFlowInstance) {
-      const bounds = flowRef.current?.getBoundingClientRect();
-      if (bounds) {
-        const position = reactFlowInstance.screenToFlowPosition({
-          x: event.clientX - bounds.left,
-          y: event.clientY - bounds.top,
-        });
-        setMousePosition(position);
+  const onMouseMove = useCallback(
+    (event: React.MouseEvent) => {
+      if (reactFlowInstance) {
+        const bounds = flowRef.current?.getBoundingClientRect();
+        if (bounds) {
+          const position = reactFlowInstance.screenToFlowPosition({
+            x: event.clientX - bounds.left,
+            y: event.clientY - bounds.top,
+          });
+          setMousePosition(position);
+        }
       }
-    }
-  }, [reactFlowInstance]);
+    },
+    [reactFlowInstance]
+  );
 
   // Save changes when needed
   const handleSave = useCallback(() => {
@@ -107,11 +102,7 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
   }, [nodes, edges, handleSave]);
 
   return (
-    <div
-      ref={flowRef}
-      style={{ width: '100%', height: '100%' }}
-      onMouseMove={onMouseMove}
-    >
+    <div ref={flowRef} style={{ width: '100%', height: '100%' }} onMouseMove={onMouseMove}>
       <ReactFlow
         nodes={nodes}
         edges={edges}

@@ -1,5 +1,6 @@
 import { Box, Button, Typography } from '@mui/material';
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
+import React, { Component } from 'react';
 
 import { useI18n } from '../../contexts/I18nContext';
 import { useBrainstormStore } from '../../store/brainstormStore';

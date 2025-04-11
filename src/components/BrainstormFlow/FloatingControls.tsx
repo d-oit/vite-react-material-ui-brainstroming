@@ -1,12 +1,13 @@
-import { SpeedDial, SpeedDialAction, SpeedDialIcon } from '@mui/material';
 import BoltIcon from '@mui/icons-material/Bolt';
-import TaskIcon from '@mui/icons-material/Task';
-import StorageIcon from '@mui/icons-material/Storage';
 import NoteIcon from '@mui/icons-material/Note';
+import StorageIcon from '@mui/icons-material/Storage';
+import TaskIcon from '@mui/icons-material/Task';
+import { SpeedDial, SpeedDialAction, SpeedDialIcon } from '@mui/material';
 import React from 'react';
 
-import { NodeType } from './types';
 import { useBrainstormStore } from '../../store/brainstormStore';
+
+import type { NodeType } from './types';
 
 interface FloatingControlsProps {
   position?: { x: number; y: number };

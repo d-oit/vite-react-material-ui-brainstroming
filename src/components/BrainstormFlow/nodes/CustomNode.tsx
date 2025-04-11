@@ -1,10 +1,11 @@
-import { Box, IconButton, Paper, TextField, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import SaveIcon from '@mui/icons-material/Save';
+import { Box, IconButton, Paper, TextField, Typography } from '@mui/material';
 import React, { memo, useState } from 'react';
-import { Handle, Position, NodeProps } from 'reactflow';
+import type { NodeProps } from 'reactflow';
+import { Handle, Position } from 'reactflow';
 
 interface CustomNodeData {
   label: string;
@@ -47,7 +48,7 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected, id })
   return (
     <Paper elevation={selected ? 3 : 1} sx={getNodeStyle()}>
       <Handle type="target" position={Position.Top} />
-      
+
       <Box sx={{ p: 1 }}>
         {isEditing ? (
           <TextField

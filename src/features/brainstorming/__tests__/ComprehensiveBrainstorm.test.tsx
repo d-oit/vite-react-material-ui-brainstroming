@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { I18nProvider } from '../../../contexts/I18nContext';
 import ComprehensiveBrainstorm from '../ComprehensiveBrainstorm';
 import type { BrainstormNode, BrainstormSession } from '../types';
+
 import { MOCK_NODE_BASE, MOCK_SESSION, TEST_PROJECT_ID } from './constants';
 import { mockGenerateId, setupTest } from './testUtils';
 

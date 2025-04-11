@@ -18,7 +18,8 @@ import React, { useCallback, useState } from 'react';
 
 import { useI18n } from '../../contexts/I18nContext';
 import { generateUniqueId } from '../../utils/idGenerator';
-import { BrainstormNode, BrainstormSession, QuickBrainstormProps } from './types';
+
+import type { BrainstormNode, BrainstormSession, QuickBrainstormProps } from './types';
 
 export default function QuickBrainstorm({ onSave, onClose, onConvert }: QuickBrainstormProps) {
   const { t } = useI18n();
@@ -132,11 +133,7 @@ export default function QuickBrainstorm({ onSave, onClose, onConvert }: QuickBra
       </Box>
 
       <Stack direction="row" spacing={1} justifyContent="flex-end">
-        <Button
-          startIcon={<UpgradeIcon />}
-          onClick={handleConvert}
-          disabled={ideas.length === 0}
-        >
+        <Button startIcon={<UpgradeIcon />} onClick={handleConvert} disabled={ideas.length === 0}>
           {t('brainstorming.convertToFull')}
         </Button>
         <Tooltip title={t('common.save')}>

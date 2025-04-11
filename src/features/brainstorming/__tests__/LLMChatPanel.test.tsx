@@ -5,6 +5,7 @@ import React from 'react';
 import { I18nProvider } from '../../../contexts/I18nContext';
 import LLMChatPanel from '../LLMChatPanel';
 import type { BrainstormNode } from '../types';
+
 import {
   DEFAULT_PROMPTS,
   MOCK_NODE_BASE,

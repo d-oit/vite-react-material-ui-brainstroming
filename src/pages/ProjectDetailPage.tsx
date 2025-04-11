@@ -191,8 +191,25 @@ const ProjectDetailPage = () => {
       onThemeToggle={() => {}}
       isDarkMode={theme.palette.mode === 'dark'}
     >
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, flexGrow: 1, mr: 2, mb: { xs: 2, sm: 0 } }}>
+      <Box
+        sx={{
+          mb: 2,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: { xs: 'wrap', sm: 'nowrap' },
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1,
+            flexGrow: 1,
+            mr: 2,
+            mb: { xs: 2, sm: 0 },
+          }}
+        >
           {isEditingName ? (
             <TextField
               fullWidth
@@ -290,7 +307,9 @@ const ProjectDetailPage = () => {
           <Box
             sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
           >
-            <Typography variant="h6" sx={{ fontWeight: 'medium' }}>Project Details</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 'medium' }}>
+              Project Details
+            </Typography>
             {isEditingDescription ? (
               <Button
                 variant="contained"

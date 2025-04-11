@@ -30,14 +30,15 @@ const SuggestedWorkflow: React.FC<SuggestedWorkflowProps> = ({
         p: 2,
         mb: 3,
         borderRadius: 2,
-        backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+        backgroundColor:
+          theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
         border: `1px solid ${theme.palette.divider}`,
       }}
     >
       <Typography variant="subtitle1" fontWeight="medium" gutterBottom>
         {title}
       </Typography>
-      
+
       <Stepper
         activeStep={activeStep}
         alternativeLabel
@@ -50,7 +51,11 @@ const SuggestedWorkflow: React.FC<SuggestedWorkflowProps> = ({
       >
         {steps.map((step, index) => (
           <Step key={index} completed={step.completed}>
-            <StepLabel optional={step.optional ? <Typography variant="caption">Optional</Typography> : undefined}>
+            <StepLabel
+              optional={
+                step.optional ? <Typography variant="caption">Optional</Typography> : undefined
+              }
+            >
               {step.label}
             </StepLabel>
           </Step>

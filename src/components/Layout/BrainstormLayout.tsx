@@ -137,7 +137,10 @@ export const BrainstormLayout = ({
             >
               {isSaving ? t('common.saving') : t('common.save')}
             </Button>
-            <IconButton onClick={toggleFullscreen} aria-label={isFullscreen ? t('common.exitFullscreen') : t('common.enterFullscreen')}>
+            <IconButton
+              onClick={toggleFullscreen}
+              aria-label={isFullscreen ? t('common.exitFullscreen') : t('common.enterFullscreen')}
+            >
               {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
             </IconButton>
             <IconButton
@@ -186,20 +189,10 @@ export const BrainstormLayout = ({
         </Tabs>
       </Box>
 
-      <TabPanel
-        value={sidebarTab}
-        index={0}
-        id="sidebar-tabpanel-0"
-        ariaLabelledBy="sidebar-tab-0"
-      >
+      <TabPanel value={sidebarTab} index={0} id="sidebar-tabpanel-0" ariaLabelledBy="sidebar-tab-0">
         {chatPanel}
       </TabPanel>
-      <TabPanel
-        value={sidebarTab}
-        index={1}
-        id="sidebar-tabpanel-1"
-        ariaLabelledBy="sidebar-tab-1"
-      >
+      <TabPanel value={sidebarTab} index={1} id="sidebar-tabpanel-1" ariaLabelledBy="sidebar-tab-1">
         {historyPanel}
       </TabPanel>
     </Box>

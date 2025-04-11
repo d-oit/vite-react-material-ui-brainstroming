@@ -1,4 +1,5 @@
 import { expect } from 'vitest';
+
 import type { BrainstormSession, BrainstormNode } from '../types';
 
 interface CustomMatchers<R = unknown> {
@@ -11,7 +12,7 @@ declare module 'vitest' {
   interface AsymmetricMatchersContaining extends CustomMatchers {}
 }
 
-const toBeValidSession = function(received: Partial<BrainstormSession>) {
+const toBeValidSession = function (received: Partial<BrainstormSession>) {
   const requiredFields = ['nodes', 'isQuick'];
   const hasRequiredFields = requiredFields.every(field => field in received);
 
@@ -24,7 +25,7 @@ const toBeValidSession = function(received: Partial<BrainstormSession>) {
   };
 };
 
-const toContainNode = function(
+const toContainNode = function (
   received: Partial<BrainstormSession>,
   node: Partial<BrainstormNode>
 ) {

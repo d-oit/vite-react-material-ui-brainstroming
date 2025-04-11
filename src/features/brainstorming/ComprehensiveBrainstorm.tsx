@@ -1,13 +1,11 @@
 import { Box, IconButton, Paper, Stack, Tooltip } from '@mui/material';
 import React, { useCallback, useEffect, useState } from 'react';
+import type { Connection, Edge, Node } from 'reactflow';
 import ReactFlow, {
   addEdge,
   Background,
-  Connection,
   Controls,
-  Edge,
   MarkerType,
-  Node,
   Position,
   useEdgesState,
   useNodesState,
@@ -20,8 +18,9 @@ import RedoIcon from '@mui/icons-material/Redo';
 import CloseIcon from '@mui/icons-material/Close';
 
 import { useI18n } from '../../contexts/I18nContext';
-import { BrainstormingProps, BrainstormNode, BrainstormSession } from './types';
 import { generateUniqueId } from '../../utils/idGenerator';
+
+import type { BrainstormingProps, BrainstormNode, BrainstormSession } from './types';
 
 const nodeTypes = {
   idea: ({ data }: { data: BrainstormNode }) => (
@@ -53,7 +52,7 @@ export default function ComprehensiveBrainstorm({
 
   // Convert BrainstormNodes to ReactFlow nodes
   const convertToFlowNodes = useCallback((brainstormNodes: BrainstormNode[]): Node[] => {
-    return brainstormNodes.map((node) => ({
+    return brainstormNodes.map(node => ({
       id: node.id,
       type: 'idea',
       position: node.position || { x: 0, y: 0 },
@@ -64,9 +63,9 @@ export default function ComprehensiveBrainstorm({
   // Convert connections to edges
   const createEdges = useCallback((brainstormNodes: BrainstormNode[]): Edge[] => {
     const edges: Edge[] = [];
-    brainstormNodes.forEach((node) => {
+    brainstormNodes.forEach(node => {
       if (node.children) {
-        node.children.forEach((childId) => {
+        node.children.forEach(childId => {
           edges.push({
             id: `${node.id}-${childId}`,
             source: node.id,
@@ -92,7 +91,7 @@ export default function ComprehensiveBrainstorm({
 
   const handleConnect = useCallback(
     (connection: Connection) => {
-      setEdges((eds) =>
+      setEdges(eds =>
         addEdge(
           {
             ...connection,
@@ -109,7 +108,7 @@ export default function ComprehensiveBrainstorm({
   const handleSave = useCallback(async () => {
     if (!session) return;
 
-    const updatedNodes: BrainstormNode[] = nodes.map((node) => ({
+    const updatedNodes: BrainstormNode[] = nodes.map(node => ({
       ...(node.data as BrainstormNode),
       position: node.position,
     }));
@@ -121,8 +120,8 @@ export default function ComprehensiveBrainstorm({
     };
 
     await onSave?.(updatedSession);
-    setHistory((prev) => [...prev.slice(0, historyIndex + 1), updatedSession]);
-    setHistoryIndex((prev) => prev + 1);
+    setHistory(prev => [...prev.slice(0, historyIndex + 1), updatedSession]);
+    setHistoryIndex(prev => prev + 1);
   }, [session, nodes, historyIndex, onSave]);
 
   const handleUndo = useCallback(() => {
@@ -130,7 +129,7 @@ export default function ComprehensiveBrainstorm({
       const prevSession = history[historyIndex - 1];
       setNodes(convertToFlowNodes(prevSession.nodes));
       setEdges(createEdges(prevSession.nodes));
-      setHistoryIndex((prev) => prev - 1);
+      setHistoryIndex(prev => prev - 1);
     }
   }, [history, historyIndex, convertToFlowNodes, createEdges]);
 
@@ -139,7 +138,7 @@ export default function ComprehensiveBrainstorm({
       const nextSession = history[historyIndex + 1];
       setNodes(convertToFlowNodes(nextSession.nodes));
       setEdges(createEdges(nextSession.nodes));
-      setHistoryIndex((prev) => prev + 1);
+      setHistoryIndex(prev => prev + 1);
     }
   }, [history, historyIndex, convertToFlowNodes, createEdges]);
 

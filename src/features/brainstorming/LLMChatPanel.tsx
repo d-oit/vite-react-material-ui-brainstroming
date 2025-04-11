@@ -14,7 +14,8 @@ import React, { useCallback, useState } from 'react';
 
 import { useI18n } from '../../contexts/I18nContext';
 import { generateUniqueId } from '../../utils/idGenerator';
-import { BrainstormNode, LLMChatPanelProps } from './types';
+
+import type { BrainstormNode, LLMChatPanelProps } from './types';
 
 interface ChatMessage {
   id: string;
@@ -30,7 +31,11 @@ const DEFAULT_PROMPTS = [
   'brainstorming.prompts.organize',
 ];
 
-export default function LLMChatPanel({ projectId, session, onInsightGenerated }: LLMChatPanelProps) {
+export default function LLMChatPanel({
+  projectId,
+  session,
+  onInsightGenerated,
+}: LLMChatPanelProps) {
   const { t } = useI18n();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -135,7 +140,9 @@ export default function LLMChatPanel({ projectId, session, onInsightGenerated }:
                   primary={message.content}
                   secondary={new Date(message.timestamp).toLocaleTimeString()}
                   secondaryTypographyProps={{
-                    sx: { color: message.role === 'user' ? 'primary.contrastText' : 'text.secondary' },
+                    sx: {
+                      color: message.role === 'user' ? 'primary.contrastText' : 'text.secondary',
+                    },
                   }}
                 />
               </Paper>
@@ -175,7 +182,10 @@ export default function LLMChatPanel({ projectId, session, onInsightGenerated }:
             maxRows={3}
             disabled={isLoading}
           />
-          <IconButton onClick={() => void handleSendMessage()} disabled={!input.trim() || isLoading}>
+          <IconButton
+            onClick={() => void handleSendMessage()}
+            disabled={!input.trim() || isLoading}
+          >
             <SendIcon />
           </IconButton>
         </Stack>

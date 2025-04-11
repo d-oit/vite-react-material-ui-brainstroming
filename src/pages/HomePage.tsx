@@ -1,4 +1,8 @@
-import { Dashboard as DashboardIcon, FolderOpen as ProjectsIcon, BubbleChart as BrainstormIcon } from '@mui/icons-material';
+import {
+  Dashboard as DashboardIcon,
+  FolderOpen as ProjectsIcon,
+  BubbleChart as BrainstormIcon,
+} from '@mui/icons-material';
 import { Box, Typography, Button, Container, Stack, CircularProgress } from '@mui/material';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';

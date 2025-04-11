@@ -1,5 +1,5 @@
-import { Box, Paper, Typography, Fab } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
+import { Box, Paper, Typography, Fab } from '@mui/material';
 import React, { Suspense } from 'react';
 import type { Node, Edge } from 'reactflow';
 
@@ -8,6 +8,7 @@ import { useBrainstormStore } from '../../store/brainstormStore';
 import { BrainstormErrorBoundary } from '../ErrorBoundary/BrainstormErrorBoundary';
 import ContentLayout from '../UI/ContentLayout';
 import NavigationTabs from '../UI/NavigationTabs';
+
 import { EnhancedBrainstormFlow } from './EnhancedBrainstormFlow';
 import { LoadingMindMap } from './LoadingMindMap';
 
@@ -51,7 +52,7 @@ const BrainstormPage: React.FC<BrainstormPageProps> = ({
       >
         {projectTitle}
       </Typography>
-      
+
       <NavigationTabs
         tabs={[
           { label: t('brainstorm.overview') || 'Overview', id: 'overview' },

@@ -1,6 +1,13 @@
 import { Edge, Node, XYPosition } from 'reactflow';
 import { create } from 'zustand';
-import { CustomNode, CustomEdge, NodeData, NodeUpdate, NewNodeParams } from '../components/BrainstormFlow/types';
+
+import type {
+  CustomNode,
+  CustomEdge,
+  NodeUpdate,
+  NewNodeParams,
+} from '../components/BrainstormFlow/types';
+import { NodeData } from '../components/BrainstormFlow/types';
 
 interface BrainstormState {
   nodes: CustomNode[];
@@ -71,9 +78,7 @@ export const useBrainstormStore = create<BrainstormState>(set => ({
   removeNode: nodeId =>
     set(state => ({
       nodes: state.nodes.filter(node => node.id !== nodeId),
-      edges: state.edges.filter(
-        edge => edge.source !== nodeId && edge.target !== nodeId
-      ),
+      edges: state.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId),
     })),
   addEdge: (source, target) =>
     set(state => ({
