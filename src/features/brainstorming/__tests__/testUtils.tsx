@@ -16,21 +16,29 @@ vi.mock('../../../utils/idGenerator', () => ({
 
 // Mock for ReactFlow
 vi.mock('reactflow', () => ({
-  ...vi.importActual('reactflow'),
+  // Remove importActual as we are mocking all used parts explicitly
   ReactFlow: ({ children }: { children: React.ReactNode }) =>
     React.createElement('div', null, children),
   Background: () => null,
   Controls: () => null,
-  useNodesState: () => {
-    const [nodes, setNodes] = React.useState<any[]>([]);
+  useNodesState: (initialNodes?: any[]) => { // Accept initialNodes
+    const [nodes, setNodes] = React.useState<any[]>(initialNodes || []); // Use initialNodes
     return [nodes, setNodes, vi.fn()];
   },
-  useEdgesState: () => {
-    const [edges, setEdges] = React.useState<any[]>([]);
+  useEdgesState: (initialEdges?: any[]) => { // Accept initialEdges
+    const [edges, setEdges] = React.useState<any[]>(initialEdges || []); // Use initialEdges
     return [edges, setEdges, vi.fn()];
   },
   MarkerType: {
     ArrowClosed: 'arrowclosed',
+  },
+  // Add mocks for other used exports
+  addEdge: vi.fn((params, edges) => [...edges, { id: `${params.source}-${params.target}`, ...params }]),
+  Position: { // Mock the Position enum/object
+    Left: 'left',
+    Top: 'top',
+    Right: 'right',
+    Bottom: 'bottom',
   },
 }));
 

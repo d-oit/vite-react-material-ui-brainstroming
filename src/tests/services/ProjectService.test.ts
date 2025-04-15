@@ -6,8 +6,10 @@ import loggerService from '../../services/LoggerService';
 import _offlineService from '../../services/OfflineService';
 import { ProjectService } from '../../services/ProjectService';
 import _s3Service from '../../services/S3Service';
-import type { Project, ProjectHistoryEntry } from '../../types';
-import { ProjectTemplate } from '../../types/project';
+// Import correct types
+import type { Project, ProjectHistoryEntry, Node, Edge } from '../../types';
+// Import ProjectTemplate enum and SyncSettings type from correct path
+import { ProjectTemplate, type SyncSettings } from '../../types/project';
 
 // Mock dependencies
 vi.mock('../../services/IndexedDBService', () => ({
@@ -15,20 +17,43 @@ vi.mock('../../services/IndexedDBService', () => ({
     init: vi.fn().mockResolvedValue(true),
     getAllProjects: vi.fn(),
     getProject: vi.fn(),
-    saveProject: vi.fn(),
+    // Mock saveProject to resolve with the project ID (string)
+    saveProject: vi.fn().mockImplementation((project: Project) => Promise.resolve(project.id)),
     deleteProject: vi.fn(),
     getProjectHistory: vi.fn(),
     addProjectHistoryEntry: vi.fn(),
   },
 }));
 
-vi.mock('../../services/LoggerService', () => ({
-  default: {
+// Mock LoggerService to provide getInstance and the logging methods
+vi.mock('../../services/LoggerService', () => {
+  const mockLoggerInstance = {
     info: vi.fn(),
-    warn: vi.fn(),
     error: vi.fn(),
-  },
-}));
+    warn: vi.fn(),
+    debug: vi.fn(),
+    log: vi.fn(),
+    configure: vi.fn(),
+    getLogs: vi.fn().mockResolvedValue([]),
+    clearLogs: vi.fn().mockResolvedValue(undefined),
+    initialize: vi.fn().mockResolvedValue(true),
+  };
+  return {
+    default: {
+      getInstance: vi.fn(() => mockLoggerInstance),
+      info: mockLoggerInstance.info,
+      error: mockLoggerInstance.error,
+      warn: mockLoggerInstance.warn,
+      debug: mockLoggerInstance.debug,
+      log: mockLoggerInstance.log,
+      configure: mockLoggerInstance.configure,
+      getLogs: mockLoggerInstance.getLogs,
+      clearLogs: mockLoggerInstance.clearLogs,
+      initialize: mockLoggerInstance.initialize,
+    },
+    LoggerService: vi.fn(() => mockLoggerInstance),
+  };
+});
 
 vi.mock('../../services/S3Service', () => ({
   default: {
@@ -78,13 +103,13 @@ vi.mock('../../data/projectTemplates', () => ({
 describe('ProjectService', () => {
   let projectService: ProjectService;
 
-  // Mock crypto.randomUUID
-  const mockUUID = 'test-uuid-1234';
+  // Mock crypto.randomUUID with a valid format
+  const mockUUID = '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed';
   vi.spyOn(crypto, 'randomUUID').mockReturnValue(mockUUID);
 
-  // Mock Date
+  // Mock Date correctly
   const mockDate = new Date('2023-01-01T00:00:00Z');
-  vi.spyOn(global, 'Date').mockImplementation(() => mockDate as unknown as string);
+  vi.spyOn(global, 'Date').mockImplementation(() => mockDate); // Return Date object
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -107,7 +132,7 @@ describe('ProjectService', () => {
     it('should create a new project from template', async () => {
       const name = 'Test Project';
       const description = 'A test project';
-      const template = ProjectTemplate.BLANK;
+      const template = ProjectTemplate.CUSTOM; // Use valid enum
 
       const mockProject: Project = {
         id: mockUUID,
@@ -116,12 +141,21 @@ describe('ProjectService', () => {
         template,
         createdAt: mockDate.toISOString(),
         updatedAt: mockDate.toISOString(),
-        nodes: [],
-        edges: [],
+        nodes: [] as Node[], // Add type assertion
+        edges: [] as Edge[], // Add type assertion
         version: '1.0.0',
+        syncSettings: { // Add missing syncSettings
+          enableS3Sync: false,
+          syncFrequency: 'manual',
+        },
       };
 
-      vi.mocked(indexedDBService.saveProject).mockResolvedValueOnce(mockProject);
+      // saveProject mock now resolves string ID, adjust test if needed or mock implementation
+      // Assuming createProject returns the full project object after saving
+      vi.mocked(indexedDBService.saveProject).mockResolvedValueOnce(mockUUID); // Mock resolves ID
+      // If createProject needs the full object, mock getProject after save
+      vi.mocked(indexedDBService.getProject).mockResolvedValueOnce(mockProject);
+
 
       const result = await projectService.createProject(name, description, template);
 
@@ -138,7 +172,7 @@ describe('ProjectService', () => {
       vi.mocked(indexedDBService.saveProject).mockRejectedValueOnce(error);
 
       await expect(
-        projectService.createProject('Test', 'Description', ProjectTemplate.BLANK)
+        projectService.createProject('Test', 'Description', ProjectTemplate.CUSTOM) // Use valid enum
       ).rejects.toThrow('Failed to save project');
 
       expect(loggerService.error).toHaveBeenCalledWith(
@@ -155,23 +189,25 @@ describe('ProjectService', () => {
           id: '1',
           name: 'Project 1',
           description: 'Description 1',
-          template: ProjectTemplate.BLANK,
+          template: ProjectTemplate.CUSTOM, // Use valid enum
           createdAt: '2023-01-01T00:00:00Z',
           updatedAt: '2023-01-01T00:00:00Z',
-          nodes: [],
-          edges: [],
+          nodes: [] as Node[],
+          edges: [] as Edge[],
           version: '1.0.0',
+          syncSettings: { enableS3Sync: false, syncFrequency: 'manual' }, // Add syncSettings
         },
         {
           id: '2',
           name: 'Project 2',
           description: 'Description 2',
-          template: ProjectTemplate.BUSINESS,
+          template: ProjectTemplate.SOFTWARE_DEVELOPMENT, // Use valid enum
           createdAt: '2023-01-02T00:00:00Z',
           updatedAt: '2023-01-02T00:00:00Z',
-          nodes: [],
-          edges: [],
+          nodes: [] as Node[],
+          edges: [] as Edge[],
           version: '1.0.0',
+          syncSettings: { enableS3Sync: false, syncFrequency: 'manual' }, // Add syncSettings
         },
       ];
 
@@ -204,12 +240,13 @@ describe('ProjectService', () => {
         id: '1',
         name: 'Project 1',
         description: 'Description 1',
-        template: ProjectTemplate.BLANK,
+        template: ProjectTemplate.CUSTOM, // Use valid enum
         createdAt: '2023-01-01T00:00:00Z',
         updatedAt: '2023-01-01T00:00:00Z',
-        nodes: [],
-        edges: [],
+        nodes: [] as Node[],
+        edges: [] as Edge[],
         version: '1.0.0',
+        syncSettings: { enableS3Sync: false, syncFrequency: 'manual' }, // Add syncSettings
       };
 
       vi.mocked(indexedDBService.getProject).mockResolvedValueOnce(mockProject);
@@ -249,12 +286,13 @@ describe('ProjectService', () => {
         id: '1',
         name: 'Project 1',
         description: 'Description 1',
-        template: ProjectTemplate.BLANK,
+        template: ProjectTemplate.CUSTOM, // Use valid enum
         createdAt: '2023-01-01T00:00:00Z',
         updatedAt: '2023-01-01T00:00:00Z',
-        nodes: [],
-        edges: [],
+        nodes: [] as Node[],
+        edges: [] as Edge[],
         version: '1.0.0',
+        syncSettings: { enableS3Sync: false, syncFrequency: 'manual' }, // Add syncSettings
       };
 
       const updatedProject: Project = {
@@ -265,7 +303,11 @@ describe('ProjectService', () => {
       };
 
       vi.mocked(indexedDBService.getProject).mockResolvedValueOnce(mockProject);
-      vi.mocked(indexedDBService.saveProject).mockResolvedValueOnce(updatedProject);
+      // saveProject resolves ID, getProject returns updated object
+      vi.mocked(indexedDBService.saveProject).mockResolvedValueOnce(updatedProject.id);
+      vi.mocked(indexedDBService.getProject)
+        .mockResolvedValueOnce(mockProject) // For the initial check in updateProject
+        .mockResolvedValueOnce(updatedProject); // For returning after save
 
       const result = await projectService.updateProject(updatedProject);
 
@@ -293,12 +335,13 @@ describe('ProjectService', () => {
         id: '1',
         name: 'Project 1',
         description: 'Description 1',
-        template: ProjectTemplate.BLANK,
+        template: ProjectTemplate.CUSTOM, // Use valid enum
         createdAt: '2023-01-01T00:00:00Z',
         updatedAt: '2023-01-01T00:00:00Z',
-        nodes: [],
-        edges: [],
+        nodes: [] as Node[],
+        edges: [] as Edge[],
         version: '1.0.0',
+        syncSettings: { enableS3Sync: false, syncFrequency: 'manual' }, // Add syncSettings
       };
 
       const error = new Error('Failed to save project');
@@ -322,12 +365,13 @@ describe('ProjectService', () => {
         id: '1',
         name: 'Project 1',
         description: 'Description 1',
-        template: ProjectTemplate.BLANK,
+        template: ProjectTemplate.CUSTOM, // Use valid enum
         createdAt: '2023-01-01T00:00:00Z',
         updatedAt: '2023-01-01T00:00:00Z',
-        nodes: [],
-        edges: [],
+        nodes: [] as Node[],
+        edges: [] as Edge[],
         version: '1.0.0',
+        syncSettings: { enableS3Sync: false, syncFrequency: 'manual' }, // Add syncSettings
       };
 
       vi.mocked(indexedDBService.getProject).mockResolvedValueOnce(mockProject);
@@ -345,17 +389,20 @@ describe('ProjectService', () => {
 
     it('should handle errors when deleting a project', async () => {
       const error = new Error('Failed to delete project');
-      vi.mocked(indexedDBService.getProject).mockResolvedValueOnce({
+      // Define the mock project object with the correct type first
+      const mockProjectForGet: Project = {
         id: '1',
         name: 'Project 1',
         description: 'Description 1',
-        template: ProjectTemplate.BLANK,
+        template: ProjectTemplate.CUSTOM, // Use valid enum
         createdAt: '2023-01-01T00:00:00Z',
         updatedAt: '2023-01-01T00:00:00Z',
-        nodes: [],
-        edges: [],
+        nodes: [] as Node[],
+        edges: [] as Edge[],
         version: '1.0.0',
-      });
+        syncSettings: { enableS3Sync: false, syncFrequency: 'manual' }, // Add syncSettings
+      };
+      vi.mocked(indexedDBService.getProject).mockResolvedValueOnce(mockProjectForGet); // Pass the typed object
       vi.mocked(indexedDBService.deleteProject).mockRejectedValueOnce(error);
 
       await expect(projectService.deleteProject('1')).rejects.toThrow('Failed to delete project');

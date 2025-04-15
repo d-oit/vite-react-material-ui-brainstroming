@@ -170,67 +170,78 @@ const AppWithTheme = () => {
   useEffect(() => {
     const initializeServices = async () => {
       try {
-        // Initialize performance monitoring
+        // Start performance monitoring
         performanceMonitoring.setEnabled(true);
         const initMetricId = performanceMonitoring.startMeasure(
           'App.initialization',
           PerformanceCategory.RENDERING
         );
 
-        // Initialize logger service first
-        await loggerService.initialize();
+        // Initialize critical services in parallel
+        const [loggerInitialized, dbInitialized] = await Promise.all([
+          // Initialize logger service
+          loggerService.initialize().catch(error => {
+            console.error('Logger initialization failed:', error);
+            return false;
+          }),
+          
+          // Initialize IndexedDB
+          indexedDBService.init().catch(error => {
+            console.error('IndexedDB initialization failed:', error);
+            return false;
+          })
+        ]);
 
-        // Then initialize IndexedDB
-        const initialized = await indexedDBService.init();
-        if (initialized === false) {
-          const warning = 'IndexedDB initialization failed, some features may not work properly';
-          console.warn(warning);
-          await loggerService.warn(warning);
-        } else {
-          const message = 'IndexedDB initialized successfully in App';
-          console.log(message);
-          await loggerService.info(message);
+        // Log initialization results
+        if (!loggerInitialized) {
+          console.warn('Logger service failed to initialize');
+        }
+        
+        if (!dbInitialized) {
+          console.warn('IndexedDB initialization failed, some features may not work properly');
+          if (loggerInitialized) {
+            void loggerService.warn('IndexedDB initialization failed');
+          }
         }
 
-        // Configure and start offline sync service
-        offlineService.configure({
-          syncInterval: 60000, // 1 minute
-          maxRetries: 5,
-          autoSync: true,
-        });
-        offlineService.startAutoSync();
+        // Configure offline service - this is less critical and can run after critical services
+        setTimeout(() => {
+          try {
+            offlineService.configure({
+              syncInterval: 60000,
+              maxRetries: 5,
+              autoSync: true,
+            });
+            offlineService.startAutoSync();
+          } catch (error) {
+            console.error('Failed to initialize offline service:', error);
+            void loggerService.error('Failed to initialize offline service', error instanceof Error ? error : new Error(String(error)));
+          }
+        }, 100);
 
-        // Register service worker for PWA
-        try {
-          // Register service worker and store the function
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const _updateSW = registerSW({
-            onNeedRefresh(updateFn) {
-              // Store the update function for later use
-              setUpdateSWFunction(() => updateFn);
-              setUpdateAvailable(true);
+        // Register service worker asynchronously - this is also less critical
+        setTimeout(() => {
+          try {
+            registerSW({
+              onNeedRefresh(updateFn) {
+                setUpdateSWFunction(() => updateFn);
+                setUpdateAvailable(true);
+                void loggerService.info('New app version available');
+              },
+              onOfflineReady() {
+                void loggerService.info('App is ready for offline use');
+              },
+              onRegisterError(error) {
+                console.error('Service worker registration failed:', error);
+                void loggerService.error('Service worker registration failed', error);
+              },
+            });
+          } catch (error) {
+            console.error('Failed to register service worker:', error);
+            void loggerService.error('Failed to register service worker', error instanceof Error ? error : new Error(String(error)));
+          }
+        }, 200);
 
-              // Log the update availability
-              void loggerService.info('New app version available').catch(console.error);
-            },
-            onOfflineReady() {
-              void loggerService.info('App is ready for offline use').catch(console.error);
-            },
-            onRegisterError(error) {
-              void loggerService
-                .error('Service worker registration failed', error)
-                .catch(console.error);
-            },
-          });
-        } catch (error) {
-          console.error('Failed to register service worker:', error);
-          await loggerService.error(
-            'Failed to register service worker',
-            error instanceof Error ? error : new Error(String(error))
-          );
-        }
-
-        // End the initialization metric
         performanceMonitoring.endMeasure(initMetricId);
       } catch (error) {
         console.error('Failed to initialize services:', error);

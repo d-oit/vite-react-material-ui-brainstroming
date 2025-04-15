@@ -1,37 +1,62 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import React, { useState } from 'react'; // Import useState
 import type { ReactNode } from 'react';
+import { vi } from 'vitest'; // Import vi
 
 import { I18nProvider } from '../../../contexts/I18nContext';
 import ComprehensiveBrainstorm from '../ComprehensiveBrainstorm';
 import type { BrainstormNode, BrainstormSession } from '../types';
 
 import { MOCK_NODE_BASE, MOCK_SESSION, TEST_PROJECT_ID } from './constants';
-import { mockGenerateId, setupTest } from './testUtils';
+import { setupTest } from './testUtils'; // Remove mockGenerateId if not used directly here
 
-// Mock ReactFlow components and hooks
-jest.mock('reactflow', () => ({
-  ...jest.requireActual('reactflow'),
-  ReactFlow: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+// Isolate the mock specifically for this test file
+vi.mock('reactflow', () => ({
+  ReactFlow: ({ children }: { children: React.ReactNode }) =>
+    React.createElement('div', null, children),
   Background: () => null,
   Controls: () => null,
-  useNodesState: () => {
-    const [nodes, setNodes] = React.useState<BrainstormNode[]>([]);
-    return [nodes, setNodes, jest.fn()];
+  useNodesState: (initialNodes?: any[]) => {
+    const [nodes, setNodes] = useState<any[]>(initialNodes || []);
+    return [nodes, setNodes, vi.fn()];
   },
-  useEdgesState: () => {
-    const [edges, setEdges] = React.useState<any[]>([]);
-    return [edges, setEdges, jest.fn()];
+  useEdgesState: (initialEdges?: any[]) => {
+    const [edges, setEdges] = useState<any[]>(initialEdges || []);
+    return [edges, setEdges, vi.fn()];
   },
   MarkerType: {
     ArrowClosed: 'arrowclosed',
   },
+  addEdge: vi.fn((params, edges) => [...edges, { id: `${params.source}-${params.target}`, ...params }]),
+  Position: {
+    Left: 'left',
+    Top: 'top',
+    Right: 'right',
+    Bottom: 'bottom',
+  },
 }));
 
+// const mockUseNodesState = vi.fn(() => {
+// const mockUseNodesState = vi.fn(() => {
+//   const [nodes, setNodes] = React.useState<BrainstormNode[]>([]);
+//   return [nodes, setNodes, vi.fn()];
+// });
+// const mockUseEdgesState = vi.fn(() => {
+//   const [edges, setEdges] = React.useState<any[]>([]);
+//   return [edges, setEdges, vi.fn()];
+// });
+// vi.mocked(useNodesState).mockImplementation(mockUseNodesState);
+// vi.mocked(useEdgesState).mockImplementation(mockUseEdgesState);
+// vi.mocked(ReactFlow).mockImplementation(({ children }) => <div>{children}</div>);
+// vi.mocked(Background).mockImplementation(() => null);
+// vi.mocked(Controls).mockImplementation(() => null);
+
+
 describe('ComprehensiveBrainstorm', () => {
-  const mockOnSave = jest.fn();
-  const mockOnClose = jest.fn();
+  // Use type assertion to force compatibility
+  const mockOnSave = vi.fn() as unknown as (session: BrainstormSession) => Promise<void>;
+  const mockOnClose = vi.fn();
 
   setupTest();
 

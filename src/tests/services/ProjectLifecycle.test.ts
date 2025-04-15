@@ -2,7 +2,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import indexedDBService from '../../services/IndexedDBService';
 import projectService from '../../services/ProjectService';
-import type { Project, ProjectHistoryEntry } from '../../types';
+// Import project-specific types including Node, Edge
+import type { Project, ProjectHistoryEntry, Node, Edge } from '../../types';
+// Import ProjectTemplate enum and SyncSettings type
+import { ProjectTemplate, type SyncSettings } from '../../types/project';
 
 // Mock the dependencies
 vi.mock('../../services/IndexedDBService', () => ({
@@ -29,13 +32,37 @@ vi.mock('../../services/GitService', () => ({
   },
 }));
 
-vi.mock('../../services/LoggerService', () => ({
-  default: {
+// Mock LoggerService to provide getInstance and the logging methods
+vi.mock('../../services/LoggerService', () => {
+  const mockLoggerInstance = {
     info: vi.fn(),
     error: vi.fn(),
     warn: vi.fn(),
-  },
-}));
+    debug: vi.fn(), // Add other methods if needed by the code under test
+    log: vi.fn(),
+    configure: vi.fn(),
+    getLogs: vi.fn().mockResolvedValue([]),
+    clearLogs: vi.fn().mockResolvedValue(undefined),
+    initialize: vi.fn().mockResolvedValue(true),
+  };
+  return {
+    default: {
+      getInstance: vi.fn(() => mockLoggerInstance),
+      // Also keep the direct methods if they are used directly anywhere
+      info: mockLoggerInstance.info,
+      error: mockLoggerInstance.error,
+      warn: mockLoggerInstance.warn,
+      debug: mockLoggerInstance.debug,
+      log: mockLoggerInstance.log,
+      configure: mockLoggerInstance.configure,
+      getLogs: mockLoggerInstance.getLogs,
+      clearLogs: mockLoggerInstance.clearLogs,
+      initialize: mockLoggerInstance.initialize,
+    },
+    // Export the class mock if needed (though getInstance is usually sufficient)
+    LoggerService: vi.fn(() => mockLoggerInstance),
+  };
+});
 
 vi.mock('../../services/OfflineService', () => ({
   default: {
@@ -52,6 +79,7 @@ vi.mock('../../services/S3Service', () => ({
 }));
 
 describe('Project Lifecycle Management', () => {
+  // Correct mockProject structure and types
   const mockProject: Project = {
     id: 'test-project-id',
     name: 'Test Project',
@@ -59,8 +87,15 @@ describe('Project Lifecycle Management', () => {
     createdAt: '2023-01-01T00:00:00.000Z',
     updatedAt: '2023-01-01T00:00:00.000Z',
     version: '1.0.0',
-    nodes: [],
-    edges: [],
+    template: ProjectTemplate.CUSTOM, // Use enum value
+    nodes: [] as Node[], // Use project's Node type
+    edges: [] as Edge[], // Use project's Edge type
+    syncSettings: { // Use correct SyncSettings structure
+      enableS3Sync: false, // Correct property name
+      syncFrequency: 'manual',
+      // s3Bucket and s3Region might not be needed if enableS3Sync is false
+    },
+    // isArchived and archivedAt are likely not base properties
   };
 
   beforeEach(() => {

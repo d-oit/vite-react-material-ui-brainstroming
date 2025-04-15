@@ -1,93 +1,83 @@
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { MemoizedNodeEditDialog as NodeEditDialog } from '../../components/BrainstormFlow/NodeEditDialog';
-import { NodeType } from '../../types';
-import type { NodeData, NodeSize } from '../../types';
+import { NodeType, NodeSize } from '../../types';
+import type { NodeData } from '../../types';
 import { render } from '../test-utils';
 
 describe('NodeEditDialog', () => {
   const mockOnClose = vi.fn();
   const mockOnSave = vi.fn();
 
+  const editInitialData: NodeData = {
+    id: 'node-1',
+    title: 'Test Node',
+    label: 'Test Node',
+    content: 'This is a test node',
+    tags: ['tag1'],
+    color: '#e3f2fd',
+    size: NodeSize.MEDIUM,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    type: NodeType.IDEA,
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renders with the correct initial values', () => {
-    // Render the component
-    const initialData: NodeData = {
-      id: 'node-1',
-      title: 'Test Node',
-      label: 'Test Node',
-      content: 'This is a test node',
-      tags: ['tag1', 'tag2'],
-      color: '#e3f2fd',
-      size: 'medium' as NodeSize,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
+  it('renders with the correct initial values in edit mode', () => {
     render(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        initialData={initialData}
+        initialData={editInitialData}
         initialType={NodeType.IDEA}
       />
     );
 
-    // Check that the dialog is rendered
     expect(screen.getByText('Edit Node')).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: /label/i })).toHaveValue('Test Node');
+    expect(screen.getByRole('textbox', { name: /content/i })).toHaveValue('This is a test node');
 
-    // Check that the initial values are set
-    expect(screen.getByLabelText('Title')).toHaveValue('Test Node');
-    expect(screen.getByLabelText('Content')).toHaveValue('This is a test node');
-
-    // Check that the tags are rendered
-    expect(screen.getByText('tag1')).toBeInTheDocument();
-    expect(screen.getByText('tag2')).toBeInTheDocument();
+    const tagListBox = screen.getByRole('textbox', { name: /add tag/i }).parentElement?.nextElementSibling;
+    expect(tagListBox).toBeInstanceOf(HTMLElement); // Check if it's an HTMLElement
+    if (tagListBox) { // Null check
+       expect(within(tagListBox as HTMLElement).getByText('tag1')).toBeInTheDocument(); // Cast to HTMLElement
+    }
   });
 
   it('calls onSave with the updated values when the save button is clicked', async () => {
-    // Render the component
-    const initialData: NodeData = {
-      id: 'node-1',
-      title: 'Test Node',
-      label: 'Test Node',
-      content: 'This is a test node',
-      tags: ['tag1', 'tag2'],
-      color: '#e3f2fd',
-      size: 'medium' as NodeSize,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
     render(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        initialData={initialData}
+        initialData={editInitialData}
         initialType={NodeType.IDEA}
       />
     );
 
-    // Update the title and content
-    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Updated Title' } });
-    fireEvent.change(screen.getByLabelText('Content'), { target: { value: 'Updated content' } });
+    fireEvent.change(screen.getByRole('textbox', { name: /label/i }), { target: { value: 'Updated Label' } });
+    fireEvent.change(screen.getByRole('textbox', { name: /content/i }), { target: { value: 'Updated content' } });
 
-    // Click the save button
-    fireEvent.click(screen.getByText('Save'));
+    const actions = screen.getByRole('dialog').querySelector('.MuiDialogActions-root');
+    expect(actions).toBeInstanceOf(HTMLElement); // Check
+    if (actions) { // Null check
+        fireEvent.click(within(actions as HTMLElement).getByRole('button', { name: 'Save' })); // Cast
+    }
 
-    // Check that onSave was called with the updated values
     await waitFor(() => {
       expect(mockOnSave).toHaveBeenCalledWith(
         expect.objectContaining({
-          title: 'Updated Title',
+          label: 'Updated Label',
+          title: 'Updated Label',
           content: 'Updated content',
-          tags: ['tag1', 'tag2'],
+          tags: ['tag1'],
+          color: '#e3f2fd',
+          size: NodeSize.MEDIUM,
         }),
         NodeType.IDEA
       );
@@ -95,199 +85,156 @@ describe('NodeEditDialog', () => {
   });
 
   it('calls onClose when the cancel button is clicked', () => {
-    // Render the component
-    const initialData: NodeData = {
-      id: 'node-1',
-      title: 'Test Node',
-      label: 'Test Node',
-      content: 'This is a test node',
-      tags: [],
-      color: '#e3f2fd',
-      size: 'medium' as NodeSize,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
     render(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        initialData={initialData}
+        initialData={editInitialData}
         initialType={NodeType.IDEA}
       />
     );
-
-    // Click the cancel button
-    fireEvent.click(screen.getByText('Cancel'));
-
-    // Check that onClose was called
+    const actions = screen.getByRole('dialog').querySelector('.MuiDialogActions-root');
+    expect(actions).toBeInstanceOf(HTMLElement); // Check
+     if (actions) { // Null check
+        fireEvent.click(within(actions as HTMLElement).getByRole('button', { name: 'Cancel' })); // Cast
+    }
     expect(mockOnClose).toHaveBeenCalled();
   });
 
   it('allows adding and removing tags', async () => {
-    // Render the component
-    const initialData: NodeData = {
-      id: 'node-1',
-      title: 'Test Node',
-      label: 'Test Node',
-      content: 'This is a test node',
-      tags: ['tag1'],
-      color: '#e3f2fd',
-      size: 'medium' as NodeSize,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
     render(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        initialData={initialData}
+        initialData={editInitialData}
         initialType={NodeType.IDEA}
       />
     );
 
-    // Add a new tag
-    const tagInput = screen.getByLabelText('Add tag');
+    const tagInput = screen.getByRole('textbox', { name: /add tag/i });
     fireEvent.change(tagInput, { target: { value: 'tag2' } });
-    fireEvent.keyDown(tagInput, { key: 'Enter', code: 'Enter' });
+    fireEvent.keyDown(tagInput, { key: 'Enter', code: 'Enter', charCode: 13 });
 
-    // Check that the new tag is rendered
-    expect(screen.getByText('tag2')).toBeInTheDocument();
+    const tagListBox = screen.getByRole('textbox', { name: /add tag/i }).parentElement?.nextElementSibling;
+    expect(tagListBox).toBeInstanceOf(HTMLElement); // Check
+    if (!tagListBox) throw new Error("Could not find tag list container");
 
-    // Remove a tag
-    const deleteIcon = screen.getAllByLabelText('delete')[0]; // First delete icon
+    await waitFor(() => {
+      expect(within(tagListBox as HTMLElement).getByText('tag2')).toBeInTheDocument(); // Cast
+    });
+
+    const tag1Chip = within(tagListBox as HTMLElement).getByText('tag1').closest('.MuiChip-root'); // Cast
+    expect(tag1Chip).toBeInstanceOf(HTMLElement); // Check
+    if (!tag1Chip) throw new Error("Could not find tag1 chip");
+
+    const deleteIcon = within(tag1Chip as HTMLElement).getByTestId('CancelIcon'); // Cast
     fireEvent.click(deleteIcon);
 
-    // Check that the tag was removed
-    expect(screen.queryByText('tag1')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(within(tagListBox as HTMLElement).queryByText('tag1')).not.toBeInTheDocument(); // Cast
+    });
 
-    // Save the changes
-    fireEvent.click(screen.getByText('Save'));
+    const actions = screen.getByRole('dialog').querySelector('.MuiDialogActions-root');
+    expect(actions).toBeInstanceOf(HTMLElement); // Check
+    if (actions) { // Null check
+        fireEvent.click(within(actions as HTMLElement).getByRole('button', { name: 'Save' })); // Cast
+    }
 
-    // Check that onSave was called with the updated tags
     await waitFor(() => {
       expect(mockOnSave).toHaveBeenCalledWith(
         expect.objectContaining({
           tags: ['tag2'],
-        })
+        }),
+        NodeType.IDEA
       );
     });
   });
 
-  it('allows changing the node type', async () => {
-    // Render the component
-    const initialData: NodeData = {
-      id: 'node-1',
-      title: 'Test Node',
-      label: 'Test Node',
-      content: 'This is a test node',
-      tags: [],
-      color: '#e3f2fd',
-      size: 'medium' as NodeSize,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
+  it('allows changing the node type and preserves color', async () => {
     render(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        initialData={initialData}
+        initialData={editInitialData}
         initialType={NodeType.IDEA}
       />
     );
 
-    // Change the node type
-    fireEvent.mouseDown(screen.getByLabelText('Node Type'));
-    fireEvent.click(screen.getByText('Task'));
+    fireEvent.mouseDown(screen.getByRole('combobox', { name: /node type/i }));
+    await screen.findByRole('listbox');
+    fireEvent.click(screen.getByRole('option', { name: 'Task' }));
 
-    // Save the changes
-    fireEvent.click(screen.getByText('Save'));
+    const actions = screen.getByRole('dialog').querySelector('.MuiDialogActions-root');
+    expect(actions).toBeInstanceOf(HTMLElement); // Check
+    if (actions) { // Null check
+        fireEvent.click(within(actions as HTMLElement).getByRole('button', { name: 'Save' })); // Cast
+    }
 
-    // Check that onSave was called with the updated type
     await waitFor(() => {
       expect(mockOnSave).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: NodeType.TASK,
-        })
+          color: '#e3f2fd',
+          size: NodeSize.MEDIUM,
+        }),
+        NodeType.TASK
       );
     });
   });
 
-  it('allows changing the node size', async () => {
-    // Render the component
-    const initialData: NodeData = {
-      id: 'node-1',
-      title: 'Test Node',
-      label: 'Test Node',
-      content: 'This is a test node',
-      tags: [],
-      color: '#e3f2fd',
-      size: 'medium' as NodeSize,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
+  it('allows changing the node size and preserves color', async () => {
     render(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        initialData={initialData}
+        initialData={editInitialData}
         initialType={NodeType.IDEA}
       />
     );
 
-    // Toggle size options
-    fireEvent.click(screen.getByLabelText('Toggle size options'));
+    fireEvent.mouseDown(screen.getByRole('combobox', { name: /size/i }));
+    await screen.findByRole('listbox');
+    fireEvent.click(screen.getByRole('option', { name: 'Large' }));
 
-    // Change the node size
-    fireEvent.click(screen.getByLabelText('Large size'));
+    const actions = screen.getByRole('dialog').querySelector('.MuiDialogActions-root');
+    expect(actions).toBeInstanceOf(HTMLElement); // Check
+     if (actions) { // Null check
+        fireEvent.click(within(actions as HTMLElement).getByRole('button', { name: 'Save' })); // Cast
+    }
 
-    // Save the changes
-    fireEvent.click(screen.getByText('Save'));
-
-    // Check that onSave was called with the updated size
     await waitFor(() => {
       expect(mockOnSave).toHaveBeenCalledWith(
         expect.objectContaining({
-          size: 'large',
-        })
+          color: '#e3f2fd',
+          size: NodeSize.LARGE,
+        }),
+        NodeType.IDEA
       );
     });
   });
 
-  it('renders in add mode when no initialValues are provided', () => {
-    // Render the component in add mode
+  it('renders in add mode when no initialData is provided', () => {
     render(
       <NodeEditDialog
         open={true}
         onClose={mockOnClose}
         onSave={mockOnSave}
-        initialData={{
-          id: 'new-node',
-          title: '',
-          content: '',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }}
         initialType={NodeType.IDEA}
       />
     );
 
-    // Check that the dialog is rendered in add mode
     expect(screen.getByText('Add New Node')).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: /label/i })).toHaveValue('');
+    expect(screen.getByRole('textbox', { name: /content/i })).toHaveValue('');
 
-    // Check that the form fields are empty
-    expect(screen.getByLabelText('Title')).toHaveValue('');
-    expect(screen.getByLabelText('Content')).toHaveValue('');
-
-    // Check that the add button is rendered instead of save
-    expect(screen.getByText('Add')).toBeInTheDocument();
-    expect(screen.queryByText('Save')).not.toBeInTheDocument();
+    const actions = screen.getByRole('dialog').querySelector('.MuiDialogActions-root');
+    expect(actions).toBeInstanceOf(HTMLElement); // Check
+    if (actions) { // Null check
+        expect(within(actions as HTMLElement).getByRole('button', { name: 'Add' })).toBeInTheDocument(); // Cast
+        expect(within(actions as HTMLElement).queryByRole('button', { name: 'Save' })).not.toBeInTheDocument(); // Cast
+    }
   });
 });

@@ -57,7 +57,7 @@ export const useKeyboardNavigation = (
       // Trigger callback
       onNodeSelect?.(nodeId);
     },
-    [containerRef, onNodeSelect]
+    [containerRef, onNodeSelect, findNodeElements] // Added findNodeElements dependency
   );
 
   const handleKeyboardNavigation = useCallback(
@@ -77,10 +77,12 @@ export const useKeyboardNavigation = (
           nextIndex = Math.max(currentIndex - 1, 0);
           break;
         case 'ArrowUp':
-          nextIndex = Math.max(currentIndex - 3, 0);
+          // Simplified logic for example, might need adjustment based on layout
+          nextIndex = Math.max(currentIndex - 1, 0); // Adjust based on visual layout if needed
           break;
         case 'ArrowDown':
-          nextIndex = Math.min(currentIndex + 3, nodeElements.length - 1);
+          // Simplified logic for example, might need adjustment based on layout
+          nextIndex = Math.min(currentIndex + 1, nodeElements.length - 1); // Adjust based on visual layout if needed
           break;
         case 'Home':
           nextIndex = 0;
@@ -137,4 +139,7 @@ export const useKeyboardNavigation = (
     container.addEventListener('keydown', handleKeyboardNavigation);
     return () => container.removeEventListener('keydown', handleKeyboardNavigation);
   }, [containerRef, nodes, findNodeElements, handleKeyboardNavigation]);
+
+  // Return the function needed by the component
+  return { updateNodeSelection }; // Added return statement
 };

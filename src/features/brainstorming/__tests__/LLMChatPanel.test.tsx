@@ -1,6 +1,8 @@
+/// <reference types="vitest/globals" />
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { vi } from 'vitest'; // Explicit import might help TS
 
 import { I18nProvider } from '../../../contexts/I18nContext';
 import LLMChatPanel from '../LLMChatPanel';
@@ -16,7 +18,8 @@ import {
 import { mockGenerateId, setupTest, setupTimers } from './testUtils';
 
 describe('LLMChatPanel', () => {
-  const mockOnInsightGenerated = jest.fn();
+  // Use type assertion for the mock function
+  const mockOnInsightGenerated = vi.fn() as unknown as (node: BrainstormNode) => void;
 
   setupTest();
   setupTimers();
@@ -58,7 +61,7 @@ describe('LLMChatPanel', () => {
 
     // Wait for simulated response
     await act(async () => {
-      jest.advanceTimersByTime(MOCK_RESPONSE_DELAY);
+      vi.advanceTimersByTime(MOCK_RESPONSE_DELAY);
     });
 
     await waitFor(() => {
@@ -76,7 +79,7 @@ describe('LLMChatPanel', () => {
 
     // Wait for simulated response and insight generation
     await act(async () => {
-      jest.advanceTimersByTime(MOCK_RESPONSE_DELAY);
+      vi.advanceTimersByTime(MOCK_RESPONSE_DELAY);
     });
 
     await waitFor(() => {
@@ -115,7 +118,7 @@ describe('LLMChatPanel', () => {
     expect(sendButton).toBeDisabled();
 
     await act(async () => {
-      jest.advanceTimersByTime(MOCK_RESPONSE_DELAY);
+      vi.advanceTimersByTime(MOCK_RESPONSE_DELAY);
     });
 
     await waitFor(() => {
@@ -135,7 +138,7 @@ describe('LLMChatPanel', () => {
     });
 
     await act(async () => {
-      jest.advanceTimersByTime(MOCK_RESPONSE_DELAY);
+      vi.advanceTimersByTime(MOCK_RESPONSE_DELAY);
     });
 
     await waitFor(() => {
@@ -149,7 +152,7 @@ describe('LLMChatPanel', () => {
     // Send first message
     await userEvent.type(screen.getByRole('textbox'), 'First message{enter}');
     await act(async () => {
-      jest.advanceTimersByTime(MOCK_RESPONSE_DELAY);
+      vi.advanceTimersByTime(MOCK_RESPONSE_DELAY);
     });
 
     // Rerender with same session

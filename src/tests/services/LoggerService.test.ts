@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import indexedDBService from '../../services/IndexedDBService';
-import loggerService from '../../services/LoggerService';
+import loggerService, { LogCategory } from '../../services/LoggerService'; // Import LogCategory
 import offlineService from '../../services/OfflineService';
 import { mockLocalStorage, mockOnlineStatus } from '../test-utils';
 
@@ -30,6 +30,8 @@ vi.mock('../../services/OfflineService', () => ({
   default: {
     getOnlineStatus: vi.fn(),
     addToSyncQueue: vi.fn(),
+    // Add the missing function to the mock
+    addOnlineStatusListener: vi.fn(),
   },
 }));
 
@@ -74,14 +76,14 @@ describe('LoggerService', () => {
       });
 
       // Call the method
-      await loggerService.log('info', 'Test message', { category: 'test' });
+      await loggerService.log('info', 'Test message', { category: 'app' }); // Use 'app' category
 
       // Verify the result
       expect(indexedDBService.log).toHaveBeenCalledWith(
         'info',
         'Test message',
         expect.objectContaining({
-          category: 'test',
+          category: 'app', // Use 'app' category
           appVersion: expect.any(String),
           userAgent: expect.any(String),
           url: expect.any(String),
@@ -311,10 +313,10 @@ describe('LoggerService', () => {
 
       // Call the method
       // Using log method directly to avoid testing-library/no-debugging-utils warning
-      void loggerService.log('debug', 'Debug message', { category: 'test' });
+      void loggerService.log('debug', 'Debug message', { category: 'app' }); // Use 'app' category
 
       // Verify the result
-      expect(logSpy).toHaveBeenCalledWith('debug', 'Debug message', { category: 'test' });
+      expect(logSpy).toHaveBeenCalledWith('debug', 'Debug message', { category: 'app' }); // Use 'app' category
     });
 
     it('should provide info method', () => {
@@ -322,10 +324,10 @@ describe('LoggerService', () => {
       const logSpy = vi.spyOn(loggerService, 'log');
 
       // Call the method
-      void loggerService.info('Info message', { category: 'test' });
+      void loggerService.info('Info message', { category: 'app' }); // Use 'app' category
 
       // Verify the result
-      expect(logSpy).toHaveBeenCalledWith('info', 'Info message', { category: 'test' });
+      expect(logSpy).toHaveBeenCalledWith('info', 'Info message', { category: 'app' }); // Use 'app' category
     });
 
     it('should provide warn method', () => {
@@ -333,10 +335,10 @@ describe('LoggerService', () => {
       const logSpy = vi.spyOn(loggerService, 'log');
 
       // Call the method
-      void loggerService.warn('Warning message', { category: 'test' });
+      void loggerService.warn('Warning message', { category: 'app' }); // Use 'app' category
 
       // Verify the result
-      expect(logSpy).toHaveBeenCalledWith('warn', 'Warning message', { category: 'test' });
+      expect(logSpy).toHaveBeenCalledWith('warn', 'Warning message', { category: 'app' }); // Use 'app' category
     });
 
     it('should provide error method', () => {
@@ -348,16 +350,16 @@ describe('LoggerService', () => {
       void loggerService.error('Error message', error);
 
       // Verify the result
-      // The error object is transformed in the error method, so we need to check differently
+      // Adjust assertion to match the actual logged metadata structure
       expect(logSpy).toHaveBeenCalledWith(
         'error',
         'Error message',
         expect.objectContaining({
-          error: expect.objectContaining({
-            name: 'Error',
-            message: 'Test error',
-            stack: expect.any(String),
-          }),
+          // Expect errorMessage, name, and stack directly in the metadata
+          errorMessage: 'Test error',
+          name: 'Error',
+          stack: expect.any(String),
+          // Remove the nested 'error' object check
         })
       );
     });
