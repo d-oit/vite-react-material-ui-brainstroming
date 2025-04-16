@@ -1,6 +1,10 @@
 import SendIcon from '@mui/icons-material/Send';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   Box,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   IconButton,
   List,
   ListItem,
@@ -35,6 +39,8 @@ export default function LLMChatPanel({
   projectId,
   session,
   onInsightGenerated,
+  open = false,
+  onClose,
 }: LLMChatPanelProps) {
   const { t } = useI18n();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -105,92 +111,112 @@ export default function LLMChatPanel({
   );
 
   return (
-    <Paper
-      sx={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        p: 2,
-        gap: 2,
-      }}
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="md"
+      aria-labelledby="chat-dialog-title"
+      data-testid="chat-panel-dialog"
     >
-      <Typography variant="h6" gutterBottom>
+      <DialogTitle id="chat-dialog-title">
         {t('brainstorming.llmChat')}
-      </Typography>
-
-      <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-        <List>
-          {messages.map(message => (
-            <ListItem
-              key={message.id}
-              sx={{
-                justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start',
-                mb: 1,
-              }}
-            >
-              <Paper
-                sx={{
-                  p: 1,
-                  backgroundColor: message.role === 'user' ? 'primary.main' : 'background.paper',
-                  color: message.role === 'user' ? 'primary.contrastText' : 'text.primary',
-                  maxWidth: '80%',
-                }}
-              >
-                <ListItemText
-                  primary={message.content}
-                  secondary={new Date(message.timestamp).toLocaleTimeString()}
-                  secondaryTypographyProps={{
-                    sx: {
-                      color: message.role === 'user' ? 'primary.contrastText' : 'text.secondary',
-                    },
+        <IconButton
+          onClick={onClose}
+          aria-label="Close"
+          data-testid="close-button"
+          sx={{ position: 'absolute', right: 8, top: 8 }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent>
+        <Paper
+          sx={{
+            height: '500px',
+            display: 'flex',
+            flexDirection: 'column',
+            p: 2,
+            gap: 2,
+          }}
+        >
+          <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+            <List>
+              {messages.map(message => (
+                <ListItem
+                  key={message.id}
+                  sx={{
+                    justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start',
+                    mb: 1,
                   }}
-                />
-              </Paper>
-            </ListItem>
-          ))}
-        </List>
-      </Box>
+                >
+                  <Paper
+                    sx={{
+                      p: 1,
+                      backgroundColor: message.role === 'user' ? 'primary.main' : 'background.paper',
+                      color: message.role === 'user' ? 'primary.contrastText' : 'text.primary',
+                      maxWidth: '80%',
+                    }}
+                  >
+                    <ListItemText
+                      primary={message.content}
+                      secondary={new Date(message.timestamp).toLocaleTimeString()}
+                      secondaryTypographyProps={{
+                        sx: {
+                          color: message.role === 'user' ? 'primary.contrastText' : 'text.secondary',
+                        },
+                      }}
+                    />
+                  </Paper>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
 
-      <Stack spacing={1}>
-        <Box>
-          {DEFAULT_PROMPTS.map(promptKey => (
-            <Typography
-              key={promptKey}
-              variant="body2"
-              sx={{
-                cursor: 'pointer',
-                color: 'primary.main',
-                '&:hover': { textDecoration: 'underline' },
-                display: 'inline-block',
-                mr: 2,
-              }}
-              onClick={() => setInput(t(promptKey))}
-            >
-              {t(promptKey)}
-            </Typography>
-          ))}
-        </Box>
+          <Stack spacing={1}>
+            <Box>
+              {DEFAULT_PROMPTS.map(promptKey => (
+                <Typography
+                  key={promptKey}
+                  variant="body2"
+                  sx={{
+                    cursor: 'pointer',
+                    color: 'primary.main',
+                    '&:hover': { textDecoration: 'underline' },
+                    display: 'inline-block',
+                    mr: 2,
+                  }}
+                  onClick={() => setInput(t(promptKey))}
+                >
+                  {t(promptKey)}
+                </Typography>
+              ))}
+            </Box>
 
-        <Stack direction="row" spacing={1}>
-          <TextField
-            fullWidth
-            placeholder={t('brainstorming.typeMessage')}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            multiline
-            maxRows={3}
-            disabled={isLoading}
-          />
-          <IconButton
-            onClick={() => void handleSendMessage()}
-            disabled={!input.trim() || isLoading}
-            aria-label="Send message"
-          >
-            <SendIcon />
-          </IconButton>
-        </Stack>
-      </Stack>
-    </Paper>
+            <Stack direction="row" spacing={1}>
+              <TextField
+                fullWidth
+                placeholder={t('brainstorming.typeMessage')}
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                multiline
+                maxRows={3}
+                disabled={isLoading}
+                data-testid="chat-input"
+              />
+              <IconButton
+                onClick={() => void handleSendMessage()}
+                disabled={!input.trim() || isLoading}
+                aria-label="Send message"
+                data-testid="send-button"
+              >
+                <SendIcon />
+              </IconButton>
+            </Stack>
+          </Stack>
+        </Paper>
+      </DialogContent>
+    </Dialog>
   );
 }

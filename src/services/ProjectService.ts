@@ -65,11 +65,16 @@ export class ProjectService {
       PerformanceCategory.DATA_LOADING,
       { projectName: name, template }
     );
-    // Create project from template
-    const project = createProjectFromTemplate(template, name, description);
-    const now = project.createdAt;
-
     try {
+      // Create project from template
+      const project = createProjectFromTemplate(template, name, description);
+
+      // Handle case where createProjectFromTemplate returns undefined
+      if (!project) {
+        throw new Error('Failed to create project from template');
+      }
+
+      const now = project.createdAt || new Date().toISOString();
       // Save to IndexedDB
       await indexedDBService.saveProject(project);
 
@@ -91,7 +96,7 @@ export class ProjectService {
         'Error creating project',
         error instanceof Error ? error : new Error(String(error))
       );
-      throw new Error('Failed to create project');
+      throw new Error('Failed to save project');
     } finally {
       performanceMonitoring.endMeasure(metricId);
     }

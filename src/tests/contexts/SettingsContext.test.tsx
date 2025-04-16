@@ -38,21 +38,14 @@ describe('SettingsContext', () => {
   let mockStorage: any;
 
   beforeEach(() => {
+    // Initialize mockStorage and set it as window.localStorage
     mockStorage = mockLocalStorage();
 
-    // Make sure localStorage is properly mocked
-    Object.defineProperty(window, 'localStorage', {
-      value: mockStorage,
-      writable: true,
-    });
+    // Ensure storage is initialized
+    mockStorage.storage = {};
 
     // Reset mocks
     vi.clearAllMocks();
-  });
-
-  beforeEach(() => {
-    // Clear any stored settings before each test
-    mockStorage.storage = {};
   });
 
   it('provides default settings when no stored settings exist', async () => {

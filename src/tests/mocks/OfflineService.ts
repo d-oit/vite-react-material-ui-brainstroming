@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
 
+// Create a mock for the OfflineService
 const mockOfflineService = {
   getOnlineStatus: vi.fn().mockImplementation(() => {
     return navigator.onLine;
@@ -42,6 +43,25 @@ const mockOfflineService = {
   }),
   syncQueue: [],
   listeners: [],
+  // Add missing methods
+  startAutoSync: vi.fn(),
+  stopAutoSync: vi.fn(),
+  configure: vi.fn(),
+  getPendingOperationsCount: vi.fn().mockReturnValue(0),
+  checkNetworkStatus: vi.fn().mockResolvedValue(true),
+  addNetworkStatusListener: vi.fn().mockImplementation(listener => {
+    // Call the listener with a default network status
+    listener({ online: true, isReliable: true, latency: 50, downlink: 10 });
+    // Return a function to remove the listener
+    return () => { };
+  }),
+};
+
+// Create a mock OfflineService class
+export class OfflineService {
+  static getInstance() {
+    return mockOfflineService;
+  }
 };
 
 export default mockOfflineService;

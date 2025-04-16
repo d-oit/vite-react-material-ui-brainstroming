@@ -53,6 +53,11 @@ export class LoggerService {
     return this.context;
   }
 
+  // Add missing methods
+  getLogs = vi.fn().mockResolvedValue([]);
+  clearLogs = vi.fn().mockResolvedValue(undefined);
+  initialize = vi.fn().mockResolvedValue(true);
+
   // Add static methods
   static getInstance() {
     return new LoggerService('test');

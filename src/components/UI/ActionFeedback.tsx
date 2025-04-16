@@ -148,6 +148,19 @@ const ActionFeedback: React.FC<ActionFeedbackProps> = ({
     </Box>
   );
 
+  // Ensure onClose is called when autoHideDuration expires
+  useEffect(() => {
+    let timer: number;
+    if (open && type !== 'loading' && autoHideDuration && onClose) {
+      timer = window.setTimeout(() => {
+        onClose();
+      }, autoHideDuration);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [open, type, autoHideDuration, onClose]);
+
   return (
     <Snackbar
       open={open}

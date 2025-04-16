@@ -2,6 +2,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import SaveIcon from '@mui/icons-material/Save';
+import ChatIcon from '@mui/icons-material/Chat';
 import { Box, IconButton, Paper, TextField, Typography } from '@mui/material';
 import React, { memo, useState } from 'react';
 import type { NodeProps } from 'reactflow';
@@ -11,6 +12,9 @@ interface CustomNodeData {
   label: string;
   type: 'idea' | 'task' | 'resource' | 'note';
   notes?: string;
+  onEdit?: (node: any) => void;
+  onDelete?: (node: any) => void;
+  onChat?: (node: any) => void;
 }
 
 const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected, id }) => {
@@ -71,11 +75,35 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected, id })
           >
             <NoteAddIcon fontSize="small" />
           </IconButton>
-          <IconButton size="small" onClick={() => setIsEditing(!isEditing)}>
+          <IconButton
+            size="small"
+            onClick={() => {
+              if (isEditing) {
+                handleSave();
+              } else {
+                data.onEdit?.({ id, data });
+                setIsEditing(true);
+              }
+            }}
+            data-testid={`edit-${id}`}
+          >
             {isEditing ? <SaveIcon fontSize="small" /> : <EditIcon fontSize="small" />}
           </IconButton>
-          <IconButton size="small" color="error">
+          <IconButton
+            size="small"
+            color="error"
+            onClick={() => data.onDelete?.({ id, data })}
+            data-testid={`delete-${id}`}
+          >
             <DeleteIcon fontSize="small" />
+          </IconButton>
+          <IconButton
+            size="small"
+            color="primary"
+            onClick={() => data.onChat?.({ id, data })}
+            data-testid={`chat-${id}`}
+          >
+            <ChatIcon fontSize="small" />
           </IconButton>
         </Box>
 

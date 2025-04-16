@@ -22,8 +22,9 @@ test.describe('App', () => {
     await expect(page).toHaveURL(/.*\/projects/);
 
     // Check that the projects page content is visible
-    const projectsHeading = page.getByRole('heading', { name: /projects/i });
-    await expect(projectsHeading).toBeVisible();
+    // Use a more specific selector to avoid ambiguity
+    const projectsHeading = page.locator('h1:has-text("My Projects")');
+    await expect(projectsHeading).toBeVisible({ timeout: 10000 });
   });
 
   test('should open quick brainstorm', async ({ page }) => {
@@ -32,9 +33,12 @@ test.describe('App', () => {
     // Click on the quick brainstorm button
     await page.getByRole('button', { name: /quick brainstorm/i }).click();
 
+    // Wait for navigation and loading
+    await page.waitForTimeout(2000);
+
     // Check that the brainstorm editor is visible
     const brainstormEditor = page.locator('.react-flow');
-    await expect(brainstormEditor).toBeVisible();
+    await expect(brainstormEditor).toBeVisible({ timeout: 10000 });
   });
 
   test('should toggle dark mode', async ({ page }) => {

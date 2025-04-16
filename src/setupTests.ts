@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 import { vi, beforeEach, afterEach } from 'vitest';
 
 declare module 'vitest' {
-  interface Assertion<T = any> extends TestingLibraryMatchers<typeof expect.stringContaining, T> {}
+  interface Assertion<T = any> extends TestingLibraryMatchers<typeof expect.stringContaining, T> { }
 }
 
 // Mock window.matchMedia
@@ -83,6 +83,7 @@ vi.mock('reactflow', async () => {
   const actual = await vi.importActual('reactflow');
   return {
     ...actual,
+    default: MockReactFlow, // Add default export
     ReactFlow: MockReactFlow,
     Background: () => null,
     Controls: () => null,
@@ -91,6 +92,27 @@ vi.mock('reactflow', async () => {
     MarkerType: {
       ArrowClosed: 'arrowclosed',
     },
+    // Add additional exports that might be used
+    Panel: () => null,
+    MiniMap: () => null,
+    addEdge: vi.fn((params, edges) => [...edges, { id: `${params.source}-${params.target}`, ...params }]),
+    Position: {
+      Left: 'left',
+      Top: 'top',
+      Right: 'right',
+      Bottom: 'bottom',
+    },
+    useReactFlow: vi.fn().mockReturnValue({
+      fitView: vi.fn(),
+      zoomIn: vi.fn(),
+      zoomOut: vi.fn(),
+      setCenter: vi.fn(),
+      getNodes: vi.fn().mockReturnValue([]),
+      getEdges: vi.fn().mockReturnValue([]),
+      setNodes: vi.fn(),
+      setEdges: vi.fn(),
+      project: vi.fn().mockImplementation(({ x, y }) => ({ x, y })),
+    }),
   };
 });
 

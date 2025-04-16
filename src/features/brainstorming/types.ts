@@ -62,6 +62,8 @@ export interface LLMChatPanelProps {
   projectId: string;
   session?: BrainstormSession | null;
   onInsightGenerated: (insight: BrainstormNode) => void;
+  open?: boolean;
+  onClose?: () => void;
 }
 
 export interface ChatMessage {

@@ -90,32 +90,42 @@ export class S3Service {
       // Dynamically import AWS SDK only when needed
       if (!this.AWS) {
         try {
-          // Use dynamic import to load only the specific AWS SDK modules we need
-          const { S3 } = await import('aws-sdk/clients/s3');
-          const { config, Credentials } = await import('aws-sdk');
+          // For tests, we can use the global AWS object if it exists
+          if (typeof AWS !== 'undefined') {
+            this.AWS = AWS;
+          } else {
+            // Use dynamic import to load only the specific AWS SDK modules we need
+            const { S3 } = await import('aws-sdk/clients/s3');
+            const { config, Credentials } = await import('aws-sdk');
 
-          // Store the imported modules
-          this.AWS = { S3, config, Credentials };
+            // Store the imported modules
+            this.AWS = { S3, config, Credentials };
+          }
         } catch (err) {
           console.error('Failed to load AWS SDK:', err);
           return false;
         }
       }
 
-      // @ts-expect-error - Dynamic AWS SDK
-      this.AWS.config.update({
-        region: region || this.region,
+      try {
         // @ts-expect-error - Dynamic AWS SDK
-        credentials: new this.AWS.Credentials({
-          accessKeyId,
-          secretAccessKey,
-        }),
-      });
+        this.AWS.config.update({
+          region: region || this.region,
+          // @ts-expect-error - Dynamic AWS SDK
+          credentials: new this.AWS.Credentials({
+            accessKeyId,
+            secretAccessKey,
+          }),
+        });
 
-      // @ts-expect-error - Dynamic AWS SDK
-      this.s3 = new this.AWS.S3({
-        region: region || this.region,
-      });
+        // @ts-expect-error - Dynamic AWS SDK
+        this.s3 = new this.AWS.S3({
+          region: region || this.region,
+        });
+      } catch (error) {
+        console.error('Error configuring AWS SDK:', error);
+        return false;
+      }
 
       if (bucketName) {
         this.bucketName = bucketName;

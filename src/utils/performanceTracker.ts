@@ -66,7 +66,33 @@ class PerformanceTracker {
   private logger: LoggerService;
 
   constructor() {
-    this.logger = LoggerService.getInstance();
+    // Check if LoggerService is available and has getInstance method
+    try {
+      if (typeof LoggerService === 'object' && LoggerService !== null && 'getInstance' in LoggerService) {
+        this.logger = LoggerService.getInstance();
+      } else if (typeof LoggerService === 'function' && 'getInstance' in LoggerService) {
+        this.logger = LoggerService.getInstance();
+      } else {
+        // Fallback logger
+        this.logger = {
+          info: console.info.bind(console),
+          error: console.error.bind(console),
+          warn: console.warn.bind(console),
+          debug: console.debug.bind(console),
+          log: console.log.bind(console)
+        };
+      }
+    } catch (error) {
+      console.error('Error initializing logger in PerformanceTracker:', error);
+      // Fallback logger
+      this.logger = {
+        info: console.info.bind(console),
+        error: console.error.bind(console),
+        warn: console.warn.bind(console),
+        debug: console.debug.bind(console),
+        log: console.log.bind(console)
+      };
+    }
   }
 
   /**
@@ -90,12 +116,16 @@ class PerformanceTracker {
   ): string {
     if (!this.isEnabled) return '';
 
-    const id = `${name}_${Date.now()}`;
+    // Use a safer way to get current timestamp
+    const timestamp = typeof Date.now === 'function' ? Date.now() : new Date().getTime();
+    const id = `${name}_${timestamp}`;
     const metric: PerformanceMetric = {
       id,
       name,
       category,
-      startTime: performance.now(),
+      startTime: typeof performance !== 'undefined' && typeof performance.now === 'function'
+        ? performance.now()
+        : timestamp,
       metadata,
     };
 
@@ -118,7 +148,12 @@ class PerformanceTracker {
       return 0;
     }
 
-    metric.endTime = performance.now();
+    // Use a safer way to get current timestamp
+    const now = typeof performance !== 'undefined' && typeof performance.now === 'function'
+      ? performance.now()
+      : (typeof Date.now === 'function' ? Date.now() : new Date().getTime());
+
+    metric.endTime = now;
     metric.duration = metric.endTime - metric.startTime;
 
     if (additionalMetadata) {

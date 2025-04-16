@@ -14,6 +14,9 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 
 import { useBrainstormStore } from '../../store/brainstormStore';
+import DeleteConfirmationDialog from '../DeleteConfirmationDialog';
+import LLMChatPanel from '../../features/brainstorming/LLMChatPanel';
+import NodeEditDialog from './NodeEditDialog';
 
 import { FloatingControls } from './FloatingControls';
 import CustomNode from './nodes/CustomNode';
@@ -42,6 +45,10 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
   const { nodes, edges, setNodes, setEdges } = useBrainstormStore();
 
   const [mousePosition, setMousePosition] = React.useState({ x: 100, y: 100 });
+  const [showEditDialog, setShowEditDialog] = React.useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
+  const [showChatPanel, setShowChatPanel] = React.useState(false);
+  const [selectedNode, setSelectedNode] = React.useState<CustomNodeType | null>(null);
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
@@ -101,6 +108,70 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
     handleSave();
   }, [nodes, edges, handleSave]);
 
+  // Handle node click for editing
+  const handleNodeClick = useCallback((event: React.MouseEvent, node: CustomNodeType) => {
+    setSelectedNode(node);
+    setShowEditDialog(true);
+  }, []);
+
+  // Handle node delete
+  const handleNodeDelete = useCallback((node: CustomNodeType) => {
+    setSelectedNode(node);
+    setShowDeleteDialog(true);
+  }, []);
+
+  // Handle chat panel open
+  const handleChatOpen = useCallback((node: CustomNodeType) => {
+    setSelectedNode(node);
+    setShowChatPanel(true);
+  }, []);
+
+  // Handle dialog close
+  const handleCloseEditDialog = useCallback(() => {
+    setShowEditDialog(false);
+    setSelectedNode(null);
+  }, []);
+
+  // Handle delete confirmation
+  const handleConfirmDelete = useCallback(() => {
+    if (selectedNode) {
+      setNodes(nodes => nodes.filter(n => n.id !== selectedNode.id));
+      setShowDeleteDialog(false);
+      setSelectedNode(null);
+    }
+  }, [selectedNode, setNodes]);
+
+  // Handle delete dialog close
+  const handleCloseDeleteDialog = useCallback(() => {
+    setShowDeleteDialog(false);
+    setSelectedNode(null);
+  }, []);
+
+  // Handle chat panel close
+  const handleCloseChatPanel = useCallback(() => {
+    setShowChatPanel(false);
+    setSelectedNode(null);
+  }, []);
+
+  // Handle node update
+  const handleNodeUpdate = useCallback((nodeId: string, data: any) => {
+    setNodes(nodes =>
+      nodes.map(node =>
+        node.id === nodeId
+          ? {
+            ...node,
+            data: {
+              ...node.data,
+              ...data,
+            },
+          }
+          : node
+      )
+    );
+    setShowEditDialog(false);
+    setSelectedNode(null);
+  }, [setNodes]);
+
   return (
     <div ref={flowRef} style={{ width: '100%', height: '100%' }} onMouseMove={onMouseMove}>
       <ReactFlow
@@ -111,6 +182,7 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
         onConnect={onConnect}
         onInit={setReactFlowInstance}
         nodeTypes={nodeTypes}
+        onNodeClick={handleNodeClick}
         fitView
         minZoom={0.1}
         maxZoom={1.5}
@@ -121,6 +193,36 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
         <Background />
       </ReactFlow>
       <FloatingControls position={mousePosition} />
+
+      {/* Node Edit Dialog */}
+      {showEditDialog && selectedNode && (
+        <NodeEditDialog
+          open={showEditDialog}
+          onClose={handleCloseEditDialog}
+          node={selectedNode}
+          onSave={handleNodeUpdate}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteDialog && selectedNode && (
+        <DeleteConfirmationDialog
+          open={showDeleteDialog}
+          onClose={handleCloseDeleteDialog}
+          onConfirm={handleConfirmDelete}
+        />
+      )}
+
+      {/* Chat Panel */}
+      {showChatPanel && selectedNode && (
+        <LLMChatPanel
+          open={showChatPanel}
+          onClose={handleCloseChatPanel}
+          projectId={selectedNode.id}
+          session={{ id: 'flow-chat', projectId: selectedNode.id, nodes: [] }}
+          onInsightGenerated={() => { }}
+        />
+      )}
     </div>
   );
 };

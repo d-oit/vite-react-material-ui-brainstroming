@@ -62,13 +62,25 @@ export const mockStorage = {
   clear: vi.fn(() => {
     mockStorage.storage = {};
   }),
+  length: 0,
+  key: vi.fn((index: number) => Object.keys(mockStorage.storage)[index] || null),
 };
 
-export const mockLocalStorage = (): void => {
+// Initialize storage object
+mockStorage.storage = {};
+
+export const mockLocalStorage = (): typeof mockStorage => {
+  // Ensure storage is initialized
+  if (!mockStorage.storage) {
+    mockStorage.storage = {};
+  }
+
   Object.defineProperty(window, 'localStorage', {
     value: mockStorage,
     writable: true,
   });
+
+  return mockStorage;
 };
 
 /**
