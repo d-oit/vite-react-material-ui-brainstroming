@@ -357,12 +357,11 @@ describe('ChatService', () => {
 
       await chatService.generateNodeSuggestions(prompt, undefined, existingNodes);
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          body: expect.stringContaining(JSON.stringify(existingNodes)),
-        })
-      );
+      const mockFetchCalls = mockFetch.mock.calls;
+      const lastCall = mockFetchCalls[mockFetchCalls.length - 1];
+      const requestBody = JSON.parse(lastCall[1].body);
+      
+      expect(requestBody.messages[0].content).toContain(JSON.stringify(existingNodes));
     });
 
     it('should handle invalid node types by defaulting to idea', async () => {

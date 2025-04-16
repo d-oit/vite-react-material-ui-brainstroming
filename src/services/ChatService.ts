@@ -14,7 +14,7 @@ export class ChatService {
   }
 
   public static getInstance(): ChatService {
-    if (!ChatService.instance) {
+    if (ChatService.instance === null || ChatService.instance === undefined) {
       ChatService.instance = new ChatService();
     }
     return ChatService.instance;
@@ -102,13 +102,15 @@ export class ChatService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`API error: ${errorData.error?.message || response.statusText}`);
+        const errorData = (await response.json()) as { error?: { message?: string } };
+        throw new Error(`API error: ${errorData.error?.message ?? response.statusText}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as {
+        choices?: Array<{ message?: { content?: string } }>;
+      };
       const assistantMessage =
-        data.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
+        data.choices?.[0]?.message?.content ?? 'Sorry, I could not generate a response.';
 
       // Create a timestamp string that's safe for testing
       const timestamp = this.getTimestamp();
@@ -208,43 +210,59 @@ export class ChatService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`API error: ${errorData.error?.message || response.statusText}`);
+        const errorData = (await response.json()) as { error?: { message?: string } };
+        throw new Error(`API error: ${errorData.error?.message ?? response.statusText}`);
       }
 
-      const data = await response.json();
-      const assistantMessage = data.choices[0]?.message?.content || '{"nodes": []}';
+      const data = (await response.json()) as {
+        choices?: Array<{ message?: { content?: string } }>;
+      };
+      const assistantMessage = data.choices?.[0]?.message?.content ?? '{"nodes": []}';
 
+      let parsedResponse;
       try {
         // Parse the JSON response
-        const parsedResponse = JSON.parse(assistantMessage);
-
-        // Validate the response structure
-        if (!parsedResponse.nodes || !Array.isArray(parsedResponse.nodes)) {
-          throw new Error('Invalid response format');
-        }
-
-        // Create the chat suggestion
-        const chatSuggestion: ChatSuggestion = {
-          id: this.generateId(),
-          nodes: parsedResponse.nodes.map(
-            (node: { title?: string; content?: string; type?: string; tags?: string[] }) => ({
-              title: node.title || 'Untitled',
-              content: node.content || '',
-              type: this.validateNodeType(node.type),
-              tags: Array.isArray(node.tags) ? node.tags : [],
-            })
-          ),
-          originalMessage: prompt,
-          timestamp: new Date().toISOString(),
-          accepted: false,
-        };
-
-        return chatSuggestion;
+        parsedResponse = JSON.parse(assistantMessage);
       } catch (error) {
         console.error('Error parsing node suggestions:', error);
         throw new Error('Failed to parse node suggestions');
       }
+
+      // Validate the response structure
+      const isValidResponse = (value: unknown): value is { nodes: unknown[] } => {
+        return (
+          value !== null &&
+          typeof value === 'object' &&
+          'nodes' in value &&
+          Array.isArray((value as { nodes?: unknown[] }).nodes)
+        );
+      };
+
+      if (!isValidResponse(parsedResponse)) {
+        throw new Error('Invalid response format');
+      }
+
+      const nodeArray = parsedResponse.nodes as Array<{
+        title?: string;
+        content?: string;
+        type?: string;
+        tags?: string[];
+      }>;
+
+      const chatSuggestion: ChatSuggestion = {
+        id: this.generateId(),
+        nodes: nodeArray.map(node => ({
+          title: node.title || 'Untitled',
+          content: node.content || '',
+          type: this.validateNodeType(node.type || ''),
+          tags: Array.isArray(node.tags) ? node.tags : [],
+        })),
+        originalMessage: prompt,
+        timestamp: this.getTimestamp(),
+        accepted: false,
+      };
+
+      return chatSuggestion;
     } catch (error) {
       console.error('Error generating node suggestions:', error);
       throw error;
@@ -284,12 +302,12 @@ export class ChatService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`API error: ${errorData.error?.message || response.statusText}`);
+        const errorData = (await response.json()) as { error?: { message?: string } };
+        throw new Error(`API error: ${errorData.error?.message ?? response.statusText}`);
       }
 
-      const data = await response.json();
-      return data.data || [];
+      const data = (await response.json()) as { data?: unknown[] };
+      return data.data ?? [];
     } catch (error) {
       console.error('Error fetching models:', error);
       throw error;

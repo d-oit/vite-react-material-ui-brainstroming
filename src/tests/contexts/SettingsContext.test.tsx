@@ -50,9 +50,13 @@ describe('SettingsContext', () => {
     vi.clearAllMocks();
   });
 
+  beforeEach(() => {
+    // Clear any stored settings before each test
+    mockStorage.storage = {};
+  });
+
   it('provides default settings when no stored settings exist', async () => {
-    // Ensure localStorage.getItem returns null for settings
-    mockStorage.getItem.mockReturnValue(null);
+    // No need to mock getItem, empty storage will return null
 
     // Render the test component
     render(<TestComponent />);

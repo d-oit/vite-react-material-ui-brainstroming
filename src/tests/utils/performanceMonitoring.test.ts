@@ -1,11 +1,27 @@
 import { renderHook } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
+import { LoggerService } from '../../services/LoggerService';
 import performanceMonitoring, {
   PerformanceCategory,
   measurePerformance,
   useRenderPerformance,
 } from '../../utils/performanceMonitoring';
+
+// Mock LoggerService
+vi.mock('../../services/LoggerService', () => {
+  const mockLoggerInstance = {
+    info: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    debug: vi.fn(),
+  };
+  return {
+    LoggerService: {
+      getInstance: vi.fn(() => mockLoggerInstance),
+    },
+  };
+});
 
 describe('Performance Monitoring', () => {
   beforeEach(() => {
@@ -103,7 +119,7 @@ describe('Performance Monitoring', () => {
   describe('Method Decorator', () => {
     it('should create a method decorator that measures performance', () => {
       // Skip decorator tests in environments that don't support them
-      if (typeof Reflect === 'undefined' || Reflect.metadata === undefined) {
+      if (typeof Reflect === 'undefined' || !('metadata' in Reflect)) {
         return;
       }
 
@@ -151,7 +167,7 @@ describe('Performance Monitoring', () => {
 
     it('should handle async methods', async () => {
       // Skip decorator tests in environments that don't support them
-      if (typeof Reflect === 'undefined' || Reflect.metadata === undefined) {
+      if (typeof Reflect === 'undefined' || !('metadata' in Reflect)) {
         return;
       }
 

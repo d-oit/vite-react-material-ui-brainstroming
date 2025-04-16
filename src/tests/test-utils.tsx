@@ -1,136 +1,82 @@
-import { render, type RenderOptions } from '@testing-library/react';
-import React, { type ReactElement } from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import {
+  render as rtlRender,
+  RenderOptions,
+  screen,
+  fireEvent,
+  waitFor,
+} from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 
-import { ErrorNotificationProvider } from '../contexts/ErrorNotificationContext';
 import { I18nProvider } from '../contexts/I18nContext';
 import { SettingsProvider } from '../contexts/SettingsContext';
 
-// Map is used instead of object literal to avoid object injection warnings
+// Re-export testing utilities
+export { screen, fireEvent, waitFor };
 
-interface ExtendedRenderOptions extends Omit<RenderOptions, 'wrapper'> {
-  route?: string;
-}
+const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <I18nProvider>
+      <SettingsProvider>{children}</SettingsProvider>
+    </I18nProvider>
+  );
+};
+type CustomRenderOptions = Omit<RenderOptions, 'wrapper'>;
 
-// Mock online status
-export function mockOnlineStatus(isOnline: boolean) {
-  Object.defineProperty(navigator, 'onLine', {
-    value: isOnline,
-    writable: true,
-  });
-}
+// Custom render function with providers
+export const render = (
+  ui: React.ReactElement,
+  options?: CustomRenderOptions
+): ReturnType<typeof rtlRender> => rtlRender(ui, { wrapper: AllTheProviders, ...options });
 
-// Mock IndexedDB
-export function mockIndexedDB() {
-  // Store is not needed for this mock
+// Legacy alias (kept for backward compatibility)
+export { render as renderWithProviders };
 
-  const indexedDB = {
-    open: vi.fn().mockReturnValue({
-      result: {
-        transaction: vi.fn().mockReturnValue({
-          objectStore: vi.fn().mockReturnValue({
-            get: vi.fn(),
-            put: vi.fn(),
-            delete: vi.fn(),
-            getAll: vi.fn(),
-            clear: vi.fn(),
-            index: vi.fn().mockReturnValue({
-              get: vi.fn(),
-              getAll: vi.fn(),
-            }),
-          }),
-        }),
-        createObjectStore: vi.fn(),
-        objectStoreNames: {
-          contains: vi.fn().mockReturnValue(true),
-        },
-      },
-      onupgradeneeded: null,
-    }),
-    deleteDatabase: vi.fn(),
-  };
 
-  Object.defineProperty(window, 'indexedDB', {
-    value: indexedDB,
-    writable: true,
-  });
-}
-
-// Mock Intersection Observer
-export function mockIntersectionObserver() {
-  class IntersectionObserverMock {
-    readonly root: Element | null = null;
-    readonly rootMargin: string = '';
-    readonly thresholds: ReadonlyArray<number> = [];
-
+/**
+ * Mock ResizeObserver for testing
+ */
+export const mockResizeObserver = (): void => {
+  class ResizeObserverMock {
     observe = vi.fn();
     unobserve = vi.fn();
     disconnect = vi.fn();
-    takeRecords = vi.fn();
-
-    constructor() {
-      return this;
-    }
   }
 
-  Object.defineProperty(window, 'IntersectionObserver', {
-    writable: true,
-    configurable: true,
-    value: IntersectionObserverMock,
-  });
-}
+  // Set up the mock
+  window.ResizeObserver = ResizeObserverMock;
+};
 
-// Mock localStorage
-export function mockLocalStorage() {
-  const store = new Map<string, string>();
+/**
+ * Mock localStorage for testing
+ */
+export const mockStorage = {
+  storage: {} as { [key: string]: string },
+  getItem: vi.fn((key: string) => mockStorage.storage[key] || null),
+  setItem: vi.fn((key: string, value: string) => {
+    mockStorage.storage[key] = value;
+  }),
+  removeItem: vi.fn((key: string) => {
+    delete mockStorage.storage[key];
+  }),
+  clear: vi.fn(() => {
+    mockStorage.storage = {};
+  }),
+};
 
-  const mockStorage = {
-    getItem: vi.fn((key: string) => store.get(key) || null),
-    setItem: vi.fn((key: string, value: string) => {
-      store.set(key, value);
-    }),
-    removeItem: vi.fn((key: string) => {
-      store.delete(key);
-    }),
-    clear: vi.fn(() => {
-      store.clear();
-    }),
-    key: vi.fn((index: number) => {
-      // Convert Map keys to array for indexing
-      return Array.from(store.keys())[index] || null;
-    }),
-    length: vi.fn(() => store.size),
-  };
-
+export const mockLocalStorage = (): void => {
   Object.defineProperty(window, 'localStorage', {
     value: mockStorage,
     writable: true,
   });
-
-  return mockStorage;
-}
-
-// Custom render with providers
-const customRender = (
-  ui: ReactElement,
-  { route = '/', ...renderOptions }: ExtendedRenderOptions = {}
-) => {
-  window.history.pushState({}, 'Test page', route);
-
-  const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <BrowserRouter>
-      <I18nProvider defaultLocale="en">
-        <ErrorNotificationProvider>
-          <SettingsProvider>{children}</SettingsProvider>
-        </ErrorNotificationProvider>
-      </I18nProvider>
-    </BrowserRouter>
-  );
-
-  return render(ui, { wrapper: Wrapper, ...renderOptions });
 };
 
-// Re-export everything except render
-export { screen, fireEvent, waitFor, act, within } from '@testing-library/react';
-export { customRender as render };
+/**
+ * Mock online status for testing
+ */
+export const mockOnlineStatus = (online: boolean): void => {
+  Object.defineProperty(window.navigator, 'onLine', {
+    value: online,
+    writable: true,
+  });
+};

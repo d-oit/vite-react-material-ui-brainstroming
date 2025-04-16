@@ -185,6 +185,7 @@ export default function LLMChatPanel({
           <IconButton
             onClick={() => void handleSendMessage()}
             disabled={!input.trim() || isLoading}
+            aria-label="Send message"
           >
             <SendIcon />
           </IconButton>

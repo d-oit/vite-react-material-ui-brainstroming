@@ -1,18 +1,33 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// Import types only, rely on mocks for implementation
-import type { Project, Node, Edge } from '../../types'; // Add Node, Edge if needed for Project type
-import { S3Service } from '../../services/S3Service'; // Import the actual class for type usage
-import { LoggerService } from '../../services/LoggerService'; // Import LoggerService class
-import { ProjectTemplate } from '../../types/project'; // Import ProjectTemplate enum
+import AWS from 'aws-sdk';
+
+// Services
+import { LoggerService } from '../../services/LoggerService';
+import { OfflineService } from '../../services/OfflineService';
+import { S3Service } from '../../services/S3Service';
+
+// Types
+import type { Project, Node, Edge } from '../../types';
+import { ProjectTemplate } from '../../types/project';
+
+// Test utilities
 import { mockLocalStorage, mockOnlineStatus } from '../test-utils';
 
 // Mock dependencies FIRST
+// Mock OfflineService
+const mockOfflineService = {
+  getOnlineStatus: vi.fn().mockReturnValue(true),
+  addToSyncQueue: vi.fn(),
+  addOnlineStatusListener: vi.fn(),
+};
+
 vi.mock('../../services/OfflineService', () => ({
   default: {
-    getOnlineStatus: vi.fn().mockReturnValue(true),
-    addToSyncQueue: vi.fn(),
-    addOnlineStatusListener: vi.fn(), // Add listener if needed by S3Service
+    getInstance: vi.fn(() => mockOfflineService),
+  },
+  OfflineService: {
+    getInstance: vi.fn(() => mockOfflineService),
   },
 }));
 
@@ -24,14 +39,9 @@ vi.mock('../../services/LoggerService', () => {
     debug: vi.fn(),
   };
   return {
-    default: {
+    LoggerService: {
       getInstance: vi.fn(() => mockLoggerInstance),
-      info: mockLoggerInstance.info,
-      error: mockLoggerInstance.error,
-      warn: mockLoggerInstance.warn,
-      debug: mockLoggerInstance.debug,
     },
-    LoggerService: vi.fn(() => mockLoggerInstance),
   };
 });
 
@@ -55,15 +65,13 @@ vi.mock('aws-sdk', () => ({
 // No need to mock 'aws-sdk/clients/s3' separately if the main mock covers it
 
 // Import the service *after* mocks are defined
-let s3ServiceInstance: S3Service; // Use the imported class as the type
+let s3ServiceInstance: ReturnType<typeof S3Service.getInstance>; // Type as return value of getInstance
 beforeAll(async () => {
   // Dynamically import the service after mocks are set up
   const module = await import('../../services/S3Service');
-  // Assuming the class itself is the default export or access it via named export if needed
-  s3ServiceInstance = module.S3Service.getInstance(); // Get instance after import
+  // Get instance using the static getInstance method
+  s3ServiceInstance = module.S3Service.getInstance(); // Use named export since that's how we imported it
 });
-
-
 // Reset mocks before each test
 beforeEach(() => {
   vi.clearAllMocks();
@@ -72,13 +80,20 @@ beforeEach(() => {
 // Removed redundant AWS mock and global assignment
 
 // Access the mocked logger instance for assertions if needed
-let loggerInstance: ReturnType<typeof LoggerService.getInstance>; // Use static method type
-beforeEach(() => {
-  // Get the mocked logger instance before each test
-  const MockedLoggerService = require('../../services/LoggerService').default;
-  loggerInstance = vi.mocked(MockedLoggerService.getInstance)(); // Call the mocked static method
-});
+type LoggerInstanceType = {
+  info: ReturnType<typeof vi.fn>;
+  error: ReturnType<typeof vi.fn>;
+  warn: ReturnType<typeof vi.fn>;
+  debug: ReturnType<typeof vi.fn>;
+};
 
+let loggerInstance: LoggerInstanceType;
+beforeEach(() => {
+  // Access the mocked logger instance directly from the mock definition
+  // The mock returns the instance object directly via getInstance
+  const MockedLogger = vi.mocked(LoggerService); // Use the imported LoggerService
+  loggerInstance = MockedLogger.getInstance() as unknown as LoggerInstanceType; // Cast to the mock type
+});
 
 describe('S3Service', () => {
   // Storage is mocked globally
@@ -91,15 +106,11 @@ describe('S3Service', () => {
     vi.clearAllMocks();
 
     // Reset the service
-    // Reset internal state using the instance obtained after mocking
-    // @ts-expect-error - Accessing private property for testing
-    s3ServiceInstance._isConfigured = false;
-    // @ts-expect-error - Accessing private property for testing
-    s3ServiceInstance._isAvailable = true;
-    // @ts-expect-error - Accessing private property for testing
-    s3ServiceInstance.operationQueue = [];
-    // @ts-expect-error - Accessing private property for testing
-    s3ServiceInstance.isProcessingQueue = false;
+    // Reset internal state using bracket notation for private properties
+    s3ServiceInstance['_isConfigured'] = false;
+    s3ServiceInstance['_isAvailable'] = true;
+    s3ServiceInstance['operationQueue'] = [];
+    s3ServiceInstance['isProcessingQueue'] = false;
     // Reset promise mock before each test
     mockS3Instance.promise.mockReset();
   });
@@ -117,10 +128,15 @@ describe('S3Service', () => {
       const bucketName = 'test-bucket';
 
       // Mock the AWS config update
-      const configUpdateSpy = vi.mocked(require('aws-sdk').config.update);
+      const configUpdateSpy = vi.mocked(AWS.config.update);
 
       // Call the method on the instance
-      const result = await s3ServiceInstance.configure(accessKeyId, secretAccessKey, region, bucketName);
+      const result = await s3ServiceInstance.configure(
+        accessKeyId,
+        secretAccessKey,
+        region,
+        bucketName
+      );
 
       // Verify the result
       // Assertions
@@ -132,7 +148,7 @@ describe('S3Service', () => {
     it('should handle configuration errors', async () => {
       // Mock AWS SDK to throw an error
       // Mock S3 constructor to throw error for this test case
-      vi.mocked(require('aws-sdk').S3).mockImplementationOnce(() => {
+      vi.mocked(AWS.S3).mockImplementationOnce(() => {
         throw new Error('Test config error');
       });
 
@@ -155,7 +171,7 @@ describe('S3Service', () => {
     it('should upload a project to S3 when online', async () => {
       // Ensure service is configured for the test
       await s3ServiceInstance.configure('a', 'b', 'c', 'd');
-      vi.mocked(require('../../services/OfflineService').default.getOnlineStatus).mockReturnValue(true);
+      mockOfflineService.getOnlineStatus.mockReturnValue(true);
 
       // Create a test project
       const project: Project = {
@@ -180,14 +196,17 @@ describe('S3Service', () => {
       // Verify the result
       expect(result).toEqual({ success: true });
       expect(mockS3Instance.putObject).toHaveBeenCalled();
-      expect(loggerInstance.info).toHaveBeenCalledWith(expect.stringContaining('uploaded to S3 successfully'), expect.any(Object));
+      expect(loggerInstance.info).toHaveBeenCalledWith(
+        expect.stringContaining('uploaded to S3 successfully'),
+        expect.any(Object)
+      );
     });
 
     it('should queue the upload when offline', async () => {
       // Ensure service is configured
       await s3ServiceInstance.configure('a', 'b', 'c', 'd');
       // Mock offline status
-      vi.mocked(require('../../services/OfflineService').default.getOnlineStatus).mockReturnValue(false);
+      mockOfflineService.getOnlineStatus.mockReturnValue(false);
 
       // Create a test project
       const project: Project = {
@@ -209,17 +228,17 @@ describe('S3Service', () => {
 
       // Verify the result
       expect(result).toEqual({ queued: true });
-      expect(vi.mocked(require('../../services/OfflineService').default.addToSyncQueue)).toHaveBeenCalledWith(
-        'uploadProject',
-        project
+      expect(mockOfflineService.addToSyncQueue).toHaveBeenCalledWith('uploadProject', project);
+      expect(loggerInstance.info).toHaveBeenCalledWith(
+        expect.stringContaining('queued for upload'),
+        expect.any(Object)
       );
-      expect(loggerInstance.info).toHaveBeenCalledWith(expect.stringContaining('queued for upload'), expect.any(Object));
     });
 
     it('should handle upload errors', async () => {
       // Ensure service is configured and online
       await s3ServiceInstance.configure('a', 'b', 'c', 'd');
-      vi.mocked(require('../../services/OfflineService').default.getOnlineStatus).mockReturnValue(true);
+      mockOfflineService.getOnlineStatus.mockReturnValue(true);
 
       // Mock the promise for putObject to reject
       const uploadError = new Error('S3 Upload failed');
@@ -246,7 +265,10 @@ describe('S3Service', () => {
       // Verify the result
       expect(result).toEqual({ success: false, error: uploadError });
       expect(mockS3Instance.putObject).toHaveBeenCalled();
-      expect(loggerInstance.error).toHaveBeenCalledWith(expect.stringContaining('Error uploading project'), uploadError);
+      expect(loggerInstance.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error uploading project'),
+        uploadError
+      );
     });
   });
 
@@ -254,7 +276,7 @@ describe('S3Service', () => {
     it('should download a project from S3 when online', async () => {
       // Ensure service is configured and online
       await s3ServiceInstance.configure('a', 'b', 'c', 'd');
-      vi.mocked(require('../../services/OfflineService').default.getOnlineStatus).mockReturnValue(true);
+      mockOfflineService.getOnlineStatus.mockReturnValue(true);
 
       // Mock the promise for getObject
       const mockProjectData = { id: 'test-project', name: 'Test Project', version: '1.0.0' };
@@ -266,13 +288,16 @@ describe('S3Service', () => {
       // Verify the result
       expect(result).toEqual(mockProjectData);
       expect(mockS3Instance.getObject).toHaveBeenCalled();
-      expect(loggerInstance.info).toHaveBeenCalledWith(expect.stringContaining('downloaded from S3 successfully'), expect.any(Object));
+      expect(loggerInstance.info).toHaveBeenCalledWith(
+        expect.stringContaining('downloaded from S3 successfully'),
+        expect.any(Object)
+      );
     });
 
     it('should return null when offline', async () => {
       // Ensure service is configured but offline
       await s3ServiceInstance.configure('a', 'b', 'c', 'd');
-      vi.mocked(require('../../services/OfflineService').default.getOnlineStatus).mockReturnValue(false);
+      mockOfflineService.getOnlineStatus.mockReturnValue(false);
 
       // Call the method on the instance
       const result = await s3ServiceInstance.downloadProject('test-project', '1.0.0');
@@ -286,7 +311,7 @@ describe('S3Service', () => {
     it('should handle download errors', async () => {
       // Ensure service is configured and online
       await s3ServiceInstance.configure('a', 'b', 'c', 'd');
-      vi.mocked(require('../../services/OfflineService').default.getOnlineStatus).mockReturnValue(true);
+      mockOfflineService.getOnlineStatus.mockReturnValue(true);
 
       // Mock the promise for getObject to reject
       const downloadError = new Error('S3 Download failed');
@@ -298,7 +323,10 @@ describe('S3Service', () => {
       // Verify the result
       expect(result).toBeNull();
       expect(mockS3Instance.getObject).toHaveBeenCalled();
-      expect(loggerInstance.error).toHaveBeenCalledWith(expect.stringContaining('Error downloading project'), downloadError);
+      expect(loggerInstance.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error downloading project'),
+        downloadError
+      );
     });
   });
 });
