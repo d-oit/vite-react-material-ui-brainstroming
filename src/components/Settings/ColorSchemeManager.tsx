@@ -577,6 +577,10 @@ export const ColorSchemeManager = () => {
           display: 'grid',
           gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
           gap: 2,
+          width: '100%',
+          justifyContent: 'center',
+          maxWidth: '1200px',
+          mx: 'auto' // This centers the grid container itself
         }}
       >
         {colorSchemes.map(scheme => (
@@ -629,4 +633,5 @@ export const ColorSchemeManager = () => {
     </Box>
   );
 };
+
 

@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { translations as allTranslations } from '../i18n';
+import defaultTranslations from '../i18n/en';
 
 // Define the structure of our translations
 interface Translations {
@@ -17,113 +19,7 @@ interface I18nContextType {
 // Create the context
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
-// Default translations (English)
-const defaultTranslations: Translations = {
-  common: {
-    loading: 'Loading...',
-    error: 'An error occurred',
-    retry: 'Retry',
-    save: 'Save',
-    cancel: 'Cancel',
-    delete: 'Delete',
-    edit: 'Edit',
-    create: 'Create',
-    search: 'Search',
-    filter: 'Filter',
-    sort: 'Sort',
-    actions: 'Actions',
-    confirm: 'Confirm',
-    back: 'Back',
-    next: 'Next',
-    previous: 'Previous',
-    submit: 'Submit',
-    reset: 'Reset',
-    close: 'Close',
-    open: 'Open',
-    yes: 'Yes',
-    no: 'No',
-    success: 'Success',
-    warning: 'Warning',
-    info: 'Information',
-  },
-  navigation: {
-    home: 'Home',
-    projects: 'Projects',
-    brainstorm: 'Brainstorm',
-    settings: 'Settings',
-    history: 'History',
-    chat: 'Chat',
-    backup: 'Backup',
-    help: 'Help',
-  },
-  project: {
-    title: 'Projects',
-    createProject: 'Create Project',
-    editProject: 'Edit Project',
-    deleteProject: 'Delete Project',
-    archiveProject: 'Archive Project',
-    restoreProject: 'Restore Project',
-    projectName: 'Project Name',
-    projectDescription: 'Project Description',
-    createFirstProject: 'Create your first brainstorming project to get started.',
-    noProjects: 'No Projects Yet',
-    noDescription: 'No description',
-    created: 'Created',
-    updated: 'Updated',
-    empty: 'Empty',
-    open: 'Open Project',
-    delete: 'Delete',
-    archive: 'Archive',
-    sync: 'Sync to Cloud',
-    pin: 'Pin Project',
-    unpin: 'Unpin Project',
-    confirmDelete: 'Are you sure you want to delete this project? This action cannot be undone.',
-    confirmArchive:
-      'Are you sure you want to archive this project? You can restore it later from the archive.',
-  },
-  brainstorm: {
-    title: 'Brainstorm',
-    newIdea: 'New Idea',
-    addNode: 'Add Node',
-    deleteNode: 'Delete Node',
-    editNode: 'Edit Node',
-    connectNodes: 'Connect Nodes',
-    disconnectNodes: 'Disconnect Nodes',
-    nodeTypes: 'Node Types',
-    saveLayout: 'Save Layout',
-    resetLayout: 'Reset Layout',
-    zoomIn: 'Zoom In',
-    zoomOut: 'Zoom Out',
-    fitView: 'Fit View',
-    undo: 'Undo',
-    redo: 'Redo',
-  },
-  settings: {
-    title: 'Settings',
-    appearance: 'Appearance',
-    language: 'Language',
-    theme: 'Theme',
-    darkMode: 'Dark Mode',
-    lightMode: 'Light Mode',
-    systemDefault: 'System Default',
-    notifications: 'Notifications',
-    account: 'Account',
-    privacy: 'Privacy',
-    security: 'Security',
-    advanced: 'Advanced',
-    about: 'About',
-    help: 'Help',
-    feedback: 'Feedback',
-    logout: 'Logout',
-  },
-  app: {
-    title: 'd.o.it.brainstorming',
-    tagline: 'Unleash structured creativity — anywhere, anytime.',
-    update: 'Update Available',
-    updateAction: 'Update',
-    offlineReady: 'App is ready for offline use',
-  },
-};
+// Default translations are imported from '../i18n/en'
 
 // Provider component
 interface I18nProviderProps {
@@ -139,16 +35,18 @@ export const I18nProvider = ({ children, initialLocale = 'en' }: I18nProviderPro
   // Load translations for the current locale
   useEffect(() => {
     const loadTranslations = async () => {
-      if (locale === 'en') {
-        setTranslations(defaultTranslations);
-        return;
-      }
-
       setIsLoading(true);
       try {
-        // In a real app, you would load translations from a file or API
-        // For now, we'll just use the default translations
-        setTranslations(defaultTranslations);
+        // Check if we have translations for the selected locale
+        if (locale in allTranslations) {
+          // Type assertion to ensure TypeScript knows this is a valid key
+          const localeKey = locale as keyof typeof allTranslations;
+          setTranslations(allTranslations[localeKey]);
+        } else {
+          // Fallback to default translations if the locale is not supported
+          console.warn(`Translations for locale '${locale}' not found, using default (en)`);
+          setTranslations(defaultTranslations);
+        }
       } catch (error) {
         console.error('Failed to load translations:', error);
         // Fallback to default translations

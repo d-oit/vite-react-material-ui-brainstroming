@@ -88,6 +88,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   size = 'medium',
   showFlags = true,
   showNativeNames = true,
+  fullWidth = false,
 }) => {
   const theme = useTheme();
   const { locale, setLocale, t } = useI18n();
@@ -135,6 +136,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       <IconButton
         onClick={handleIconClick}
         size={size}
+        color="inherit"
         aria-label={t('language.change') || 'Change language'}
         aria-controls={anchorEl ? 'language-menu' : undefined}
         aria-haspopup="true"
@@ -285,5 +287,6 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 };
 
 export default LanguageSelector;
+
 
 

@@ -225,7 +225,7 @@ export const NodePreferencesManager = () => {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           Customize the size of your nodes for different screen sizes.
         </Typography>
-        
+
         <FormControlLabel
           control={
             <Switch
@@ -235,7 +235,7 @@ export const NodePreferencesManager = () => {
           }
           label="Touch-optimized mode (larger nodes for touch screens)"
         />
-        
+
         <Box sx={{ mb: 3 }}>
           <FormControlLabel
             control={
@@ -259,34 +259,40 @@ export const NodePreferencesManager = () => {
           />
         </Box>
 
-        <Typography variant="subtitle1" gutterBottom>
-          Size Preview
-        </Typography>
-
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 4 }}>
-          {(['small', 'medium', 'large'] as const).map(size => (
-            <Box key={size}>
-              <NodeSizePreview
-                size={size}
-                width={
-                  size === 'small'
-                    ? localPreferences.nodeSizes.small.width
-                    : size === 'medium'
-                      ? localPreferences.nodeSizes.medium.width
-                      : localPreferences.nodeSizes.large.width
-                }
-                fontSize={
-                  size === 'small'
-                    ? localPreferences.nodeSizes.small.fontSize
-                    : size === 'medium'
-                      ? localPreferences.nodeSizes.medium.fontSize
-                      : localPreferences.nodeSizes.large.fontSize
-                }
-                isSelected={settings.preferredNodeSize === size}
-                onClick={() => handleSizeChange(size)}
-              />
-            </Box>
-          ))}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="subtitle1" gutterBottom>
+            Size Preview
+          </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              gap: 2,
+              flexWrap: 'wrap'
+            }}
+          >
+            <NodeSizePreview
+              size="small"
+              width={localPreferences.nodeSizes.small.width}
+              fontSize={localPreferences.nodeSizes.small.fontSize}
+              isSelected={settings.preferredNodeSize === 'small'}
+              onClick={() => handleSizeChange('small')}
+            />
+            <NodeSizePreview
+              size="medium"
+              width={localPreferences.nodeSizes.medium.width}
+              fontSize={localPreferences.nodeSizes.medium.fontSize}
+              isSelected={settings.preferredNodeSize === 'medium'}
+              onClick={() => handleSizeChange('medium')}
+            />
+            <NodeSizePreview
+              size="large"
+              width={localPreferences.nodeSizes.large.width}
+              fontSize={localPreferences.nodeSizes.large.fontSize}
+              isSelected={settings.preferredNodeSize === 'large'}
+              onClick={() => handleSizeChange('large')}
+            />
+          </Box>
         </Box>
 
         <Typography variant="subtitle1" gutterBottom>
@@ -475,4 +481,5 @@ export const NodePreferencesManager = () => {
     </Box>
   );
 };
+
 

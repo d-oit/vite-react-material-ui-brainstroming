@@ -11,6 +11,7 @@ import AppShell from '../components/Layout/AppShell';
 import { useI18n } from '../contexts/I18nContext';
 import projectService from '../services/ProjectService';
 import { ProjectTemplate } from '../types/project';
+import { handleQuickBrainstorm } from '../features/brainstorming/quickBrainstormUtils';
 
 interface HomePageProps {
   onThemeToggle: () => void;
@@ -22,32 +23,10 @@ const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
   const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
 
-  const handleQuickBrainstorm = async () => {
-    try {
-      setIsCreating(true);
-
-      // Check if a Quick Brainstorm project already exists
-      const projects = await projectService.getProjects();
-      const quickBrainstormProject = projects.find(p => p.name.startsWith('Quick Brainstorm'));
-
-      if (quickBrainstormProject) {
-        // If it exists, navigate to it
-        navigate(`/projects/${quickBrainstormProject.id}`);
-      } else {
-        // If not, create a new one
-        const projectName = `Quick Brainstorm - ${new Date().toLocaleString()}`;
-        const project = await projectService.createProject(
-          projectName,
-          'A quick brainstorming session',
-          ProjectTemplate.CUSTOM
-        );
-        navigate(`/projects/${project.id}`);
-      }
-    } catch (error) {
-      console.error('Error handling quick brainstorm project:', error);
-    } finally {
-      setIsCreating(false);
-    }
+  const handleQuickBrainstormClick = async () => {
+    setIsCreating(true);
+    await handleQuickBrainstorm(navigate);
+    setIsCreating(false);
   };
 
   return (
@@ -78,7 +57,7 @@ const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
               variant="outlined"
               color="primary"
               size="large"
-              onClick={handleQuickBrainstorm}
+              onClick={handleQuickBrainstormClick}
               startIcon={<DashboardIcon />}
               disabled={isCreating}
               data-quick-brainstorm
@@ -110,3 +89,4 @@ const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
 };
 
 export default HomePage;
+

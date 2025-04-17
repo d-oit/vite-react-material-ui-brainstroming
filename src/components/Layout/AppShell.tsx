@@ -45,6 +45,7 @@ import LanguageSelector from '../I18n/LanguageSelector';
 import NetworkInfoDialog from '../OfflineIndicator/NetworkInfoDialog';
 import NetworkStatusIcon from '../OfflineIndicator/NetworkStatusIcon';
 import _OfflineIndicator from '../OfflineIndicator/OfflineIndicator';
+import { handleQuickBrainstorm } from '../../features/brainstorming/quickBrainstormUtils';
 
 interface AppShellProps {
   children: ReactNode;
@@ -111,15 +112,7 @@ const AppShell = ({
       text: t('nav.quickBrainstorm'),
       icon: <BrainstormIcon />,
       path: '#',
-      onClick: () => {
-        // This will be handled in the HomePage component
-        navigate('/');
-        // We'll trigger the quick brainstorm action from the home page
-        const quickBrainstormButton = document.querySelector('[data-quick-brainstorm]');
-        if (quickBrainstormButton) {
-          (quickBrainstormButton as HTMLButtonElement).click();
-        }
-      },
+      onClick: () => handleQuickBrainstorm(navigate),
       active: false,
     },
     {
@@ -408,4 +401,5 @@ const AppShell = ({
 };
 
 export default AppShell;
+
 
