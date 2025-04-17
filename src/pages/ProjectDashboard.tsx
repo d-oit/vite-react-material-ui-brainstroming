@@ -1,12 +1,12 @@
 import { Dashboard as DashboardIcon, Archive as ArchiveIcon } from '@mui/icons-material';
 import { Box, Container, Paper, Tabs, Tab, Typography } from '@mui/material';
-import { useI18n } from '../contexts/I18nContext';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import AppShell from '../components/Layout/AppShell';
 import ProjectArchivePanel from '../components/ProjectArchive/ProjectArchivePanel';
 import ProjectList from '../components/ProjectList/ProjectList';
+import { useI18n } from '../contexts/I18nContext';
 import type { Project } from '../types';
 
 interface TabPanelProps {
@@ -68,7 +68,9 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
           px: { xs: 0.5, sm: 1 }, // Minimal horizontal padding
         }}
       >
-        <Box sx={{ mb: 2 }}> {/* Reduced margin from 3 to 2 */}
+        <Box sx={{ mb: 2 }}>
+          {' '}
+          {/* Reduced margin from 3 to 2 */}
           <Typography variant="h5" component="h1" gutterBottom>
             {t('project.myProjects')}
           </Typography>
@@ -118,6 +120,3 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
 };
 
 export default ProjectDashboard;
-
-
-

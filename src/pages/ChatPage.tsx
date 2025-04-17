@@ -1,8 +1,9 @@
 import { Box, Typography, Paper, Divider } from '@mui/material';
-import { useI18n } from '../contexts/I18nContext';
 
 import { ChatInterface } from '@/components/Chat/ChatInterface';
 import { MainLayout } from '@/components/Layout/MainLayout';
+
+import { useI18n } from '../contexts/I18nContext';
 
 export const ChatPage = () => {
   const { t } = useI18n();

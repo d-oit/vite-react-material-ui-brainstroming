@@ -228,10 +228,7 @@ export const NodePreferencesManager = () => {
 
         <FormControlLabel
           control={
-            <Switch
-              checked={touchOptimized}
-              onChange={(e) => setTouchOptimized(e.target.checked)}
-            />
+            <Switch checked={touchOptimized} onChange={e => setTouchOptimized(e.target.checked)} />
           }
           label="Touch-optimized mode (larger nodes for touch screens)"
         />
@@ -250,7 +247,9 @@ export const NodePreferencesManager = () => {
                 <TouchIcon sx={{ mr: 0.5, fontSize: '1rem' }} />
                 <Typography variant="body2">Touch-optimized nodes</Typography>
                 <Tooltip title="Makes nodes easier to interact with on touch devices">
-                  <Box sx={{ ml: 0.5, cursor: 'help', color: 'text.secondary', fontSize: '0.8rem' }}>
+                  <Box
+                    sx={{ ml: 0.5, cursor: 'help', color: 'text.secondary', fontSize: '0.8rem' }}
+                  >
                     ⓘ
                   </Box>
                 </Tooltip>
@@ -268,7 +267,7 @@ export const NodePreferencesManager = () => {
               display: 'flex',
               justifyContent: 'center',
               gap: 2,
-              flexWrap: 'wrap'
+              flexWrap: 'wrap',
             }}
           >
             <NodeSizePreview
@@ -360,7 +359,9 @@ export const NodePreferencesManager = () => {
                     min={0.6}
                     max={1.6}
                     step={0.1}
-                    onChange={(_, value) => handleSizeConfigChange(size, 'fontSize', value as number)}
+                    onChange={(_, value) =>
+                      handleSizeConfigChange(size, 'fontSize', value as number)
+                    }
                     valueLabelDisplay="auto"
                   />
                 </CardContent>
@@ -376,8 +377,8 @@ export const NodePreferencesManager = () => {
         </Typography>
 
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          Customize the colors for each node type. These colors will be used as the default background
-          color for nodes of each type.
+          Customize the colors for each node type. These colors will be used as the default
+          background color for nodes of each type.
         </Typography>
 
         <Box
@@ -481,5 +482,3 @@ export const NodePreferencesManager = () => {
     </Box>
   );
 };
-
-

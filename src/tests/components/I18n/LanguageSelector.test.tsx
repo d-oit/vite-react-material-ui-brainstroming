@@ -1,10 +1,10 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import React from 'react';
 import { ThemeProvider, createTheme } from '@mui/material';
+import { render, screen, fireEvent } from '@testing-library/react';
+import React from 'react';
+import { describe, it, expect, vi } from 'vitest';
 
-import { I18nProvider, useI18n } from '../../../contexts/I18nContext';
 import { LanguageSelector } from '../../../components/I18n/LanguageSelector';
+import { I18nProvider, useI18n } from '../../../contexts/I18nContext';
 
 // Wrapper component to access the I18n context
 const LanguageSelectorWrapper = (props: any) => {

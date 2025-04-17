@@ -1,7 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
-import { hasProjectChanged } from '../../utils/projectUtils';
+
 import type { Project } from '../../types';
 import { ProjectTemplate } from '../../types/project';
+import { hasProjectChanged } from '../../utils/projectUtils';
 
 // Mock the s3Service
 vi.mock('../../lib/s3Service', () => ({
@@ -59,8 +60,8 @@ describe('Project change detection', () => {
             updatedAt: '2023-01-01T00:00:00.000Z',
             type: 'idea',
           },
-        }
-      ]
+        },
+      ],
     };
     expect(hasProjectChanged(project1, project2)).toBe(true);
   });

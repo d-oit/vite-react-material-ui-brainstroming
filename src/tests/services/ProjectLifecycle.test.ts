@@ -90,7 +90,8 @@ describe('Project Lifecycle Management', () => {
     template: ProjectTemplate.CUSTOM, // Use enum value
     nodes: [] as Node[], // Use project's Node type
     edges: [] as Edge[], // Use project's Edge type
-    syncSettings: { // Use correct SyncSettings structure
+    syncSettings: {
+      // Use correct SyncSettings structure
       enableS3Sync: false, // Correct property name
       syncFrequency: 'manual',
       // s3Bucket and s3Region might not be needed if enableS3Sync is false

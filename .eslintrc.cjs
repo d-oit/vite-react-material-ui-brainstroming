@@ -1,4 +1,3 @@
-
 /** @type {import('eslint').Linter.Config} */
 module.exports = {
   root: true,
@@ -27,7 +26,7 @@ module.exports = {
     },
     ecmaVersion: 'latest',
     sourceType: 'module',
-    projectService: true, // Use projectService instead of project to fix TypeScript project references issue
+    projectService: true,
   },
   plugins: [
     'react',
@@ -37,7 +36,7 @@ module.exports = {
     'import',
     'security',
     'prettier',
-    'testing-library'
+    'testing-library',
   ],
   rules: {
     // React
@@ -57,38 +56,53 @@ module.exports = {
 
     // TypeScript
     '@typescript-eslint/no-explicit-any': 'warn',
-    '@typescript-eslint/no-unused-vars': ['warn', {
-      argsIgnorePattern: '^_',
-      varsIgnorePattern: '^_',
-    }],
-    '@typescript-eslint/strict-boolean-expressions': ['error', {
-      allowString: true,
-      allowNumber: true,
-      allowNullableObject: true,
-      allowNullableBoolean: true,
-      allowNullableString: true,
-      allowNullableNumber: true,
-      allowAny: false,
-    }],
+    '@typescript-eslint/no-unused-vars': [
+      'warn',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+      },
+    ],
+    '@typescript-eslint/strict-boolean-expressions': [
+      'error',
+      {
+        allowString: true,
+        allowNumber: true,
+        allowNullableObject: true,
+        allowNullableBoolean: true,
+        allowNullableString: true,
+        allowNullableNumber: true,
+        allowAny: false,
+      },
+    ],
     '@typescript-eslint/no-floating-promises': 'error',
     '@typescript-eslint/await-thenable': 'error',
     '@typescript-eslint/no-misused-promises': 'error',
-    '@typescript-eslint/explicit-function-return-type': ['off', {
-      allowExpressions: true,
-      allowTypedFunctionExpressions: true,
-    }],
-    '@typescript-eslint/consistent-type-imports': ['warn', {
-      prefer: 'type-imports',
-      disallowTypeAnnotations: false,
-    }],
+    '@typescript-eslint/explicit-function-return-type': [
+      'off',
+      {
+        allowExpressions: true,
+        allowTypedFunctionExpressions: true,
+      },
+    ],
+    '@typescript-eslint/consistent-type-imports': [
+      'warn',
+      {
+        prefer: 'type-imports',
+        disallowTypeAnnotations: false,
+      },
+    ],
     '@typescript-eslint/no-non-null-assertion': 'warn',
 
     // Import
-    'import/order': ['error', {
-      'groups': ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-      'newlines-between': 'always',
-      'alphabetize': { 'order': 'asc', 'caseInsensitive': true }
-    }],
+    'import/order': [
+      'error',
+      {
+        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+        'newlines-between': 'always',
+        alphabetize: { order: 'asc', caseInsensitive: true },
+      },
+    ],
     'import/no-cycle': 'error',
     'import/no-unresolved': 'error',
     'import/first': 'error',
@@ -111,17 +125,15 @@ module.exports = {
     },
     'import/resolver': {
       typescript: {
-        alwaysTryTypes: true
+        alwaysTryTypes: true,
       },
       node: {
-        extensions: ['.js', '.jsx', '.ts', '.tsx']
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
       },
       alias: {
-        map: [
-          ['@', './src']
-        ],
-        extensions: ['.js', '.jsx', '.ts', '.tsx']
-      }
+        map: [['@', './src']],
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      },
     },
   },
   ignorePatterns: [
@@ -131,7 +143,9 @@ module.exports = {
     '.eslintrc.cjs',
     'public',
     'vite.config.ts',
-    'pwa-assets.config.ts'
+    'pwa-assets.config.ts',
+    'jest.config.ts',
+    'src/__mocks__/fileMock.js',
   ],
   overrides: [
     // React Testing Library test files
@@ -149,8 +163,8 @@ module.exports = {
         'testing-library/no-container': 'warn',
         'testing-library/render-result-naming-convention': 'warn',
         'testing-library/no-wait-for-multiple-assertions': 'warn',
-        'testing-library/no-debugging-utils': 'warn'
-      }
+        'testing-library/no-debugging-utils': 'warn',
+      },
     },
     // Playwright e2e test files
     {
@@ -160,16 +174,16 @@ module.exports = {
         '@typescript-eslint/no-non-null-assertion': 'off',
         'testing-library/prefer-screen-queries': 'off',
         'testing-library/no-node-access': 'off',
-        'testing-library/no-container': 'off'
-      }
+        'testing-library/no-container': 'off',
+      },
     },
     // Configuration files
     {
       files: ['*.config.ts', '*.config.js'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'off',
-        'import/no-default-export': 'off'
-      }
+        'import/no-default-export': 'off',
+      },
     },
     // Virtual modules
     {
@@ -178,23 +192,23 @@ module.exports = {
         'import/no-unresolved': [
           'error',
           {
-            ignore: ['^virtual:.*$', '@vite-pwa/.*']
-          }
-        ]
-      }
+            ignore: ['^virtual:.*$', '@vite-pwa/.*'],
+          },
+        ],
+      },
     },
     // Service Worker
     {
       files: ['src/sw.ts'],
       env: {
         worker: true,
-        serviceworker: true
+        serviceworker: true,
       },
       rules: {
         '@typescript-eslint/no-unsafe-member-access': 'off',
         '@typescript-eslint/no-unsafe-call': 'off',
-        '@typescript-eslint/no-unsafe-assignment': 'off'
-      }
-    }
-  ]
-}
+        '@typescript-eslint/no-unsafe-assignment': 'off',
+      },
+    },
+  ],
+};

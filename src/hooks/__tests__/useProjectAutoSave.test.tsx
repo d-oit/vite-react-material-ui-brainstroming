@@ -1,11 +1,11 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import ToastProviderWrapper from '../../tests/wrappers/ToastProviderWrapper';
 
-import { useProject } from '../useProject';
-import { hasProjectChanged } from '../../utils/projectUtils';
+import ToastProviderWrapper from '../../tests/wrappers/ToastProviderWrapper';
 import type { Project } from '../../types';
 import { ProjectTemplate } from '../../types/project';
+import { hasProjectChanged } from '../../utils/projectUtils';
+import { useProject } from '../useProject';
 
 // Define mockProject at the top level since vi.mock is hoisted
 const mockProject: Project = {
@@ -59,10 +59,14 @@ describe('useProject auto-save functionality', () => {
     vi.mocked(hasProjectChanged).mockReturnValue(false);
 
     // Render the hook with autoSave enabled
-    const { result } = renderHook(() => useProject({
-      projectId: 'test-project-id',
-      autoSave: true
-    }), { wrapper: ToastProviderWrapper });
+    const { result } = renderHook(
+      () =>
+        useProject({
+          projectId: 'test-project-id',
+          autoSave: true,
+        }),
+      { wrapper: ToastProviderWrapper }
+    );
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -99,9 +103,13 @@ describe('useProject auto-save functionality', () => {
     vi.mocked(hasProjectChanged).mockReturnValueOnce(false);
 
     // Render the hook
-    const { result } = renderHook(() => useProject({
-      projectId: 'test-project-id'
-    }), { wrapper: ToastProviderWrapper });
+    const { result } = renderHook(
+      () =>
+        useProject({
+          projectId: 'test-project-id',
+        }),
+      { wrapper: ToastProviderWrapper }
+    );
 
     // Verify that hasChanges is false initially
     expect(result.current.hasChanges).toBe(false);
@@ -109,7 +117,7 @@ describe('useProject auto-save functionality', () => {
     // Now simulate a change by calling saveProject with an updated project
     const updatedProject = {
       ...mockProject,
-      name: 'Updated Project Name'
+      name: 'Updated Project Name',
     };
 
     // Mock hasProjectChanged to return true for the next call

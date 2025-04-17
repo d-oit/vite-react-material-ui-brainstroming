@@ -55,7 +55,9 @@ export class LoggerService {
         this.sessionId = crypto.randomUUID();
       } else {
         // Fallback to a simple random ID generator
-        this.sessionId = 'session-' + Math.random().toString(36).substring(2, 15) +
+        this.sessionId =
+          'session-' +
+          Math.random().toString(36).substring(2, 15) +
           Math.random().toString(36).substring(2, 15);
       }
     } catch (error) {
@@ -264,11 +266,11 @@ export class LoggerService {
   ): Promise<void> {
     const errorContext = error
       ? {
-        ...context,
-        errorMessage: error.message,
-        stack: error.stack,
-        name: error.name,
-      }
+          ...context,
+          errorMessage: error.message,
+          stack: error.stack,
+          name: error.name,
+        }
       : context;
 
     await this.log('error', message, errorContext);
@@ -287,11 +289,11 @@ export class LoggerService {
   ): Promise<void> {
     const errorContext = error
       ? {
-        ...context,
-        errorMessage: error.message,
-        stack: error.stack,
-        name: error.name,
-      }
+          ...context,
+          errorMessage: error.message,
+          stack: error.stack,
+          name: error.name,
+        }
       : context;
 
     await this.log('critical', message, errorContext);

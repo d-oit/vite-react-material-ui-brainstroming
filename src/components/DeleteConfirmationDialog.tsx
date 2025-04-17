@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import {
   Button,
   Checkbox,
@@ -9,6 +8,7 @@ import {
   DialogTitle,
   FormControlLabel,
 } from '@mui/material';
+import React, { useState } from 'react';
 
 import { useSettings } from '../contexts/SettingsContext';
 
@@ -47,14 +47,12 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
     >
       <DialogTitle id="delete-confirmation-dialog-title">{title}</DialogTitle>
       <DialogContent>
-        <DialogContentText id="delete-confirmation-dialog-description">
-          {message}
-        </DialogContentText>
+        <DialogContentText id="delete-confirmation-dialog-description">{message}</DialogContentText>
         <FormControlLabel
           control={
             <Checkbox
               checked={dontAskAgain}
-              onChange={(e) => setDontAskAgain(e.target.checked)}
+              onChange={e => setDontAskAgain(e.target.checked)}
               data-testid="dont-ask-again"
             />
           }

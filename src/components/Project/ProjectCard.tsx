@@ -298,5 +298,3 @@ export const ProjectCard = ({ project, onDelete, onArchive, onSync, onPin }: Pro
 };
 
 export default ProjectCard;
-
-

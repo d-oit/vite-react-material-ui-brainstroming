@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 import { vi, beforeEach, afterEach } from 'vitest';
 
 declare module 'vitest' {
-  interface Assertion<T = any> extends TestingLibraryMatchers<typeof expect.stringContaining, T> { }
+  interface Assertion<T = any> extends TestingLibraryMatchers<typeof expect.stringContaining, T> {}
 }
 
 // Mock window.matchMedia
@@ -95,7 +95,10 @@ vi.mock('reactflow', async () => {
     // Add additional exports that might be used
     Panel: () => null,
     MiniMap: () => null,
-    addEdge: vi.fn((params, edges) => [...edges, { id: `${params.source}-${params.target}`, ...params }]),
+    addEdge: vi.fn((params, edges) => [
+      ...edges,
+      { id: `${params.source}-${params.target}`, ...params },
+    ]),
     Position: {
       Left: 'left',
       Top: 'top',

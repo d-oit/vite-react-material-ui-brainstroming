@@ -1,5 +1,6 @@
+import type { AlertProps } from '@mui/material';
+import { Snackbar, Alert } from '@mui/material';
 import React, { useState, useEffect } from 'react';
-import { Snackbar, Alert, AlertProps } from '@mui/material';
 
 interface ToastProps {
   open: boolean;
@@ -39,7 +40,7 @@ const Toast: React.FC<ToastProps> = ({
       sx={{
         '& .MuiAlert-root': {
           width: '100%',
-          boxShadow: (theme) => theme.shadows[3],
+          boxShadow: theme => theme.shadows[3],
         },
       }}
     >
@@ -47,13 +48,13 @@ const Toast: React.FC<ToastProps> = ({
         onClose={handleClose}
         severity={severity}
         variant="filled"
-        sx={{ 
+        sx={{
           width: '100%',
           opacity: 0.9,
           '&:hover': {
-            opacity: 1
+            opacity: 1,
           },
-          transition: 'opacity 0.2s ease-in-out'
+          transition: 'opacity 0.2s ease-in-out',
         }}
       >
         {message}

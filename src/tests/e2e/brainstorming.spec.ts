@@ -15,10 +15,13 @@ test.describe('Brainstorming', () => {
     await expect(page.locator('.react-flow')).toBeVisible({ timeout: 30000 });
 
     // Wait for the react-flow to be fully initialized
-    await page.waitForFunction(() => {
-      const reactFlow = document.querySelector('.react-flow');
-      return reactFlow && reactFlow.querySelectorAll('.react-flow__node').length > 0;
-    }, { timeout: 30000 });
+    await page.waitForFunction(
+      () => {
+        const reactFlow = document.querySelector('.react-flow');
+        return reactFlow && reactFlow.querySelectorAll('.react-flow__node').length > 0;
+      },
+      { timeout: 30000 }
+    );
 
     // Wait for the UI to stabilize
     await page.waitForTimeout(1000);
@@ -59,10 +62,13 @@ test.describe('Brainstorming', () => {
     await expect(page.locator('.react-flow')).toBeVisible({ timeout: 30000 });
 
     // Wait for the react-flow to be fully initialized
-    await page.waitForFunction(() => {
-      const reactFlow = document.querySelector('.react-flow');
-      return reactFlow && reactFlow.querySelectorAll('.react-flow__node').length > 0;
-    }, { timeout: 30000 });
+    await page.waitForFunction(
+      () => {
+        const reactFlow = document.querySelector('.react-flow');
+        return reactFlow && reactFlow.querySelectorAll('.react-flow__node').length > 0;
+      },
+      { timeout: 30000 }
+    );
 
     // Add a node
     await page.locator('button:has-text("Add Node")').click();
@@ -100,10 +106,13 @@ test.describe('Brainstorming', () => {
     await expect(page.locator('.react-flow')).toBeVisible({ timeout: 30000 });
 
     // Wait for the react-flow to be fully initialized
-    await page.waitForFunction(() => {
-      const reactFlow = document.querySelector('.react-flow');
-      return reactFlow && reactFlow.querySelectorAll('.react-flow__node').length > 0;
-    }, { timeout: 30000 });
+    await page.waitForFunction(
+      () => {
+        const reactFlow = document.querySelector('.react-flow');
+        return reactFlow && reactFlow.querySelectorAll('.react-flow__node').length > 0;
+      },
+      { timeout: 30000 }
+    );
 
     // Open the AI suggestions panel
     await page.locator('button:has-text("AI")').click();
@@ -142,10 +151,13 @@ test.describe('Brainstorming', () => {
     await expect(page.locator('.react-flow')).toBeVisible({ timeout: 30000 });
 
     // Wait for the react-flow to be fully initialized
-    await page.waitForFunction(() => {
-      const reactFlow = document.querySelector('.react-flow');
-      return reactFlow && reactFlow.querySelectorAll('.react-flow__node').length > 0;
-    }, { timeout: 30000 });
+    await page.waitForFunction(
+      () => {
+        const reactFlow = document.querySelector('.react-flow');
+        return reactFlow && reactFlow.querySelectorAll('.react-flow__node').length > 0;
+      },
+      { timeout: 30000 }
+    );
 
     // Add first node
     await page.locator('button:has-text("Add Node")').click();

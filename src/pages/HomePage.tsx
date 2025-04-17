@@ -9,9 +9,9 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import AppShell from '../components/Layout/AppShell';
 import { useI18n } from '../contexts/I18nContext';
+import { handleQuickBrainstorm } from '../features/brainstorming/quickBrainstormUtils';
 import projectService from '../services/ProjectService';
 import { ProjectTemplate } from '../types/project';
-import { handleQuickBrainstorm } from '../features/brainstorming/quickBrainstormUtils';
 
 interface HomePageProps {
   onThemeToggle: () => void;
@@ -89,4 +89,3 @@ const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
 };
 
 export default HomePage;
-

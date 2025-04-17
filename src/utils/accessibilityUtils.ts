@@ -16,7 +16,7 @@ import React, { useEffect, useRef, useState } from 'react';
 export function checkColorContrast(
   foreground: string,
   background: string,
-  isLargeText: boolean = false
+  isLargeText = false
 ): {
   ratio: number;
   isWCAGAA: boolean;
@@ -28,21 +28,15 @@ export function checkColorContrast(
     const formattedHex = hex.replace(shorthandRegex, (_, r, g, b) => r + r + g + g + b + b);
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(formattedHex);
     return result
-      ? [
-          parseInt(result[1], 16),
-          parseInt(result[2], 16),
-          parseInt(result[3], 16),
-        ]
+      ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)]
       : [0, 0, 0];
   };
 
   // Calculate relative luminance
   const calculateLuminance = (rgb: number[]): number => {
-    const [r, g, b] = rgb.map(c => {
+    const [r, g, b] = rgb.map((c) => {
       const value = c / 255;
-      return value <= 0.03928
-        ? value / 12.92
-        : Math.pow((value + 0.055) / 1.055, 2.4);
+      return value <= 0.03928 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
     });
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   };
@@ -59,12 +53,8 @@ export function checkColorContrast(
   const contrastRatio = (lighterLuminance + 0.05) / (darkerLuminance + 0.05);
 
   // Check WCAG compliance
-  const isWCAGAA = isLargeText
-    ? contrastRatio >= 3
-    : contrastRatio >= 4.5;
-  const isWCAGAAA = isLargeText
-    ? contrastRatio >= 4.5
-    : contrastRatio >= 7;
+  const isWCAGAA = isLargeText ? contrastRatio >= 3 : contrastRatio >= 4.5;
+  const isWCAGAAA = isLargeText ? contrastRatio >= 4.5 : contrastRatio >= 7;
 
   return {
     ratio: contrastRatio,
@@ -80,11 +70,7 @@ export function checkColorContrast(
  * @param count Optional count for pluralization
  * @returns Accessible label
  */
-export function generateAccessibleLabel(
-  baseLabel: string,
-  context?: string,
-  count?: number
-): string {
+export function generateAccessibleLabel(baseLabel: string, context?: string, count?: number): string {
   let label = baseLabel;
 
   if (count !== undefined) {
@@ -189,25 +175,29 @@ export function useScreenReaderAnnouncer(
     }, 5000);
   };
 
-  const ScreenReaderAnnouncer: React.FC = () => (
-    <div
-      aria-live={politeness}
-      aria-atomic="true"
-      style={{
-        position: 'absolute',
-        width: '1px',
-        height: '1px',
-        padding: 0,
-        margin: '-1px',
-        overflow: 'hidden',
-        clip: 'rect(0, 0, 0, 0)',
-        whiteSpace: 'nowrap',
-        border: 0,
-      }}
-    >
-      {message}
-    </div>
-  );
+  const ScreenReaderAnnouncer = () => {
+    const divStyle = {
+      position: 'absolute' as const,
+      width: '1px',
+      height: '1px',
+      padding: 0,
+      margin: '-1px',
+      overflow: 'hidden',
+      clip: 'rect(0, 0, 0, 0)',
+      whiteSpace: 'nowrap' as const,
+      border: 0,
+    };
+
+    return (
+      <div
+        aria-live={politeness}
+        aria-atomic="true"
+        style={divStyle}
+      >
+        {message}
+      </div>
+    );
+  };
 
   return { announce, ScreenReaderAnnouncer };
 }
@@ -263,7 +253,7 @@ export function withAccessibilityProps<T extends object>(
   'aria-expanded'?: boolean;
   'aria-controls'?: string;
 } {
-  const accessibilityProps: any = { ...props };
+  const accessibilityProps: Record<string, unknown> = { ...props };
 
   if (label) {
     accessibilityProps['aria-label'] = label;
@@ -281,7 +271,12 @@ export function withAccessibilityProps<T extends object>(
     accessibilityProps['aria-controls'] = controls;
   }
 
-  return accessibilityProps;
+  return accessibilityProps as T & {
+    'aria-label'?: string;
+    'aria-describedby'?: string;
+    'aria-expanded'?: boolean;
+    'aria-controls'?: string;
+  };
 }
 
 export default {

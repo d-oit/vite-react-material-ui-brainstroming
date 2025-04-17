@@ -40,7 +40,9 @@ vi.mock('../../components/Help/HelpOverlay', () => ({
 }));
 
 vi.mock('../../components/Project/ProjectBrainstormingSection', () => ({
-  ProjectBrainstormingSection: () => <div data-testid="brainstorming-section">Brainstorming Section</div>,
+  ProjectBrainstormingSection: () => (
+    <div data-testid="brainstorming-section">Brainstorming Section</div>
+  ),
 }));
 
 vi.mock('../../components/Project/ProjectSettingsSection', () => ({
@@ -70,12 +72,12 @@ describe('ProjectDetailPage i18n', () => {
 
   it('renders with English translations by default', () => {
     renderComponent();
-    
+
     // Check tab labels
     expect(screen.getByRole('tab', { name: /Overview/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Brainstorm/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Settings/i })).toBeInTheDocument();
-    
+
     // Check other translated elements
     expect(screen.getByText('Project Details')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Edit Description/i })).toBeInTheDocument();
@@ -85,12 +87,12 @@ describe('ProjectDetailPage i18n', () => {
 
   it('renders with German translations', () => {
     renderComponent('de');
-    
+
     // Check tab labels
     expect(screen.getByRole('tab', { name: /Übersicht/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Brainstorming/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Einstellungen/i })).toBeInTheDocument();
-    
+
     // Check other translated elements
     expect(screen.getByText('Projektdetails')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Beschreibung bearbeiten/i })).toBeInTheDocument();
@@ -100,12 +102,12 @@ describe('ProjectDetailPage i18n', () => {
 
   it('renders with French translations', () => {
     renderComponent('fr');
-    
+
     // Check tab labels
     expect(screen.getByRole('tab', { name: /Aperçu/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Brainstorming/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Paramètres/i })).toBeInTheDocument();
-    
+
     // Check other translated elements
     expect(screen.getByText('Détails du Projet')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Modifier la Description/i })).toBeInTheDocument();
@@ -115,12 +117,12 @@ describe('ProjectDetailPage i18n', () => {
 
   it('renders with Spanish translations', () => {
     renderComponent('es');
-    
+
     // Check tab labels
     expect(screen.getByRole('tab', { name: /Resumen/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Lluvia de Ideas/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Configuración/i })).toBeInTheDocument();
-    
+
     // Check other translated elements
     expect(screen.getByText('Detalles del Proyecto')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Editar Descripción/i })).toBeInTheDocument();

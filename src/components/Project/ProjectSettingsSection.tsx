@@ -378,7 +378,7 @@ export const ProjectSettingsSection = ({
                 disabled={isSyncing || isSaving || !isS3Available}
                 sx={{
                   mr: 2,
-                  minWidth: '120px',  // Fixed width to prevent layout shifts
+                  minWidth: '120px', // Fixed width to prevent layout shifts
                   transition: 'all 0.2s ease-in-out',
                   position: 'relative',
                   '& .MuiCircularProgress-root': {
@@ -389,7 +389,7 @@ export const ProjectSettingsSection = ({
                     opacity: isSyncing ? 0 : 1,
                     position: isSyncing ? 'absolute' : 'relative',
                     left: isSyncing ? '16px' : 'auto',
-                  }
+                  },
                 }}
               >
                 {isSyncing ? t('s3.syncing') : t('s3.syncNow')}
@@ -422,7 +422,7 @@ export const ProjectSettingsSection = ({
                 onClick={() => void handleExportToFile()}
                 disabled={exportLoading || isSaving}
                 sx={{
-                  minWidth: '130px',  // Fixed width to prevent layout shifts
+                  minWidth: '130px', // Fixed width to prevent layout shifts
                   transition: 'all 0.2s ease-in-out',
                   position: 'relative',
                   '& .MuiCircularProgress-root': {
@@ -433,7 +433,7 @@ export const ProjectSettingsSection = ({
                     opacity: exportLoading ? 0 : 1,
                     position: exportLoading ? 'absolute' : 'relative',
                     left: exportLoading ? '16px' : 'auto',
-                  }
+                  },
                 }}
               >
                 {t('importExport.exportToFile')}
@@ -444,7 +444,7 @@ export const ProjectSettingsSection = ({
                 onClick={() => void handleImportFromFile()}
                 disabled={importLoading || isSaving}
                 sx={{
-                  minWidth: '130px',  // Fixed width to prevent layout shifts
+                  minWidth: '130px', // Fixed width to prevent layout shifts
                   transition: 'all 0.2s ease-in-out',
                   position: 'relative',
                   '& .MuiCircularProgress-root': {
@@ -455,7 +455,7 @@ export const ProjectSettingsSection = ({
                     opacity: importLoading ? 0 : 1,
                     position: importLoading ? 'absolute' : 'relative',
                     left: importLoading ? '16px' : 'auto',
-                  }
+                  },
                 }}
               >
                 {t('importExport.importFromFile')}
@@ -474,7 +474,7 @@ export const ProjectSettingsSection = ({
                 onClick={() => void handleManualSync()}
                 disabled={isSyncing || isSaving || !isS3Available}
                 sx={{
-                  minWidth: '120px',  // Fixed width to prevent layout shifts
+                  minWidth: '120px', // Fixed width to prevent layout shifts
                   transition: 'all 0.2s ease-in-out',
                   position: 'relative',
                   '& .MuiCircularProgress-root': {
@@ -485,7 +485,7 @@ export const ProjectSettingsSection = ({
                     opacity: isSyncing ? 0 : 1,
                     position: isSyncing ? 'absolute' : 'relative',
                     left: isSyncing ? '16px' : 'auto',
-                  }
+                  },
                 }}
               >
                 {t('importExport.exportToS3')}
@@ -496,7 +496,7 @@ export const ProjectSettingsSection = ({
                 onClick={() => void handleImportFromS3()}
                 disabled={importLoading || isSaving || !isS3Available}
                 sx={{
-                  minWidth: '120px',  // Fixed width to prevent layout shifts
+                  minWidth: '120px', // Fixed width to prevent layout shifts
                   transition: 'all 0.2s ease-in-out',
                   position: 'relative',
                   '& .MuiCircularProgress-root': {
@@ -507,7 +507,7 @@ export const ProjectSettingsSection = ({
                     opacity: importLoading ? 0 : 1,
                     position: importLoading ? 'absolute' : 'relative',
                     left: importLoading ? '16px' : 'auto',
-                  }
+                  },
                 }}
               >
                 {t('importExport.importFromS3')}

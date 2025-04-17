@@ -33,7 +33,10 @@ vi.mock('reactflow', () => {
     MarkerType: {
       ArrowClosed: 'arrowclosed',
     },
-    addEdge: vi.fn((params, edges) => [...edges, { id: `${params.source}-${params.target}`, ...params }]),
+    addEdge: vi.fn((params, edges) => [
+      ...edges,
+      { id: `${params.source}-${params.target}`, ...params },
+    ]),
     Position: {
       Left: 'left',
       Top: 'top',
@@ -71,7 +74,6 @@ vi.mock('reactflow', () => {
 // vi.mocked(ReactFlow).mockImplementation(({ children }) => <div>{children}</div>);
 // vi.mocked(Background).mockImplementation(() => null);
 // vi.mocked(Controls).mockImplementation(() => null);
-
 
 describe('ComprehensiveBrainstorm', () => {
   // Use type assertion to force compatibility

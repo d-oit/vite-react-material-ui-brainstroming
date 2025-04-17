@@ -13,12 +13,12 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
+import LLMChatPanel from '../../features/brainstorming/LLMChatPanel';
 import { useBrainstormStore } from '../../store/brainstormStore';
 import DeleteConfirmationDialog from '../DeleteConfirmationDialog';
-import LLMChatPanel from '../../features/brainstorming/LLMChatPanel';
-import NodeEditDialog from './NodeEditDialog';
 
 import { FloatingControls } from './FloatingControls';
+import NodeEditDialog from './NodeEditDialog';
 import CustomNode from './nodes/CustomNode';
 import type { CustomNode as CustomNodeType, CustomEdge } from './types';
 
@@ -172,23 +172,26 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
   }, []);
 
   // Handle node update
-  const handleNodeUpdate = useCallback((nodeId: string, data: any) => {
-    setNodes(nodes =>
-      nodes.map(node =>
-        node.id === nodeId
-          ? {
-            ...node,
-            data: {
-              ...node.data,
-              ...data,
-            },
-          }
-          : node
-      )
-    );
-    setShowEditDialog(false);
-    setSelectedNode(null);
-  }, [setNodes]);
+  const handleNodeUpdate = useCallback(
+    (nodeId: string, data: any) => {
+      setNodes(nodes =>
+        nodes.map(node =>
+          node.id === nodeId
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  ...data,
+                },
+              }
+            : node
+        )
+      );
+      setShowEditDialog(false);
+      setSelectedNode(null);
+    },
+    [setNodes]
+  );
 
   return (
     <div ref={flowRef} style={{ width: '100%', height: '100%' }} onMouseMove={onMouseMove}>
@@ -239,7 +242,7 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
           onClose={handleCloseChatPanel}
           projectId={selectedNode.id}
           session={{ id: 'flow-chat', projectId: selectedNode.id, nodes: [] }}
-          onInsightGenerated={() => { }}
+          onInsightGenerated={() => {}}
         />
       )}
     </div>

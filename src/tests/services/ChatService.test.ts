@@ -360,7 +360,7 @@ describe('ChatService', () => {
       const mockFetchCalls = mockFetch.mock.calls;
       const lastCall = mockFetchCalls[mockFetchCalls.length - 1];
       const requestBody = JSON.parse(lastCall[1].body);
-      
+
       expect(requestBody.messages[0].content).toContain(JSON.stringify(existingNodes));
     });
 

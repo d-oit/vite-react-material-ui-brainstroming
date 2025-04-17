@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { AlertProps } from '@mui/material';
+import type { AlertProps } from '@mui/material';
+import type { ReactNode } from 'react';
+import React, { createContext, useContext, useState } from 'react';
+
 import Toast from '../components/UI/Toast';
 
 interface ToastContextType {

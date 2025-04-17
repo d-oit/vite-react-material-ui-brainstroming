@@ -1,8 +1,8 @@
+import ChatIcon from '@mui/icons-material/Chat';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import SaveIcon from '@mui/icons-material/Save';
-import ChatIcon from '@mui/icons-material/Chat';
 import { Box, IconButton, Paper, TextField, Typography } from '@mui/material';
 import React, { memo, useState } from 'react';
 import type { NodeProps } from 'reactflow';

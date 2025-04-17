@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
+import { useToast } from '../contexts/ToastContext';
 import { uploadProject, downloadProject } from '../lib/s3Service';
 import type { Project, Node, Edge } from '../types';
 import { ProjectTemplate } from '../types/project';
 import { hasProjectChanged } from '../utils/projectUtils';
-import { useToast } from '../contexts/ToastContext';
+
 import useDebounce from './useDebounce';
 
 interface UseProjectProps {
@@ -117,119 +118,123 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
   }, []);
 
   // Save project
-  const saveProject = useCallback(async (updatedProjectData?: Project): Promise<boolean> => {
-    // Use either the provided project or the current state
-    const projectToSave = updatedProjectData || project;
+  const saveProject = useCallback(
+    async (updatedProjectData?: Project): Promise<boolean> => {
+      // Use either the provided project or the current state
+      const projectToSave = updatedProjectData || project;
 
-    if (projectToSave === null || !('id' in projectToSave) || !('nodes' in projectToSave)) {
-      const errorMessage = 'Cannot save invalid project';
-      console.error(errorMessage);
-      setError(errorMessage);
-      return false;
-    }
-
-    // Only set isSaving to true for operations that will take time
-    // For quick saves, we'll avoid the UI state change to prevent flickering
-    const saveStartTime = performance.now();
-    let savingIndicatorTimeout: NodeJS.Timeout | null = null;
-
-    // Only show saving indicator if operation takes longer than 300ms
-    savingIndicatorTimeout = setTimeout(() => {
-      setIsSaving(true);
-    }, 300);
-
-    setError(null); // Clear any previous errors
-
-    try {
-      // Update the timestamps
-      const updatedProject: Project = {
-        ...projectToSave,
-        updatedAt: new Date().toISOString(),
-      };
-
-      // If an updated project is provided, update the state
-      // We do this after creating updatedProject to ensure timestamps are updated
-      if (updatedProjectData) {
-        setProject(updatedProject);
+      if (projectToSave === null || !('id' in projectToSave) || !('nodes' in projectToSave)) {
+        const errorMessage = 'Cannot save invalid project';
+        console.error(errorMessage);
+        setError(errorMessage);
+        return false;
       }
 
-      // Only try to save to S3 if S3 is enabled and project has S3 sync enabled
-      let s3SaveSuccessful = false;
+      // Only set isSaving to true for operations that will take time
+      // For quick saves, we'll avoid the UI state change to prevent flickering
+      const saveStartTime = performance.now();
+      let savingIndicatorTimeout: NodeJS.Timeout | null = null;
 
-      // Import the isS3Enabled function to check if S3 is enabled
-      const { isS3Enabled } = await import('../lib/s3Service');
+      // Only show saving indicator if operation takes longer than 300ms
+      savingIndicatorTimeout = setTimeout(() => {
+        setIsSaving(true);
+      }, 300);
 
-      if (isS3Enabled() && updatedProject.syncSettings?.enableS3Sync === true) {
-        try {
-          await uploadProject(updatedProject);
-          s3SaveSuccessful = true;
-        } catch (s3Error) {
-          // If the error is about S3 not being configured, just log it
-          if (s3Error instanceof Error && s3Error.message.includes('S3 not configured')) {
-            console.log('S3 not configured, saving only to local storage');
-          } else {
-            // For other errors, log them but don't fail the operation
-            console.warn('Error uploading to S3:', s3Error);
+      setError(null); // Clear any previous errors
+
+      try {
+        // Update the timestamps
+        const updatedProject: Project = {
+          ...projectToSave,
+          updatedAt: new Date().toISOString(),
+        };
+
+        // If an updated project is provided, update the state
+        // We do this after creating updatedProject to ensure timestamps are updated
+        if (updatedProjectData) {
+          setProject(updatedProject);
+        }
+
+        // Only try to save to S3 if S3 is enabled and project has S3 sync enabled
+        let s3SaveSuccessful = false;
+
+        // Import the isS3Enabled function to check if S3 is enabled
+        const { isS3Enabled } = await import('../lib/s3Service');
+
+        if (isS3Enabled() && updatedProject.syncSettings?.enableS3Sync === true) {
+          try {
+            await uploadProject(updatedProject);
+            s3SaveSuccessful = true;
+          } catch (s3Error) {
+            // If the error is about S3 not being configured, just log it
+            if (s3Error instanceof Error && s3Error.message.includes('S3 not configured')) {
+              console.log('S3 not configured, saving only to local storage');
+            } else {
+              // For other errors, log them but don't fail the operation
+              console.warn('Error uploading to S3:', s3Error);
+            }
+          }
+        } else {
+          // Log that we're skipping S3 upload
+          if (!isS3Enabled()) {
+            console.log('S3 is not enabled, saving only to local storage');
+          } else if (updatedProject.syncSettings?.enableS3Sync !== true) {
+            console.log('S3 sync is not enabled for this project, saving only to local storage');
           }
         }
-      } else {
-        // Log that we're skipping S3 upload
-        if (!isS3Enabled()) {
-          console.log('S3 is not enabled, saving only to local storage');
-        } else if (updatedProject.syncSettings?.enableS3Sync !== true) {
-          console.log('S3 sync is not enabled for this project, saving only to local storage');
+
+        // Always save to local storage
+        await saveProjectToLocalStorage(updatedProject);
+
+        // Only update the project state if it wasn't already updated above
+        if (!updatedProjectData) {
+          setProject(updatedProject);
         }
+
+        // Return success with a warning if S3 save failed but local save succeeded
+        if (!s3SaveSuccessful && updatedProject.syncSettings.enableS3Sync) {
+          console.warn('Project saved locally but not to S3. Will retry on next save.');
+        }
+
+        // Clear the timeout to prevent setting isSaving if operation was fast
+        if (savingIndicatorTimeout) {
+          clearTimeout(savingIndicatorTimeout);
+        }
+
+        // Only update isSaving state if it was set to true
+        if (performance.now() - saveStartTime >= 300) {
+          setIsSaving(false);
+        }
+
+        // Show toast notification for successful save, but not too frequently
+        const currentTime = Date.now();
+        if (currentTime - lastSaveTimeRef.current > 5000) {
+          // Only show toast every 5 seconds at most
+          showToast('Project saved successfully', 'success', 2000);
+          lastSaveTimeRef.current = currentTime;
+        }
+
+        return true;
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        console.error('Failed to save project:', err);
+        setError(`Failed to save project: ${errorMessage}`);
+
+        // Clear the timeout to prevent setting isSaving if operation was fast
+        if (savingIndicatorTimeout) {
+          clearTimeout(savingIndicatorTimeout);
+        }
+
+        // Only update isSaving state if it was set to true
+        if (performance.now() - saveStartTime >= 300) {
+          setIsSaving(false);
+        }
+
+        return false;
       }
-
-      // Always save to local storage
-      await saveProjectToLocalStorage(updatedProject);
-
-      // Only update the project state if it wasn't already updated above
-      if (!updatedProjectData) {
-        setProject(updatedProject);
-      }
-
-      // Return success with a warning if S3 save failed but local save succeeded
-      if (!s3SaveSuccessful && updatedProject.syncSettings.enableS3Sync) {
-        console.warn('Project saved locally but not to S3. Will retry on next save.');
-      }
-
-      // Clear the timeout to prevent setting isSaving if operation was fast
-      if (savingIndicatorTimeout) {
-        clearTimeout(savingIndicatorTimeout);
-      }
-
-      // Only update isSaving state if it was set to true
-      if (performance.now() - saveStartTime >= 300) {
-        setIsSaving(false);
-      }
-
-      // Show toast notification for successful save, but not too frequently
-      const currentTime = Date.now();
-      if (currentTime - lastSaveTimeRef.current > 5000) { // Only show toast every 5 seconds at most
-        showToast('Project saved successfully', 'success', 2000);
-        lastSaveTimeRef.current = currentTime;
-      }
-
-      return true;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      console.error('Failed to save project:', err);
-      setError(`Failed to save project: ${errorMessage}`);
-
-      // Clear the timeout to prevent setting isSaving if operation was fast
-      if (savingIndicatorTimeout) {
-        clearTimeout(savingIndicatorTimeout);
-      }
-
-      // Only update isSaving state if it was set to true
-      if (performance.now() - saveStartTime >= 300) {
-        setIsSaving(false);
-      }
-
-      return false;
-    }
-  }, [project]);
+    },
+    [project]
+  );
 
   // Helper function to save project to local storage
   const saveProjectToLocalStorage = async (projectToSave: Project): Promise<void> => {
@@ -510,7 +515,15 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
 
     // Clean up on unmount or when dependencies change
     return () => cancelDebouncedAutoSave();
-  }, [project, autoSave, loading, isSaving, hasChanges, debouncedAutoSave, cancelDebouncedAutoSave]);
+  }, [
+    project,
+    autoSave,
+    loading,
+    isSaving,
+    hasChanges,
+    debouncedAutoSave,
+    cancelDebouncedAutoSave,
+  ]);
 
   // Load project on mount
   useEffect(() => {
@@ -537,4 +550,3 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
     removeEdge,
   };
 };
-

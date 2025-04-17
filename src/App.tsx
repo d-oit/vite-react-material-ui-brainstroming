@@ -1,11 +1,7 @@
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { Navigate, Route, Routes, BrowserRouter } from 'react-router-dom';
 import type { PaletteMode, ThemeOptions } from '@mui/material';
-import { ThemeProvider, CssBaseline, createTheme, Button, Snackbar, Alert } from '@mui/material';
-import { useState, useMemo, useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-
-// Import our demo page
-// Icons are imported but not used in this file
-// They might be used in child components or for future implementation
+import { Alert, Button, CssBaseline, createTheme, Snackbar, ThemeProvider } from '@mui/material';
 import { registerSW } from 'virtual:pwa-register';
 
 // Import all styles
@@ -153,7 +149,7 @@ const AppWithTheme = () => {
     try {
       if (typeof updateSWFunction === 'function') {
         try {
-          updateSWFunction(true);
+          void updateSWFunction(true);
         } catch (error) {
           console.error('Failed to update application:', error);
           void loggerService.error(
@@ -195,7 +191,7 @@ const AppWithTheme = () => {
             indexedDBService.init().catch(error => {
               console.error('IndexedDB initialization failed:', error);
               return false;
-            })
+            }),
           ]);
 
           // Extract results
@@ -230,7 +226,10 @@ const AppWithTheme = () => {
             offlineService.startAutoSync();
           } catch (error) {
             console.error('Failed to initialize offline service:', error);
-            void loggerService.error('Failed to initialize offline service', error instanceof Error ? error : new Error(String(error)));
+            void loggerService.error(
+              'Failed to initialize offline service',
+              error instanceof Error ? error : new Error(String(error))
+            );
           }
 
           // Register service worker
@@ -251,7 +250,10 @@ const AppWithTheme = () => {
             });
           } catch (error) {
             console.error('Failed to register service worker:', error);
-            void loggerService.error('Failed to register service worker', error instanceof Error ? error : new Error(String(error)));
+            void loggerService.error(
+              'Failed to register service worker',
+              error instanceof Error ? error : new Error(String(error))
+            );
           }
         };
 
@@ -325,7 +327,10 @@ const AppWithTheme = () => {
                     <Route
                       path="/settings"
                       element={
-                        <SettingsPage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
+                        <SettingsPage
+                          onThemeToggle={toggleThemeMode}
+                          isDarkMode={mode === 'dark'}
+                        />
                       }
                     />
                     <Route

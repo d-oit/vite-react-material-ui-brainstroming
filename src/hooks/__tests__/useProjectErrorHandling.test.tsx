@@ -1,12 +1,15 @@
 import { renderHook, act } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
 import * as React from 'react';
-import ToastProviderWrapper from '../../tests/wrappers/ToastProviderWrapper';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 
-import { useProject } from '../useProject';
-import { hasProjectChanged } from '../../utils/projectUtils';
+import { uploadProject, downloadProject } from '../../lib/s3Service';
+import ToastProviderWrapper from '../../tests/wrappers/ToastProviderWrapper';
 import type { Project } from '../../types';
 import { ProjectTemplate } from '../../types/project';
+import { hasProjectChanged } from '../../utils/projectUtils';
+import { useProject } from '../useProject';
+
+// Import the mocked modules
 
 // Define mockProject at the top level since vi.mock is hoisted
 const mockProject: Project = {
@@ -39,7 +42,7 @@ vi.mock('../../services/ProjectService', () => {
     default: {
       getProject: vi.fn().mockResolvedValue(mockProject),
       updateProject: vi.fn().mockResolvedValue(true),
-    }
+    },
   };
 });
 
@@ -47,9 +50,6 @@ vi.mock('../../services/ProjectService', () => {
 vi.mock('../../utils/projectUtils', () => ({
   hasProjectChanged: vi.fn(),
 }));
-
-// Import the mocked modules
-import { uploadProject, downloadProject } from '../../lib/s3Service';
 
 describe('useProject error handling', () => {
   beforeEach(() => {
@@ -71,10 +71,14 @@ describe('useProject error handling', () => {
     vi.mocked(uploadProject).mockRejectedValueOnce(new Error('S3 upload failed'));
 
     // Render the hook
-    const { result } = renderHook(() => useProject({
-      projectId: 'test-project-id',
-      autoSave: true
-    }), { wrapper: ToastProviderWrapper });
+    const { result } = renderHook(
+      () =>
+        useProject({
+          projectId: 'test-project-id',
+          autoSave: true,
+        }),
+      { wrapper: ToastProviderWrapper }
+    );
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -83,7 +87,7 @@ describe('useProject error handling', () => {
     await act(async () => {
       const saveResult = await result.current.saveProject({
         ...mockProject,
-        name: 'Updated Name'
+        name: 'Updated Name',
       });
 
       // Should still return true because local save succeeds
@@ -97,13 +101,19 @@ describe('useProject error handling', () => {
   it('should handle local storage errors and set error state', async () => {
     // Mock ProjectService updateProject to fail
     const projectService = await import('../../services/ProjectService');
-    vi.mocked(projectService.default.updateProject).mockRejectedValueOnce(new Error('Local storage error'));
+    vi.mocked(projectService.default.updateProject).mockRejectedValueOnce(
+      new Error('Local storage error')
+    );
 
     // Render the hook
-    const { result } = renderHook(() => useProject({
-      projectId: 'test-project-id',
-      autoSave: true
-    }), { wrapper: ToastProviderWrapper });
+    const { result } = renderHook(
+      () =>
+        useProject({
+          projectId: 'test-project-id',
+          autoSave: true,
+        }),
+      { wrapper: ToastProviderWrapper }
+    );
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -112,7 +122,7 @@ describe('useProject error handling', () => {
     await act(async () => {
       const saveResult = await result.current.saveProject({
         ...mockProject,
-        name: 'Updated Name'
+        name: 'Updated Name',
       });
 
       // Should return false because save failed
@@ -148,13 +158,19 @@ describe('useProject error handling', () => {
 
     // Mock ProjectService updateProject to fail
     const projectService = await import('../../services/ProjectService');
-    vi.mocked(projectService.default.updateProject).mockRejectedValueOnce(new Error('Auto-save error'));
+    vi.mocked(projectService.default.updateProject).mockRejectedValueOnce(
+      new Error('Auto-save error')
+    );
 
     // Render the hook
-    const { result } = renderHook(() => useProject({
-      projectId: 'test-project-id',
-      autoSave: true
-    }), { wrapper: ToastProviderWrapper });
+    const { result } = renderHook(
+      () =>
+        useProject({
+          projectId: 'test-project-id',
+          autoSave: true,
+        }),
+      { wrapper: ToastProviderWrapper }
+    );
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -163,7 +179,7 @@ describe('useProject error handling', () => {
     await act(async () => {
       const saveResult = await result.current.saveProject({
         ...mockProject,
-        name: 'Updated Name'
+        name: 'Updated Name',
       });
 
       // Should return false because save failed
@@ -189,10 +205,14 @@ describe('useProject error handling', () => {
       .mockResolvedValueOnce(true);
 
     // Render the hook
-    const { result } = renderHook(() => useProject({
-      projectId: 'test-project-id',
-      autoSave: true
-    }), { wrapper: ToastProviderWrapper });
+    const { result } = renderHook(
+      () =>
+        useProject({
+          projectId: 'test-project-id',
+          autoSave: true,
+        }),
+      { wrapper: ToastProviderWrapper }
+    );
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -201,7 +221,7 @@ describe('useProject error handling', () => {
     await act(async () => {
       const saveResult = await result.current.saveProject({
         ...mockProject,
-        name: 'Updated Name'
+        name: 'Updated Name',
       });
 
       // Should return false because save failed
@@ -229,15 +249,21 @@ describe('useProject error handling', () => {
   it('should handle project loading errors', async () => {
     // Mock ProjectService getProject to fail
     const projectService = await import('../../services/ProjectService');
-    vi.mocked(projectService.default.getProject).mockRejectedValueOnce(new Error('Failed to load project'));
+    vi.mocked(projectService.default.getProject).mockRejectedValueOnce(
+      new Error('Failed to load project')
+    );
 
     // Mock S3 download to fail
     vi.mocked(downloadProject).mockRejectedValueOnce(new Error('S3 download failed'));
 
     // Render the hook with a non-existent project ID to trigger an error
-    const { result } = renderHook(() => useProject({
-      projectId: 'non-existent-id'
-    }), { wrapper: ToastProviderWrapper });
+    const { result } = renderHook(
+      () =>
+        useProject({
+          projectId: 'non-existent-id',
+        }),
+      { wrapper: ToastProviderWrapper }
+    );
 
     // Wait for the project to load (and fail)
     await vi.runAllTimersAsync();
@@ -256,9 +282,13 @@ describe('useProject error handling', () => {
     );
 
     // Render the hook
-    const { result } = renderHook(() => useProject({
-      projectId: 'test-project-id'
-    }), { wrapper: ToastProviderWrapper });
+    const { result } = renderHook(
+      () =>
+        useProject({
+          projectId: 'test-project-id',
+        }),
+      { wrapper: ToastProviderWrapper }
+    );
 
     // Wait for the project to load
     await vi.runAllTimersAsync();

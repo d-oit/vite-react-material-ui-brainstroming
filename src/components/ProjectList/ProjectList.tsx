@@ -240,9 +240,9 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
           }}
         >
           {projects.map(project => (
-            <Box 
+            <Box
               key={project.id}
-              sx={{ 
+              sx={{
                 height: 220, // Fixed height for all cards
                 width: '100%',
               }}
@@ -303,5 +303,3 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
 };
 
 export default ProjectList;
-
-

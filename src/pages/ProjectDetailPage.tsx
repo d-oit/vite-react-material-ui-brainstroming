@@ -5,7 +5,6 @@ import {
   Add as AddIcon,
   Edit as EditIcon,
 } from '@mui/icons-material';
-import StatusIndicator from '../components/UI/StatusIndicator';
 import {
   Box,
   Typography,
@@ -25,7 +24,6 @@ import {
 } from '@mui/material';
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { useI18n } from '../contexts/I18nContext';
 
 import KeyboardShortcutsHandler from '../components/BrainstormFlow/KeyboardShortcutsHandler';
 import { ChatInterface } from '../components/Chat/ChatInterface';
@@ -33,6 +31,8 @@ import HelpOverlay from '../components/Help/HelpOverlay';
 import AppShell from '../components/Layout/AppShell';
 import { ProjectBrainstormingSection } from '../components/Project/ProjectBrainstormingSection';
 import ProjectSettingsSection from '../components/Project/ProjectSettingsSection';
+import StatusIndicator from '../components/UI/StatusIndicator';
+import { useI18n } from '../contexts/I18nContext';
 import { useProject } from '../hooks/useProject';
 import type { Node, Edge, Project } from '../types';
 import type { NodeSuggestion } from '../types/chat';
@@ -75,10 +75,11 @@ const ProjectDetailPage = () => {
   const [editedName, setEditedName] = useState('');
   const [editedDescription, setEditedDescription] = useState('');
 
-  const { project, loading, error, isSaving, hasChanges, saveProject, createNewVersion } = useProject({
-    projectId,
-    autoSave: true,
-  });
+  const { project, loading, error, isSaving, hasChanges, saveProject, createNewVersion } =
+    useProject({
+      projectId,
+      autoSave: true,
+    });
 
   useEffect(() => {
     if (project !== null && project !== undefined) {
@@ -176,10 +177,20 @@ const ProjectDetailPage = () => {
 
   if (loading) {
     return (
-      <AppShell title={t('project.title')} onThemeToggle={() => { }} isDarkMode={theme.palette.mode === 'dark'}>
+      <AppShell
+        title={t('project.title')}
+        onThemeToggle={() => {}}
+        isDarkMode={theme.palette.mode === 'dark'}
+      >
         <Container maxWidth="lg">
           <Box
-            sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', position: 'relative' }}
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '80vh',
+              position: 'relative',
+            }}
           >
             <StatusIndicator
               status="loading"
@@ -199,7 +210,11 @@ const ProjectDetailPage = () => {
     project === undefined
   ) {
     return (
-      <AppShell title={t('project.title')} onThemeToggle={() => { }} isDarkMode={theme.palette.mode === 'dark'}>
+      <AppShell
+        title={t('project.title')}
+        onThemeToggle={() => {}}
+        isDarkMode={theme.palette.mode === 'dark'}
+      >
         <Container maxWidth="lg">
           <Paper sx={{ p: 3 }}>
             <Typography color="error" variant="h6">
@@ -215,7 +230,7 @@ const ProjectDetailPage = () => {
   return (
     <AppShell
       title={project.name}
-      onThemeToggle={() => { }}
+      onThemeToggle={() => {}}
       isDarkMode={theme.palette.mode === 'dark'}
     >
       {/* Status indicators */}
@@ -229,12 +244,7 @@ const ProjectDetailPage = () => {
         />
       )}
       {error && (
-        <StatusIndicator
-          status="error"
-          message={error}
-          position="top-right"
-          size="small"
-        />
+        <StatusIndicator status="error" message={error} position="top-right" size="small" />
       )}
       <Box
         sx={{
@@ -327,7 +337,7 @@ const ProjectDetailPage = () => {
             disabled={isSaving || !hasChanges}
             size={isMobile ? 'small' : 'medium'}
             sx={{
-              minWidth: '90px',  // Fixed width to prevent layout shifts
+              minWidth: '90px', // Fixed width to prevent layout shifts
               transition: 'all 0.2s ease-in-out',
               position: 'relative',
               '& .MuiCircularProgress-root': {
@@ -339,7 +349,7 @@ const ProjectDetailPage = () => {
                 opacity: isSaving ? 0 : 1,
                 position: isSaving ? 'absolute' : 'relative',
                 left: isSaving ? '16px' : 'auto',
-              }
+              },
             }}
           >
             {hasChanges ? `${t('common.save')}*` : t('common.save')}
@@ -437,8 +447,8 @@ const ProjectDetailPage = () => {
           ) : (
             <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
               {project.description !== null &&
-                project.description !== undefined &&
-                project.description !== ''
+              project.description !== undefined &&
+              project.description !== ''
                 ? project.description
                 : t('project.noDescriptionProvided')}
             </Typography>
@@ -609,15 +619,20 @@ const ProjectDetailPage = () => {
             position: 'relative',
             '&:disabled': {
               opacity: 0.6,
-            }
+            },
           }}
         >
-          {isSaving ?
-            <CircularProgress size={24} sx={{
-              position: 'absolute',
-              transition: 'opacity 0.2s ease-in-out'
-            }} /> :
-            <SaveIcon />}
+          {isSaving ? (
+            <CircularProgress
+              size={24}
+              sx={{
+                position: 'absolute',
+                transition: 'opacity 0.2s ease-in-out',
+              }}
+            />
+          ) : (
+            <SaveIcon />
+          )}
         </IconButton>
       </Box>
 
@@ -694,13 +709,3 @@ const ProjectDetailPage = () => {
 };
 
 export default ProjectDetailPage;
-
-
-
-
-
-
-
-
-
-

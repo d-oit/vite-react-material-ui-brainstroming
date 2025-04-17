@@ -26,10 +26,12 @@ vi.mock('../../components/BrainstormFlow/NodeEditDialog', () => ({
         <h2>{dialogTitle}</h2>
         <div data-testid="edit-form">
           <span>Editing node: {node?.id}</span>
-          <button type="button" onClick={onClose} data-testid="close-edit-dialog">Close</button>
+          <button type="button" onClick={onClose} data-testid="close-edit-dialog">
+            Close
+          </button>
         </div>
       </div>
-    ) : null
+    ) : null,
 }));
 
 vi.mock('../../components/DeleteConfirmationDialog', () => ({
@@ -52,11 +54,15 @@ vi.mock('../../components/DeleteConfirmationDialog', () => ({
           </label>
         </div>
         <div>
-          <button type="button" onClick={onClose}>Cancel</button>
-          <button type="button" onClick={onConfirm} data-testid="confirm-delete">Delete</button>
+          <button type="button" onClick={onClose}>
+            Cancel
+          </button>
+          <button type="button" onClick={onConfirm} data-testid="confirm-delete">
+            Delete
+          </button>
         </div>
       </div>
-    ) : null
+    ) : null,
 }));
 
 vi.mock('../../features/brainstorming/LLMChatPanel', () => ({
@@ -65,10 +71,14 @@ vi.mock('../../features/brainstorming/LLMChatPanel', () => ({
       <div role="dialog" aria-label="Chat" data-testid="chat-panel-dialog">
         <h2>Chat Panel</h2>
         <textarea placeholder="Type your message..." data-testid="chat-input" />
-        <button type="button" data-testid="send-button">Send</button>
-        <button type="button" onClick={onClose} data-testid="close-button">Close</button>
+        <button type="button" data-testid="send-button">
+          Send
+        </button>
+        <button type="button" onClick={onClose} data-testid="close-button">
+          Close
+        </button>
       </div>
-    ) : null
+    ) : null,
 }));
 
 vi.mock('reactflow', async () => {
@@ -78,14 +88,24 @@ vi.mock('reactflow', async () => {
   const NodeComponent = ({ id, data }: { id: string; data?: { label?: string } }) => (
     <div key={id} data-testid={`node-${id}`} onClick={() => mockNodes.get(id)?.onClick?.()}>
       {data?.label}
-      <button type="button" aria-label="Delete node" data-testid={`delete-${id}`} onClick={(e) => {
-        e.stopPropagation();
-        mockNodes.get(id)?.onDelete?.();
-      }} />
-      <button type="button" aria-label="Chat panel" data-testid={`chat-${id}`} onClick={(e) => {
-        e.stopPropagation();
-        mockNodes.get(id)?.onChat?.();
-      }} />
+      <button
+        type="button"
+        aria-label="Delete node"
+        data-testid={`delete-${id}`}
+        onClick={e => {
+          e.stopPropagation();
+          mockNodes.get(id)?.onDelete?.();
+        }}
+      />
+      <button
+        type="button"
+        aria-label="Chat panel"
+        data-testid={`chat-${id}`}
+        onClick={e => {
+          e.stopPropagation();
+          mockNodes.get(id)?.onChat?.();
+        }}
+      />
     </div>
   );
 
@@ -99,29 +119,31 @@ vi.mock('reactflow', async () => {
     onNodeDelete?: (node: any) => void;
   }
 
-  const MockReactFlow = vi.fn().mockImplementation(({ children, nodes, onNodeClick, onNodeDelete }: ReactFlowProps) => {
-    nodes?.forEach((node: any) => {
-      mockNodes.set(node.id, {
-        onClick: () => {
-          // Simulate node click for edit
-          if (node.data?.onEdit) {
-            node.data.onEdit(node);
-          } else {
-            onNodeClick?.(undefined, node);
-          }
-        },
-        onDelete: () => {
-          // Simulate delete action
-          if (node.data?.onDelete) {
-            node.data.onDelete(node);
-          } else {
-            mockDispatch({ type: 'SHOW_DELETE_DIALOG', node });
-            onNodeDelete?.(node);
-          }
-          // Directly render the DeleteConfirmationDialog
-          const deleteDialog = document.createElement('div');
-          deleteDialog.setAttribute('data-testid', 'delete-confirmation-dialog');
-          deleteDialog.innerHTML = `
+  const MockReactFlow = vi
+    .fn()
+    .mockImplementation(({ children, nodes, onNodeClick, onNodeDelete }: ReactFlowProps) => {
+      nodes?.forEach((node: any) => {
+        mockNodes.set(node.id, {
+          onClick: () => {
+            // Simulate node click for edit
+            if (node.data?.onEdit) {
+              node.data.onEdit(node);
+            } else {
+              onNodeClick?.(undefined, node);
+            }
+          },
+          onDelete: () => {
+            // Simulate delete action
+            if (node.data?.onDelete) {
+              node.data.onDelete(node);
+            } else {
+              mockDispatch({ type: 'SHOW_DELETE_DIALOG', node });
+              onNodeDelete?.(node);
+            }
+            // Directly render the DeleteConfirmationDialog
+            const deleteDialog = document.createElement('div');
+            deleteDialog.setAttribute('data-testid', 'delete-confirmation-dialog');
+            deleteDialog.innerHTML = `
             <div id="delete-confirmation-dialog-title">Delete Confirmation</div>
             <div id="delete-confirmation-dialog-description">
               Are you sure you want to delete this node? This action cannot be undone.
@@ -137,41 +159,39 @@ vi.mock('reactflow', async () => {
               <button type="button" data-testid="confirm-delete">Delete</button>
             </div>
           `;
-          document.body.appendChild(deleteDialog);
-        },
-        onChat: () => {
-          // Simulate chat action
-          if (node.data?.onChat) {
-            node.data.onChat(node);
-          } else {
-            mockDispatch({ type: 'SHOW_CHAT_PANEL', node });
-            onNodeClick?.(undefined, node);
-          }
-          // Directly render the chat panel dialog
-          const chatDialog = document.createElement('div');
-          chatDialog.setAttribute('role', 'dialog');
-          chatDialog.setAttribute('aria-label', 'Chat');
-          chatDialog.setAttribute('data-testid', 'chat-panel-dialog');
-          chatDialog.innerHTML = `
+            document.body.appendChild(deleteDialog);
+          },
+          onChat: () => {
+            // Simulate chat action
+            if (node.data?.onChat) {
+              node.data.onChat(node);
+            } else {
+              mockDispatch({ type: 'SHOW_CHAT_PANEL', node });
+              onNodeClick?.(undefined, node);
+            }
+            // Directly render the chat panel dialog
+            const chatDialog = document.createElement('div');
+            chatDialog.setAttribute('role', 'dialog');
+            chatDialog.setAttribute('aria-label', 'Chat');
+            chatDialog.setAttribute('data-testid', 'chat-panel-dialog');
+            chatDialog.innerHTML = `
             <h2>Chat Panel</h2>
             <textarea placeholder="Type your message..." data-testid="chat-input"></textarea>
             <button type="button" data-testid="send-button">Send</button>
             <button type="button" data-testid="close-button">Close</button>
           `;
-          document.body.appendChild(chatDialog);
-        },
+            document.body.appendChild(chatDialog);
+          },
+        });
       });
-    });
 
-    return (
-      <div data-testid="react-flow">
-        {nodes?.map((node: any) => (
-          <NodeComponent key={node.id} id={node.id} data={node.data} />
-        ))}
-        {children}
-      </div>
-    );
-  });
+      return (
+        <div data-testid="react-flow">
+          {nodes?.map((node: any) => <NodeComponent key={node.id} id={node.id} data={node.data} />)}
+          {children}
+        </div>
+      );
+    });
 
   const mockComponents = {
     Panel: vi.fn().mockImplementation(() => <div data-testid="panel" />),
@@ -354,13 +374,16 @@ describe('EnhancedBrainstormFlow', () => {
     fireEvent.click(node);
 
     // Check that the edit dialog is opened
-    await waitFor(() => {
-      const dialog = screen.getByRole('dialog');
-      expect(dialog).toBeInTheDocument();
+    await waitFor(
+      () => {
+        const dialog = screen.getByRole('dialog');
+        expect(dialog).toBeInTheDocument();
 
-      // Check dialog content
-      expect(screen.getByText('Edit Node')).toBeInTheDocument();
-    }, { timeout: 5000 });
+        // Check dialog content
+        expect(screen.getByText('Edit Node')).toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
   });
 
   it('shows a confirmation dialog when a node is deleted', async () => {
@@ -390,16 +413,19 @@ describe('EnhancedBrainstormFlow', () => {
     fireEvent.click(deleteButton);
 
     // Check that the confirmation dialog is opened
-    await waitFor(() => {
-      const dialog = screen.getByTestId('delete-confirmation-dialog');
-      expect(dialog).toBeInTheDocument();
+    await waitFor(
+      () => {
+        const dialog = screen.getByTestId('delete-confirmation-dialog');
+        expect(dialog).toBeInTheDocument();
 
-      // Check dialog content
-      const confirmButton = screen.getByTestId('confirm-delete');
-      const cancelButton = screen.getByRole('button', { name: /cancel/i });
-      expect(confirmButton).toBeInTheDocument();
-      expect(cancelButton).toBeInTheDocument();
-    }, { timeout: 5000 });
+        // Check dialog content
+        const confirmButton = screen.getByTestId('confirm-delete');
+        const cancelButton = screen.getByRole('button', { name: /cancel/i });
+        expect(confirmButton).toBeInTheDocument();
+        expect(cancelButton).toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
   });
 
   it('shows the chat panel when the chat button is clicked', async () => {
@@ -429,15 +455,18 @@ describe('EnhancedBrainstormFlow', () => {
     fireEvent.click(chatButton);
 
     // Check that the chat panel is opened
-    await waitFor(() => {
-      const chatPanel = screen.getByTestId('chat-panel-dialog');
-      expect(chatPanel).toBeInTheDocument();
+    await waitFor(
+      () => {
+        const chatPanel = screen.getByTestId('chat-panel-dialog');
+        expect(chatPanel).toBeInTheDocument();
 
-      // Verify chat elements are present
-      expect(screen.getByTestId('chat-input')).toBeInTheDocument();
-      expect(screen.getByTestId('send-button')).toBeInTheDocument();
-      expect(screen.getByTestId('close-button')).toBeInTheDocument();
-    }, { timeout: 5000 });
+        // Verify chat elements are present
+        expect(screen.getByTestId('chat-input')).toBeInTheDocument();
+        expect(screen.getByTestId('send-button')).toBeInTheDocument();
+        expect(screen.getByTestId('close-button')).toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
   });
 
   it('adds the "Don\'t ask again" checkbox to the delete confirmation dialog', async () => {
@@ -488,13 +517,16 @@ describe('EnhancedBrainstormFlow', () => {
     fireEvent.click(deleteButton);
 
     // Wait for the confirmation dialog
-    await waitFor(() => {
-      const dialogs = screen.getAllByTestId('delete-confirmation-dialog');
-      expect(dialogs.length).toBeGreaterThan(0);
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        const dialogs = screen.getAllByTestId('delete-confirmation-dialog');
+        expect(dialogs.length).toBeGreaterThan(0);
+      },
+      { timeout: 5000 }
+    );
 
     // Check that the "Don't ask again" checkbox is rendered
-    const checkboxes = screen.getAllByTestId("dont-ask-again");
+    const checkboxes = screen.getAllByTestId('dont-ask-again');
     expect(checkboxes.length).toBeGreaterThan(0);
   });
 });

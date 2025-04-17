@@ -2,6 +2,9 @@ import { Box, Paper, Typography, Chip, CircularProgress, Snackbar, Alert } from 
 import { useState, useCallback, useMemo, useRef } from 'react';
 import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from 'reactflow'; // Use aliases for clarity
 
+import { useFocusManagement } from '../../hooks/useFocusManagement';
+import { useKeyboardNavigation } from '../../hooks/useKeyboardNavigation';
+import { useS3Sync } from '../../hooks/useS3Sync';
 import type { Node, Edge, NodeData } from '../../types'; // App-wide types
 import { NodeType } from '../../types/enums'; // App-wide enum
 import type { ProjectTemplate, SyncSettings } from '../../types/project';
@@ -9,9 +12,6 @@ import { templateConfigs } from '../../types/project';
 import { EnhancedBrainstormFlow } from '../BrainstormFlow/EnhancedBrainstormFlow';
 import type { CustomNode, CustomEdge, NodeData as CustomNodeData } from '../BrainstormFlow/types'; // Flow-specific types
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
-import { useKeyboardNavigation } from '../../hooks/useKeyboardNavigation';
-import { useFocusManagement } from '../../hooks/useFocusManagement';
-import { useS3Sync } from '../../hooks/useS3Sync';
 
 // --- Mapping Functions ---
 
@@ -41,7 +41,8 @@ const mapCustomNodeToNode = (customNode: CustomNode, existingNodes: Node[]): Nod
     type: NodeType.IDEA,
   };
   const nodeTypeKey = customNode.data.type?.toUpperCase();
-  const mappedType = NodeType[nodeTypeKey as keyof typeof NodeType] ?? existingData.type ?? NodeType.IDEA;
+  const mappedType =
+    NodeType[nodeTypeKey as keyof typeof NodeType] ?? existingData.type ?? NodeType.IDEA;
 
   return {
     id: customNode.id,
@@ -92,43 +93,124 @@ export const ProjectBrainstormingSection = ({
   const flowEdges = useMemo(() => initialEdges as CustomEdge[], [initialEdges]);
 
   const { updateNodeSelection: _updateNodeSelection } = useKeyboardNavigation(
-    containerRef, nodes,
-    (nodeId: string) => { /* ... */ }
+    containerRef,
+    nodes,
+    (nodeId: string) => {
+      /* ... */
+    }
   );
   const { announceFocusChange } = useFocusManagement({
-    containerRef, nodes,
-    onFocusChange: (nodeId: string | null) => { /* ... */ }
+    containerRef,
+    nodes,
+    onFocusChange: (nodeId: string | null) => {
+      /* ... */
+    },
   });
   const { sync, syncStatus, lastSyncTime } = useS3Sync({
-    projectId, syncSettings, data: { nodes, edges },
+    projectId,
+    syncSettings,
+    data: { nodes, edges },
   });
 
   const handleSaveFromFlow = useCallback(
     (updatedFlowNodes: CustomNode[], updatedFlowEdges: CustomEdge[]) => {
-      const updatedNodes = updatedFlowNodes.map(customNode => mapCustomNodeToNode(customNode, nodes));
+      const updatedNodes = updatedFlowNodes.map(customNode =>
+        mapCustomNodeToNode(customNode, nodes)
+      );
       const updatedEdges = updatedFlowEdges as Edge[];
       setNodes(updatedNodes);
       setEdges(updatedEdges);
       onSave?.(updatedNodes, updatedEdges);
       const syncEnabled = Boolean(syncSettings?.enableS3Sync);
       const isSaveSync = syncSettings?.syncFrequency === 'onSave';
-      if (syncEnabled && isSaveSync) { void sync(); }
+      if (syncEnabled && isSaveSync) {
+        void sync();
+      }
     },
     [sync, syncSettings, onSave, nodes]
   );
 
   return (
     <>
-      <Paper sx={{ /* styles */ }} elevation={0} role="region" aria-label="Project Brainstorming">
+      <Paper
+        sx={
+          {
+            /* styles */
+          }
+        }
+        elevation={0}
+        role="region"
+        aria-label="Project Brainstorming"
+      >
         {/* Header */}
-        <Box sx={{ /* styles */ }}>
-          <Typography variant="subtitle2" color="text.secondary" sx={{ /* styles */ }}>
+        <Box
+          sx={
+            {
+              /* styles */
+            }
+          }
+        >
+          <Typography
+            variant="subtitle2"
+            color="text.secondary"
+            sx={
+              {
+                /* styles */
+              }
+            }
+          >
             Suggested workflow: {templateConfig.suggestedWorkflow.join(' → ')}
           </Typography>
-          <Box sx={{ /* styles */ }}>
-            {syncStatus === 'syncing' && ( <Box sx={{ /* styles */ }}> <CircularProgress size={14} /> <Typography variant="caption" sx={{ fontSize: '0.7rem' }}> Syncing... </Typography> </Box> )}
-            {syncStatus === 'error' && ( <Chip label="Sync Error" color="error" size="small" onClick={() => void sync()} aria-label="Sync failed. Click to retry." sx={{ /* styles */ }} /> )}
-            {syncStatus === 'success' && typeof lastSyncTime === 'string' && ( <Chip label={`Last synced: ${new Date(lastSyncTime).toLocaleTimeString()}`} color="success" size="small" aria-label={`Last successful sync at ${new Date(lastSyncTime).toLocaleTimeString()}`} sx={{ /* styles */ }} /> )}
+          <Box
+            sx={
+              {
+                /* styles */
+              }
+            }
+          >
+            {syncStatus === 'syncing' && (
+              <Box
+                sx={
+                  {
+                    /* styles */
+                  }
+                }
+              >
+                {' '}
+                <CircularProgress size={14} />{' '}
+                <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>
+                  {' '}
+                  Syncing...{' '}
+                </Typography>{' '}
+              </Box>
+            )}
+            {syncStatus === 'error' && (
+              <Chip
+                label="Sync Error"
+                color="error"
+                size="small"
+                onClick={() => void sync()}
+                aria-label="Sync failed. Click to retry."
+                sx={
+                  {
+                    /* styles */
+                  }
+                }
+              />
+            )}
+            {syncStatus === 'success' && typeof lastSyncTime === 'string' && (
+              <Chip
+                label={`Last synced: ${new Date(lastSyncTime).toLocaleTimeString()}`}
+                color="success"
+                size="small"
+                aria-label={`Last successful sync at ${new Date(lastSyncTime).toLocaleTimeString()}`}
+                sx={
+                  {
+                    /* styles */
+                  }
+                }
+              />
+            )}
           </Box>
         </Box>
 
@@ -138,13 +220,22 @@ export const ProjectBrainstormingSection = ({
             height: 'calc(100vh - 200px)', // Provide sufficient height for the flow
             width: '100%', // Full width
             minHeight: '500px', // Minimum height to ensure visibility
-            position: 'relative' // Required for ReactFlow to calculate dimensions correctly
+            position: 'relative', // Required for ReactFlow to calculate dimensions correctly
           }}
           ref={containerRef}
         >
           <ErrorBoundary
-            fallback={ <Box sx={{ p: 2 }}> <Alert severity="error"> An error occurred... </Alert> </Box> }
-            onReset={() => { setNodes(initialNodes); setEdges(initialEdges); setErrorMessage(null); }}
+            fallback={
+              <Box sx={{ p: 2 }}>
+                {' '}
+                <Alert severity="error"> An error occurred... </Alert>{' '}
+              </Box>
+            }
+            onReset={() => {
+              setNodes(initialNodes);
+              setEdges(initialEdges);
+              setErrorMessage(null);
+            }}
           >
             <EnhancedBrainstormFlow
               initialNodes={flowNodes}
@@ -158,8 +249,16 @@ export const ProjectBrainstormingSection = ({
       </Paper>
 
       {/* Snackbar */}
-      <Snackbar open={typeof errorMessage === 'string' && errorMessage.length > 0} autoHideDuration={6000} onClose={() => setErrorMessage(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} >
-        <Alert severity="error" onClose={() => setErrorMessage(null)}> {errorMessage} </Alert>
+      <Snackbar
+        open={typeof errorMessage === 'string' && errorMessage.length > 0}
+        autoHideDuration={6000}
+        onClose={() => setErrorMessage(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={() => setErrorMessage(null)}>
+          {' '}
+          {errorMessage}{' '}
+        </Alert>
       </Snackbar>
     </>
   );

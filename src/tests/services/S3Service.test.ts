@@ -46,13 +46,13 @@ vi.mock('aws-sdk', () => {
       config: {
         update: vi.fn(),
       },
-      Credentials: vi.fn((options) => options),
+      Credentials: vi.fn(options => options),
     },
     S3: vi.fn(() => mockS3Instance),
     config: {
       update: vi.fn(),
     },
-    Credentials: vi.fn((options) => options),
+    Credentials: vi.fn(options => options),
   };
 });
 

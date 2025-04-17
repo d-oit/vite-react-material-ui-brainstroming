@@ -1,11 +1,12 @@
 import { Box, Typography, Paper, CircularProgress, Tabs, Tab, Divider } from '@mui/material';
-import { useI18n } from '../contexts/I18nContext';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { GitHistoryViewer } from '@/components/GitHistory/GitHistoryViewer';
 import { MainLayout } from '@/components/Layout/MainLayout';
 import { useProject } from '@/hooks/useProject';
+
+import { useI18n } from '../contexts/I18nContext';
 
 interface TabPanelProps {
   children?: React.ReactNode;

@@ -1,5 +1,6 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
+import type { SelectChangeEvent } from '@mui/material';
 import {
   Box,
   Typography,
@@ -10,7 +11,6 @@ import {
   FormHelperText,
   Switch,
   Select,
-  SelectChangeEvent,
   MenuItem,
   InputLabel,
   Slider,
@@ -29,12 +29,12 @@ import {
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 
+import LanguageSelector from '../components/I18n/LanguageSelector';
 import AppShell from '../components/Layout/AppShell';
 import { ColorSchemeManager } from '../components/Settings/ColorSchemeManager';
 import { LogViewer } from '../components/Settings/LogViewer';
 import { NodePreferencesManager } from '../components/Settings/NodePreferencesManager';
 import { SettingsExportImport } from '../components/Settings/SettingsExportImport';
-import LanguageSelector from '../components/I18n/LanguageSelector';
 import { useI18n } from '../contexts/I18nContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { ThemeMode } from '../types';
@@ -163,12 +163,17 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
   };
 
   const handleSwitchChange =
-    (name: keyof Pick<ExtendedUserPreferences, 'autoSave' | 'autoBackup' | 'skipDeleteConfirmation'>) =>
-      (event: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = event.target.checked;
-        setPreferences({ ...preferences, [name]: newValue });
-        updateSettings({ [name]: newValue });
-      };
+    (
+      name: keyof Pick<
+        ExtendedUserPreferences,
+        'autoSave' | 'autoBackup' | 'skipDeleteConfirmation'
+      >
+    ) =>
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = event.target.checked;
+      setPreferences({ ...preferences, [name]: newValue });
+      updateSettings({ [name]: newValue });
+    };
 
   const handleFontSizeChange = (_event: Event, newValue: number | number[]) => {
     const fontSize = newValue as number;
@@ -309,7 +314,7 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
   return (
     <AppShell
       title={t('settings.title')}
-      onThemeToggle={onThemeToggle || (() => { })}
+      onThemeToggle={onThemeToggle || (() => {})}
       isDarkMode={isDarkMode || theme.palette.mode === 'dark'}
     >
       <Container
@@ -621,10 +626,3 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
 };
 
 export default SettingsPage;
-
-
-
-
-
-
-

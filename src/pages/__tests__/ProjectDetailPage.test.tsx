@@ -1,12 +1,12 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 
-import ProjectDetailPage from '../ProjectDetailPage';
 import { useProject } from '../../hooks/useProject';
 import type { Project } from '../../types';
 import { ProjectTemplate } from '../../types/project';
+import ProjectDetailPage from '../ProjectDetailPage';
 
 // Mock the useProject hook
 vi.mock('../../hooks/useProject', () => ({
@@ -15,11 +15,15 @@ vi.mock('../../hooks/useProject', () => ({
 
 // Mock the components used in ProjectDetailPage
 vi.mock('../../components/Layout/AppShell', () => ({
-  default: ({ children }: { children: React.ReactNode }) => <div data-testid="app-shell">{children}</div>,
+  default: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="app-shell">{children}</div>
+  ),
 }));
 
 vi.mock('../../components/Project/ProjectBrainstormingSection', () => ({
-  ProjectBrainstormingSection: () => <div data-testid="brainstorming-section">Brainstorming Section</div>,
+  ProjectBrainstormingSection: () => (
+    <div data-testid="brainstorming-section">Brainstorming Section</div>
+  ),
 }));
 
 vi.mock('../../components/Project/ProjectSettingsSection', () => ({
@@ -187,9 +191,8 @@ describe('ProjectDetailPage', () => {
     // Click the Save button - use a more specific selector
     const saveButtons = screen.getAllByRole('button', { name: /Save$/i });
     // Find the one that's not disabled and is contained in the project details section
-    const saveButton = saveButtons.find(button =>
-      !button.hasAttribute('disabled') &&
-      button.closest('.MuiPaper-root')
+    const saveButton = saveButtons.find(
+      button => !button.hasAttribute('disabled') && button.closest('.MuiPaper-root')
     );
 
     if (!saveButton) {
@@ -290,9 +293,8 @@ describe('ProjectDetailPage', () => {
     // Click the Save button (which calls handleSaveProjectDetails)
     const saveButtons = screen.getAllByRole('button', { name: /Save$/i });
     // Find the one that's not disabled and is contained in the project details section
-    const saveButton = saveButtons.find(button =>
-      !button.hasAttribute('disabled') &&
-      button.closest('.MuiPaper-root')
+    const saveButton = saveButtons.find(
+      button => !button.hasAttribute('disabled') && button.closest('.MuiPaper-root')
     );
 
     if (!saveButton) {
@@ -359,9 +361,8 @@ describe('ProjectDetailPage', () => {
     // Click the Save button
     const saveButtons = screen.getAllByRole('button', { name: /Save$/i });
     // Find the one that's not disabled and is contained in the project details section
-    const saveButton = saveButtons.find(button =>
-      !button.hasAttribute('disabled') &&
-      button.closest('.MuiPaper-root')
+    const saveButton = saveButtons.find(
+      button => !button.hasAttribute('disabled') && button.closest('.MuiPaper-root')
     );
 
     if (!saveButton) {

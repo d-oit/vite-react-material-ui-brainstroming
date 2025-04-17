@@ -177,12 +177,14 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
   const updateSettings = (newSettings: Partial<Settings>) => {
     setSettings(prevSettings => {
       // Ensure themeMode is a valid enum value if it's being updated
-      if (newSettings.themeMode !== undefined && 
-          !Object.values(ThemeMode).includes(newSettings.themeMode as ThemeMode)) {
+      if (
+        newSettings.themeMode !== undefined &&
+        !Object.values(ThemeMode).includes(newSettings.themeMode as ThemeMode)
+      ) {
         // Default to system if invalid value
         newSettings.themeMode = ThemeMode.SYSTEM;
       }
-      
+
       const updatedSettings = { ...prevSettings, ...newSettings };
 
       // Save to IndexedDB

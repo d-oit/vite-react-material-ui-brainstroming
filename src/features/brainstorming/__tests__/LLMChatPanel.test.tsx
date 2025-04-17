@@ -42,7 +42,9 @@ describe('LLMChatPanel', () => {
           return (
             <div role="dialog" aria-labelledby={ariaLabelledBy} data-testid="dialog">
               {children}
-              <button type="button" onClick={onClose} data-testid="close-dialog">Close</button>
+              <button type="button" onClick={onClose} data-testid="close-dialog">
+                Close
+              </button>
             </div>
           );
         },
@@ -67,7 +69,7 @@ describe('LLMChatPanel', () => {
           session={MOCK_SESSION}
           onInsightGenerated={mockOnInsightGenerated}
           open={true}
-          onClose={() => { }}
+          onClose={() => {}}
         />
       </I18nProvider>
     );

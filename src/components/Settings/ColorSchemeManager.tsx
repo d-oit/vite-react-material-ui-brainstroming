@@ -580,7 +580,7 @@ export const ColorSchemeManager = () => {
           width: '100%',
           justifyContent: 'center',
           maxWidth: '1200px',
-          mx: 'auto' // This centers the grid container itself
+          mx: 'auto', // This centers the grid container itself
         }}
       >
         {colorSchemes.map(scheme => (
@@ -633,5 +633,3 @@ export const ColorSchemeManager = () => {
     </Box>
   );
 };
-
-

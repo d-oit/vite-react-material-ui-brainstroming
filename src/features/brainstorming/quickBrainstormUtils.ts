@@ -1,6 +1,7 @@
-import { ProjectTemplate } from '../../types/project';
+import type { NavigateFunction } from 'react-router-dom';
+
 import projectService from '../../services/ProjectService';
-import { NavigateFunction } from 'react-router-dom';
+import { ProjectTemplate } from '../../types/project';
 
 /**
  * Handles creating or navigating to a Quick Brainstorm project

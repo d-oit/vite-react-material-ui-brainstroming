@@ -68,7 +68,11 @@ class PerformanceTracker {
   constructor() {
     // Check if LoggerService is available and has getInstance method
     try {
-      if (typeof LoggerService === 'object' && LoggerService !== null && 'getInstance' in LoggerService) {
+      if (
+        typeof LoggerService === 'object' &&
+        LoggerService !== null &&
+        'getInstance' in LoggerService
+      ) {
         this.logger = LoggerService.getInstance();
       } else if (typeof LoggerService === 'function' && 'getInstance' in LoggerService) {
         this.logger = LoggerService.getInstance();
@@ -79,7 +83,7 @@ class PerformanceTracker {
           error: console.error.bind(console),
           warn: console.warn.bind(console),
           debug: console.debug.bind(console),
-          log: console.log.bind(console)
+          log: console.log.bind(console),
         };
       }
     } catch (error) {
@@ -90,7 +94,7 @@ class PerformanceTracker {
         error: console.error.bind(console),
         warn: console.warn.bind(console),
         debug: console.debug.bind(console),
-        log: console.log.bind(console)
+        log: console.log.bind(console),
       };
     }
   }
@@ -123,9 +127,12 @@ class PerformanceTracker {
       id: uniqueId,
       name,
       category,
-      startTime: typeof performance !== 'undefined' && typeof performance.now === 'function'
-        ? performance.now()
-        : (typeof Date.now === 'function' ? Date.now() : new Date().getTime()),
+      startTime:
+        typeof performance !== 'undefined' && typeof performance.now === 'function'
+          ? performance.now()
+          : typeof Date.now === 'function'
+            ? Date.now()
+            : new Date().getTime(),
       metadata,
     };
 
@@ -149,9 +156,12 @@ class PerformanceTracker {
     }
 
     // Use a safer way to get current timestamp
-    const now = typeof performance !== 'undefined' && typeof performance.now === 'function'
-      ? performance.now()
-      : (typeof Date.now === 'function' ? Date.now() : new Date().getTime());
+    const now =
+      typeof performance !== 'undefined' && typeof performance.now === 'function'
+        ? performance.now()
+        : typeof Date.now === 'function'
+          ? Date.now()
+          : new Date().getTime();
 
     metric.endTime = now;
     metric.duration = metric.endTime - metric.startTime;
@@ -223,9 +233,11 @@ class PerformanceTracker {
     if (metricName.includes('App.initialization')) {
       // App initialization can take longer, so we use a higher threshold
       threshold = 500; // 500ms threshold for initialization
-      if (metric.duration > 1000) { // 1 second is poor
+      if (metric.duration > 1000) {
+        // 1 second is poor
         level = 'POOR';
-      } else if (metric.duration > 500) { // 500ms is acceptable
+      } else if (metric.duration > 500) {
+        // 500ms is acceptable
         level = 'ACCEPTABLE';
       }
     } else if (category === MetricCategory.RENDER || category === PerformanceCategory.RENDERING) {

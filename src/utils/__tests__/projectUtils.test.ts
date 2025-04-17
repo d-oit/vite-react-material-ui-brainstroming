@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { hasProjectChanged } from '../projectUtils';
+
 import type { Project } from '../../types';
 import { ProjectTemplate } from '../../types/project';
 import { performanceTracker } from '../performanceMonitoring';
+import { hasProjectChanged } from '../projectUtils';
 
 // Mock the performance monitoring
 vi.mock('../performanceMonitoring', () => ({
@@ -17,7 +18,6 @@ vi.mock('../performanceMonitoring', () => ({
 
 describe('projectUtils', () => {
   describe('hasProjectChanged', () => {
-
     beforeEach(() => {
       vi.clearAllMocks();
     });
@@ -231,25 +231,29 @@ describe('projectUtils', () => {
       // Create a large project with many nodes
       const largeProject1: Project = {
         ...baseProject,
-        nodes: Array(100).fill(null).map((_, index) => ({
-          id: `node${index}`,
-          type: 'idea',
-          position: { x: index * 10, y: index * 10 },
-          data: {
+        nodes: Array(100)
+          .fill(null)
+          .map((_, index) => ({
             id: `node${index}`,
-            title: `Node ${index}`,
-            content: `Content ${index}`,
-            createdAt: '2023-01-01T00:00:00.000Z',
-            updatedAt: '2023-01-01T00:00:00.000Z',
             type: 'idea',
-          },
-        })),
-        edges: Array(50).fill(null).map((_, index) => ({
-          id: `edge${index}`,
-          source: `node${index}`,
-          target: `node${index + 1}`,
-          type: 'default',
-        })),
+            position: { x: index * 10, y: index * 10 },
+            data: {
+              id: `node${index}`,
+              title: `Node ${index}`,
+              content: `Content ${index}`,
+              createdAt: '2023-01-01T00:00:00.000Z',
+              updatedAt: '2023-01-01T00:00:00.000Z',
+              type: 'idea',
+            },
+          })),
+        edges: Array(50)
+          .fill(null)
+          .map((_, index) => ({
+            id: `edge${index}`,
+            source: `node${index}`,
+            target: `node${index + 1}`,
+            type: 'default',
+          })),
       };
 
       const largeProject2 = JSON.parse(JSON.stringify(largeProject1));

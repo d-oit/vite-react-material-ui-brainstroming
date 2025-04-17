@@ -164,7 +164,9 @@ describe('ActionFeedbackContext', () => {
 
     // Create a mock implementation of hideFeedback
     const hideFeedbackMock = vi.fn();
-    vi.spyOn(document.querySelector('.MuiSnackbar-root') || document, 'remove').mockImplementation(hideFeedbackMock);
+    vi.spyOn(document.querySelector('.MuiSnackbar-root') || document, 'remove').mockImplementation(
+      hideFeedbackMock
+    );
 
     // Hide feedback
     await user.click(screen.getByTestId('hide-feedback'));

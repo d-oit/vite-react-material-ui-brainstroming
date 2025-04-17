@@ -1,7 +1,7 @@
-import React from 'react';
-import { Box, CircularProgress, Typography, Paper, Fade } from '@mui/material';
-import ErrorIcon from '@mui/icons-material/Error';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import { Box, CircularProgress, Typography, Paper, Fade } from '@mui/material';
+import React from 'react';
 
 type StatusType = 'loading' | 'error' | 'success' | 'idle';
 
@@ -59,7 +59,7 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({
       bottom: 16,
       left: 16,
     },
-    'center': {
+    center: {
       top: '50%',
       left: '50%',
       transform: 'translate(-50%, -50%)',

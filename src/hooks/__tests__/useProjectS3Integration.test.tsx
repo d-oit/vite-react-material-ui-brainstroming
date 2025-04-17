@@ -1,11 +1,14 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import ToastProviderWrapper from '../../tests/wrappers/ToastProviderWrapper';
 
-import { useProject } from '../useProject';
-import { hasProjectChanged } from '../../utils/projectUtils';
+import { uploadProject, downloadProject, isS3Enabled } from '../../lib/s3Service';
+import ToastProviderWrapper from '../../tests/wrappers/ToastProviderWrapper';
 import type { Project } from '../../types';
 import { ProjectTemplate } from '../../types/project';
+import { hasProjectChanged } from '../../utils/projectUtils';
+import { useProject } from '../useProject';
+
+// Import the mocked modules
 
 // Define mockProject at the top level since vi.mock is hoisted
 const mockProject: Project = {
@@ -38,7 +41,7 @@ vi.mock('../../services/ProjectService', () => {
     default: {
       getProject: vi.fn().mockResolvedValue(mockProject),
       updateProject: vi.fn().mockResolvedValue(true),
-    }
+    },
   };
 });
 
@@ -46,9 +49,6 @@ vi.mock('../../services/ProjectService', () => {
 vi.mock('../../utils/projectUtils', () => ({
   hasProjectChanged: vi.fn(),
 }));
-
-// Import the mocked modules
-import { uploadProject, downloadProject, isS3Enabled } from '../../lib/s3Service';
 
 describe('useProject S3 integration', () => {
   beforeEach(() => {
@@ -71,9 +71,13 @@ describe('useProject S3 integration', () => {
     vi.mocked(isS3Enabled).mockReturnValue(false);
 
     // Render the hook
-    const { result } = renderHook(() => useProject({
-      projectId: 'test-project-id'
-    }), { wrapper: ToastProviderWrapper });
+    const { result } = renderHook(
+      () =>
+        useProject({
+          projectId: 'test-project-id',
+        }),
+      { wrapper: ToastProviderWrapper }
+    );
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -82,7 +86,7 @@ describe('useProject S3 integration', () => {
     await act(async () => {
       await result.current.saveProject({
         ...mockProject,
-        name: 'Updated Name'
+        name: 'Updated Name',
       });
     });
 
@@ -95,9 +99,13 @@ describe('useProject S3 integration', () => {
     vi.mocked(isS3Enabled).mockReturnValue(true);
 
     // Render the hook
-    const { result } = renderHook(() => useProject({
-      projectId: 'test-project-id'
-    }), { wrapper: ToastProviderWrapper });
+    const { result } = renderHook(
+      () =>
+        useProject({
+          projectId: 'test-project-id',
+        }),
+      { wrapper: ToastProviderWrapper }
+    );
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -108,8 +116,8 @@ describe('useProject S3 integration', () => {
         ...mockProject,
         syncSettings: {
           ...mockProject.syncSettings,
-          enableS3Sync: false
-        }
+          enableS3Sync: false,
+        },
       });
     });
 
@@ -122,9 +130,13 @@ describe('useProject S3 integration', () => {
     vi.mocked(isS3Enabled).mockReturnValue(true);
 
     // Render the hook
-    const { result } = renderHook(() => useProject({
-      projectId: 'test-project-id'
-    }), { wrapper: ToastProviderWrapper });
+    const { result } = renderHook(
+      () =>
+        useProject({
+          projectId: 'test-project-id',
+        }),
+      { wrapper: ToastProviderWrapper }
+    );
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -135,8 +147,8 @@ describe('useProject S3 integration', () => {
         ...mockProject,
         syncSettings: {
           ...mockProject.syncSettings,
-          enableS3Sync: true
-        }
+          enableS3Sync: true,
+        },
       });
     });
 
@@ -149,9 +161,13 @@ describe('useProject S3 integration', () => {
     vi.mocked(isS3Enabled).mockReturnValue(false);
 
     // Render the hook
-    const { result } = renderHook(() => useProject({
-      projectId: 'test-project-id'
-    }), { wrapper: ToastProviderWrapper });
+    const { result } = renderHook(
+      () =>
+        useProject({
+          projectId: 'test-project-id',
+        }),
+      { wrapper: ToastProviderWrapper }
+    );
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -175,14 +191,18 @@ describe('useProject S3 integration', () => {
       ...mockProject,
       syncSettings: {
         ...mockProject.syncSettings,
-        enableS3Sync: false
-      }
+        enableS3Sync: false,
+      },
     });
 
     // Render the hook
-    const { result } = renderHook(() => useProject({
-      projectId: 'test-project-id'
-    }), { wrapper: ToastProviderWrapper });
+    const { result } = renderHook(
+      () =>
+        useProject({
+          projectId: 'test-project-id',
+        }),
+      { wrapper: ToastProviderWrapper }
+    );
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -205,8 +225,8 @@ describe('useProject S3 integration', () => {
       ...mockProject,
       syncSettings: {
         ...mockProject.syncSettings,
-        enableS3Sync: true
-      }
+        enableS3Sync: true,
+      },
     };
 
     // Mock ProjectService to return a project with S3 sync enabled
@@ -216,9 +236,13 @@ describe('useProject S3 integration', () => {
     // Render the hook with a project that has S3 sync enabled
     let result: any;
     await act(async () => {
-      const rendered = renderHook(() => useProject({
-        projectId: 'test-project-id'
-      }), { wrapper: ToastProviderWrapper });
+      const rendered = renderHook(
+        () =>
+          useProject({
+            projectId: 'test-project-id',
+          }),
+        { wrapper: ToastProviderWrapper }
+      );
       result = rendered.result;
 
       // Wait for the project to load

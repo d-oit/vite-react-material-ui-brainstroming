@@ -2,10 +2,10 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
 import { ProjectBrainstormingSection } from '../../components/Project/ProjectBrainstormingSection'; // Corrected import
-import { NodeType } from '../../types/enums';
-import { ProjectTemplate, type SyncSettings } from '../../types/project'; // Import SyncSettings type if needed
 import { useS3Sync } from '../../hooks/useS3Sync'; // Added import for vi.mocked
 import type { Node, Edge } from '../../types'; // Import Node/Edge types if needed for casting
+import { NodeType } from '../../types/enums';
+import { ProjectTemplate, type SyncSettings } from '../../types/project'; // Import SyncSettings type if needed
 
 // Mock the EnhancedBrainstormFlow component
 vi.mock('../../components/BrainstormFlow/EnhancedBrainstormFlow', () => ({
@@ -105,7 +105,6 @@ describe('ProjectBrainstormingSection', () => {
     return render(<ProjectBrainstormingSection {...finalProps} />);
   };
 
-
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useS3Sync).mockReturnValue({
@@ -115,15 +114,14 @@ describe('ProjectBrainstormingSection', () => {
     });
   });
 
-
   it('renders loading state correctly', () => {
     renderComponent();
     expect(screen.getByTestId('mock-enhanced-brainstorm-flow')).toBeInTheDocument();
   });
 
   it('renders error state correctly', () => {
-     renderComponent();
-     expect(screen.getByTestId('mock-enhanced-brainstorm-flow')).toBeInTheDocument();
+    renderComponent();
+    expect(screen.getByTestId('mock-enhanced-brainstorm-flow')).toBeInTheDocument();
   });
 
   it('renders empty state correctly when no nodes', () => {
@@ -165,16 +163,16 @@ describe('ProjectBrainstormingSection', () => {
   });
 
   it('disables EnhancedBrainstormFlow when isSaving is true', () => {
-     vi.mocked(useS3Sync).mockReturnValueOnce({
-       sync: vi.fn().mockResolvedValue(undefined),
-       syncStatus: 'syncing',
-       lastSyncTime: null,
-     });
+    vi.mocked(useS3Sync).mockReturnValueOnce({
+      sync: vi.fn().mockResolvedValue(undefined),
+      syncStatus: 'syncing',
+      lastSyncTime: null,
+    });
 
-     renderComponent({ readOnly: true }); // Pass readOnly, assuming it's used internally now
+    renderComponent({ readOnly: true }); // Pass readOnly, assuming it's used internally now
 
-     expect(screen.getByTestId('mock-enhanced-brainstorm-flow')).toBeInTheDocument();
-     // If EnhancedBrainstormFlow mock accepted readOnly, we could check:
-     // expect(vi.mocked(EnhancedBrainstormFlow).mock.calls[0][0].readOnly).toBe(true);
+    expect(screen.getByTestId('mock-enhanced-brainstorm-flow')).toBeInTheDocument();
+    // If EnhancedBrainstormFlow mock accepted readOnly, we could check:
+    // expect(vi.mocked(EnhancedBrainstormFlow).mock.calls[0][0].readOnly).toBe(true);
   });
 });

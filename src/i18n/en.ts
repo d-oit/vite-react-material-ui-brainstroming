@@ -147,7 +147,8 @@ export const translations = {
   },
   s3: {
     title: 'S3 Synchronization',
-    integration: 'S3 integration is not configured. To enable S3 synchronization, please set the required environment variables.',
+    integration:
+      'S3 integration is not configured. To enable S3 synchronization, please set the required environment variables.',
     enable: 'Enable S3 Synchronization',
     storage: 'S3 Storage',
     syncNow: 'Sync Now',
@@ -183,13 +184,16 @@ export const translations = {
     exportSettingsDescription: 'Export your settings to a file or import settings from a file.',
     exportSettings: 'Export Settings',
     importSettings: 'Import Settings',
-    exportSettingsDetail: 'Export all your settings, color schemes, and node preferences to a JSON file. You can use this file to backup your settings or transfer them to another device.',
-    importSettingsDetail: 'Import settings from a previously exported JSON file. This will replace your current settings, color schemes, and node preferences.',
+    exportSettingsDetail:
+      'Export all your settings, color schemes, and node preferences to a JSON file. You can use this file to backup your settings or transfer them to another device.',
+    importSettingsDetail:
+      'Import settings from a previously exported JSON file. This will replace your current settings, color schemes, and node preferences.',
     offline: 'Offline',
     offlineTooltip: 'You are currently offline. Some functionality may be limited.',
     warning: 'Warning:',
     importConfirmTitle: 'Import Settings',
-    importConfirmMessage: 'This will replace your current settings. Are you sure you want to continue?',
+    importConfirmMessage:
+      'This will replace your current settings. Are you sure you want to continue?',
     cancel: 'Cancel',
     confirm: 'Confirm',
     exportSuccess: 'Settings exported successfully',

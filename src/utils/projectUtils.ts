@@ -8,7 +8,10 @@ import { performanceTracker, PerformanceCategory } from './performanceMonitoring
  * @param previousProject The previous project state to compare against
  * @returns True if the projects have meaningful differences, false otherwise
  */
-export function hasProjectChanged(currentProject: Project | null, previousProject: Project | null): boolean {
+export function hasProjectChanged(
+  currentProject: Project | null,
+  previousProject: Project | null
+): boolean {
   // Start performance measurement
   const metricId = performanceTracker.startMeasure(
     'hasProjectChanged',
@@ -22,8 +25,12 @@ export function hasProjectChanged(currentProject: Project | null, previousProjec
     }
 
     // Check for missing properties
-    if (!currentProject.nodes || !previousProject.nodes ||
-      !currentProject.edges || !previousProject.edges) {
+    if (
+      !currentProject.nodes ||
+      !previousProject.nodes ||
+      !currentProject.edges ||
+      !previousProject.edges
+    ) {
       return true; // Consider it changed if any essential property is missing
     }
 

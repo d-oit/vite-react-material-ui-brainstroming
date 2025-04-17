@@ -25,8 +25,8 @@ import {
 } from '@mui/material';
 import { useState, useRef, useEffect } from 'react';
 
-import { useSettings } from '../../contexts/SettingsContext';
 import { useI18n } from '../../contexts/I18nContext';
+import { useSettings } from '../../contexts/SettingsContext';
 import loggerService from '../../services/LoggerService';
 import offlineService from '../../services/OfflineService';
 
@@ -55,7 +55,7 @@ export const SettingsExportImport = () => {
     open: false,
     title: '',
     message: '',
-    onConfirm: () => { },
+    onConfirm: () => {},
   });
 
   const [loading, setLoading] = useState(false);
@@ -110,7 +110,8 @@ export const SettingsExportImport = () => {
       setSnackbar({
         open: true,
         message:
-          t('importExport.exportError') + ' ' +
+          t('importExport.exportError') +
+          ' ' +
           (error instanceof Error ? error.message : 'Unknown error'),
         severity: 'error',
       });
@@ -247,7 +248,8 @@ export const SettingsExportImport = () => {
       setSnackbar({
         open: true,
         message:
-          t('importExport.exportError') + ' ' +
+          t('importExport.exportError') +
+          ' ' +
           (error instanceof Error ? error.message : 'Unknown error'),
         severity: 'error',
       });
@@ -372,4 +374,3 @@ export const SettingsExportImport = () => {
     </Box>
   );
 };
-

@@ -1,5 +1,5 @@
-import SendIcon from '@mui/icons-material/Send';
 import CloseIcon from '@mui/icons-material/Close';
+import SendIcon from '@mui/icons-material/Send';
 import {
   Box,
   Dialog,
@@ -153,7 +153,8 @@ export default function LLMChatPanel({
                   <Paper
                     sx={{
                       p: 1,
-                      backgroundColor: message.role === 'user' ? 'primary.main' : 'background.paper',
+                      backgroundColor:
+                        message.role === 'user' ? 'primary.main' : 'background.paper',
                       color: message.role === 'user' ? 'primary.contrastText' : 'text.primary',
                       maxWidth: '80%',
                     }}
@@ -163,7 +164,8 @@ export default function LLMChatPanel({
                       secondary={new Date(message.timestamp).toLocaleTimeString()}
                       secondaryTypographyProps={{
                         sx: {
-                          color: message.role === 'user' ? 'primary.contrastText' : 'text.secondary',
+                          color:
+                            message.role === 'user' ? 'primary.contrastText' : 'text.secondary',
                         },
                       }}
                     />

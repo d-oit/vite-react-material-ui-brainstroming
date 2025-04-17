@@ -124,7 +124,7 @@ describe('ProjectService', () => {
   // Mock Date correctly
   const mockDate = new Date('2023-01-01T00:00:00Z');
   const originalDate = global.Date;
-  vi.spyOn(global, 'Date').mockImplementation((arg) => {
+  vi.spyOn(global, 'Date').mockImplementation(arg => {
     // When called as a constructor, return a date object
     if (arg === undefined) return mockDate;
     // When called with arguments, pass them through to the original Date constructor
@@ -155,22 +155,24 @@ describe('ProjectService', () => {
     projectService = ProjectService.getInstance();
 
     // Mock the methods directly
-    vi.spyOn(projectService, 'createProject').mockImplementation(async (name, description, template) => {
-      return {
-        id: mockUUID,
-        name,
-        description,
-        template,
-        createdAt: mockDate.toISOString(),
-        updatedAt: mockDate.toISOString(),
-        nodes: [],
-        edges: [],
-        version: '1.0.0',
-        syncSettings: { enableS3Sync: false, syncFrequency: 'manual' },
-      };
-    });
+    vi.spyOn(projectService, 'createProject').mockImplementation(
+      async (name, description, template) => {
+        return {
+          id: mockUUID,
+          name,
+          description,
+          template,
+          createdAt: mockDate.toISOString(),
+          updatedAt: mockDate.toISOString(),
+          nodes: [],
+          edges: [],
+          version: '1.0.0',
+          syncSettings: { enableS3Sync: false, syncFrequency: 'manual' },
+        };
+      }
+    );
 
-    vi.spyOn(projectService, 'getProject').mockImplementation(async (id) => {
+    vi.spyOn(projectService, 'getProject').mockImplementation(async id => {
       if (id === '1') return mockProject;
       return null;
     });
@@ -179,10 +181,11 @@ describe('ProjectService', () => {
       return [mockProject];
     });
 
-    vi.spyOn(projectService, 'updateProject').mockImplementation(async (projectOrId) => {
-      const updatedProject = typeof projectOrId === 'string'
-        ? { ...mockProject, ...projectOrId }
-        : { ...mockProject, ...projectOrId, updatedAt: mockDate.toISOString() };
+    vi.spyOn(projectService, 'updateProject').mockImplementation(async projectOrId => {
+      const updatedProject =
+        typeof projectOrId === 'string'
+          ? { ...mockProject, ...projectOrId }
+          : { ...mockProject, ...projectOrId, updatedAt: mockDate.toISOString() };
       return updatedProject;
     });
 

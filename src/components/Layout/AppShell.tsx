@@ -40,12 +40,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useI18n } from '../../contexts/I18nContext';
 import { useSettings } from '../../contexts/SettingsContext';
+import { handleQuickBrainstorm } from '../../features/brainstorming/quickBrainstormUtils';
 import SkipLink from '../Accessibility/SkipLink';
 import LanguageSelector from '../I18n/LanguageSelector';
 import NetworkInfoDialog from '../OfflineIndicator/NetworkInfoDialog';
 import NetworkStatusIcon from '../OfflineIndicator/NetworkStatusIcon';
 import _OfflineIndicator from '../OfflineIndicator/OfflineIndicator';
-import { handleQuickBrainstorm } from '../../features/brainstorming/quickBrainstormUtils';
 
 interface AppShellProps {
   children: ReactNode;
@@ -112,7 +112,7 @@ const AppShell = ({
       text: t('navigation.quickBrainstorm'),
       icon: <BrainstormIcon />,
       path: '#',
-      onClick: () => handleQuickBrainstorm(navigate),
+      onClick: () => void handleQuickBrainstorm(navigate),
       active: false,
     },
     {
@@ -262,7 +262,7 @@ const AppShell = ({
                 ml: 1,
               }}
             >
-              v{import.meta.env.VITE_APP_VERSION ? import.meta.env.VITE_APP_VERSION : '1.0.0'}
+              v{import.meta.env.VITE_APP_VERSION || '1.0.0'}
             </Typography>
           </Typography>
 
@@ -401,5 +401,3 @@ const AppShell = ({
 };
 
 export default AppShell;
-
-

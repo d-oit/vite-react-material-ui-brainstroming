@@ -64,7 +64,8 @@ export const translations = {
     pin: 'Projekt anheften',
     unpin: 'Projekt lösen',
     newVersion: 'Neue Version',
-    confirmDelete: 'Sind Sie sicher, dass Sie dieses Projekt löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.',
+    confirmDelete:
+      'Sind Sie sicher, dass Sie dieses Projekt löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.',
     confirmArchive:
       'Sind Sie sicher, dass Sie dieses Projekt archivieren möchten? Sie können es später aus dem Archiv wiederherstellen.',
     myProjects: 'Meine Projekte',
@@ -145,7 +146,8 @@ export const translations = {
   },
   s3: {
     title: 'S3 Synchronisation',
-    integration: 'S3-Integration ist nicht konfiguriert. Um die S3-Synchronisation zu aktivieren, legen Sie bitte die erforderlichen Umgebungsvariablen fest.',
+    integration:
+      'S3-Integration ist nicht konfiguriert. Um die S3-Synchronisation zu aktivieren, legen Sie bitte die erforderlichen Umgebungsvariablen fest.',
     enable: 'S3-Synchronisation aktivieren',
     storage: 'S3 Speicher',
     syncNow: 'Jetzt synchronisieren',
@@ -178,16 +180,20 @@ export const translations = {
     exportToS3: 'Nach S3 exportieren',
     importFromS3: 'Von S3 importieren',
     exportImportSettings: 'Einstellungen exportieren/importieren',
-    exportSettingsDescription: 'Exportieren Sie Ihre Einstellungen in eine Datei oder importieren Sie Einstellungen aus einer Datei.',
+    exportSettingsDescription:
+      'Exportieren Sie Ihre Einstellungen in eine Datei oder importieren Sie Einstellungen aus einer Datei.',
     exportSettings: 'Einstellungen exportieren',
     importSettings: 'Einstellungen importieren',
-    exportSettingsDetail: 'Exportieren Sie alle Ihre Einstellungen, Farbschemata und Knotenpräferenzen in eine JSON-Datei. Sie können diese Datei verwenden, um Ihre Einstellungen zu sichern oder auf ein anderes Gerät zu übertragen.',
-    importSettingsDetail: 'Importieren Sie Einstellungen aus einer zuvor exportierten JSON-Datei. Dies ersetzt Ihre aktuellen Einstellungen, Farbschemata und Knotenpräferenzen.',
+    exportSettingsDetail:
+      'Exportieren Sie alle Ihre Einstellungen, Farbschemata und Knotenpräferenzen in eine JSON-Datei. Sie können diese Datei verwenden, um Ihre Einstellungen zu sichern oder auf ein anderes Gerät zu übertragen.',
+    importSettingsDetail:
+      'Importieren Sie Einstellungen aus einer zuvor exportierten JSON-Datei. Dies ersetzt Ihre aktuellen Einstellungen, Farbschemata und Knotenpräferenzen.',
     offline: 'Offline',
     offlineTooltip: 'Sie sind derzeit offline. Einige Funktionen können eingeschränkt sein.',
     warning: 'Warnung:',
     importConfirmTitle: 'Einstellungen importieren',
-    importConfirmMessage: 'Dies wird Ihre aktuellen Einstellungen ersetzen. Sind Sie sicher, dass Sie fortfahren möchten?',
+    importConfirmMessage:
+      'Dies wird Ihre aktuellen Einstellungen ersetzen. Sind Sie sicher, dass Sie fortfahren möchten?',
     cancel: 'Abbrechen',
     confirm: 'Bestätigen',
     exportSuccess: 'Einstellungen erfolgreich exportiert',

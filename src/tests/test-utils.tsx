@@ -1,10 +1,5 @@
-import {
-  render as rtlRender,
-  RenderOptions,
-  screen,
-  fireEvent,
-  waitFor,
-} from '@testing-library/react';
+import type { RenderOptions } from '@testing-library/react';
+import { render as rtlRender, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { vi } from 'vitest';
 
@@ -31,7 +26,6 @@ export const render = (
 
 // Legacy alias (kept for backward compatibility)
 export { render as renderWithProviders };
-
 
 /**
  * Mock ResizeObserver for testing

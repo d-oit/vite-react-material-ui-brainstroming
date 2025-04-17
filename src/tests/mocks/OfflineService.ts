@@ -53,7 +53,7 @@ const mockOfflineService = {
     // Call the listener with a default network status
     listener({ online: true, isReliable: true, latency: 50, downlink: 10 });
     // Return a function to remove the listener
-    return () => { };
+    return () => {};
   }),
 };
 
@@ -62,6 +62,6 @@ export class OfflineService {
   static getInstance() {
     return mockOfflineService;
   }
-};
+}
 
 export default mockOfflineService;

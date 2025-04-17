@@ -1,7 +1,7 @@
+import { i18n } from '../i18n';
 import { uploadProject } from '../lib/s3Service';
 import type { Project, SyncSettings } from '../types/project';
 
-import { i18n } from '../i18n';
 import loggerService from './LoggerService';
 
 export interface S3SyncResult {
@@ -94,7 +94,8 @@ export class S3SyncService {
           continue;
         }
         throw new Error(
-          i18n.t('s3.failedSyncAttempts', { attempts: this.retryAttempts }) + ` ${lastError.message}`
+          i18n.t('s3.failedSyncAttempts', { attempts: this.retryAttempts }) +
+            ` ${lastError.message}`
         );
       }
     }

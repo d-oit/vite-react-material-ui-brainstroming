@@ -64,7 +64,8 @@ export const translations = {
     pin: 'Fijar Proyecto',
     unpin: 'Desfijar Proyecto',
     newVersion: 'Nueva Versión',
-    confirmDelete: '¿Estás seguro de que quieres eliminar este proyecto? Esta acción no se puede deshacer.',
+    confirmDelete:
+      '¿Estás seguro de que quieres eliminar este proyecto? Esta acción no se puede deshacer.',
     confirmArchive:
       '¿Estás seguro de que quieres archivar este proyecto? Puedes restaurarlo más tarde desde el archivo.',
     myProjects: 'Mis Proyectos',
@@ -145,7 +146,8 @@ export const translations = {
   },
   s3: {
     title: 'Sincronización S3',
-    integration: 'La integración S3 no está configurada. Para habilitar la sincronización S3, establezca las variables de entorno requeridas.',
+    integration:
+      'La integración S3 no está configurada. Para habilitar la sincronización S3, establezca las variables de entorno requeridas.',
     enable: 'Habilitar sincronización S3',
     storage: 'Almacenamiento S3',
     syncNow: 'Sincronizar ahora',
@@ -178,16 +180,21 @@ export const translations = {
     exportToS3: 'Exportar a S3',
     importFromS3: 'Importar desde S3',
     exportImportSettings: 'Exportar/Importar configuración',
-    exportSettingsDescription: 'Exporte su configuración a un archivo o importe configuración desde un archivo.',
+    exportSettingsDescription:
+      'Exporte su configuración a un archivo o importe configuración desde un archivo.',
     exportSettings: 'Exportar configuración',
     importSettings: 'Importar configuración',
-    exportSettingsDetail: 'Exporte toda su configuración, esquemas de colores y preferencias de nodos a un archivo JSON. Puede usar este archivo para hacer una copia de seguridad de su configuración o transferirla a otro dispositivo.',
-    importSettingsDetail: 'Importe la configuración desde un archivo JSON exportado previamente. Esto reemplazará su configuración actual, esquemas de colores y preferencias de nodos.',
+    exportSettingsDetail:
+      'Exporte toda su configuración, esquemas de colores y preferencias de nodos a un archivo JSON. Puede usar este archivo para hacer una copia de seguridad de su configuración o transferirla a otro dispositivo.',
+    importSettingsDetail:
+      'Importe la configuración desde un archivo JSON exportado previamente. Esto reemplazará su configuración actual, esquemas de colores y preferencias de nodos.',
     offline: 'Sin conexión',
-    offlineTooltip: 'Actualmente está sin conexión. Algunas funcionalidades pueden estar limitadas.',
+    offlineTooltip:
+      'Actualmente está sin conexión. Algunas funcionalidades pueden estar limitadas.',
     warning: 'Advertencia:',
     importConfirmTitle: 'Importar configuración',
-    importConfirmMessage: 'Esto reemplazará su configuración actual. ¿Está seguro de que desea continuar?',
+    importConfirmMessage:
+      'Esto reemplazará su configuración actual. ¿Está seguro de que desea continuar?',
     cancel: 'Cancelar',
     confirm: 'Confirmar',
     exportSuccess: 'Configuración exportada con éxito',

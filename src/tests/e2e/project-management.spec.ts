@@ -14,7 +14,9 @@ test.describe('Project Management', () => {
     await expect(page.locator('h1:has-text("My Projects")')).toBeVisible({ timeout: 10000 });
 
     // Check that the create project button is visible
-    await expect(page.getByRole('button', { name: /create project/i })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('button', { name: /create project/i })).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test('should create a new project', async ({ page }) => {

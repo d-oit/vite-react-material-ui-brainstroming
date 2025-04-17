@@ -255,19 +255,30 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
     <>
       {variant === 'select' ? (
         <FormControl fullWidth={fullWidth}>
-          <InputLabel id="language-select-label">{t('language.select') || 'Select Language'}</InputLabel>
+          <InputLabel id="language-select-label">
+            {t('language.select') || 'Select Language'}
+          </InputLabel>
           <Select
             labelId="language-select-label"
             value={locale}
             label={t('language.select') || 'Select Language'}
-            onChange={(e) => handleLanguageSelect(e.target.value as string)}
+            onChange={e => handleLanguageSelect(e.target.value as string)}
           >
             {languages.map(lang => (
               <MenuItem key={lang.code} value={lang.code}>
-                {showFlags && lang.flag && <Box component="span" sx={{ mr: 1 }}>{lang.flag}</Box>}
+                {showFlags && lang.flag && (
+                  <Box component="span" sx={{ mr: 1 }}>
+                    {lang.flag}
+                  </Box>
+                )}
                 {lang.name}
                 {showNativeNames && lang.name !== lang.nativeName && (
-                  <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                  <Typography
+                    component="span"
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ ml: 1 }}
+                  >
                     ({lang.nativeName})
                   </Typography>
                 )}
@@ -287,6 +298,3 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 };
 
 export default LanguageSelector;
-
-
-
