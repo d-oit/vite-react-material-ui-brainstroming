@@ -345,8 +345,8 @@ describe('ProjectDetailPage', () => {
     expect(screen.queryByDisplayValue('Blurred Description')).not.toBeInTheDocument();
   });
 
-  // Test that auto-save only happens when data has changed
-  it('does not save project when description has not changed', async () => {
+  // Test that save happens even when data has not changed
+  it('saves project when description has not changed', async () => {
     renderComponent();
 
     // Click the "Edit Description" button
@@ -370,8 +370,12 @@ describe('ProjectDetailPage', () => {
 
     fireEvent.click(saveButton);
 
-    // Check that saveProject was not called
-    expect(mockSaveProject).not.toHaveBeenCalled();
+    // Check that saveProject was called even though the value didn't change
+    expect(mockSaveProject).toHaveBeenCalledWith(
+      expect.objectContaining({
+        description: 'Test Description',
+      })
+    );
 
     // Check that editing mode is turned off
     expect(screen.queryByDisplayValue('Test Description')).not.toBeInTheDocument();

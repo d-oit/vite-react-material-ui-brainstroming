@@ -375,7 +375,21 @@ export const ProjectSettingsSection = ({
                 startIcon={isSyncing ? <CircularProgress size={20} /> : <CloudUploadIcon />}
                 onClick={() => void handleManualSync()}
                 disabled={isSyncing || isSaving || !isS3Available}
-                sx={{ mr: 2 }}
+                sx={{
+                  mr: 2,
+                  minWidth: '120px',  // Fixed width to prevent layout shifts
+                  transition: 'all 0.2s ease-in-out',
+                  position: 'relative',
+                  '& .MuiCircularProgress-root': {
+                    transition: 'opacity 0.2s ease-in-out',
+                  },
+                  '& .MuiSvgIcon-root': {
+                    transition: 'opacity 0.2s ease-in-out',
+                    opacity: isSyncing ? 0 : 1,
+                    position: isSyncing ? 'absolute' : 'relative',
+                    left: isSyncing ? '16px' : 'auto',
+                  }
+                }}
               >
                 {isSyncing ? 'Syncing...' : 'Sync Now'}
               </Button>
@@ -406,6 +420,20 @@ export const ProjectSettingsSection = ({
                 startIcon={exportLoading ? <CircularProgress size={20} /> : <DownloadIcon />}
                 onClick={() => void handleExportToFile()}
                 disabled={exportLoading || isSaving}
+                sx={{
+                  minWidth: '130px',  // Fixed width to prevent layout shifts
+                  transition: 'all 0.2s ease-in-out',
+                  position: 'relative',
+                  '& .MuiCircularProgress-root': {
+                    transition: 'opacity 0.2s ease-in-out',
+                  },
+                  '& .MuiSvgIcon-root': {
+                    transition: 'opacity 0.2s ease-in-out',
+                    opacity: exportLoading ? 0 : 1,
+                    position: exportLoading ? 'absolute' : 'relative',
+                    left: exportLoading ? '16px' : 'auto',
+                  }
+                }}
               >
                 Export to File
               </Button>
@@ -414,6 +442,20 @@ export const ProjectSettingsSection = ({
                 startIcon={importLoading ? <CircularProgress size={20} /> : <UploadIcon />}
                 onClick={() => void handleImportFromFile()}
                 disabled={importLoading || isSaving}
+                sx={{
+                  minWidth: '130px',  // Fixed width to prevent layout shifts
+                  transition: 'all 0.2s ease-in-out',
+                  position: 'relative',
+                  '& .MuiCircularProgress-root': {
+                    transition: 'opacity 0.2s ease-in-out',
+                  },
+                  '& .MuiSvgIcon-root': {
+                    transition: 'opacity 0.2s ease-in-out',
+                    opacity: importLoading ? 0 : 1,
+                    position: importLoading ? 'absolute' : 'relative',
+                    left: importLoading ? '16px' : 'auto',
+                  }
+                }}
               >
                 Import from File
               </Button>
@@ -430,6 +472,20 @@ export const ProjectSettingsSection = ({
                 startIcon={isSyncing ? <CircularProgress size={20} /> : <CloudUploadIcon />}
                 onClick={() => void handleManualSync()}
                 disabled={isSyncing || isSaving || !isS3Available}
+                sx={{
+                  minWidth: '120px',  // Fixed width to prevent layout shifts
+                  transition: 'all 0.2s ease-in-out',
+                  position: 'relative',
+                  '& .MuiCircularProgress-root': {
+                    transition: 'opacity 0.2s ease-in-out',
+                  },
+                  '& .MuiSvgIcon-root': {
+                    transition: 'opacity 0.2s ease-in-out',
+                    opacity: isSyncing ? 0 : 1,
+                    position: isSyncing ? 'absolute' : 'relative',
+                    left: isSyncing ? '16px' : 'auto',
+                  }
+                }}
               >
                 Export to S3
               </Button>
@@ -438,6 +494,20 @@ export const ProjectSettingsSection = ({
                 startIcon={importLoading ? <CircularProgress size={20} /> : <CloudDownloadIcon />}
                 onClick={() => void handleImportFromS3()}
                 disabled={importLoading || isSaving || !isS3Available}
+                sx={{
+                  minWidth: '120px',  // Fixed width to prevent layout shifts
+                  transition: 'all 0.2s ease-in-out',
+                  position: 'relative',
+                  '& .MuiCircularProgress-root': {
+                    transition: 'opacity 0.2s ease-in-out',
+                  },
+                  '& .MuiSvgIcon-root': {
+                    transition: 'opacity 0.2s ease-in-out',
+                    opacity: importLoading ? 0 : 1,
+                    position: importLoading ? 'absolute' : 'relative',
+                    left: importLoading ? '16px' : 'auto',
+                  }
+                }}
               >
                 Import from S3
               </Button>

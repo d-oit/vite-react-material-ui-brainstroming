@@ -119,25 +119,22 @@ const ProjectDetailPage = () => {
   // Function to save edited project details
   const handleProjectDetailsChange = async (field: 'name' | 'description', value: string) => {
     if (project !== null && project !== undefined) {
-      // Only update if the value has actually changed
-      if (project[field] !== value) {
-        // Update local state
-        if (field === 'name') {
-          setEditedName(value);
-        } else {
-          setEditedDescription(value);
-        }
-
-        // Create updated project with new field value
-        const updatedProject = {
-          ...project,
-          [field]: value,
-          updatedAt: new Date().toISOString(),
-        };
-
-        // Save project with the updated project object
-        await saveProject(updatedProject);
+      // Update local state
+      if (field === 'name') {
+        setEditedName(value);
+      } else {
+        setEditedDescription(value);
       }
+
+      // Create updated project with new field value
+      const updatedProject = {
+        ...project,
+        [field]: value,
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Save project with the updated project object
+      await saveProject(updatedProject);
     }
   };
 
@@ -167,7 +164,8 @@ const ProjectDetailPage = () => {
 
   // Function to save project description
   const handleSaveProjectDetails = () => {
-    if (editedDescription.trim() !== '' && editedDescription !== project.description) {
+    // Always save if the description is not empty, regardless of whether it has changed
+    if (editedDescription.trim() !== '') {
       void handleProjectDetailsChange('description', editedDescription);
     }
     setIsEditingDescription(false);
@@ -249,7 +247,8 @@ const ProjectDetailPage = () => {
               }}
               autoFocus
               onBlur={() => {
-                if (editedName.trim() !== '' && editedName !== project.name) {
+                // Always save if the name is not empty, regardless of whether it has changed
+                if (editedName.trim() !== '') {
                   void handleProjectDetailsChange('name', editedName);
                   setIsEditingName(false);
                 } else {
@@ -259,9 +258,11 @@ const ProjectDetailPage = () => {
               }}
               onKeyDown={e => {
                 if (e.key === 'Enter' && editedName.trim() !== '') {
+                  // Always save on Enter if the name is not empty
                   void handleProjectDetailsChange('name', editedName);
                   setIsEditingName(false);
                 } else if (e.key === 'Escape') {
+                  // Reset to original name on Escape
                   setEditedName(project.name);
                   setIsEditingName(false);
                 }
@@ -293,14 +294,29 @@ const ProjectDetailPage = () => {
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
             variant="outlined"
-            startIcon={<SaveIcon />}
+            startIcon={isSaving ? <CircularProgress size={16} /> : <SaveIcon />}
             onClick={() => {
               void saveProject();
             }}
             disabled={isSaving || !hasChanges}
             size={isMobile ? 'small' : 'medium'}
+            sx={{
+              minWidth: '90px',  // Fixed width to prevent layout shifts
+              transition: 'all 0.2s ease-in-out',
+              position: 'relative',
+              '& .MuiCircularProgress-root': {
+                transition: 'opacity 0.2s ease-in-out',
+                opacity: isSaving ? 1 : 0,
+              },
+              '& .MuiSvgIcon-root': {
+                transition: 'opacity 0.2s ease-in-out',
+                opacity: isSaving ? 0 : 1,
+                position: isSaving ? 'absolute' : 'relative',
+                left: isSaving ? '16px' : 'auto',
+              }
+            }}
           >
-            {isSaving ? 'Saving...' : hasChanges ? 'Save*' : 'Save'}
+            {hasChanges ? 'Save*' : 'Save'}
           </Button>
 
           <Button
@@ -560,10 +576,22 @@ const ProjectDetailPage = () => {
           onClick={() => {
             void saveProject();
           }}
-          disabled={isSaving}
-          sx={{ bgcolor: 'background.paper' }}
+          disabled={isSaving || !hasChanges}
+          sx={{
+            bgcolor: 'background.paper',
+            transition: 'all 0.2s ease-in-out',
+            position: 'relative',
+            '&:disabled': {
+              opacity: 0.6,
+            }
+          }}
         >
-          <SaveIcon />
+          {isSaving ?
+            <CircularProgress size={24} sx={{
+              position: 'absolute',
+              transition: 'opacity 0.2s ease-in-out'
+            }} /> :
+            <SaveIcon />}
         </IconButton>
       </Box>
 
