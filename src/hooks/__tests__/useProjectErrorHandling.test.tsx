@@ -1,6 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import * as React from 'react';
+import ToastProviderWrapper from '../../tests/wrappers/ToastProviderWrapper';
 
 import { useProject } from '../useProject';
 import { hasProjectChanged } from '../../utils/projectUtils';
@@ -73,7 +74,7 @@ describe('useProject error handling', () => {
     const { result } = renderHook(() => useProject({
       projectId: 'test-project-id',
       autoSave: true
-    }));
+    }), { wrapper: ToastProviderWrapper });
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -102,7 +103,7 @@ describe('useProject error handling', () => {
     const { result } = renderHook(() => useProject({
       projectId: 'test-project-id',
       autoSave: true
-    }));
+    }), { wrapper: ToastProviderWrapper });
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -125,7 +126,7 @@ describe('useProject error handling', () => {
 
   it('should handle invalid project data', async () => {
     // Render the hook
-    const { result } = renderHook(() => useProject());
+    const { result } = renderHook(() => useProject(), { wrapper: ToastProviderWrapper });
 
     // Attempt to save an invalid project
     await act(async () => {
@@ -153,7 +154,7 @@ describe('useProject error handling', () => {
     const { result } = renderHook(() => useProject({
       projectId: 'test-project-id',
       autoSave: true
-    }));
+    }), { wrapper: ToastProviderWrapper });
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -191,7 +192,7 @@ describe('useProject error handling', () => {
     const { result } = renderHook(() => useProject({
       projectId: 'test-project-id',
       autoSave: true
-    }));
+    }), { wrapper: ToastProviderWrapper });
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -236,7 +237,7 @@ describe('useProject error handling', () => {
     // Render the hook with a non-existent project ID to trigger an error
     const { result } = renderHook(() => useProject({
       projectId: 'non-existent-id'
-    }));
+    }), { wrapper: ToastProviderWrapper });
 
     // Wait for the project to load (and fail)
     await vi.runAllTimersAsync();
@@ -257,7 +258,7 @@ describe('useProject error handling', () => {
     // Render the hook
     const { result } = renderHook(() => useProject({
       projectId: 'test-project-id'
-    }));
+    }), { wrapper: ToastProviderWrapper });
 
     // Wait for the project to load
     await vi.runAllTimersAsync();

@@ -1,5 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import ToastProviderWrapper from '../../tests/wrappers/ToastProviderWrapper';
 
 import { useProject } from '../useProject';
 import { hasProjectChanged } from '../../utils/projectUtils';
@@ -61,7 +62,7 @@ describe('useProject auto-save functionality', () => {
     const { result } = renderHook(() => useProject({
       projectId: 'test-project-id',
       autoSave: true
-    }));
+    }), { wrapper: ToastProviderWrapper });
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -100,7 +101,7 @@ describe('useProject auto-save functionality', () => {
     // Render the hook
     const { result } = renderHook(() => useProject({
       projectId: 'test-project-id'
-    }));
+    }), { wrapper: ToastProviderWrapper });
 
     // Verify that hasChanges is false initially
     expect(result.current.hasChanges).toBe(false);

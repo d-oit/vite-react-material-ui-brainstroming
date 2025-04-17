@@ -1,5 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import ToastProviderWrapper from '../../tests/wrappers/ToastProviderWrapper';
 
 import { useProject } from '../useProject';
 import { hasProjectChanged } from '../../utils/projectUtils';
@@ -72,7 +73,7 @@ describe('useProject S3 integration', () => {
     // Render the hook
     const { result } = renderHook(() => useProject({
       projectId: 'test-project-id'
-    }));
+    }), { wrapper: ToastProviderWrapper });
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -96,7 +97,7 @@ describe('useProject S3 integration', () => {
     // Render the hook
     const { result } = renderHook(() => useProject({
       projectId: 'test-project-id'
-    }));
+    }), { wrapper: ToastProviderWrapper });
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -123,7 +124,7 @@ describe('useProject S3 integration', () => {
     // Render the hook
     const { result } = renderHook(() => useProject({
       projectId: 'test-project-id'
-    }));
+    }), { wrapper: ToastProviderWrapper });
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -150,7 +151,7 @@ describe('useProject S3 integration', () => {
     // Render the hook
     const { result } = renderHook(() => useProject({
       projectId: 'test-project-id'
-    }));
+    }), { wrapper: ToastProviderWrapper });
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -181,7 +182,7 @@ describe('useProject S3 integration', () => {
     // Render the hook
     const { result } = renderHook(() => useProject({
       projectId: 'test-project-id'
-    }));
+    }), { wrapper: ToastProviderWrapper });
 
     // Wait for the project to load
     await vi.runAllTimersAsync();
@@ -217,7 +218,7 @@ describe('useProject S3 integration', () => {
     await act(async () => {
       const rendered = renderHook(() => useProject({
         projectId: 'test-project-id'
-      }));
+      }), { wrapper: ToastProviderWrapper });
       result = rendered.result;
 
       // Wait for the project to load

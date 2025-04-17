@@ -26,6 +26,7 @@ import LoadingFallback from './components/UI/LoadingFallback';
 import { ActionFeedbackProvider } from './contexts/ActionFeedbackContext';
 import { I18nProvider, useI18n } from './contexts/I18nContext';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { ToastProvider } from './contexts/ToastContext';
 import BrainstormDemoPage from './pages/BrainstormDemoPage';
 import indexedDBService from './services/IndexedDBService';
 import loggerService from './services/LoggerService';
@@ -288,83 +289,85 @@ const AppWithTheme = () => {
       <CSPMeta />
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <ActionFeedbackProvider>
-          <ErrorBoundary>
-            <BrowserRouter
-              future={{
-                v7_startTransition: true,
-                v7_relativeSplatPath: true,
-              }}
-            >
-              <Suspense fallback={<LoadingFallback />}>
-                <Routes>
-                  <Route
-                    path="/"
-                    element={
-                      <HomePage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
-                    }
-                  />
-                  <Route
-                    path="/projects"
-                    element={
-                      <ProjectDashboard
-                        onThemeToggle={toggleThemeMode}
-                        isDarkMode={mode === 'dark'}
-                      />
-                    }
-                  />
-                  <Route
-                    path="/projects/:projectId/*"
-                    element={withOfflineFallback(ProjectDetailPage)({
-                      onThemeToggle: toggleThemeMode,
-                      isDarkMode: mode === 'dark',
-                    })}
-                  />
-                  <Route
-                    path="/settings"
-                    element={
-                      <SettingsPage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
-                    }
-                  />
-                  <Route
-                    path="/performance"
-                    element={
-                      <PerformancePage
-                        onThemeToggle={toggleThemeMode}
-                        isDarkMode={mode === 'dark'}
-                      />
-                    }
-                  />
-                  {/* Demo route for our redesigned UI */}
-                  <Route path="/brainstorm-demo" element={<BrainstormDemoPage />} />
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-              </Suspense>
-
-              {/* Offline indicator removed as per UI update plan */}
-
-              {/* Screen reader announcer - always visible */}
-              <ScreenReaderAnnouncer messages={[]} politeness="polite" />
-
-              {/* Update notification */}
-              <Snackbar
-                open={updateAvailable}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        <ToastProvider>
+          <ActionFeedbackProvider>
+            <ErrorBoundary>
+              <BrowserRouter
+                future={{
+                  v7_startTransition: true,
+                  v7_relativeSplatPath: true,
+                }}
               >
-                <Alert
-                  severity="info"
-                  action={
-                    <Button color="inherit" size="small" onClick={handleUpdateApp}>
-                      Update
-                    </Button>
-                  }
+                <Suspense fallback={<LoadingFallback />}>
+                  <Routes>
+                    <Route
+                      path="/"
+                      element={
+                        <HomePage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
+                      }
+                    />
+                    <Route
+                      path="/projects"
+                      element={
+                        <ProjectDashboard
+                          onThemeToggle={toggleThemeMode}
+                          isDarkMode={mode === 'dark'}
+                        />
+                      }
+                    />
+                    <Route
+                      path="/projects/:projectId/*"
+                      element={withOfflineFallback(ProjectDetailPage)({
+                        onThemeToggle: toggleThemeMode,
+                        isDarkMode: mode === 'dark',
+                      })}
+                    />
+                    <Route
+                      path="/settings"
+                      element={
+                        <SettingsPage onThemeToggle={toggleThemeMode} isDarkMode={mode === 'dark'} />
+                      }
+                    />
+                    <Route
+                      path="/performance"
+                      element={
+                        <PerformancePage
+                          onThemeToggle={toggleThemeMode}
+                          isDarkMode={mode === 'dark'}
+                        />
+                      }
+                    />
+                    {/* Demo route for our redesigned UI */}
+                    <Route path="/brainstorm-demo" element={<BrainstormDemoPage />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </Suspense>
+
+                {/* Offline indicator removed as per UI update plan */}
+
+                {/* Screen reader announcer - always visible */}
+                <ScreenReaderAnnouncer messages={[]} politeness="polite" />
+
+                {/* Update notification */}
+                <Snackbar
+                  open={updateAvailable}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
                 >
-                  A new version is available!
-                </Alert>
-              </Snackbar>
-            </BrowserRouter>
-          </ErrorBoundary>
-        </ActionFeedbackProvider>
+                  <Alert
+                    severity="info"
+                    action={
+                      <Button color="inherit" size="small" onClick={handleUpdateApp}>
+                        Update
+                      </Button>
+                    }
+                  >
+                    A new version is available!
+                  </Alert>
+                </Snackbar>
+              </BrowserRouter>
+            </ErrorBoundary>
+          </ActionFeedbackProvider>
+        </ToastProvider>
       </ThemeProvider>
     </>
   );

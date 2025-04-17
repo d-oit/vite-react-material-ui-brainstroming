@@ -5,6 +5,7 @@ import {
   Add as AddIcon,
   Edit as EditIcon,
 } from '@mui/icons-material';
+import StatusIndicator from '../components/UI/StatusIndicator';
 import {
   Box,
   Typography,
@@ -176,9 +177,14 @@ const ProjectDetailPage = () => {
       <AppShell title="Project" onThemeToggle={() => { }} isDarkMode={theme.palette.mode === 'dark'}>
         <Container maxWidth="lg">
           <Box
-            sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}
+            sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', position: 'relative' }}
           >
-            <CircularProgress />
+            <StatusIndicator
+              status="loading"
+              message="Loading project..."
+              position="center"
+              size="large"
+            />
           </Box>
         </Container>
       </AppShell>
@@ -210,6 +216,24 @@ const ProjectDetailPage = () => {
       onThemeToggle={() => { }}
       isDarkMode={theme.palette.mode === 'dark'}
     >
+      {/* Status indicators */}
+      {isSaving && (
+        <StatusIndicator
+          status="loading"
+          message="Saving..."
+          position="bottom-right"
+          size="small"
+          showBackground={false}
+        />
+      )}
+      {error && (
+        <StatusIndicator
+          status="error"
+          message={error}
+          position="top-right"
+          size="small"
+        />
+      )}
       <Box
         sx={{
           mb: 2,

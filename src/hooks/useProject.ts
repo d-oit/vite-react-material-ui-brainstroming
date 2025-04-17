@@ -5,6 +5,8 @@ import { uploadProject, downloadProject } from '../lib/s3Service';
 import type { Project, Node, Edge } from '../types';
 import { ProjectTemplate } from '../types/project';
 import { hasProjectChanged } from '../utils/projectUtils';
+import { useToast } from '../contexts/ToastContext';
+import useDebounce from './useDebounce';
 
 interface UseProjectProps {
   projectId?: string;
@@ -19,6 +21,8 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasChanges, setHasChanges] = useState<boolean>(false);
   const previousProjectRef = useRef<Project | null>(null);
+  const { showToast } = useToast();
+  const lastSaveTimeRef = useRef<number>(0);
 
   // Load project
   const loadProject = useCallback(async () => {
@@ -198,6 +202,13 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
       // Only update isSaving state if it was set to true
       if (performance.now() - saveStartTime >= 300) {
         setIsSaving(false);
+      }
+
+      // Show toast notification for successful save, but not too frequently
+      const currentTime = Date.now();
+      if (currentTime - lastSaveTimeRef.current > 5000) { // Only show toast every 5 seconds at most
+        showToast('Project saved successfully', 'success', 2000);
+        lastSaveTimeRef.current = currentTime;
       }
 
       return true;
@@ -448,6 +459,38 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
     previousProjectRef.current = { ...project };
   }, [project, loading, isSaving]);
 
+  // Create a debounced auto-save function
+  const [debouncedAutoSave, cancelDebouncedAutoSave] = useDebounce(
+    async () => {
+      if (
+        autoSave !== true ||
+        project === null ||
+        !('id' in project) ||
+        !('nodes' in project) ||
+        loading === true ||
+        isSaving === true ||
+        !hasChanges // Only proceed if there are changes
+      ) {
+        return;
+      }
+
+      try {
+        const saveResult = await saveProject();
+        if (saveResult) {
+          setHasChanges(false); // Reset the changes flag after successful save
+        } else {
+          // If save failed, we'll keep hasChanges true so it can retry
+          console.warn('Auto-save failed, will retry on next change');
+        }
+      } catch (autoSaveError) {
+        console.error('Error during auto-save:', autoSaveError);
+        // Keep hasChanges true so it can retry
+      }
+    },
+    5000, // Auto-save after 5 seconds of inactivity
+    [project, autoSave, loading, isSaving, hasChanges]
+  );
+
   // Auto-save effect - only triggers when there are changes
   useEffect(() => {
     if (
@@ -462,23 +505,12 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
       return;
     }
 
-    const timer = setTimeout(async () => {
-      try {
-        const saveResult = await saveProject();
-        if (saveResult) {
-          setHasChanges(false); // Reset the changes flag after successful save
-        } else {
-          // If save failed, we'll keep hasChanges true so it can retry
-          console.warn('Auto-save failed, will retry on next change');
-        }
-      } catch (autoSaveError) {
-        console.error('Error during auto-save:', autoSaveError);
-        // Keep hasChanges true so it can retry
-      }
-    }, 5000); // Auto-save after 5 seconds of inactivity
+    // Trigger the debounced auto-save
+    debouncedAutoSave();
 
-    return () => clearTimeout(timer);
-  }, [project, autoSave, loading, isSaving, saveProject, hasChanges]);
+    // Clean up on unmount or when dependencies change
+    return () => cancelDebouncedAutoSave();
+  }, [project, autoSave, loading, isSaving, hasChanges, debouncedAutoSave, cancelDebouncedAutoSave]);
 
   // Load project on mount
   useEffect(() => {
