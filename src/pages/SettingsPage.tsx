@@ -10,6 +10,7 @@ import {
   FormHelperText,
   Switch,
   Select,
+  SelectChangeEvent,
   MenuItem,
   InputLabel,
   Slider,
@@ -33,6 +34,7 @@ import { ColorSchemeManager } from '../components/Settings/ColorSchemeManager';
 import { LogViewer } from '../components/Settings/LogViewer';
 import { NodePreferencesManager } from '../components/Settings/NodePreferencesManager';
 import { SettingsExportImport } from '../components/Settings/SettingsExportImport';
+import LanguageSelector from '../components/I18n/LanguageSelector';
 import { useI18n } from '../contexts/I18nContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { ThemeMode } from '../types';
@@ -46,12 +48,20 @@ import {
 } from '../utils/urlValidation';
 
 // Default user preferences
-const _defaultPreferences: UserPreferences = {
+interface ExtendedUserPreferences extends UserPreferences {
+  themeMode: ThemeMode;
+  fontSize: number;
+  language: string;
+  skipDeleteConfirmation?: boolean;
+}
+
+const _defaultPreferences: ExtendedUserPreferences = {
   themeMode: ThemeMode.SYSTEM,
   autoSave: true,
   autoBackup: false,
   fontSize: 14,
   language: 'en',
+  skipDeleteConfirmation: false,
 };
 
 interface SettingsPageProps {
@@ -89,7 +99,7 @@ function TabPanel(props: TabPanelProps) {
 
 const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
   const { settings, updateSettings } = useSettings();
-  const [preferences, setPreferences] = useState<UserPreferences>(() => {
+  const [preferences, setPreferences] = useState<ExtendedUserPreferences>(() => {
     // Use settings from the context
     return {
       themeMode: settings.themeMode,
@@ -97,6 +107,7 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
       autoBackup: settings.autoBackup,
       fontSize: settings.fontSize,
       language: settings.language,
+      skipDeleteConfirmation: settings.skipDeleteConfirmation || false,
     };
   });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -145,19 +156,19 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
       });
     };
 
-  const handleThemeModeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+  const handleThemeModeChange = (event: SelectChangeEvent<ThemeMode>) => {
     const newMode = event.target.value as ThemeMode;
     setPreferences({ ...preferences, themeMode: newMode });
     updateSettings({ themeMode: newMode });
   };
 
   const handleSwitchChange =
-    (name: keyof Pick<UserPreferences, 'autoSave' | 'autoBackup'>) =>
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = event.target.checked;
-      setPreferences({ ...preferences, [name]: newValue });
-      updateSettings({ [name]: newValue });
-    };
+    (name: keyof Pick<ExtendedUserPreferences, 'autoSave' | 'autoBackup' | 'skipDeleteConfirmation'>) =>
+      (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = event.target.checked;
+        setPreferences({ ...preferences, [name]: newValue });
+        updateSettings({ [name]: newValue });
+      };
 
   const handleFontSizeChange = (_event: Event, newValue: number | number[]) => {
     const fontSize = newValue as number;
@@ -165,8 +176,8 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
     updateSettings({ fontSize });
   };
 
-  const handleLanguageChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    const language = event.target.value as string;
+  const handleLanguageChange = (event: SelectChangeEvent<string>) => {
+    const language = event.target.value;
     setPreferences({ ...preferences, language });
     updateSettings({ language });
   };
@@ -220,8 +231,8 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
   };
 
   // Handle AWS region change
-  const handleAwsRegionChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    const value = event.target.value as string;
+  const handleAwsRegionChange = (event: SelectChangeEvent<string>) => {
+    const value = event.target.value;
     setAwsRegion(value);
   };
 
@@ -233,8 +244,8 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
   };
 
   // Handle OpenRouter model change
-  const handleOpenRouterModelChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    const value = event.target.value as string;
+  const handleOpenRouterModelChange = (event: SelectChangeEvent<string>) => {
+    const value = event.target.value;
     setOpenRouterModel(value);
   };
 
@@ -298,13 +309,14 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
   return (
     <AppShell
       title={t('settings.title')}
-      onThemeToggle={onThemeToggle || (() => {})}
+      onThemeToggle={onThemeToggle || (() => { })}
       isDarkMode={isDarkMode || theme.palette.mode === 'dark'}
     >
       <Container
-        maxWidth="lg"
+        maxWidth="xl"
         sx={{
-          py: 4,
+          py: 2,
+          px: { xs: 0.5, sm: 1 },
           height: '100%',
           overflow: 'auto',
           '&::-webkit-scrollbar': {
@@ -399,18 +411,12 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
                   </Box>
 
                   <FormControl fullWidth>
-                    <InputLabel id="language-label">Language</InputLabel>
-                    <Select
-                      labelId="language-label"
-                      value={preferences.language}
-                      label="Language"
-                      onChange={handleLanguageChange}
-                    >
-                      <MenuItem value="en">English</MenuItem>
-                      <MenuItem value="de">German</MenuItem>
-                      <MenuItem value="fr">French</MenuItem>
-                      <MenuItem value="es">Spanish</MenuItem>
-                    </Select>
+                    <LanguageSelector
+                      variant="select"
+                      showFlags={true}
+                      showNativeNames={true}
+                      fullWidth={true}
+                    />
                   </FormControl>
                 </AccordionDetails>
               </Accordion>
@@ -615,3 +621,10 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
 };
 
 export default SettingsPage;
+
+
+
+
+
+
+

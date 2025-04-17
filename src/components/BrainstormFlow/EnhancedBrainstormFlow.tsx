@@ -103,9 +103,27 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
 
-  // Auto-save on significant changes
+  // Track previous state to detect changes
+  const prevNodesRef = React.useRef<string>(JSON.stringify(initialNodes));
+  const prevEdgesRef = React.useRef<string>(JSON.stringify(initialEdges));
+
+  // Auto-save only when there are actual changes
   React.useEffect(() => {
-    handleSave();
+    const currentNodesJSON = JSON.stringify(nodes);
+    const currentEdgesJSON = JSON.stringify(edges);
+
+    // Check if nodes or edges have changed
+    const nodesChanged = currentNodesJSON !== prevNodesRef.current;
+    const edgesChanged = currentEdgesJSON !== prevEdgesRef.current;
+
+    // Only save if there are actual changes
+    if (nodesChanged || edgesChanged) {
+      handleSave();
+
+      // Update previous state references
+      prevNodesRef.current = currentNodesJSON;
+      prevEdgesRef.current = currentEdgesJSON;
+    }
   }, [nodes, edges, handleSave]);
 
   // Handle node click for editing
@@ -199,8 +217,9 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
         <NodeEditDialog
           open={showEditDialog}
           onClose={handleCloseEditDialog}
-          node={selectedNode}
-          onSave={handleNodeUpdate}
+          initialData={selectedNode.data}
+          initialType={selectedNode.type as any}
+          onSave={(data, type) => handleNodeUpdate(selectedNode.id, { ...data, type })}
         />
       )}
 

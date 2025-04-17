@@ -49,7 +49,20 @@ export class LoggerService {
     this.applicationVersion = import.meta.env.VITE_PROJECT_VERSION ?? '0.1.0';
 
     // Generate a session ID
-    this.sessionId = crypto.randomUUID();
+    try {
+      // Use crypto.randomUUID() if available
+      if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        this.sessionId = crypto.randomUUID();
+      } else {
+        // Fallback to a simple random ID generator
+        this.sessionId = 'session-' + Math.random().toString(36).substring(2, 15) +
+          Math.random().toString(36).substring(2, 15);
+      }
+    } catch (error) {
+      // Fallback if crypto API fails
+      console.warn('Failed to generate UUID using crypto API, using fallback');
+      this.sessionId = 'session-' + Date.now() + '-' + Math.random().toString(36).substring(2, 15);
+    }
 
     // Set default context
     this.defaultContext = {
@@ -60,31 +73,39 @@ export class LoggerService {
 
   /**
    * Initialize the logger service
-   * @returns Promise that resolves when initialization is complete
+   * @returns Promise that resolves with true when initialization is complete, false on failure
    */
-  public async initialize(): Promise<void> {
+  public async initialize(): Promise<boolean> {
     if (this.isInitialized) {
-      return;
+      return true;
     }
 
-    // Set up periodic log cleanup
-    this.setupLogCleanup();
+    try {
+      // Set up periodic log cleanup
+      this.setupLogCleanup();
 
-    // Set up global error handlers
-    this.setupGlobalErrorHandlers();
+      // Set up global error handlers
+      this.setupGlobalErrorHandlers();
 
-    this.isInitialized = true;
+      this.isInitialized = true;
 
-    // Process any pending logs
-    while (this.pendingLogs.length > 0) {
-      const log = this.pendingLogs.shift();
-      if (log) {
-        await this.log(log.level, log.message, log.context);
+      // Process any pending logs
+      while (this.pendingLogs.length > 0) {
+        const log = this.pendingLogs.shift();
+        if (log) {
+          await this.log(log.level, log.message, log.context);
+        }
       }
-    }
 
-    // Log application start after initialization
-    await this.info('Application started', { category: 'app' });
+      // Log application start after initialization
+      await this.info('Application started', { category: 'app' });
+
+      return true;
+    } catch (error) {
+      console.error('Failed to initialize logger service:', error);
+      this.isInitialized = false;
+      return false;
+    }
   }
 
   /**
@@ -243,11 +264,11 @@ export class LoggerService {
   ): Promise<void> {
     const errorContext = error
       ? {
-          ...context,
-          errorMessage: error.message,
-          stack: error.stack,
-          name: error.name,
-        }
+        ...context,
+        errorMessage: error.message,
+        stack: error.stack,
+        name: error.name,
+      }
       : context;
 
     await this.log('error', message, errorContext);
@@ -266,11 +287,11 @@ export class LoggerService {
   ): Promise<void> {
     const errorContext = error
       ? {
-          ...context,
-          errorMessage: error.message,
-          stack: error.stack,
-          name: error.name,
-        }
+        ...context,
+        errorMessage: error.message,
+        stack: error.stack,
+        name: error.name,
+      }
       : context;
 
     await this.log('critical', message, errorContext);
@@ -292,38 +313,44 @@ export class LoggerService {
     // Check if we should log this level
     if (!this.shouldLogLevel(level)) return;
 
-    // If not initialized, queue the log
-    if (!this.isInitialized) {
-      this.pendingLogs.push({ level, message, context });
-      // Log to console even if not initialized
-      if (this.consoleLoggingEnabled) {
-        this.logToConsole(level, message, this.mergeContext(context));
-      }
-      return;
-    }
-
-    // Merge with default context
-    const mergedContext = this.mergeContext(context);
-
-    // Log to console if enabled
-    if (this.consoleLoggingEnabled) {
-      this.logToConsole(level, message, mergedContext);
-    }
-
     try {
-      // Log to IndexedDB
-      await this.logToIndexedDB(level, message, mergedContext);
+      // If not initialized, queue the log
+      if (!this.isInitialized) {
+        this.pendingLogs.push({ level, message, context });
+        // Log to console even if not initialized
+        if (this.consoleLoggingEnabled) {
+          this.logToConsole(level, message, this.mergeContext(context));
+        }
+        return;
+      }
 
-      // If we have a remote endpoint and it's an error or critical, try to send it immediately
-      if (
-        this.remoteLoggingEndpoint &&
-        (level === 'error' || level === 'critical') &&
-        offlineService.getOnlineStatus()
-      ) {
-        await this.sendLogToRemote(level, message, mergedContext);
+      // Merge with default context
+      const mergedContext = this.mergeContext(context);
+
+      // Log to console if enabled
+      if (this.consoleLoggingEnabled) {
+        this.logToConsole(level, message, mergedContext);
+      }
+
+      try {
+        // Log to IndexedDB
+        await this.logToIndexedDB(level, message, mergedContext);
+
+        // If we have a remote endpoint and it's an error or critical, try to send it immediately
+        if (
+          this.remoteLoggingEndpoint &&
+          (level === 'error' || level === 'critical') &&
+          offlineService.getOnlineStatus()
+        ) {
+          await this.sendLogToRemote(level, message, mergedContext);
+        }
+      } catch (error) {
+        // Don't let IndexedDB or remote logging errors propagate up
+        console.error('Failed to log to storage:', error);
       }
     } catch (error) {
-      console.error('Failed to log:', error);
+      // Catch any unexpected errors to prevent app crashes
+      console.error('Critical error in logger:', error);
     }
   }
 
@@ -476,14 +503,20 @@ export class LoggerService {
     context?: Record<string, unknown>
   ): Promise<void> {
     try {
+      // Check if IndexedDB is already initialized to avoid redundant init calls
       const initialized = await indexedDBService.init();
       if (initialized === true) {
-        void (await indexedDBService.log(level, message, {
+        // Add enhanced context to the log entry
+        const enhancedContext = {
           ...context,
           appVersion: this.applicationVersion,
           userAgent: navigator.userAgent,
           url: window.location.href,
-        }));
+          timestamp: new Date().toISOString(),
+        };
+
+        // Use await directly instead of void (await ...) pattern
+        await indexedDBService.log(level, message, enhancedContext);
       } else {
         // If IndexedDB is not available, just log to console
         if (level === 'error' || level === 'warn') {
@@ -491,7 +524,8 @@ export class LoggerService {
         }
       }
     } catch (error) {
-      console.error('Failed to log to IndexedDB:', error);
+      // More detailed error message
+      console.error(`Failed to log "${message}" to IndexedDB:`, error);
     }
   }
 

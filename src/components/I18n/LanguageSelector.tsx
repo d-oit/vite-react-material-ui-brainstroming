@@ -10,8 +10,12 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  FormControlLabel,
+  FormHelperText,
   IconButton,
   InputBase,
+  InputLabel,
   List,
   ListItem,
   ListItemButton,
@@ -19,6 +23,7 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  Select,
   Tooltip,
   Typography,
   useTheme,
@@ -71,10 +76,11 @@ const languages: Language[] = [
 ];
 
 interface LanguageSelectorProps {
-  variant?: 'icon' | 'menu' | 'dialog';
+  variant?: 'icon' | 'menu' | 'dialog' | 'select';
   size?: 'small' | 'medium' | 'large';
   showFlags?: boolean;
   showNativeNames?: boolean;
+  fullWidth?: boolean;
 }
 
 export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
@@ -245,11 +251,39 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   // Render based on variant
   return (
     <>
-      {languageButton}
-      {variant === 'icon' && languageMenu}
-      {variant === 'dialog' && languageDialog}
+      {variant === 'select' ? (
+        <FormControl fullWidth={fullWidth}>
+          <InputLabel id="language-select-label">{t('language.select') || 'Select Language'}</InputLabel>
+          <Select
+            labelId="language-select-label"
+            value={locale}
+            label={t('language.select') || 'Select Language'}
+            onChange={(e) => handleLanguageSelect(e.target.value as string)}
+          >
+            {languages.map(lang => (
+              <MenuItem key={lang.code} value={lang.code}>
+                {showFlags && lang.flag && <Box component="span" sx={{ mr: 1 }}>{lang.flag}</Box>}
+                {lang.name}
+                {showNativeNames && lang.name !== lang.nativeName && (
+                  <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                    ({lang.nativeName})
+                  </Typography>
+                )}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      ) : (
+        <>
+          {languageButton}
+          {variant === 'icon' && languageMenu}
+          {variant === 'dialog' && languageDialog}
+        </>
+      )}
     </>
   );
 };
 
 export default LanguageSelector;
+
+

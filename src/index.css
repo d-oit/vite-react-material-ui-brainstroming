@@ -105,3 +105,12 @@ body,
   white-space: nowrap;
   border: 0;
 }
+
+#root {
+  max-width: 100%; /* Changed from 1280px to 100% */
+  margin: 0 auto;
+  padding: 0; /* Changed from 2rem to 0 */
+  text-align: center;
+}
+
+

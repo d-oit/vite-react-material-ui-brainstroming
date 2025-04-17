@@ -59,8 +59,14 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
 
   return (
     <AppShell title="Project Dashboard" onThemeToggle={onThemeToggle} isDarkMode={isDarkMode}>
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box sx={{ mb: 3 }}>
+      <Container 
+        maxWidth="xl" 
+        sx={{ 
+          py: 2,
+          px: { xs: 0.5, sm: 1 }, // Minimal horizontal padding
+        }}
+      >
+        <Box sx={{ mb: 2 }}> {/* Reduced margin from 3 to 2 */}
           <Typography variant="h5" component="h1" gutterBottom>
             My Projects
           </Typography>
@@ -110,3 +116,6 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
 };
 
 export default ProjectDashboard;
+
+
+

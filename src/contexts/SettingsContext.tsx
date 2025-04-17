@@ -144,7 +144,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       }
     };
 
-    initializeData();
+    void initializeData(); // Add void operator to explicitly ignore the promise
   }, [settings.activeColorSchemeId]);
 
   // Configure services with settings
@@ -176,10 +176,17 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
   // Update settings
   const updateSettings = (newSettings: Partial<Settings>) => {
     setSettings(prevSettings => {
+      // Ensure themeMode is a valid enum value if it's being updated
+      if (newSettings.themeMode !== undefined && 
+          !Object.values(ThemeMode).includes(newSettings.themeMode as ThemeMode)) {
+        // Default to system if invalid value
+        newSettings.themeMode = ThemeMode.SYSTEM;
+      }
+      
       const updatedSettings = { ...prevSettings, ...newSettings };
 
       // Save to IndexedDB
-      indexedDBService.saveSettings(updatedSettings).catch(error => {
+      indexedDBService.saveSettings(updatedSettings as Record<string, unknown>).catch(error => {
         console.error('Failed to save settings to IndexedDB:', error);
         // Fallback to localStorage
         localStorage.setItem('app_settings', JSON.stringify(updatedSettings));
@@ -232,7 +239,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
   // Reset settings to defaults
   const resetSettings = () => {
     setSettings(defaultSettings);
-    indexedDBService.saveSettings(defaultSettings).catch(error => {
+    indexedDBService.saveSettings(defaultSettings as Record<string, unknown>).catch(error => {
       console.error('Failed to reset settings in IndexedDB:', error);
       localStorage.removeItem('app_settings');
     });
@@ -329,7 +336,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
             ...prevSettings,
             ...legacySettings,
           }));
-          await indexedDBService.saveSettings(legacySettings);
+          await indexedDBService.saveSettings(legacySettings as Record<string, unknown>);
           return true;
         } catch (_) {
           throw new Error('Invalid settings data');
@@ -346,7 +353,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         ...prevSettings,
         ...importData.settings,
       }));
-      await indexedDBService.saveSettings(importData.settings);
+      await indexedDBService.saveSettings(importData.settings as Record<string, unknown>);
 
       // Import color schemes if available
       if (importData.colorSchemes && Array.isArray(importData.colorSchemes)) {

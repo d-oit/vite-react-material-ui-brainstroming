@@ -562,6 +562,9 @@ export const ColorSchemeManager = () => {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h6">Color Schemes</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Customize the appearance of your nodes by creating and editing color schemes.
+        </Typography>
         <Button variant="outlined" startIcon={<AddIcon />} onClick={handleCreate}>
           New Scheme
         </Button>
@@ -626,3 +629,4 @@ export const ColorSchemeManager = () => {
     </Box>
   );
 };
+

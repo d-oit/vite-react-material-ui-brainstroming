@@ -72,7 +72,7 @@ const ProjectDetailPage = () => {
   const [editedName, setEditedName] = useState('');
   const [editedDescription, setEditedDescription] = useState('');
 
-  const { project, loading, error, isSaving, saveProject, createNewVersion } = useProject({
+  const { project, loading, error, isSaving, hasChanges, saveProject, createNewVersion } = useProject({
     projectId,
     autoSave: true,
   });
@@ -88,19 +88,25 @@ const ProjectDetailPage = () => {
 
   const handleSaveFlow = (updatedNodes: Node[], updatedEdges: Edge[]) => {
     if (project !== null && project !== undefined) {
-      setNodes(updatedNodes);
-      setEdges(updatedEdges);
+      // Check if nodes or edges have actually changed
+      const nodesChanged = JSON.stringify(updatedNodes) !== JSON.stringify(project.nodes);
+      const edgesChanged = JSON.stringify(updatedEdges) !== JSON.stringify(project.edges);
 
-      // Create updated project with new nodes and edges
-      const _updatedProject = {
-        ...project,
-        nodes: updatedNodes,
-        edges: updatedEdges,
-        updatedAt: new Date().toISOString(),
-      };
+      if (nodesChanged || edgesChanged) {
+        setNodes(updatedNodes);
+        setEdges(updatedEdges);
 
-      // Save project
-      void saveProject();
+        // Create updated project with new nodes and edges
+        const _updatedProject = {
+          ...project,
+          nodes: updatedNodes,
+          edges: updatedEdges,
+          updatedAt: new Date().toISOString(),
+        };
+
+        // Save project
+        void saveProject(_updatedProject);
+      }
     }
   };
 
@@ -111,21 +117,36 @@ const ProjectDetailPage = () => {
   };
 
   // Function to save edited project details
-  const handleSaveProjectDetails = async () => {
+  const handleProjectDetailsChange = async (field: 'name' | 'description', value: string) => {
     if (project !== null && project !== undefined) {
-      const updatedProject = {
-        ...project,
-        name: editedName,
-        description: editedDescription,
-      };
+      // Only update if the value has actually changed
+      if (project[field] !== value) {
+        // Update local state
+        if (field === 'name') {
+          setEditedName(value);
+        } else {
+          setEditedDescription(value);
+        }
 
-      // Save the project with updated details
-      await saveProject(updatedProject);
+        // Create updated project with new field value
+        const updatedProject = {
+          ...project,
+          [field]: value,
+          updatedAt: new Date().toISOString(),
+        };
 
-      // Exit editing mode
-      setIsEditingName(false);
-      setIsEditingDescription(false);
+        // Save project with the updated project object
+        await saveProject(updatedProject);
+      }
     }
+  };
+
+  const toggleChat = () => {
+    setChatOpen(prev => !prev);
+  };
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
   };
 
   // Function to handle adding nodes from chat suggestions
@@ -144,17 +165,17 @@ const ProjectDetailPage = () => {
     [project]
   );
 
-  const toggleChat = () => {
-    setChatOpen(prev => !prev);
-  };
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
+  // Function to save project description
+  const handleSaveProjectDetails = () => {
+    if (editedDescription.trim() !== '' && editedDescription !== project.description) {
+      void handleProjectDetailsChange('description', editedDescription);
+    }
+    setIsEditingDescription(false);
   };
 
   if (loading) {
     return (
-      <AppShell title="Project" onThemeToggle={() => {}} isDarkMode={theme.palette.mode === 'dark'}>
+      <AppShell title="Project" onThemeToggle={() => { }} isDarkMode={theme.palette.mode === 'dark'}>
         <Container maxWidth="lg">
           <Box
             sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}
@@ -172,7 +193,7 @@ const ProjectDetailPage = () => {
     project === undefined
   ) {
     return (
-      <AppShell title="Project" onThemeToggle={() => {}} isDarkMode={theme.palette.mode === 'dark'}>
+      <AppShell title="Project" onThemeToggle={() => { }} isDarkMode={theme.palette.mode === 'dark'}>
         <Container maxWidth="lg">
           <Paper sx={{ p: 3 }}>
             <Typography color="error" variant="h6">
@@ -188,7 +209,7 @@ const ProjectDetailPage = () => {
   return (
     <AppShell
       title={project.name}
-      onThemeToggle={() => {}}
+      onThemeToggle={() => { }}
       isDarkMode={theme.palette.mode === 'dark'}
     >
       <Box
@@ -216,11 +237,21 @@ const ProjectDetailPage = () => {
               variant="outlined"
               size="small"
               value={editedName}
-              onChange={e => setEditedName(e.target.value)}
+              onChange={e => {
+                setEditedName(e.target.value);
+                // Don't trigger save on every keystroke, use debounce
+                if (e.target.value.trim() !== '' && e.target.value !== project.name) {
+                  const timeoutId = setTimeout(() => {
+                    void handleProjectDetailsChange('name', e.target.value);
+                  }, 1000); // 1 second debounce
+                  return () => clearTimeout(timeoutId);
+                }
+              }}
               autoFocus
               onBlur={() => {
-                if (editedName.trim() !== '') {
-                  void handleSaveProjectDetails();
+                if (editedName.trim() !== '' && editedName !== project.name) {
+                  void handleProjectDetailsChange('name', editedName);
+                  setIsEditingName(false);
                 } else {
                   setEditedName(project.name);
                   setIsEditingName(false);
@@ -228,7 +259,8 @@ const ProjectDetailPage = () => {
               }}
               onKeyDown={e => {
                 if (e.key === 'Enter' && editedName.trim() !== '') {
-                  void handleSaveProjectDetails();
+                  void handleProjectDetailsChange('name', editedName);
+                  setIsEditingName(false);
                 } else if (e.key === 'Escape') {
                   setEditedName(project.name);
                   setIsEditingName(false);
@@ -265,10 +297,10 @@ const ProjectDetailPage = () => {
             onClick={() => {
               void saveProject();
             }}
-            disabled={isSaving}
+            disabled={isSaving || !hasChanges}
             size={isMobile ? 'small' : 'medium'}
           >
-            {isSaving ? 'Saving...' : 'Save'}
+            {isSaving ? 'Saving...' : hasChanges ? 'Save*' : 'Save'}
           </Button>
 
           <Button
@@ -340,7 +372,14 @@ const ProjectDetailPage = () => {
               rows={4}
               variant="outlined"
               value={editedDescription}
-              onChange={e => setEditedDescription(e.target.value)}
+              onChange={e => {
+                setEditedDescription(e.target.value);
+                // Debounce to avoid too many saves
+                const timeoutId = setTimeout(() => {
+                  void handleProjectDetailsChange('description', e.target.value);
+                }, 1000); // 1 second debounce
+                return () => clearTimeout(timeoutId);
+              }}
               placeholder="Enter project description"
               sx={{ mb: 2 }}
               InputProps={{
@@ -351,12 +390,13 @@ const ProjectDetailPage = () => {
                   },
                 },
               }}
+              onBlur={handleSaveProjectDetails}
             />
           ) : (
             <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
               {project.description !== null &&
-              project.description !== undefined &&
-              project.description !== ''
+                project.description !== undefined &&
+                project.description !== ''
                 ? project.description
                 : 'No description provided.'}
             </Typography>
@@ -467,21 +507,24 @@ const ProjectDetailPage = () => {
         <ProjectSettingsSection
           project={project}
           onSave={(updatedProject: Project) => {
-            // Update the project in state
-            if (project !== null && project !== undefined) {
-              // Create a merged project with the updates
-              const mergedProject = {
-                ...project,
-                ...updatedProject,
-                updatedAt: new Date().toISOString(),
-              };
+            // Only save if there are actual changes
+            if (JSON.stringify(updatedProject) !== JSON.stringify(project)) {
+              // Update the project in state
+              if (project !== null && project !== undefined) {
+                // Create a merged project with the updates
+                const mergedProject = {
+                  ...project,
+                  ...updatedProject,
+                  updatedAt: new Date().toISOString(),
+                };
 
-              // Update local state
-              setNodes(mergedProject.nodes);
-              setEdges(mergedProject.edges);
+                // Update local state
+                setNodes(mergedProject.nodes);
+                setEdges(mergedProject.edges);
 
-              // Save project
-              void saveProject();
+                // Save project
+                void saveProject(mergedProject);
+              }
             }
           }}
           isSaving={isSaving}
@@ -597,3 +640,13 @@ const ProjectDetailPage = () => {
 };
 
 export default ProjectDetailPage;
+
+
+
+
+
+
+
+
+
+

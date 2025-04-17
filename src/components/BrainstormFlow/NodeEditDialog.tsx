@@ -120,7 +120,7 @@ const NodeEditDialog = ({
 
   const handleSave = () => {
     void loggerService.info('Saving node', { type, label, tagsCount: tags.length, size });
-    onSave( { label, title: label, content, tags, color, size, }, type );
+    onSave({ label, title: label, content, tags, color, size, }, type);
   };
 
   const defaultNodeColor = getNodeColor(type);
@@ -131,7 +131,7 @@ const NodeEditDialog = ({
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
           {/* Form Controls... */}
-           <FormControl fullWidth>
+          <FormControl fullWidth>
             <InputLabel id="node-type-label">Node Type</InputLabel>
             <Select labelId="node-type-label" value={type} label="Node Type" onChange={handleTypeChange} >
               <MenuItem value={NodeType.IDEA}>Idea</MenuItem>
@@ -149,7 +149,7 @@ const NodeEditDialog = ({
             <Button variant="outlined" onClick={handleAddTag}> Add </Button>
           </Box>
           <Box data-testid="tag-list-container" sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1, mb: 2 }}>
-            {tags.map(tag => ( <Chip key={tag} label={tag} onDelete={() => handleDeleteTag(tag)} /> ))}
+            {tags.map(tag => (<Chip key={tag} label={tag} onDelete={() => handleDeleteTag(tag)} />))}
           </Box>
           <Divider sx={{ my: 2 }} />
           <Typography variant="subtitle1" gutterBottom> Appearance </Typography>
@@ -182,7 +182,7 @@ const NodeEditDialog = ({
                     </Select>
                   </FormControl>
                 )}
-                {nodePreferences && ( <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }} > Width: {nodePreferences.nodeSizes[size].width}px, Font: {nodePreferences.nodeSizes[size].fontSize}rem </Typography> )}
+                {nodePreferences && (<Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }} > Width: {nodePreferences.nodeSizes[size].width}px, Font: {nodePreferences.nodeSizes[size].fontSize}rem </Typography>)}
               </Grid>
 
               {/* Color selection */}
@@ -214,7 +214,7 @@ const NodeEditDialog = ({
                   />
                   {(showColorPicker || !isMobile) && (
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1, justifyContent: 'space-between', }} >
-                      {[ '#e3f2fd', '#e8f5e9', '#fff8e1', '#f3e5f5', '#0d47a1', '#1b5e20', '#f57f17', '#4a148c', ].map(presetColor => (
+                      {['#e3f2fd', '#e8f5e9', '#fff8e1', '#f3e5f5', '#0d47a1', '#1b5e20', '#f57f17', '#4a148c',].map(presetColor => (
                         // Corrected Tooltip usage: Box is now a child
                         <Tooltip key={presetColor} title={presetColor}>
                           <Box sx={{ width: 24, height: 24, borderRadius: '50%', bgcolor: presetColor, border: color === presetColor ? `2px solid ${theme.palette.primary.main}` : '1px solid rgba(0, 0, 0, 0.2)', cursor: 'pointer', transition: 'all 0.2s ease', '&:hover': { transform: 'scale(1.1)', }, }}
@@ -238,7 +238,7 @@ const NodeEditDialog = ({
               </Typography>
               {tags.length > 0 && (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1, mt: 0.5 }}>
-                  {tags.map(tag => ( <Chip key={tag} label={tag} size="small" sx={{ height: 20, fontSize: '0.7rem', backgroundColor: `${theme.palette.primary.main}20`, }} /> ))}
+                  {tags.map(tag => (<Chip key={tag} label={tag} size="small" sx={{ height: 20, fontSize: '0.7rem', backgroundColor: `${theme.palette.primary.main}20`, }} />))}
                 </Box>
               )}
               <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: 'inherit', }} >
@@ -260,3 +260,6 @@ const NodeEditDialog = ({
 };
 
 export const MemoizedNodeEditDialog = memo(NodeEditDialog);
+
+// Export as default for backward compatibility
+export default memo(NodeEditDialog);

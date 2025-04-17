@@ -116,21 +116,21 @@ class PerformanceTracker {
   ): string {
     if (!this.isEnabled) return '';
 
-    // Use a safer way to get current timestamp
-    const timestamp = typeof Date.now === 'function' ? Date.now() : new Date().getTime();
-    const id = `${name}_${timestamp}`;
+    // Generate a unique ID that doesn't include the timestamp twice
+    const uniqueId = `${name}_${Math.random().toString(36).substring(2, 9)}`;
+
     const metric: PerformanceMetric = {
-      id,
+      id: uniqueId,
       name,
       category,
       startTime: typeof performance !== 'undefined' && typeof performance.now === 'function'
         ? performance.now()
-        : timestamp,
+        : (typeof Date.now === 'function' ? Date.now() : new Date().getTime()),
       metadata,
     };
 
-    this.activeMetrics.set(id, metric);
-    return id;
+    this.activeMetrics.set(uniqueId, metric);
+    return uniqueId;
   }
 
   /**
@@ -217,8 +217,18 @@ class PerformanceTracker {
 
     // Map the category to the appropriate budget
     const category = String(metric.category);
+    const metricName = String(metric.name || '');
 
-    if (category === MetricCategory.RENDER || category === PerformanceCategory.RENDERING) {
+    // Special case for App initialization which is allowed to take longer
+    if (metricName.includes('App.initialization')) {
+      // App initialization can take longer, so we use a higher threshold
+      threshold = 500; // 500ms threshold for initialization
+      if (metric.duration > 1000) { // 1 second is poor
+        level = 'POOR';
+      } else if (metric.duration > 500) { // 500ms is acceptable
+        level = 'ACCEPTABLE';
+      }
+    } else if (category === MetricCategory.RENDER || category === PerformanceCategory.RENDERING) {
       threshold = PerformanceBudget.RENDER.ACCEPTABLE;
       if (metric.duration > PerformanceBudget.RENDER.POOR) {
         level = 'POOR';

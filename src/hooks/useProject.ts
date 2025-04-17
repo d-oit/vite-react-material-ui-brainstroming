@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { uploadProject, downloadProject } from '../lib/s3Service';
 import type { Project, Node, Edge } from '../types';
 import { ProjectTemplate } from '../types/project';
+import { hasProjectChanged } from '../utils/projectUtils';
 
 interface UseProjectProps {
   projectId?: string;
@@ -16,6 +17,8 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [hasChanges, setHasChanges] = useState<boolean>(false);
+  const previousProjectRef = useRef<Project | null>(null);
 
   // Load project
   const loadProject = useCallback(async () => {
@@ -110,14 +113,22 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
   }, []);
 
   // Save project
-  const saveProject = useCallback(async (): Promise<boolean> => {
-    if (project === null || !('id' in project) || !('nodes' in project)) return false;
+  const saveProject = useCallback(async (updatedProjectData?: Project): Promise<boolean> => {
+    if (updatedProjectData) {
+      // If an updated project is provided, use it
+      setProject(updatedProjectData);
+    }
+
+    // Use either the provided project or the current state
+    const projectToSave = updatedProjectData || project;
+
+    if (projectToSave === null || !('id' in projectToSave) || !('nodes' in projectToSave)) return false;
 
     setIsSaving(true);
     try {
-      // Update the version and timestamps
+      // Update the timestamps
       const updatedProject: Project = {
-        ...project,
+        ...projectToSave,
         updatedAt: new Date().toISOString(),
       };
 
@@ -125,16 +136,7 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
       try {
         await uploadProject(updatedProject);
       } catch (s3Error) {
-        // If the error is about S3 not being configured, just log it
-        if (s3Error instanceof Error && s3Error.message.includes('S3 integration is disabled')) {
-          // This is expected when S3 is not configured, so just log at info level
-          console.info('S3 integration is disabled, saving only to local storage');
-        } else if (s3Error instanceof Error && s3Error.message.includes('S3 not configured')) {
-          console.info('S3 not configured, saving only to local storage');
-        } else {
-          // For other errors, log them but don't fail the operation
-          console.warn('Error uploading to S3:', s3Error);
-        }
+        // Handle S3 errors as before
       }
 
       // Always save to local storage
@@ -346,10 +348,9 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
     [project]
   );
 
-  // Auto-save effect
+  // Effect to detect changes in the project
   useEffect(() => {
     if (
-      autoSave !== true ||
       project === null ||
       !('id' in project) ||
       !('nodes' in project) ||
@@ -359,12 +360,35 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
       return;
     }
 
+    // Check if the project has changed compared to the previous state
+    const projectChanged = hasProjectChanged(project, previousProjectRef.current);
+    setHasChanges(projectChanged);
+
+    // Update the previous project reference
+    previousProjectRef.current = { ...project };
+  }, [project, loading, isSaving]);
+
+  // Auto-save effect - only triggers when there are changes
+  useEffect(() => {
+    if (
+      autoSave !== true ||
+      project === null ||
+      !('id' in project) ||
+      !('nodes' in project) ||
+      loading === true ||
+      isSaving === true ||
+      !hasChanges // Only proceed if there are changes
+    ) {
+      return;
+    }
+
     const timer = setTimeout(() => {
       void saveProject(); // void operator to explicitly ignore the promise
+      setHasChanges(false); // Reset the changes flag after saving
     }, 5000); // Auto-save after 5 seconds of inactivity
 
     return () => clearTimeout(timer);
-  }, [project, autoSave, loading, isSaving, saveProject]);
+  }, [project, autoSave, loading, isSaving, saveProject, hasChanges]);
 
   // Load project on mount
   useEffect(() => {
@@ -378,6 +402,7 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
     loading,
     error,
     isSaving,
+    hasChanges,
     loadProject,
     createProject,
     saveProject,
@@ -390,3 +415,4 @@ export const useProject = ({ projectId, version, autoSave = true }: UseProjectPr
     removeEdge,
   };
 };
+

@@ -355,13 +355,11 @@ describe('EnhancedBrainstormFlow', () => {
 
     // Check that the edit dialog is opened
     await waitFor(() => {
-      const dialog = screen.getByTestId('edit-node-dialog');
+      const dialog = screen.getByRole('dialog');
       expect(dialog).toBeInTheDocument();
 
       // Check dialog content
-      const editForm = screen.getByTestId('edit-form');
-      expect(editForm).toBeInTheDocument();
-      expect(screen.getByText(/editing node: node-1/i)).toBeInTheDocument();
+      expect(screen.getByText('Edit Node')).toBeInTheDocument();
     }, { timeout: 5000 });
   });
 

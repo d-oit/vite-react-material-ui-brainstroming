@@ -234,13 +234,19 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
         <Box
           sx={{
             display: 'grid',
-            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
             gap: 3,
             width: '100%',
           }}
         >
           {projects.map(project => (
-            <Box key={project.id}>
+            <Box 
+              key={project.id}
+              sx={{ 
+                height: 220, // Fixed height for all cards
+                width: '100%',
+              }}
+            >
               <ProjectCard
                 project={project}
                 onDelete={id => openConfirmDialog('delete', id)}
@@ -297,3 +303,5 @@ export const ProjectList: React.FC<ProjectListProps> = ({ onCreateProject, onRef
 };
 
 export default ProjectList;
+
+

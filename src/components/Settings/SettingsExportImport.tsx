@@ -255,24 +255,25 @@ export const SettingsExportImport = () => {
   };
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Export and Import Settings
-        </Typography>
+    <Box sx={{ p: { xs: 0, sm: 1 } }}>
+      <Typography variant="h6" gutterBottom>
+        Export/Import Settings
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        Export your settings to a file or import settings from a file.
+      </Typography>
 
-        {!isOnline && (
-          <Tooltip title="You are currently offline. Some functionality may be limited.">
-            <Chip
-              icon={<OfflineIcon />}
-              label="Offline"
-              color="warning"
-              size="small"
-              sx={{ ml: 2 }}
-            />
-          </Tooltip>
-        )}
-      </Box>
+      {!isOnline && (
+        <Tooltip title="You are currently offline. Some functionality may be limited.">
+          <Chip
+            icon={<OfflineIcon />}
+            label="Offline"
+            color="warning"
+            size="small"
+            sx={{ ml: 2 }}
+          />
+        </Tooltip>
+      )}
 
       <Divider sx={{ mb: 3 }} />
 
@@ -370,3 +371,4 @@ export const SettingsExportImport = () => {
     </Box>
   );
 };
+

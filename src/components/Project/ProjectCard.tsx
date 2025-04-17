@@ -125,7 +125,9 @@ export const ProjectCard = ({ project, onDelete, onArchive, onSync, onPin }: Pro
           boxShadow: theme.shadows[8],
         },
         position: 'relative',
-        overflow: 'visible',
+        overflow: 'hidden', // Change from 'visible' to 'hidden'
+        // Set a fixed aspect ratio for consistency
+        aspectRatio: '3/2',
       }}
     >
       {/* Pin button */}
@@ -296,3 +298,5 @@ export const ProjectCard = ({ project, onDelete, onArchive, onSync, onPin }: Pro
 };
 
 export default ProjectCard;
+
+

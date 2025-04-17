@@ -57,31 +57,31 @@ const getDesignTokens = (mode: PaletteMode): ThemeOptions => {
       mode,
       ...(mode === 'light'
         ? {
-            // Light mode
-            primary: {
-              main: '#2196f3',
-            },
-            secondary: {
-              main: '#f50057',
-            },
-            background: {
-              default: '#f5f5f5',
-              paper: '#ffffff',
-            },
-          }
+          // Light mode
+          primary: {
+            main: '#2196f3',
+          },
+          secondary: {
+            main: '#f50057',
+          },
+          background: {
+            default: '#f5f5f5',
+            paper: '#ffffff',
+          },
+        }
         : {
-            // Dark mode
-            primary: {
-              main: '#90caf9',
-            },
-            secondary: {
-              main: '#f48fb1',
-            },
-            background: {
-              default: '#121212',
-              paper: '#1e1e1e',
-            },
-          }),
+          // Dark mode
+          primary: {
+            main: '#90caf9',
+          },
+          secondary: {
+            main: '#f48fb1',
+          },
+          background: {
+            default: '#121212',
+            paper: '#1e1e1e',
+          },
+        }),
     },
     typography: {
       fontFamily: [
@@ -170,7 +170,7 @@ const AppWithTheme = () => {
   useEffect(() => {
     const initializeServices = async () => {
       try {
-        // Start performance monitoring
+        // Start performance monitoring with a stable ID
         performanceMonitoring.setEnabled(true);
         const initMetricId = performanceMonitoring.startMeasure(
           'App.initialization',
@@ -178,25 +178,37 @@ const AppWithTheme = () => {
         );
 
         // Initialize critical services in parallel
-        const [loggerInitialized, dbInitialized] = await Promise.all([
-          // Initialize logger service
-          loggerService.initialize().catch(error => {
-            console.error('Logger initialization failed:', error);
-            return false;
-          }),
-          
-          // Initialize IndexedDB
-          indexedDBService.init().catch(error => {
-            console.error('IndexedDB initialization failed:', error);
-            return false;
-          })
-        ]);
+        let loggerInitialized = false;
+        let dbInitialized = false;
+
+        try {
+          // Initialize services with proper error handling
+          const results = await Promise.all([
+            // Initialize logger service
+            loggerService.initialize().catch(error => {
+              console.error('Logger initialization failed:', error);
+              return false;
+            }),
+
+            // Initialize IndexedDB
+            indexedDBService.init().catch(error => {
+              console.error('IndexedDB initialization failed:', error);
+              return false;
+            })
+          ]);
+
+          // Extract results
+          [loggerInitialized, dbInitialized] = results;
+        } catch (error) {
+          console.error('Error during service initialization:', error);
+          // Continue with default values (false) for both services
+        }
 
         // Log initialization results
         if (!loggerInitialized) {
           console.warn('Logger service failed to initialize');
         }
-        
+
         if (!dbInitialized) {
           console.warn('IndexedDB initialization failed, some features may not work properly');
           if (loggerInitialized) {
@@ -204,8 +216,10 @@ const AppWithTheme = () => {
           }
         }
 
-        // Configure offline service - this is less critical and can run after critical services
-        setTimeout(() => {
+        // Use requestIdleCallback or setTimeout with 0 to defer non-critical initialization
+        // This allows the main UI to render first
+        const initNonCriticalServices = () => {
+          // Configure offline service
           try {
             offlineService.configure({
               syncInterval: 60000,
@@ -217,10 +231,8 @@ const AppWithTheme = () => {
             console.error('Failed to initialize offline service:', error);
             void loggerService.error('Failed to initialize offline service', error instanceof Error ? error : new Error(String(error)));
           }
-        }, 100);
 
-        // Register service worker asynchronously - this is also less critical
-        setTimeout(() => {
+          // Register service worker
           try {
             registerSW({
               onNeedRefresh(updateFn) {
@@ -240,7 +252,14 @@ const AppWithTheme = () => {
             console.error('Failed to register service worker:', error);
             void loggerService.error('Failed to register service worker', error instanceof Error ? error : new Error(String(error)));
           }
-        }, 200);
+        };
+
+        // Use requestIdleCallback if available, otherwise use setTimeout with 0
+        if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+          (window as any).requestIdleCallback(initNonCriticalServices);
+        } else {
+          setTimeout(initNonCriticalServices, 0);
+        }
 
         performanceMonitoring.endMeasure(initMetricId);
       } catch (error) {

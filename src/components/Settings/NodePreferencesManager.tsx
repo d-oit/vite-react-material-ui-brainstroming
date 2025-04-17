@@ -218,222 +218,227 @@ export const NodePreferencesManager = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6">Node Size Preferences</Typography>
-        <Box>
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={handleResetPreferences}
-            sx={{ mr: 1 }}
-          >
-            Reset to Defaults
-          </Button>
-          <Button variant="contained" onClick={handleSavePreferences}>
-            Save Changes
-          </Button>
-        </Box>
-      </Box>
-
-      <Divider sx={{ mb: 3 }} />
-
-      <Typography variant="subtitle1" gutterBottom>
-        Default Node Size
-      </Typography>
-
-      <FormControl component="fieldset" sx={{ mb: 3 }}>
-        <RadioGroup
-          row
-          value={settings.preferredNodeSize}
-          onChange={e => handleSizeChange(e.target.value as 'small' | 'medium' | 'large')}
-        >
-          <FormControlLabel value="small" control={<Radio />} label="Small" />
-          <FormControlLabel value="medium" control={<Radio />} label="Medium" />
-          <FormControlLabel value="large" control={<Radio />} label="Large" />
-        </RadioGroup>
-      </FormControl>
-
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ p: { xs: 0, sm: 1 } }}>
+        <Typography variant="h6" gutterBottom>
+          Node Size Preferences
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Customize the size of your nodes for different screen sizes.
+        </Typography>
+        
         <FormControlLabel
           control={
             <Switch
               checked={touchOptimized}
-              onChange={handleTouchOptimizationChange}
-              color="primary"
+              onChange={(e) => setTouchOptimized(e.target.checked)}
             />
           }
-          label={
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <TouchIcon sx={{ mr: 0.5, fontSize: '1rem' }} />
-              <Typography variant="body2">Touch-optimized nodes</Typography>
-              <Tooltip title="Makes nodes easier to interact with on touch devices">
-                <Box sx={{ ml: 0.5, cursor: 'help', color: 'text.secondary', fontSize: '0.8rem' }}>
-                  ⓘ
-                </Box>
-              </Tooltip>
-            </Box>
-          }
+          label="Touch-optimized mode (larger nodes for touch screens)"
         />
-      </Box>
+        
+        <Box sx={{ mb: 3 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={touchOptimized}
+                onChange={handleTouchOptimizationChange}
+                color="primary"
+              />
+            }
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <TouchIcon sx={{ mr: 0.5, fontSize: '1rem' }} />
+                <Typography variant="body2">Touch-optimized nodes</Typography>
+                <Tooltip title="Makes nodes easier to interact with on touch devices">
+                  <Box sx={{ ml: 0.5, cursor: 'help', color: 'text.secondary', fontSize: '0.8rem' }}>
+                    ⓘ
+                  </Box>
+                </Tooltip>
+              </Box>
+            }
+          />
+        </Box>
 
-      <Typography variant="subtitle1" gutterBottom>
-        Size Preview
-      </Typography>
+        <Typography variant="subtitle1" gutterBottom>
+          Size Preview
+        </Typography>
 
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 4 }}>
-        {(['small', 'medium', 'large'] as const).map(size => (
-          <Box key={size}>
-            <NodeSizePreview
-              size={size}
-              width={
-                size === 'small'
-                  ? localPreferences.nodeSizes.small.width
-                  : size === 'medium'
-                    ? localPreferences.nodeSizes.medium.width
-                    : localPreferences.nodeSizes.large.width
-              }
-              fontSize={
-                size === 'small'
-                  ? localPreferences.nodeSizes.small.fontSize
-                  : size === 'medium'
-                    ? localPreferences.nodeSizes.medium.fontSize
-                    : localPreferences.nodeSizes.large.fontSize
-              }
-              isSelected={settings.preferredNodeSize === size}
-              onClick={() => handleSizeChange(size)}
-            />
-          </Box>
-        ))}
-      </Box>
-
-      <Typography variant="subtitle1" gutterBottom>
-        Customize Sizes
-      </Typography>
-
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
-          gap: 3,
-          width: '100%',
-        }}
-      >
-        {(['small', 'medium', 'large'] as const).map(size => (
-          <Box key={size}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  {size.charAt(0).toUpperCase() + size.slice(1)}
-                </Typography>
-
-                <Typography variant="body2" gutterBottom>
-                  Width:{' '}
-                  {size === 'small'
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 4 }}>
+          {(['small', 'medium', 'large'] as const).map(size => (
+            <Box key={size}>
+              <NodeSizePreview
+                size={size}
+                width={
+                  size === 'small'
                     ? localPreferences.nodeSizes.small.width
                     : size === 'medium'
                       ? localPreferences.nodeSizes.medium.width
-                      : localPreferences.nodeSizes.large.width}
-                  px
-                </Typography>
-                <Slider
-                  value={
-                    size === 'small'
-                      ? localPreferences.nodeSizes.small.width
-                      : size === 'medium'
-                        ? localPreferences.nodeSizes.medium.width
-                        : localPreferences.nodeSizes.large.width
-                  }
-                  min={100}
-                  max={400}
-                  step={10}
-                  onChange={(_, value) => handleSizeConfigChange(size, 'width', value as number)}
-                  valueLabelDisplay="auto"
-                  sx={{ mb: 3 }}
-                />
-
-                <Typography variant="body2" gutterBottom>
-                  Font Size:{' '}
-                  {size === 'small'
+                      : localPreferences.nodeSizes.large.width
+                }
+                fontSize={
+                  size === 'small'
                     ? localPreferences.nodeSizes.small.fontSize
                     : size === 'medium'
                       ? localPreferences.nodeSizes.medium.fontSize
-                      : localPreferences.nodeSizes.large.fontSize}
-                  rem
-                </Typography>
-                <Slider
-                  value={
-                    size === 'small'
+                      : localPreferences.nodeSizes.large.fontSize
+                }
+                isSelected={settings.preferredNodeSize === size}
+                onClick={() => handleSizeChange(size)}
+              />
+            </Box>
+          ))}
+        </Box>
+
+        <Typography variant="subtitle1" gutterBottom>
+          Customize Sizes
+        </Typography>
+
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+            gap: 3,
+            width: '100%',
+          }}
+        >
+          {(['small', 'medium', 'large'] as const).map(size => (
+            <Box key={size}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    {size.charAt(0).toUpperCase() + size.slice(1)}
+                  </Typography>
+
+                  <Typography variant="body2" gutterBottom>
+                    Width:{' '}
+                    {size === 'small'
+                      ? localPreferences.nodeSizes.small.width
+                      : size === 'medium'
+                        ? localPreferences.nodeSizes.medium.width
+                        : localPreferences.nodeSizes.large.width}
+                    px
+                  </Typography>
+                  <Slider
+                    value={
+                      size === 'small'
+                        ? localPreferences.nodeSizes.small.width
+                        : size === 'medium'
+                          ? localPreferences.nodeSizes.medium.width
+                          : localPreferences.nodeSizes.large.width
+                    }
+                    min={100}
+                    max={400}
+                    step={10}
+                    onChange={(_, value) => handleSizeConfigChange(size, 'width', value as number)}
+                    valueLabelDisplay="auto"
+                    sx={{ mb: 3 }}
+                  />
+
+                  <Typography variant="body2" gutterBottom>
+                    Font Size:{' '}
+                    {size === 'small'
                       ? localPreferences.nodeSizes.small.fontSize
                       : size === 'medium'
                         ? localPreferences.nodeSizes.medium.fontSize
-                        : localPreferences.nodeSizes.large.fontSize
-                  }
-                  min={0.6}
-                  max={1.6}
-                  step={0.1}
-                  onChange={(_, value) => handleSizeConfigChange(size, 'fontSize', value as number)}
-                  valueLabelDisplay="auto"
-                />
-              </CardContent>
-            </Card>
-          </Box>
-        ))}
-      </Box>
+                        : localPreferences.nodeSizes.large.fontSize}
+                    rem
+                  </Typography>
+                  <Slider
+                    value={
+                      size === 'small'
+                        ? localPreferences.nodeSizes.small.fontSize
+                        : size === 'medium'
+                          ? localPreferences.nodeSizes.medium.fontSize
+                          : localPreferences.nodeSizes.large.fontSize
+                    }
+                    min={0.6}
+                    max={1.6}
+                    step={0.1}
+                    onChange={(_, value) => handleSizeConfigChange(size, 'fontSize', value as number)}
+                    valueLabelDisplay="auto"
+                  />
+                </CardContent>
+              </Card>
+            </Box>
+          ))}
+        </Box>
 
-      <Divider sx={{ my: 4 }} />
+        <Divider sx={{ my: 4 }} />
 
-      <Typography variant="h6" gutterBottom>
-        Node Color Preferences
-      </Typography>
+        <Typography variant="h6" gutterBottom>
+          Node Color Preferences
+        </Typography>
 
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Customize the colors for each node type. These colors will be used as the default background
-        color for nodes of each type.
-      </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          Customize the colors for each node type. These colors will be used as the default background
+          color for nodes of each type.
+        </Typography>
 
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
-          gap: 3,
-          mb: 4,
-          width: '100%',
-        }}
-      >
-        {Object.values(NodeType).map(nodeType => {
-          const nodeTypeLabel = nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
-          const currentColor = localPreferences.customColors?.[nodeType] || '#e3f2fd';
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+            gap: 3,
+            mb: 4,
+            width: '100%',
+          }}
+        >
+          {Object.values(NodeType).map(nodeType => {
+            const nodeTypeLabel = nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
+            const currentColor = localPreferences.customColors?.[nodeType] || '#e3f2fd';
 
-          return (
-            <Box key={nodeType}>
-              <Card>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <ColorLensIcon sx={{ mr: 1, color: currentColor }} />
-                    <Typography variant="subtitle1">{nodeTypeLabel}</Typography>
-                  </Box>
+            return (
+              <Box key={nodeType}>
+                <Card>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      <ColorLensIcon sx={{ mr: 1, color: currentColor }} />
+                      <Typography variant="subtitle1">{nodeTypeLabel}</Typography>
+                    </Box>
 
-                  <Box
-                    sx={{
-                      width: '100%',
-                      height: 40,
-                      backgroundColor: currentColor,
-                      borderRadius: 1,
-                      border: '1px solid rgba(0,0,0,0.1)',
-                      mb: 2,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        boxShadow: 2,
-                      },
-                    }}
-                    onClick={() => {
-                      // Use native color picker
-                      const input = document.createElement('input');
-                      input.type = 'color';
-                      input.value = currentColor;
-                      input.addEventListener('input', e => {
-                        const newColor = (e.target as HTMLInputElement).value;
+                    <Box
+                      sx={{
+                        width: '100%',
+                        height: 40,
+                        backgroundColor: currentColor,
+                        borderRadius: 1,
+                        border: '1px solid rgba(0,0,0,0.1)',
+                        mb: 2,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          boxShadow: 2,
+                        },
+                      }}
+                      onClick={() => {
+                        // Use native color picker
+                        const input = document.createElement('input');
+                        input.type = 'color';
+                        input.value = currentColor;
+                        input.addEventListener('input', e => {
+                          const newColor = (e.target as HTMLInputElement).value;
+                          setLocalPreferences(prev => {
+                            if (!prev) return prev;
+                            return {
+                              ...prev,
+                              customColors: {
+                                ...prev.customColors,
+                                [nodeType]: newColor,
+                              },
+                            };
+                          });
+                        });
+                        input.click();
+                      }}
+                    />
+
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Color code"
+                      value={currentColor}
+                      onChange={e => {
+                        const newColor = e.target.value;
                         setLocalPreferences(prev => {
                           if (!prev) return prev;
                           return {
@@ -444,50 +449,30 @@ export const NodePreferencesManager = () => {
                             },
                           };
                         });
-                      });
-                      input.click();
-                    }}
-                  />
+                      }}
+                    />
+                  </CardContent>
+                </Card>
+              </Box>
+            );
+          })}
+        </Box>
 
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Color code"
-                    value={currentColor}
-                    onChange={e => {
-                      const newColor = e.target.value;
-                      setLocalPreferences(prev => {
-                        if (!prev) return prev;
-                        return {
-                          ...prev,
-                          customColors: {
-                            ...prev.customColors,
-                            [nodeType]: newColor,
-                          },
-                        };
-                      });
-                    }}
-                  />
-                </CardContent>
-              </Card>
-            </Box>
-          );
-        })}
-      </Box>
-
-      {/* Snackbar for notifications */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert
-          severity={snackbar.severity}
+        {/* Snackbar for notifications */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
           onClose={() => setSnackbar({ ...snackbar, open: false })}
         >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+          <Alert
+            severity={snackbar.severity}
+            onClose={() => setSnackbar({ ...snackbar, open: false })}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </Box>
     </Box>
   );
 };
+
