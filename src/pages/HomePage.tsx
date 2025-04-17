@@ -40,7 +40,7 @@ const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
             {t('app.tagline')}
           </Typography>
           <Typography variant="body1" paragraph>
-            Welcome to the d.o.it.brainstorming app!
+            {t('app.welcome')}
           </Typography>
           <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
             <Button
@@ -51,7 +51,7 @@ const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
               to="/projects"
               startIcon={<ProjectsIcon />}
             >
-              My Projects
+              {t('project.myProjects')}
             </Button>
             <Button
               variant="outlined"
@@ -65,10 +65,10 @@ const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
               {isCreating ? (
                 <>
                   <CircularProgress size={24} color="inherit" sx={{ mr: 1 }} />
-                  Creating...
+                  {t('app.creating')}
                 </>
               ) : (
-                'Quick Brainstorm'
+                t('navigation.quickBrainstorm')
               )}
             </Button>
             <Button
@@ -79,7 +79,7 @@ const HomePage = ({ onThemeToggle, isDarkMode }: HomePageProps) => {
               to="/brainstorm-demo"
               startIcon={<BrainstormIcon />}
             >
-              UI Demo
+              {t('app.uiDemo')}
             </Button>
           </Stack>
         </Box>

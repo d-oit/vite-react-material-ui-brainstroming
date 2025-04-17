@@ -1,5 +1,6 @@
 import { Dashboard as DashboardIcon, Archive as ArchiveIcon } from '@mui/icons-material';
 import { Box, Container, Paper, Tabs, Tab, Typography } from '@mui/material';
+import { useI18n } from '../contexts/I18nContext';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -40,6 +41,7 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
   isDarkMode,
 }) => {
   const _navigate = useNavigate();
+  const { t } = useI18n();
   const [tabValue, setTabValue] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -58,20 +60,20 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
   };
 
   return (
-    <AppShell title="Project Dashboard" onThemeToggle={onThemeToggle} isDarkMode={isDarkMode}>
-      <Container 
-        maxWidth="xl" 
-        sx={{ 
+    <AppShell title={t('project.dashboard')} onThemeToggle={onThemeToggle} isDarkMode={isDarkMode}>
+      <Container
+        maxWidth="xl"
+        sx={{
           py: 2,
           px: { xs: 0.5, sm: 1 }, // Minimal horizontal padding
         }}
       >
         <Box sx={{ mb: 2 }}> {/* Reduced margin from 3 to 2 */}
           <Typography variant="h5" component="h1" gutterBottom>
-            My Projects
+            {t('project.myProjects')}
           </Typography>
           <Typography variant="subtitle2" color="text.secondary">
-            Manage your brainstorming projects and archives
+            {t('project.manageProjects')}
           </Typography>
         </Box>
 
@@ -85,13 +87,13 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
             >
               <Tab
                 icon={<DashboardIcon />}
-                label="Projects"
+                label={t('project.title')}
                 id="project-tab-0"
                 aria-controls="project-tabpanel-0"
               />
               <Tab
                 icon={<ArchiveIcon />}
-                label="Archive"
+                label={t('project.archive')}
                 id="project-tab-1"
                 aria-controls="project-tabpanel-1"
               />

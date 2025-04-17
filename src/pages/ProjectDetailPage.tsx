@@ -25,6 +25,7 @@ import {
 } from '@mui/material';
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { useI18n } from '../contexts/I18nContext';
 
 import KeyboardShortcutsHandler from '../components/BrainstormFlow/KeyboardShortcutsHandler';
 import { ChatInterface } from '../components/Chat/ChatInterface';
@@ -62,6 +63,7 @@ const ProjectDetailPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { t } = useI18n();
   const [chatOpen, setChatOpen] = useState(false); // Chat closed by default
   const [_nodes, setNodes] = useState<Node[]>([]);
   const [_edges, setEdges] = useState<Edge[]>([]);
@@ -174,14 +176,14 @@ const ProjectDetailPage = () => {
 
   if (loading) {
     return (
-      <AppShell title="Project" onThemeToggle={() => { }} isDarkMode={theme.palette.mode === 'dark'}>
+      <AppShell title={t('project.title')} onThemeToggle={() => { }} isDarkMode={theme.palette.mode === 'dark'}>
         <Container maxWidth="lg">
           <Box
             sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', position: 'relative' }}
           >
             <StatusIndicator
               status="loading"
-              message="Loading project..."
+              message={t('app.loadingProject')}
               position="center"
               size="large"
             />
@@ -197,7 +199,7 @@ const ProjectDetailPage = () => {
     project === undefined
   ) {
     return (
-      <AppShell title="Project" onThemeToggle={() => { }} isDarkMode={theme.palette.mode === 'dark'}>
+      <AppShell title={t('project.title')} onThemeToggle={() => { }} isDarkMode={theme.palette.mode === 'dark'}>
         <Container maxWidth="lg">
           <Paper sx={{ p: 3 }}>
             <Typography color="error" variant="h6">
@@ -220,7 +222,7 @@ const ProjectDetailPage = () => {
       {isSaving && (
         <StatusIndicator
           status="loading"
-          message="Saving..."
+          message={t('common.saving')}
           position="bottom-right"
           size="small"
           showBackground={false}
@@ -311,7 +313,7 @@ const ProjectDetailPage = () => {
             </Box>
           )}
           <Typography variant="subtitle2" color="text.secondary">
-            Version {project.version}
+            {t('project.version')} {project.version}
           </Typography>
         </Box>
 
@@ -340,7 +342,7 @@ const ProjectDetailPage = () => {
               }
             }}
           >
-            {hasChanges ? 'Save*' : 'Save'}
+            {hasChanges ? `${t('common.save')}*` : t('common.save')}
           </Button>
 
           <Button
@@ -351,7 +353,7 @@ const ProjectDetailPage = () => {
             disabled={isSaving}
             size={isMobile ? 'small' : 'medium'}
           >
-            New Version
+            {t('project.newVersion')}
           </Button>
 
           <Button
@@ -361,16 +363,16 @@ const ProjectDetailPage = () => {
             onClick={toggleChat}
             size={isMobile ? 'small' : 'medium'}
           >
-            Assistant
+            {t('chat.assistant')}
           </Button>
         </Box>
       </Box>
 
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
         <Tabs value={tabValue} onChange={handleTabChange} aria-label="project tabs">
-          <Tab label="Overview" id="project-tab-0" />
-          <Tab label="Brainstorm" id="project-tab-1" />
-          <Tab label="Settings" id="project-tab-2" />
+          <Tab label={t('brainstorm.overview')} id="project-tab-0" />
+          <Tab label={t('brainstorm.brainstorm')} id="project-tab-1" />
+          <Tab label={t('brainstorm.settings')} id="project-tab-2" />
         </Tabs>
       </Box>
 
@@ -380,7 +382,7 @@ const ProjectDetailPage = () => {
             sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
           >
             <Typography variant="h6" sx={{ fontWeight: 'medium' }}>
-              Project Details
+              {t('project.projectDetails')}
             </Typography>
             {isEditingDescription ? (
               <Button
@@ -390,7 +392,7 @@ const ProjectDetailPage = () => {
                 startIcon={<SaveIcon />}
                 sx={{ boxShadow: theme => theme.shadows[2] }}
               >
-                Save
+                {t('common.save')}
               </Button>
             ) : (
               <Button
@@ -400,7 +402,7 @@ const ProjectDetailPage = () => {
                 startIcon={<EditIcon />}
                 sx={{ borderColor: 'primary.main' }}
               >
-                Edit Description
+                {t('project.editDescription')}
               </Button>
             )}
           </Box>
@@ -438,7 +440,7 @@ const ProjectDetailPage = () => {
                 project.description !== undefined &&
                 project.description !== ''
                 ? project.description
-                : 'No description provided.'}
+                : t('project.noDescriptionProvided')}
             </Typography>
           )}
         </Paper>
@@ -514,12 +516,12 @@ const ProjectDetailPage = () => {
                 }}
               >
                 <Typography variant="subtitle1" fontWeight="medium">
-                  AI Assistant
+                  {t('chat.aiAssistant')}
                 </Typography>
                 <IconButton
                   size="small"
                   onClick={toggleChat}
-                  aria-label="Close chat"
+                  aria-label={t('chat.closeChat')}
                   sx={{ color: 'text.secondary' }}
                 >
                   <CloseIcon fontSize="small" />

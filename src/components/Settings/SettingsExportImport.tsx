@@ -26,11 +26,13 @@ import {
 import { useState, useRef, useEffect } from 'react';
 
 import { useSettings } from '../../contexts/SettingsContext';
+import { useI18n } from '../../contexts/I18nContext';
 import loggerService from '../../services/LoggerService';
 import offlineService from '../../services/OfflineService';
 
 export const SettingsExportImport = () => {
   const { exportSettings, importSettings } = useSettings();
+  const { t } = useI18n();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isOnline, setIsOnline] = useState(offlineService.getOnlineStatus());
 
@@ -53,7 +55,7 @@ export const SettingsExportImport = () => {
     open: false,
     title: '',
     message: '',
-    onConfirm: () => {},
+    onConfirm: () => { },
   });
 
   const [loading, setLoading] = useState(false);
@@ -92,7 +94,7 @@ export const SettingsExportImport = () => {
 
       setSnackbar({
         open: true,
-        message: 'Settings exported successfully',
+        message: t('importExport.exportSuccess'),
         severity: 'success',
       });
 
@@ -108,7 +110,7 @@ export const SettingsExportImport = () => {
       setSnackbar({
         open: true,
         message:
-          'Failed to export settings: ' +
+          t('importExport.exportError') + ' ' +
           (error instanceof Error ? error.message : 'Unknown error'),
         severity: 'error',
       });
@@ -132,8 +134,8 @@ export const SettingsExportImport = () => {
       // Show confirmation dialog
       setConfirmDialog({
         open: true,
-        title: 'Import Settings',
-        message: 'This will replace your current settings. Are you sure you want to continue?',
+        title: t('importExport.importConfirmTitle'),
+        message: t('importExport.importConfirmMessage'),
         onConfirm: () => processImport(content),
       });
     };
@@ -204,7 +206,7 @@ export const SettingsExportImport = () => {
       if (!validation.isValid) {
         setSnackbar({
           open: true,
-          message: `Failed to import settings: ${validation.errors.join(', ')}`,
+          message: `${t('importExport.exportError')} ${validation.errors.join(', ')}`,
           severity: 'error',
         });
         return;
@@ -221,15 +223,16 @@ export const SettingsExportImport = () => {
         setSnackbar({
           open: true,
           message:
-            'Settings imported successfully' +
-            (validation.warnings.length > 0 ? ' (with warnings)' : ''),
+            validation.warnings.length > 0
+              ? t('importExport.importWarning')
+              : t('importExport.importSuccess'),
           severity: validation.warnings.length > 0 ? 'warning' : 'success',
         });
         loggerService.info('Settings imported successfully');
       } else {
         setSnackbar({
           open: true,
-          message: 'Failed to import settings: Invalid format',
+          message: t('importExport.importError'),
           severity: 'error',
         });
         loggerService.error('Failed to import settings: Invalid format');
@@ -244,7 +247,7 @@ export const SettingsExportImport = () => {
       setSnackbar({
         open: true,
         message:
-          'Failed to import settings: ' +
+          t('importExport.exportError') + ' ' +
           (error instanceof Error ? error.message : 'Unknown error'),
         severity: 'error',
       });
@@ -257,17 +260,17 @@ export const SettingsExportImport = () => {
   return (
     <Box sx={{ p: { xs: 0, sm: 1 } }}>
       <Typography variant="h6" gutterBottom>
-        Export/Import Settings
+        {t('importExport.exportImportSettings')}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Export your settings to a file or import settings from a file.
+        {t('importExport.exportSettingsDescription')}
       </Typography>
 
       {!isOnline && (
-        <Tooltip title="You are currently offline. Some functionality may be limited.">
+        <Tooltip title={t('importExport.offlineTooltip')}>
           <Chip
             icon={<OfflineIcon />}
-            label="Offline"
+            label={t('importExport.offline')}
             color="warning"
             size="small"
             sx={{ ml: 2 }}
@@ -280,7 +283,7 @@ export const SettingsExportImport = () => {
       {validationResult && validationResult.warnings.length > 0 && (
         <Alert severity="warning" sx={{ mb: 3 }}>
           <Typography variant="body2">
-            <strong>Warning:</strong> {validationResult.warnings.join(', ')}
+            <strong>{t('importExport.warning')}</strong> {validationResult.warnings.join(', ')}
           </Typography>
         </Alert>
       )}
@@ -288,11 +291,10 @@ export const SettingsExportImport = () => {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="subtitle1" gutterBottom>
-            Export Settings
+            {t('importExport.exportSettings')}
           </Typography>
           <Typography variant="body2" color="text.secondary" paragraph>
-            Export all your settings, color schemes, and node preferences to a JSON file. You can
-            use this file to backup your settings or transfer them to another device.
+            {t('importExport.exportSettingsDetail')}
           </Typography>
           <Button
             variant="contained"
@@ -301,7 +303,7 @@ export const SettingsExportImport = () => {
             disabled={loading}
             aria-label="Export settings to JSON file"
           >
-            {loading ? <CircularProgress size={24} /> : 'Export Settings'}
+            {loading ? <CircularProgress size={24} /> : t('importExport.exportSettings')}
           </Button>
         </CardContent>
       </Card>
@@ -309,11 +311,10 @@ export const SettingsExportImport = () => {
       <Card>
         <CardContent>
           <Typography variant="subtitle1" gutterBottom>
-            Import Settings
+            {t('importExport.importSettings')}
           </Typography>
           <Typography variant="body2" color="text.secondary" paragraph>
-            Import settings from a previously exported JSON file. This will replace your current
-            settings, color schemes, and node preferences.
+            {t('importExport.importSettingsDetail')}
           </Typography>
           <Button
             variant="outlined"
@@ -322,7 +323,7 @@ export const SettingsExportImport = () => {
             disabled={loading}
             aria-label="Import settings from JSON file"
           >
-            {loading ? <CircularProgress size={24} /> : 'Import Settings'}
+            {loading ? <CircularProgress size={24} /> : t('importExport.importSettings')}
           </Button>
           <input
             type="file"
@@ -347,10 +348,10 @@ export const SettingsExportImport = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmDialog({ ...confirmDialog, open: false })}>
-            Cancel
+            {t('importExport.cancel')}
           </Button>
           <Button onClick={confirmDialog.onConfirm} variant="contained" color="primary">
-            Confirm
+            {t('importExport.confirm')}
           </Button>
         </DialogActions>
       </Dialog>

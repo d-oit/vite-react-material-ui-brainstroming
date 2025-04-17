@@ -60,7 +60,7 @@ interface ProjectTemplatesPageProps {
 
 export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTemplatesPageProps) => {
   const theme = useTheme();
-  const { t: _t } = useI18n();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   // Use isMobile for responsive layout adjustments
@@ -149,11 +149,11 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
     const updatedTemplates = templates.map(t =>
       t.id === selectedTemplate.id
         ? {
-            ...t,
-            name: newProjectName,
-            description: newProjectDescription,
-            updatedAt: new Date().toISOString(),
-          }
+          ...t,
+          name: newProjectName,
+          description: newProjectDescription,
+          updatedAt: new Date().toISOString(),
+        }
         : t
     );
 
@@ -195,7 +195,7 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
 
   return (
     <AppShell
-      title="Project Templates"
+      title={t('project.templates')}
       onThemeToggle={onThemeToggle}
       isDarkMode={isDarkMode}
       onCreateNew={handleCreateNewTemplate}
@@ -206,10 +206,10 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
             sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
           >
             <Typography variant="h4" component="h1">
-              Project Templates
+              {t('project.templates')}
             </Typography>
             <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateNewTemplate}>
-              Create Template
+              {t('project.createTemplate')}
             </Button>
           </Box>
 

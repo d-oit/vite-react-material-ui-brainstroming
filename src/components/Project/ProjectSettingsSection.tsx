@@ -26,6 +26,7 @@ import {
 import { useState, useEffect, useCallback } from 'react';
 
 import { useErrorNotification } from '../../contexts/ErrorNotificationContext';
+import { useI18n } from '../../contexts/I18nContext';
 import { uploadProject, downloadProject } from '../../lib/s3Service';
 import loggerService from '../../services/LoggerService';
 import type { Project, SyncSettings } from '../../types';
@@ -44,6 +45,7 @@ export const ProjectSettingsSection = ({
   error = null,
 }: ProjectSettingsSectionProps) => {
   const { showError } = useErrorNotification();
+  const { t } = useI18n();
   const [syncSettings, setSyncSettings] = useState<SyncSettings>({
     enableS3Sync: false,
     syncFrequency: 'manual',
@@ -137,7 +139,7 @@ export const ProjectSettingsSection = ({
   // Handle manual sync
   const handleManualSync = useCallback(async () => {
     if (!isS3Available) {
-      showError('S3 is not configured. Please check your environment variables.');
+      showError(t('s3.notConfigured'));
       return;
     }
 
@@ -149,7 +151,7 @@ export const ProjectSettingsSection = ({
       handleSyncSettingsChange({ lastSyncedAt: now });
       void loggerService.info('Project synced to S3', { projectId: project.id });
     } catch (err) {
-      const errorMessage = 'Failed to sync project to S3';
+      const errorMessage = t('s3.failedToSync');
       void loggerService.error(errorMessage, err instanceof Error ? err : new Error(String(err)));
       showError(errorMessage);
     } finally {
@@ -181,7 +183,7 @@ export const ProjectSettingsSection = ({
 
       void loggerService.info('Project exported to file', { projectId: project.id });
     } catch (err) {
-      const errorMessage = 'Failed to export project';
+      const errorMessage = t('importExport.failedToExportProject');
       void loggerService.error(errorMessage, err instanceof Error ? err : new Error(String(err)));
       showError(errorMessage);
     } finally {
@@ -213,7 +215,7 @@ export const ProjectSettingsSection = ({
 
             // Validate the imported project
             if (!importedProject.id || !importedProject.name) {
-              throw new Error('Invalid project file');
+              throw new Error(t('importExport.invalidProjectFile'));
             }
 
             // Update the current project with imported data
@@ -230,7 +232,7 @@ export const ProjectSettingsSection = ({
             onSave(updatedProject);
             void loggerService.info('Project imported from file', { projectId: project.id });
           } catch (err) {
-            const errorMessage = 'Failed to import project: Invalid file format';
+            const errorMessage = t('importExport.invalidFileFormat');
             void loggerService.error(
               errorMessage,
               err instanceof Error ? err : new Error(String(err))
@@ -242,7 +244,7 @@ export const ProjectSettingsSection = ({
         };
 
         reader.onerror = () => {
-          showError('Failed to read file');
+          showError(t('importExport.failedToReadFile'));
           setImportLoading(false);
         };
 
@@ -252,7 +254,7 @@ export const ProjectSettingsSection = ({
       // Trigger the file input click
       input.click();
     } catch (err) {
-      const errorMessage = 'Failed to import project';
+      const errorMessage = t('importExport.failedToImportProject');
       void loggerService.error(errorMessage, err instanceof Error ? err : new Error(String(err)));
       showError(errorMessage);
       setImportLoading(false);
@@ -262,7 +264,7 @@ export const ProjectSettingsSection = ({
   // Handle import from S3
   const handleImportFromS3 = useCallback(async () => {
     if (!isS3Available) {
-      showError('S3 is not configured. Please check your environment variables.');
+      showError(t('s3.notConfigured'));
       return;
     }
 
@@ -294,7 +296,7 @@ export const ProjectSettingsSection = ({
         void loggerService.info('Project imported from S3', { projectId: project.id });
       }
     } catch (err) {
-      const errorMessage = 'Failed to import project from S3';
+      const errorMessage = t('importExport.failedToImportFromS3');
       void loggerService.error(errorMessage, err instanceof Error ? err : new Error(String(err)));
       showError(errorMessage);
     } finally {
@@ -314,13 +316,12 @@ export const ProjectSettingsSection = ({
     <Box sx={{ py: 2 }}>
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
-          S3 Synchronization
+          {t('s3.title')}
         </Typography>
 
         {!isS3Available && (
           <Alert severity="info" sx={{ mb: 2 }}>
-            S3 integration is not configured. To enable S3 synchronization, please set the required
-            environment variables.
+            {t('s3.integration')}
           </Alert>
         )}
 
@@ -332,29 +333,29 @@ export const ProjectSettingsSection = ({
               disabled={!isS3Available || isSaving}
             />
           }
-          label="Enable S3 Synchronization"
+          label={t('s3.enable')}
         />
 
         {syncSettings.enableS3Sync && (
           <Box sx={{ mt: 2 }}>
             <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel id="sync-frequency-label">Sync Frequency</InputLabel>
+              <InputLabel id="sync-frequency-label">{t('s3.syncFrequency')}</InputLabel>
               <Select
                 labelId="sync-frequency-label"
                 value={syncSettings.syncFrequency}
-                label="Sync Frequency"
+                label={t('s3.syncFrequency')}
                 onChange={handleSyncFrequencyChange}
                 disabled={isSaving}
               >
-                <MenuItem value="manual">Manual</MenuItem>
-                <MenuItem value="onSave">On Save</MenuItem>
-                <MenuItem value="interval">Interval</MenuItem>
+                <MenuItem value="manual">{t('s3.manual')}</MenuItem>
+                <MenuItem value="onSave">{t('s3.onSave')}</MenuItem>
+                <MenuItem value="interval">{t('s3.interval')}</MenuItem>
               </Select>
             </FormControl>
 
             {syncSettings.syncFrequency === 'interval' && (
               <TextField
-                label="Interval (minutes)"
+                label={t('s3.intervalMinutes')}
                 type="number"
                 value={
                   typeof syncSettings.intervalMinutes === 'number'
@@ -391,12 +392,12 @@ export const ProjectSettingsSection = ({
                   }
                 }}
               >
-                {isSyncing ? 'Syncing...' : 'Sync Now'}
+                {isSyncing ? t('s3.syncing') : t('s3.syncNow')}
               </Button>
 
               {lastSyncTime && (
                 <Typography variant="body2" color="text.secondary">
-                  Last synced: {new Date(lastSyncTime).toLocaleString()}
+                  {t('s3.lastSynced')} {new Date(lastSyncTime).toLocaleString()}
                 </Typography>
               )}
             </Box>
@@ -406,13 +407,13 @@ export const ProjectSettingsSection = ({
 
       <Paper sx={{ p: 3 }}>
         <Typography variant="h6" gutterBottom>
-          Import/Export
+          {t('importExport.title')}
         </Typography>
 
         <Grid container spacing={2}>
           <Grid lg={6} md={6} sm={12} xs={12}>
             <Typography variant="subtitle1" gutterBottom>
-              Local File
+              {t('importExport.localFile')}
             </Typography>
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
               <Button
@@ -435,7 +436,7 @@ export const ProjectSettingsSection = ({
                   }
                 }}
               >
-                Export to File
+                {t('importExport.exportToFile')}
               </Button>
               <Button
                 variant="outlined"
@@ -457,14 +458,14 @@ export const ProjectSettingsSection = ({
                   }
                 }}
               >
-                Import from File
+                {t('importExport.importFromFile')}
               </Button>
             </Box>
           </Grid>
 
           <Grid lg={6} md={6} sm={12} xs={12}>
             <Typography variant="subtitle1" gutterBottom>
-              S3 Storage
+              {t('s3.storage')}
             </Typography>
             <Box sx={{ display: 'flex', gap: 2 }}>
               <Button
@@ -487,7 +488,7 @@ export const ProjectSettingsSection = ({
                   }
                 }}
               >
-                Export to S3
+                {t('importExport.exportToS3')}
               </Button>
               <Button
                 variant="outlined"
@@ -509,7 +510,7 @@ export const ProjectSettingsSection = ({
                   }
                 }}
               >
-                Import from S3
+                {t('importExport.importFromS3')}
               </Button>
             </Box>
           </Grid>

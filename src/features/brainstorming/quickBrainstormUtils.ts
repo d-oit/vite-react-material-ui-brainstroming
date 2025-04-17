@@ -1,5 +1,5 @@
 import { ProjectTemplate } from '../../types/project';
-import { projectService } from '../../services/ProjectService';
+import projectService from '../../services/ProjectService';
 import { NavigateFunction } from 'react-router-dom';
 
 /**

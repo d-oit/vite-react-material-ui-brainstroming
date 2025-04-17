@@ -97,32 +97,32 @@ const AppShell = ({
 
   const navigationItems = [
     {
-      text: t('nav.home'),
+      text: t('navigation.home'),
       icon: <HomeIcon />,
       path: '/',
       active: location.pathname === '/',
     },
     {
-      text: t('nav.projects'),
+      text: t('navigation.projects'),
       icon: <ProjectsIcon />,
       path: '/projects',
       active: location.pathname === '/projects',
     },
     {
-      text: t('nav.quickBrainstorm'),
+      text: t('navigation.quickBrainstorm'),
       icon: <BrainstormIcon />,
       path: '#',
       onClick: () => handleQuickBrainstorm(navigate),
       active: false,
     },
     {
-      text: t('nav.settings'),
+      text: t('navigation.settings'),
       icon: <SettingsIcon />,
       path: '/settings',
       active: location.pathname === '/settings',
     },
     {
-      text: t('nav.performance') || 'Performance',
+      text: t('navigation.performance'),
       icon: <BarChartIcon />,
       path: '/performance',
       active: location.pathname === '/performance',

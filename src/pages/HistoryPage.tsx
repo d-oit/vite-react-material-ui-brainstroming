@@ -1,4 +1,5 @@
 import { Box, Typography, Paper, CircularProgress, Tabs, Tab, Divider } from '@mui/material';
+import { useI18n } from '../contexts/I18nContext';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -31,6 +32,7 @@ const TabPanel = (props: TabPanelProps) => {
 
 export const HistoryPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
+  const { t } = useI18n();
   const [tabValue, setTabValue] = useState(0);
 
   const { project, loading, error } = useProject({ projectId });
@@ -41,7 +43,7 @@ export const HistoryPage = () => {
 
   if (loading) {
     return (
-      <MainLayout title="Project History">
+      <MainLayout title={t('project.history')}>
         <Box
           sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}
         >
@@ -53,7 +55,7 @@ export const HistoryPage = () => {
 
   if (error || !project) {
     return (
-      <MainLayout title="Project History">
+      <MainLayout title={t('project.history')}>
         <Paper sx={{ p: 3 }}>
           <Typography color="error" variant="h6">
             Error: {error || 'Project not found'}
@@ -64,13 +66,13 @@ export const HistoryPage = () => {
   }
 
   return (
-    <MainLayout title={`History: ${project.name}`}>
+    <MainLayout title={`${t('project.history')}: ${project.name}`}>
       <Box sx={{ mb: 2 }}>
         <Typography variant="h5" component="h1">
-          {project.name} - History
+          {project.name} - {t('project.history')}
         </Typography>
         <Typography variant="subtitle2" color="text.secondary">
-          Current Version: {project.version}
+          {t('project.currentVersion')} {project.version}
         </Typography>
       </Box>
 

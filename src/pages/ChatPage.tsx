@@ -1,17 +1,19 @@
 import { Box, Typography, Paper, Divider } from '@mui/material';
+import { useI18n } from '../contexts/I18nContext';
 
 import { ChatInterface } from '@/components/Chat/ChatInterface';
 import { MainLayout } from '@/components/Layout/MainLayout';
 
 export const ChatPage = () => {
+  const { t } = useI18n();
   return (
-    <MainLayout title="Chat Assistant">
+    <MainLayout title={t('chat.chatAssistant')}>
       <Box sx={{ mb: 2 }}>
         <Typography variant="h5" component="h1">
-          Brainstorming Assistant
+          {t('chat.brainstormingAssistant')}
         </Typography>
         <Typography variant="subtitle2" color="text.secondary">
-          Powered by OpenRouter AI
+          {t('chat.poweredBy')}
         </Typography>
       </Box>
 
