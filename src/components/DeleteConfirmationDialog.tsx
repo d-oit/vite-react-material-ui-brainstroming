@@ -44,6 +44,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
       aria-labelledby="delete-confirmation-dialog-title"
       aria-describedby="delete-confirmation-dialog-description"
       data-testid="delete-confirmation-dialog"
+      sx={{ zIndex: 10001 }} // Ensure dialog appears above other elements
     >
       <DialogTitle id="delete-confirmation-dialog-title">{title}</DialogTitle>
       <DialogContent>

@@ -3,10 +3,11 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import SaveIcon from '@mui/icons-material/Save';
-import { Box, IconButton, Paper, TextField, Typography } from '@mui/material';
-import React, { memo, useState } from 'react';
+import { Box, IconButton, Paper, TextField, Typography, useTheme, useMediaQuery } from '@mui/material';
+import React, { memo, useState, useMemo } from 'react';
 import type { NodeProps } from 'reactflow';
 import { Handle, Position } from 'reactflow';
+import { useSettings } from '../../../contexts/SettingsContext';
 
 interface CustomNodeData {
   label: string;
@@ -28,24 +29,57 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected, id })
     setIsEditing(false);
   };
 
+  const { getNodeColor, nodePreferences, settings } = useSettings();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  // Calculate node size based on settings
+  const nodeSize = useMemo(() => {
+    if (!nodePreferences) return { width: 200, fontSize: 1 };
+
+    // Use preferred size from settings
+    const preferredSize = settings.preferredNodeSize || 'medium';
+
+    // Get the size configuration
+    let sizeConfig;
+    switch (preferredSize) {
+      case 'small':
+        sizeConfig = nodePreferences.nodeSizes.small;
+        break;
+      case 'large':
+        sizeConfig = nodePreferences.nodeSizes.large;
+        break;
+      case 'medium':
+      default:
+        sizeConfig = nodePreferences.nodeSizes.medium;
+        break;
+    }
+
+    // Adjust size for mobile devices
+    const width = isMobile ? Math.min(sizeConfig.width, window.innerWidth * 0.8) : sizeConfig.width;
+
+    return {
+      width: width,
+      fontSize: sizeConfig.fontSize
+    };
+  }, [nodePreferences, settings.preferredNodeSize, isMobile]);
+
   const getNodeStyle = () => {
     const baseStyle = {
       padding: 2,
-      minWidth: 150,
+      minWidth: nodeSize.width,
+      width: nodeSize.width,
       borderRadius: 1,
+      fontSize: `${nodeSize.fontSize}rem`,
     };
 
-    const typeStyles = {
-      idea: { backgroundColor: '#e3f2fd' },
-      task: { backgroundColor: '#f3e5f5' },
-      resource: { backgroundColor: '#e8f5e9' },
-      note: { backgroundColor: '#fff3e0' },
-    };
+    // Get color from settings
+    const backgroundColor = getNodeColor(data.type);
 
     return {
       ...baseStyle,
-      ...typeStyles[data.type],
-      border: selected ? '2px solid #1976d2' : '1px solid #ccc',
+      backgroundColor,
+      border: selected ? `2px solid ${theme.palette.primary.main}` : '1px solid #ccc',
     };
   };
 
@@ -92,8 +126,13 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected, id })
           <IconButton
             size="small"
             color="error"
-            onClick={() => data.onDelete?.({ id, data })}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent node selection
+              data.onDelete?.({ id, data });
+            }}
             data-testid={`delete-${id}`}
+            aria-label="Delete node"
+            title="Delete node"
           >
             <DeleteIcon fontSize="small" />
           </IconButton>

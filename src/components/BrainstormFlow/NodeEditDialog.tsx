@@ -128,7 +128,20 @@ const NodeEditDialog = ({
   const defaultNodeColor = getNodeColor(type);
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      sx={{
+        zIndex: 10001, // Ensure dialog appears above other elements
+        '& .MuiDialog-paper': {
+          margin: { xs: '16px', sm: '32px' },
+          width: { xs: 'calc(100% - 32px)', sm: 'auto' },
+          maxHeight: { xs: 'calc(100% - 32px)', sm: 'auto' },
+        }
+      }}
+    >
       <DialogTitle>{isEditMode ? 'Edit Node' : 'Add New Node'}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
@@ -203,7 +216,7 @@ const NodeEditDialog = ({
               {' '}
               {/* Container Grid */}
               {/* Size selection */}
-              <Grid size={{ xs: 12, sm: 6 }}>
+              <Grid xs={12} sm={6}>
                 {' '}
                 {/* Direct responsive props */}
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -286,7 +299,7 @@ const NodeEditDialog = ({
                 )}
               </Grid>
               {/* Color selection */}
-              <Grid size={{ xs: 12, sm: 6 }}>
+              <Grid xs={12} sm={6}>
                 {' '}
                 {/* Direct responsive props */}
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>

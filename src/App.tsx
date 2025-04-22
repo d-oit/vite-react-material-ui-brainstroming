@@ -54,31 +54,31 @@ const getDesignTokens = (mode: PaletteMode): ThemeOptions => {
       mode,
       ...(mode === 'light'
         ? {
-            // Light mode
-            primary: {
-              main: '#2196f3',
-            },
-            secondary: {
-              main: '#f50057',
-            },
-            background: {
-              default: '#f5f5f5',
-              paper: '#ffffff',
-            },
-          }
+          // Light mode
+          primary: {
+            main: '#2196f3',
+          },
+          secondary: {
+            main: '#f50057',
+          },
+          background: {
+            default: '#f5f5f5',
+            paper: '#ffffff',
+          },
+        }
         : {
-            // Dark mode
-            primary: {
-              main: '#90caf9',
-            },
-            secondary: {
-              main: '#f48fb1',
-            },
-            background: {
-              default: '#121212',
-              paper: '#1e1e1e',
-            },
-          }),
+          // Dark mode
+          primary: {
+            main: '#90caf9',
+          },
+          secondary: {
+            main: '#f48fb1',
+          },
+          background: {
+            default: '#121212',
+            paper: '#1e1e1e',
+          },
+        }),
     },
     typography: {
       fontFamily: [
@@ -319,6 +319,20 @@ const AppWithTheme = () => {
                     />
                     <Route
                       path="/projects/:projectId/*"
+                      element={withOfflineFallback(ProjectDetailPage)({
+                        onThemeToggle: toggleThemeMode,
+                        isDarkMode: mode === 'dark',
+                      })}
+                    />
+                    <Route
+                      path="/projects/:projectId/brainstorm"
+                      element={withOfflineFallback(ProjectDetailPage)({
+                        onThemeToggle: toggleThemeMode,
+                        isDarkMode: mode === 'dark',
+                      })}
+                    />
+                    <Route
+                      path="/projects/:projectId/settings"
                       element={withOfflineFallback(ProjectDetailPage)({
                         onThemeToggle: toggleThemeMode,
                         isDarkMode: mode === 'dark',

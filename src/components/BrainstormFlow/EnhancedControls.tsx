@@ -86,7 +86,7 @@ export const EnhancedControls: React.FC<EnhancedControlsProps> = ({
         return { bottom: 10, left: 10 };
       case 'bottom-right':
       default:
-        return { bottom: 10, right: 10 };
+        return { top: 10, right: 10 }; // Changed to top-right to avoid overlap with minimap
     }
   };
 
@@ -99,7 +99,7 @@ export const EnhancedControls: React.FC<EnhancedControlsProps> = ({
         ...getPositionStyles(),
         zIndex: 10,
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row', // Changed to row for horizontal layout
         gap: 0.5,
         backgroundColor: theme.palette.background.paper,
         borderRadius: 2,
@@ -107,31 +107,33 @@ export const EnhancedControls: React.FC<EnhancedControlsProps> = ({
         boxShadow: theme => theme.shadows[3],
       }}
     >
-      {onSave && (
-        <Tooltip title={t('flow.save') || 'Save'} placement="left">
-          <IconButton onClick={onSave} size="small" aria-label={t('flow.save') || 'Save'}>
-            <SaveIcon fontSize="small" />
+      {/* Reordered buttons to match the screenshot */}
+      <Tooltip title={t('flow.settings') || 'Settings'} placement="bottom">
+        <IconButton
+          onClick={handleSettingsClick}
+          size="small"
+          aria-label={t('flow.settings') || 'Settings'}
+        >
+          <SettingsIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+
+      {onToggleGrid && (
+        <Tooltip
+          title={showGrid ? t('flow.hideGrid') || 'Hide grid' : t('flow.showGrid') || 'Show grid'}
+          placement="bottom"
+        >
+          <IconButton
+            onClick={onToggleGrid}
+            size="small"
+            aria-label={
+              showGrid ? t('flow.hideGrid') || 'Hide grid' : t('flow.showGrid') || 'Show grid'
+            }
+          >
+            {showGrid ? <GridOffIcon fontSize="small" /> : <GridIcon fontSize="small" />}
           </IconButton>
         </Tooltip>
       )}
-
-      <Tooltip title={t('flow.zoomIn') || 'Zoom in'} placement="left">
-        <IconButton onClick={onZoomIn} size="small" aria-label={t('flow.zoomIn') || 'Zoom in'}>
-          <ZoomInIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-
-      <Tooltip title={t('flow.zoomOut') || 'Zoom out'} placement="left">
-        <IconButton onClick={onZoomOut} size="small" aria-label={t('flow.zoomOut') || 'Zoom out'}>
-          <ZoomOutIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-
-      <Tooltip title={t('flow.fitView') || 'Fit view'} placement="left">
-        <IconButton onClick={onFitView} size="small" aria-label={t('flow.fitView') || 'Fit view'}>
-          <FitViewIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
 
       {onFullscreen && (
         <Tooltip
@@ -140,7 +142,7 @@ export const EnhancedControls: React.FC<EnhancedControlsProps> = ({
               ? t('flow.exitFullscreen') || 'Exit fullscreen'
               : t('flow.enterFullscreen') || 'Enter fullscreen'
           }
-          placement="left"
+          placement="bottom"
         >
           <IconButton
             onClick={onFullscreen}
@@ -160,8 +162,40 @@ export const EnhancedControls: React.FC<EnhancedControlsProps> = ({
         </Tooltip>
       )}
 
+      <Tooltip title={t('flow.zoomOut') || 'Zoom out'} placement="bottom">
+        <IconButton onClick={onZoomOut} size="small" aria-label={t('flow.zoomOut') || 'Zoom out'}>
+          <ZoomOutIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+
+      <Tooltip title={t('flow.zoomIn') || 'Zoom in'} placement="bottom">
+        <IconButton onClick={onZoomIn} size="small" aria-label={t('flow.zoomIn') || 'Zoom in'}>
+          <ZoomInIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+
+      {/* Only show save button if onSave is provided (which means autosave is disabled) */}
+      {onSave && (
+        <Tooltip title={t('flow.save') || 'Save'} placement="bottom">
+          <IconButton
+            onClick={onSave}
+            size="small"
+            aria-label={t('flow.save') || 'Save'}
+            data-testid="save-button"
+          >
+            <SaveIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+
+      <Tooltip title={t('flow.fitView') || 'Fit view'} placement="bottom">
+        <IconButton onClick={onFitView} size="small" aria-label={t('flow.fitView') || 'Fit view'}>
+          <FitViewIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+
       {onUndo && (
-        <Tooltip title={t('flow.undo') || 'Undo'} placement="left">
+        <Tooltip title={t('flow.undo') || 'Undo'} placement="bottom">
           <span>
             <IconButton
               onClick={onUndo}
@@ -176,7 +210,7 @@ export const EnhancedControls: React.FC<EnhancedControlsProps> = ({
       )}
 
       {onRedo && (
-        <Tooltip title={t('flow.redo') || 'Redo'} placement="left">
+        <Tooltip title={t('flow.redo') || 'Redo'} placement="bottom">
           <span>
             <IconButton
               onClick={onRedo}
@@ -190,25 +224,8 @@ export const EnhancedControls: React.FC<EnhancedControlsProps> = ({
         </Tooltip>
       )}
 
-      {onToggleGrid && (
-        <Tooltip
-          title={showGrid ? t('flow.hideGrid') || 'Hide grid' : t('flow.showGrid') || 'Show grid'}
-          placement="left"
-        >
-          <IconButton
-            onClick={onToggleGrid}
-            size="small"
-            aria-label={
-              showGrid ? t('flow.hideGrid') || 'Hide grid' : t('flow.showGrid') || 'Show grid'
-            }
-          >
-            {showGrid ? <GridOffIcon fontSize="small" /> : <GridIcon fontSize="small" />}
-          </IconButton>
-        </Tooltip>
-      )}
-
       {onAccessibility && (
-        <Tooltip title={t('accessibility.title') || 'Accessibility'} placement="left">
+        <Tooltip title={t('accessibility.title') || 'Accessibility'} placement="bottom">
           <IconButton
             onClick={onAccessibility}
             size="small"
@@ -218,16 +235,6 @@ export const EnhancedControls: React.FC<EnhancedControlsProps> = ({
           </IconButton>
         </Tooltip>
       )}
-
-      <Tooltip title={t('flow.settings') || 'Settings'} placement="left">
-        <IconButton
-          onClick={handleSettingsClick}
-          size="small"
-          aria-label={t('flow.settings') || 'Settings'}
-        >
-          <SettingsIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
 
       <Popover
         open={settingsOpen}

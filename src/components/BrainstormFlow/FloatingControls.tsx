@@ -18,11 +18,11 @@ const nodeTypes: Array<{
   icon: React.ReactNode;
   label: string;
 }> = [
-  { type: 'idea', icon: <BoltIcon />, label: 'Add Idea' },
-  { type: 'task', icon: <TaskIcon />, label: 'Add Task' },
-  { type: 'resource', icon: <StorageIcon />, label: 'Add Resource' },
-  { type: 'note', icon: <NoteIcon />, label: 'Add Note' },
-];
+    { type: 'idea', icon: <BoltIcon />, label: 'Add Idea' },
+    { type: 'task', icon: <TaskIcon />, label: 'Add Task' },
+    { type: 'resource', icon: <StorageIcon />, label: 'Add Resource' },
+    { type: 'note', icon: <NoteIcon />, label: 'Add Note' },
+  ];
 
 export const FloatingControls: React.FC<FloatingControlsProps> = ({
   position = { x: 100, y: 100 },
@@ -47,6 +47,12 @@ export const FloatingControls: React.FC<FloatingControlsProps> = ({
         position: 'absolute',
         bottom: 16,
         right: 16,
+        zIndex: 1000, // Ensure it's above other elements
+        '& .MuiSpeedDial-fab': {
+          width: 56,
+          height: 56,
+          boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+        }
       }}
       icon={<SpeedDialIcon />}
     >

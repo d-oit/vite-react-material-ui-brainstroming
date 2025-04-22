@@ -150,17 +150,7 @@ export const ProjectBrainstormingSection = ({
             }
           }
         >
-          <Typography
-            variant="subtitle2"
-            color="text.secondary"
-            sx={
-              {
-                /* styles */
-              }
-            }
-          >
-            Suggested workflow: {templateConfig.suggestedWorkflow.join(' → ')}
-          </Typography>
+          {/* Removed suggested workflow text */}
           <Box
             sx={
               {
@@ -241,8 +231,8 @@ export const ProjectBrainstormingSection = ({
               initialNodes={flowNodes}
               initialEdges={flowEdges}
               onSave={handleSaveFromFlow}
-              // readOnly={readOnly} // Removed prop causing the error
               aria-label="Brainstorming Flow"
+              key={`flow-${projectId}-${Date.now()}`} // Add timestamp to force re-render
             />
           </ErrorBoundary>
         </Box>

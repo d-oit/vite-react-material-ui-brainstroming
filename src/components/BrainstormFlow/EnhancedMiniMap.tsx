@@ -80,10 +80,10 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
       case 'top-right':
         return { top: 80, right: 20 }; // Increased top margin to avoid toolbar overlap
       case 'bottom-right':
-        return { bottom: 100, right: 20 }; // Further increased bottom margin to avoid toolbar overlap
+        return { bottom: 80, right: 20 }; // Increased bottom margin to ensure visibility
       case 'bottom-left':
       default:
-        return { bottom: 100, left: 20 }; // Further increased bottom margin to avoid toolbar overlap
+        return { bottom: 80, left: 20 }; // Increased bottom margin to ensure visibility
     }
   };
 
@@ -94,7 +94,7 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
         sx={{
           position: 'absolute',
           ...getPositionStyles(),
-          zIndex: 50, // Increased z-index to ensure visibility
+          zIndex: 1000, // Significantly increased z-index to ensure visibility above all nodes
         }}
       >
         <Tooltip title={t('flow.showMiniMap') || 'Show mini map'}>
@@ -123,7 +123,7 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
       sx={{
         position: 'absolute',
         ...getPositionStyles(),
-        zIndex: 50, // Increased z-index to ensure visibility
+        zIndex: 1000, // Significantly increased z-index to ensure visibility above all nodes
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-end',

@@ -50,6 +50,7 @@ import _OfflineIndicator from '../OfflineIndicator/OfflineIndicator';
 interface AppShellProps {
   children: ReactNode;
   title?: string;
+  version?: string | number;
   loading?: boolean;
   error?: string | null;
   onThemeToggle: () => void;
@@ -60,6 +61,7 @@ interface AppShellProps {
 const AppShell = ({
   children,
   title,
+  version,
   loading = false,
   error = null,
   onThemeToggle,
@@ -252,18 +254,20 @@ const AppShell = ({
             }}
           >
             {title || t('app.title')}
-            {/* Version info moved to header for better visibility */}
-            <Typography
-              variant="caption"
-              component="span"
-              sx={{
-                opacity: 0.7,
-                display: { xs: 'none', sm: 'inline' },
-                ml: 1,
-              }}
-            >
-              v{import.meta.env.VITE_APP_VERSION || '1.0.0'}
-            </Typography>
+            {/* Display project version if provided, otherwise app version */}
+            {version && (
+              <Typography
+                variant="caption"
+                component="span"
+                sx={{
+                  opacity: 0.7,
+                  display: { xs: 'none', sm: 'inline' },
+                  ml: 1,
+                }}
+              >
+                v{version}
+              </Typography>
+            )}
           </Typography>
 
           {/* Network status icon in header */}

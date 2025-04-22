@@ -67,7 +67,10 @@ const ProjectDetailPage = () => {
   const [chatOpen, setChatOpen] = useState(false); // Chat closed by default
   const [_nodes, setNodes] = useState<Node[]>([]);
   const [_edges, setEdges] = useState<Edge[]>([]);
-  const [tabValue, setTabValue] = useState(0);
+
+  // Check if the URL contains '/brainstorm' to set the initial tab value
+  const initialTabValue = window.location.pathname.includes('/brainstorm') ? 1 : 0;
+  const [tabValue, setTabValue] = useState(initialTabValue);
 
   // State for editable fields
   const [isEditingName, setIsEditingName] = useState(false);
@@ -148,6 +151,16 @@ const ProjectDetailPage = () => {
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
+
+    // Update URL when tab changes
+    const baseUrl = `/projects/${projectId}`;
+    if (newValue === 1) {
+      window.history.pushState(null, '', `${baseUrl}/brainstorm`);
+    } else if (newValue === 2) {
+      window.history.pushState(null, '', `${baseUrl}/settings`);
+    } else {
+      window.history.pushState(null, '', baseUrl);
+    }
   };
 
   // Function to handle adding nodes from chat suggestions
@@ -179,8 +192,9 @@ const ProjectDetailPage = () => {
     return (
       <AppShell
         title={t('project.title')}
-        onThemeToggle={() => {}}
+        onThemeToggle={() => { }}
         isDarkMode={theme.palette.mode === 'dark'}
+        loading={true}
       >
         <Container maxWidth="lg">
           <Box
@@ -212,8 +226,9 @@ const ProjectDetailPage = () => {
     return (
       <AppShell
         title={t('project.title')}
-        onThemeToggle={() => {}}
+        onThemeToggle={() => { }}
         isDarkMode={theme.palette.mode === 'dark'}
+        error={error}
       >
         <Container maxWidth="lg">
           <Paper sx={{ p: 3 }}>
@@ -230,7 +245,8 @@ const ProjectDetailPage = () => {
   return (
     <AppShell
       title={project.name}
-      onThemeToggle={() => {}}
+      version={project.version}
+      onThemeToggle={() => { }}
       isDarkMode={theme.palette.mode === 'dark'}
     >
       {/* Status indicators */}
@@ -322,38 +338,39 @@ const ProjectDetailPage = () => {
               </IconButton>
             </Box>
           )}
-          <Typography variant="subtitle2" color="text.secondary">
-            {t('project.version')} {project.version}
-          </Typography>
+          {/* Version information removed from here and only shown in app header */}
         </Box>
 
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={isSaving ? <CircularProgress size={16} /> : <SaveIcon />}
-            onClick={() => {
-              void saveProject();
-            }}
-            disabled={isSaving || !hasChanges}
-            size={isMobile ? 'small' : 'medium'}
-            sx={{
-              minWidth: '90px', // Fixed width to prevent layout shifts
-              transition: 'all 0.2s ease-in-out',
-              position: 'relative',
-              '& .MuiCircularProgress-root': {
-                transition: 'opacity 0.2s ease-in-out',
-                opacity: isSaving ? 1 : 0,
-              },
-              '& .MuiSvgIcon-root': {
-                transition: 'opacity 0.2s ease-in-out',
-                opacity: isSaving ? 0 : 1,
-                position: isSaving ? 'absolute' : 'relative',
-                left: isSaving ? '16px' : 'auto',
-              },
-            }}
-          >
-            {hasChanges ? `${t('common.save')}*` : t('common.save')}
-          </Button>
+          {/* Only show Save button when autoSave is disabled */}
+          {!project.autoSave && (
+            <Button
+              variant="outlined"
+              startIcon={isSaving ? <CircularProgress size={16} /> : <SaveIcon />}
+              onClick={() => {
+                void saveProject();
+              }}
+              disabled={isSaving || !hasChanges}
+              size={isMobile ? 'small' : 'medium'}
+              sx={{
+                minWidth: '90px', // Fixed width to prevent layout shifts
+                transition: 'all 0.2s ease-in-out',
+                position: 'relative',
+                '& .MuiCircularProgress-root': {
+                  transition: 'opacity 0.2s ease-in-out',
+                  opacity: isSaving ? 1 : 0,
+                },
+                '& .MuiSvgIcon-root': {
+                  transition: 'opacity 0.2s ease-in-out',
+                  opacity: isSaving ? 0 : 1,
+                  position: isSaving ? 'absolute' : 'relative',
+                  left: isSaving ? '16px' : 'auto',
+                },
+              }}
+            >
+              {hasChanges ? `${t('common.save')}*` : t('common.save')}
+            </Button>
+          )}
 
           <Button
             variant="outlined"
@@ -447,8 +464,8 @@ const ProjectDetailPage = () => {
           ) : (
             <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
               {project.description !== null &&
-              project.description !== undefined &&
-              project.description !== ''
+                project.description !== undefined &&
+                project.description !== ''
                 ? project.description
                 : t('project.noDescriptionProvided')}
             </Typography>
@@ -606,34 +623,37 @@ const ProjectDetailPage = () => {
           </IconButton>
         )}
 
-        <IconButton
-          color="primary"
-          aria-label="save"
-          onClick={() => {
-            void saveProject();
-          }}
-          disabled={isSaving || !hasChanges}
-          sx={{
-            bgcolor: 'background.paper',
-            transition: 'all 0.2s ease-in-out',
-            position: 'relative',
-            '&:disabled': {
-              opacity: 0.6,
-            },
-          }}
-        >
-          {isSaving ? (
-            <CircularProgress
-              size={24}
-              sx={{
-                position: 'absolute',
-                transition: 'opacity 0.2s ease-in-out',
-              }}
-            />
-          ) : (
-            <SaveIcon />
-          )}
-        </IconButton>
+        {/* Only show Save button when autoSave is disabled */}
+        {!project.autoSave && (
+          <IconButton
+            color="primary"
+            aria-label="save"
+            onClick={() => {
+              void saveProject();
+            }}
+            disabled={isSaving || !hasChanges}
+            sx={{
+              bgcolor: 'background.paper',
+              transition: 'all 0.2s ease-in-out',
+              position: 'relative',
+              '&:disabled': {
+                opacity: 0.6,
+              },
+            }}
+          >
+            {isSaving ? (
+              <CircularProgress
+                size={24}
+                sx={{
+                  position: 'absolute',
+                  transition: 'opacity 0.2s ease-in-out',
+                }}
+              />
+            ) : (
+              <SaveIcon />
+            )}
+          </IconButton>
+        )}
       </Box>
 
       {/* Keyboard shortcuts handler */}

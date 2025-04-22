@@ -98,6 +98,8 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
+  // Get application version from environment
+  const appVersion = import.meta.env.VITE_PROJECT_VERSION || '0.1.0';
   const { settings, updateSettings } = useSettings();
   const [preferences, setPreferences] = useState<ExtendedUserPreferences>(() => {
     // Use settings from the context
@@ -169,11 +171,11 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
         'autoSave' | 'autoBackup' | 'skipDeleteConfirmation'
       >
     ) =>
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = event.target.checked;
-      setPreferences({ ...preferences, [name]: newValue });
-      updateSettings({ [name]: newValue });
-    };
+      (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = event.target.checked;
+        setPreferences({ ...preferences, [name]: newValue });
+        updateSettings({ [name]: newValue });
+      };
 
   const handleFontSizeChange = (_event: Event, newValue: number | number[]) => {
     const fontSize = newValue as number;
@@ -314,7 +316,7 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
   return (
     <AppShell
       title={t('settings.title')}
-      onThemeToggle={onThemeToggle || (() => {})}
+      onThemeToggle={onThemeToggle || (() => { })}
       isDarkMode={isDarkMode || theme.palette.mode === 'dark'}
     >
       <Container
@@ -609,6 +611,13 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
           <TabPanel value={tabValue} index={4}>
             <LogViewer />
           </TabPanel>
+        </Box>
+
+        {/* Application Version Information */}
+        <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center', opacity: 0.7 }}>
+          <Typography variant="caption" color="text.secondary">
+            Application Version: v{appVersion}
+          </Typography>
         </Box>
 
         <Snackbar
