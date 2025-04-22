@@ -103,8 +103,8 @@ export const HelpOverlay: React.FC<HelpOverlayProps> = ({ tours = [], tips = [],
 					onClick={handleOpen}
 					sx={{
 						position: 'fixed',
-						bottom: 80, // Position above accessibility button
-						right: 16,
+						bottom: 16, // Changed from 80 to 16 to position at the very bottom
+						left: 16,
 						zIndex: 1000,
 					}}>
 					<HelpIcon />
@@ -504,3 +504,5 @@ export const HelpOverlay: React.FC<HelpOverlayProps> = ({ tours = [], tips = [],
 }
 
 export default HelpOverlay
+
+

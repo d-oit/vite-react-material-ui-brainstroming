@@ -502,8 +502,8 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 						</button>
 					</Panel>
 
-					{/* Enhanced MiniMap positioned at the bottom-right, with proper spacing */}
-					<Panel position="bottom-right" style={{ marginBottom: '80px', marginRight: '20px' }}>
+					{/* Enhanced MiniMap positioned at the bottom-right with proper spacing */}
+					<Panel position="bottom-right" style={{ bottom: '80px', right: '20px' }}>
 						<EnhancedMiniMap
 							nodes={nodes.map(
 								(node) =>
@@ -531,7 +531,6 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 							onZoomIn={() => reactFlowInstance?.zoomIn()}
 							onZoomOut={() => reactFlowInstance?.zoomOut()}
 							onFitView={fitViewToNodes}
-							position="bottom-right"
 						/>
 					</Panel>
 				</ReactFlow>
@@ -638,3 +637,6 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 		</ReactFlowProvider>
 	)
 }
+
+
+
