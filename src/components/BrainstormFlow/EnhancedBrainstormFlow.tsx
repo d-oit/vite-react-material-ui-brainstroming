@@ -1,49 +1,178 @@
-import React, { useCallback, useRef, useState } from 'react';
-import type { ReactFlowInstance, Connection, NodeChange as ReactFlowNodeChange, EdgeChange as ReactFlowEdgeChange } from 'reactflow';
-import type { Node, Edge, NodeData, NodeType } from '../../types/models';
+// MUI imports
+import { FullscreenExit as FullscreenExitIcon } from '@mui/icons-material';
+import {
+  Box,
+  IconButton,
+  Menu,
+  MenuItem,
+  Typography,
+  Divider,
+  Slider,
+  useTheme,
+} from '@mui/material';
+// React and ReactFlow imports
+import React, { useCallback, useRef, useState, useEffect } from 'react';
+import type {
+  ReactFlowInstance,
+  Connection,
+  Node as ReactFlowNode,
+  Edge as ReactFlowEdge,
+  NodeProps,
+  NodeChange,
+  EdgeChange,
+  NodeMouseHandler,
+} from 'reactflow';
 import ReactFlow, {
   Background,
   Panel,
   addEdge,
   applyNodeChanges,
   applyEdgeChanges,
+  useReactFlow,
+  ReactFlowProvider,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import './EnhancedBrainstormFlow.css';
 
-import { Box, IconButton, Menu, MenuItem, Typography, Divider, Slider } from '@mui/material';
-import { FullscreenExit as FullscreenExitIcon } from '@mui/icons-material';
-
+// Project imports
+import { useSettings } from '../../contexts/SettingsContext';
 import LLMChatPanel from '../../features/brainstorming/LLMChatPanel';
 import { useBrainstormStore } from '../../store/brainstormStore';
+import { NodeType, EdgeType } from '../../types/enums';
+import type { Node as ProjectNode, Edge as ProjectEdge } from '../../types/models';
+import type { Node as FlowNode, Edge as FlowEdge } from 'reactflow';
 import DeleteConfirmationDialog from '../DeleteConfirmationDialog';
-import { useSettings } from '../../contexts/SettingsContext';
 
+// Local Components
+import ControlsPanel from './ControlsPanel';
+import { EnhancedMiniMap } from './EnhancedMiniMap';
 import { FloatingControls } from './FloatingControls';
 import NodeEditDialog from './NodeEditDialog';
-import CustomNode from './nodes/CustomNode';
-import type { CustomNode as CustomNodeType, CustomEdge } from './types';
-import { NodeType, EdgeType } from '../../types/models';
+import CustomNodeComponent from './nodes/CustomNode';
+import type { CustomNodeData } from './nodes/CustomNode';
 
-// Type assertion for custom nodes and edges
-const asNode = (node: CustomNodeType): Node => ({
-  ...node,
-  type: node.type as NodeType
-});
+// Extended node data interface that includes all required fields
+interface NodeData extends CustomNodeData {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  tags?: string[];
+  color?: string;
+}
 
-const asEdge = (edge: CustomEdge): Edge => ({
-  ...edge,
-  type: edge.type as EdgeType
-});
-import EnhancedControls from './EnhancedControls';
-import { EnhancedMiniMap } from './EnhancedMiniMap';
+// Type definitions for ReactFlow
+// Custom type definitions
+interface CustomNodeType extends Omit<FlowNode<NodeData>, 'type' | 'style'> {
+  type: NodeType;
+  style?: Record<string, unknown>;
+}
 
-const nodeTypes = {
-  idea: CustomNode,
-  task: CustomNode,
-  resource: CustomNode,
-  note: CustomNode,
+interface CustomEdge extends Omit<FlowEdge, 'type' | 'label'> {
+  type: EdgeType;
+  label?: string;
+}
+
+// Helper functions to convert between ReactFlow and Project types
+const createFlowNodes = (nodes: ReactFlowNode[]): ProjectNode[] => {
+  return nodes.map(node => {
+    const nodeType = (node.type ?? NodeType.IDEA) as NodeType;
+    const defaultData = createDefaultNodeData(node.id, nodeType);
+
+    return {
+      id: node.id,
+      type: nodeType,
+      position: node.position,
+      data: {
+        ...defaultData,
+        ...node.data,
+      },
+      style: node.style as Record<string, unknown>,
+      selected: node.selected,
+    };
+  });
 };
+
+const createFlowEdges = (edges: ReactFlowEdge[]): ProjectEdge[] => {
+  return edges.map(edge => ({
+    id: edge.id,
+    source: edge.source,
+    target: edge.target,
+    type: (edge.type ?? EdgeType.DEFAULT) as EdgeType,
+    label: typeof edge.label === 'string' ? edge.label : undefined,
+    animated: edge.animated,
+    style: edge.style as Record<string, unknown>,
+    selected: edge.selected,
+  }));
+};
+
+// Component registration
+const nodeTypes = {
+  [NodeType.IDEA]: CustomNodeComponent,
+  [NodeType.TASK]: CustomNodeComponent,
+  [NodeType.RESOURCE]: CustomNodeComponent,
+  [NodeType.NOTE]: CustomNodeComponent,
+};
+
+const createDefaultNodeData = (id: string, type: NodeType = NodeType.IDEA): NodeData => ({
+  id,
+  label: '',
+  title: '',
+  content: '',
+  type,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  tags: [],
+  notes: '',
+  onEdit: undefined,
+  onDelete: undefined,
+  onChat: undefined,
+});
+
+// Safe accessor functions for node data
+const getNodeDataProperty = <T,>(node: CustomNodeType, property: string, defaultValue: T): T => {
+  if (node.data === null || node.data === undefined) return defaultValue;
+  return (node.data as any)[property] ?? defaultValue;
+};
+
+const hasNodeDataMethod = (node: CustomNodeType, methodName: string): boolean => {
+  if (node.data === null || node.data === undefined) return false;
+  return typeof (node.data as any)[methodName] === 'function';
+};
+
+// These interfaces are not needed and causing type issues
+// We'll use the base types directly
+
+// Transform node to ensure it has the correct type
+const transformNode = (node: CustomNodeType): CustomNodeType => ({
+  ...node,
+  type: (node.type ?? NodeType.IDEA) as NodeType,
+  data: {
+    ...node.data,
+    id: node.id,
+    type: (node.type ?? NodeType.IDEA) as NodeType,
+  },
+  style: node.style as Record<string, unknown>,
+});
+
+// Transform edge to ensure it has the correct type
+const transformEdge = (edge: CustomEdge): CustomEdge => ({
+  ...edge,
+  type: (edge.type ?? EdgeType.DEFAULT) as EdgeType,
+  label: edge.label?.toString(),
+});
+
+type NodeTypeModel = NodeType;
+interface EnhancedBrainstormFlowProps {
+  initialNodes: CustomNodeType[];
+  initialEdges: CustomEdge[];
+  onSave?: (nodes: CustomNodeType[], edges: CustomEdge[]) => void;
+}
+
+// Removed duplicate nodeTypes definition
+// Component Implementation
+
+// Removed unused helper functions
 
 interface EnhancedBrainstormFlowProps {
   initialNodes: CustomNodeType[];
@@ -56,20 +185,37 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
   initialEdges,
   onSave,
 }) => {
+  const _theme = useTheme();
+  // We can remove these unused variables
   const flowRef = useRef<HTMLDivElement>(null);
-  const [reactFlowInstance, setReactFlowInstance] = React.useState<ReactFlowInstance | null>(null);
-  const { nodes, edges, setNodes, setEdges } = useBrainstormStore();
+  const { fitView: reactFlowFitView } = useReactFlow();
+  const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
+  const { nodes: storeNodes, edges: storeEdges, setNodes, setEdges } = useBrainstormStore();
+  // Cast store values to the correct types
+  const nodes = storeNodes as CustomNodeType[];
+  const edges = storeEdges as CustomEdge[];
 
-  const [mousePosition, setMousePosition] = React.useState({ x: 100, y: 100 });
-  const [showEditDialog, setShowEditDialog] = React.useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
-  const [showChatPanel, setShowChatPanel] = React.useState(false);
-  const [selectedNode, setSelectedNode] = React.useState<CustomNodeType | null>(null);
+  // UI State
+  const [mousePosition, setMousePosition] = useState({ x: 100, y: 100 });
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showChatPanel, setShowChatPanel] = useState(false);
+  const [selectedNode, setSelectedNode] = useState<CustomNodeType | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [settingsAnchorEl, setSettingsAnchorEl] = useState<HTMLElement | null>(null);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [showGrid, setShowGrid] = useState<boolean>(true);
   const { settings } = useSettings();
+
+  // Accessibility and UX State
+  const [_isLoading, setIsLoading] = useState(false);
+
+  // Removed unused debounced save function
+
+  // Show loading state while initializing
+  useEffect(() => {
+    setIsLoading(!reactFlowInstance);
+  }, [reactFlowInstance]);
 
   // Settings menu handlers
   const handleSettingsOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -93,14 +239,21 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
   };
 
   const onNodesChange = useCallback(
-    (changes: ReactFlowNodeChange[]) => {
-      setNodes(currentNodes => applyNodeChanges(changes, currentNodes) as CustomNodeType[]);
+    (changes: NodeChange[]) => {
+      setNodes(currentNodes => {
+        const updatedNodes = applyNodeChanges(changes, currentNodes);
+        return updatedNodes.map(node => ({
+          ...node,
+          type: node.type as NodeType,
+          data: node.data as NodeData,
+        })) as CustomNodeType[];
+      });
     },
     [setNodes]
   );
 
   const onEdgesChange = useCallback(
-    (changes: ReactFlowEdgeChange[]) => {
+    (changes: EdgeChange[]) => {
       setEdges(currentEdges => applyEdgeChanges(changes, currentEdges) as CustomEdge[]);
     },
     [setEdges]
@@ -140,17 +293,17 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
   }, [onSave, reactFlowInstance]);
 
   // Initialize flow with props
-  React.useEffect(() => {
+  useEffect(() => {
     setNodes(initialNodes);
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
 
   // Track previous state to detect changes
-  const prevNodesRef = React.useRef<string>(JSON.stringify(initialNodes));
-  const prevEdgesRef = React.useRef<string>(JSON.stringify(initialEdges));
+  const prevNodesRef = useRef<string>(JSON.stringify(initialNodes));
+  const prevEdgesRef = useRef<string>(JSON.stringify(initialEdges));
 
   // Auto-save only when there are actual changes
-  React.useEffect(() => {
+  useEffect(() => {
     const currentNodesJSON = JSON.stringify(nodes);
     const currentEdgesJSON = JSON.stringify(edges);
 
@@ -169,26 +322,19 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
   }, [nodes, edges, handleSave]);
 
   // Handle node click for editing
-  const handleNodeClick = useCallback((event: React.MouseEvent, node: CustomNodeType) => {
-    setSelectedNode(node);
-    setShowEditDialog(true);
-  }, []);
+  const handleNodeClick = useCallback<NodeMouseHandler>(
+    (_event: React.MouseEvent, node: ReactFlowNode) => {
+      setSelectedNode({
+        ...node,
+        type: node.type as NodeType,
+        data: node.data as NodeData,
+      } as CustomNodeType);
+      setShowEditDialog(true);
+    },
+    []
+  );
 
-  // Handle node delete
-  const handleNodeDelete = useCallback((node: CustomNodeType) => {
-    // Ensure we have the correct node data
-    if (!node?.id) return;
-
-    // Set the selected node and show the delete dialog
-    setSelectedNode(node);
-    setShowDeleteDialog(true);
-  }, []);
-
-  // Handle chat panel open
-  const handleChatOpen = useCallback((node: CustomNodeType) => {
-    setSelectedNode(node);
-    setShowChatPanel(true);
-  }, []);
+  // Removed unused handler functions
 
   // Handle dialog close
   const handleCloseEditDialog = useCallback(() => {
@@ -225,17 +371,17 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 
   // Handle node update
   const handleNodeUpdate = useCallback(
-    (nodeId: string, data: any) => {
+    (nodeId: string, data: Record<string, unknown>) => {
       setNodes(nodes =>
         nodes.map(node =>
           node.id === nodeId
             ? {
-              ...node,
-              data: {
-                ...node.data,
-                ...data,
-              },
-            }
+                ...node,
+                data: {
+                  ...node.data,
+                  ...data,
+                },
+              }
             : node
         )
       );
@@ -246,7 +392,7 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
   );
 
   // Toggle fullscreen mode
-  const toggleFullscreen = useCallback(() => {
+  const toggleFullscreen = useCallback(async () => {
     const newFullscreenState = !isFullscreen;
     setIsFullscreen(newFullscreenState);
 
@@ -254,35 +400,31 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
     try {
       if (newFullscreenState) {
         // First set our state, then try browser fullscreen API
-        if (document.documentElement.requestFullscreen) {
-          void document.documentElement.requestFullscreen();
-        }
+        await document.documentElement?.requestFullscreen?.();
       } else {
         // Exit browser fullscreen if active
-        if (document.fullscreenElement && document.exitFullscreen) {
-          void document.exitFullscreen();
-        }
+        await document.exitFullscreen?.();
       }
-    } catch (err) {
-      console.error('Error with fullscreen API:', err);
+    } catch (error) {
+      console.error('Error with fullscreen API:', error);
       // Fallback to CSS-only fullscreen if browser API fails
     }
   }, [isFullscreen]);
 
   // Fit view to ensure all nodes are visible
-  const fitView = useCallback(() => {
+  const fitViewToNodes = useCallback(() => {
     if (reactFlowInstance) {
       reactFlowInstance.fitView({ padding: 0.2 });
     }
   }, [reactFlowInstance]);
 
   // Use effect to force re-render when component mounts
-  React.useEffect(() => {
-    fitView();
-  }, [fitView]);
+  useEffect(() => {
+    fitViewToNodes();
+  }, [fitViewToNodes]);
 
   // Add fullscreen change event listener
-  React.useEffect(() => {
+  useEffect(() => {
     const handleFullscreenChange = () => {
       // Update our state when browser fullscreen changes
       setIsFullscreen(!!document.fullscreenElement);
@@ -295,251 +437,211 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
   }, []);
 
   return (
-    <div
-      ref={flowRef}
-      className={`flow-container ${isFullscreen ? 'fullscreen' : ''}`}
-      onMouseMove={onMouseMove}
-      data-testid="enhanced-brainstorm-flow"
-    >
-      {/* Mobile fullscreen close button */}
-      {isFullscreen && (
-        <Box className="mobile-close-button">
-          <IconButton
-            onClick={toggleFullscreen}
-            size="large"
-            color="primary"
-            aria-label="Exit fullscreen"
-            data-testid="exit-fullscreen-button"
-          >
-            <FullscreenExitIcon />
-          </IconButton>
-        </Box>
-      )}
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onInit={setReactFlowInstance}
-        nodeTypes={nodeTypes}
-        onNodeClick={handleNodeClick}
-        fitView
-        minZoom={0.1}
-        maxZoom={1.5}
-        attributionPosition="bottom-left"
-        draggable={true}
-        selectionOnDrag={true}
-        panOnDrag={true}
-        zoomOnScroll={true}
-        panOnScroll={false}
-        onNodeDragStop={(event, node) => {
-          if (settings.autoSave) {
-            handleSave();
-          }
-        }}
+    <ReactFlowProvider>
+      <div
+        ref={flowRef}
+        className={`flow-container ${isFullscreen ? 'fullscreen' : ''}`}
+        onMouseMove={onMouseMove}
+        data-te stid="enhanced-brainstorm-flow"
       >
-        {showGrid && <Background />}
-
-        {/* Controls in the top-right corner with proper spacing */}
-        <div className="flow-controls" style={{ padding: '10px' }}>
-          <button
-            type="button"
-            className="flow-controls-button"
-            onClick={handleSettingsOpen}
-            title="Settings"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
-              <path fill="none" d="M0 0h24v24H0z" />
-              <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="flow-controls-button"
-            onClick={() => setShowGrid(!showGrid)}
-            title={showGrid ? 'Hide Grid' : 'Show Grid'}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
-              <path fill="none" d="M0 0h24v24H0z" />
-              <path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H4v-4h4v4zm0-6H4v-4h4v4zm0-6H4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4z" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="flow-controls-button"
-            onClick={toggleFullscreen}
-            title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-          >
-            {isFullscreen ? (
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
-                <path fill="none" d="M0 0h24v24H0z" />
-                <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
-                <path fill="none" d="M0 0h24v24H0z" />
-                <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
-              </svg>
-            )}
-          </button>
-          <button
-            type="button"
-            className="flow-controls-button"
-            onClick={() => reactFlowInstance?.zoomOut()}
-            title="Zoom Out"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
-              <path fill="none" d="M0 0h24v24H0z" />
-              <path d="M19 13H5v-2h14v2z" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="flow-controls-button"
-            onClick={() => reactFlowInstance?.zoomIn()}
-            title="Zoom In"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
-              <path fill="none" d="M0 0h24v24H0z" />
-              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Help button in bottom-left corner */}
-        <Panel position="bottom-left">
-          <button
-            type="button"
-            className="flow-help-button"
-            onClick={() => window.open('/help', '_blank')}
-            title="Help"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="none" d="M0 0h24v24H0z"/>
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
-            </svg>
-          </button>
-        </Panel>
-
-        {/* Enhanced MiniMap positioned at the bottom-right, with proper spacing */}
-        <Panel position="bottom-right" style={{ marginBottom: '80px', marginRight: '20px' }}>
-          <EnhancedMiniMap
-            nodes={nodes.map(asNode)}
-            edges={edges.map(asEdge)}
-            className="enhanced-minimap"
-            onNodeClick={nodeId => {
-              const node = nodes.find(n => n.id === nodeId);
-              if (node) handleNodeClick({} as React.MouseEvent, node);
-            }}
-            onZoomIn={() => reactFlowInstance?.zoomIn()}
-            onZoomOut={() => reactFlowInstance?.zoomOut()}
-            onFitView={fitView}
-            position="bottom-right"
-          />
-        </Panel>
-      </ReactFlow>
-      <FloatingControls position={mousePosition} />
-
-      {/* Node Edit Dialog */}
-      {showEditDialog && selectedNode && (
-        <NodeEditDialog
-          open={showEditDialog}
-          onClose={handleCloseEditDialog}
-          initialData={selectedNode.data as NodeData}
-          initialType={selectedNode.type as NodeType}
-          onSave={(data, type) => handleNodeUpdate(selectedNode.id, { ...data, type })}
-        />
-      )}
-
-      {/* Delete Confirmation Dialog */}
-      {showDeleteDialog && selectedNode && (
-        <DeleteConfirmationDialog
-          open={showDeleteDialog}
-          onClose={handleCloseDeleteDialog}
-          onConfirm={handleConfirmDelete}
-        />
-      )}
-
-      {/* Chat Panel */}
-      {showChatPanel && selectedNode && (
-        <LLMChatPanel
-          open={showChatPanel}
-          onClose={handleCloseChatPanel}
-          projectId={selectedNode.id}
-          session={{
-            id: 'flow-chat',
-            projectId: selectedNode.id,
-            nodes: [],
-            templateId: '',
-            history: [],
-            created: new Date(),
-            modified: new Date(),
-            custom: {},
-            isQuick: false
+        {/* Mobile fullscreen close button */}
+        {isFullscreen && (
+          <Box className="mobile-close-button">
+            <IconButton
+              onClick={() => void toggleFullscreen()}
+              size="large"
+              color="primary"
+              aria-label="Exit fullscreen"
+              data-testid="exit-fullscreen-button"
+            >
+              <FullscreenExitIcon />
+            </IconButton>
+          </Box>
+        )}
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onInit={setReactFlowInstance}
+          nodeTypes={nodeTypes}
+          onNodeClick={handleNodeClick}
+          fitView
+          minZoom={0.1}
+          maxZoom={1.5}
+          attributionPosition="bottom-left"
+          draggable={true}
+          selectionOnDrag={true}
+          panOnDrag={true}
+          zoomOnScroll={true}
+          panOnScroll={false}
+          onNodeDragStop={(_event, _node) => {
+            if (settings.autoSave) {
+              handleSave();
+            }
           }}
-          onInsightGenerated={() => { }}
-        />
-      )}
+        >
+          {showGrid && <Background />}
 
-      {/* Settings Menu */}
-      <Menu
-        anchorEl={settingsAnchorEl}
-        open={Boolean(settingsAnchorEl)}
-        onClose={handleSettingsClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-        PaperProps={{
-          sx: { width: 280, p: 2 },
-        }}
-      >
-        <Typography variant="subtitle2" gutterBottom>
-          Zoom Level: {Math.round(zoomLevel * 100)}%
-        </Typography>
-        <Box sx={{ px: 1, mb: 2 }}>
-          <Slider
-            value={zoomLevel}
-            onChange={handleZoomChange}
-            min={0.1}
-            max={2}
-            step={0.1}
-            marks={[
-              { value: 0.5, label: '50%' },
-              { value: 1, label: '100%' },
-              { value: 1.5, label: '150%' },
-            ]}
-            valueLabelDisplay="auto"
-            valueLabelFormat={value => `${Math.round(value * 100)}%`}
+          {/* Controls in the top-right corner with proper spacing */}
+          <Panel position="top-right">
+            <ControlsPanel
+              handleSettingsOpen={handleSettingsOpen}
+              toggleGrid={() => setShowGrid(!showGrid)}
+              toggleFullscreen={() => void toggleFullscreen()}
+              zoomIn={() => reactFlowInstance?.zoomIn()}
+              zoomOut={() => reactFlowInstance?.zoomOut()}
+              isFullscreen={isFullscreen}
+              showGrid={showGrid}
+            />
+          </Panel>
+
+          {/* Help button in bottom-left corner */}
+          <Panel position="bottom-left">
+            <button
+              type="button"
+              className="flow-help-button"
+              onClick={() => window.open('/help', '_blank')}
+              title="Help"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                <path fill="none" d="M0 0h24v24H0z" />
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z" />
+              </svg>
+            </button>
+          </Panel>
+
+          {/* Enhanced MiniMap positioned at the bottom-right, with proper spacing */}
+          <Panel position="bottom-right" style={{ marginBottom: '80px', marginRight: '20px' }}>
+            <EnhancedMiniMap
+              nodes={nodes.map(
+                node =>
+                  ({
+                    ...node,
+                    type: node.type || NodeType.IDEA,
+                    data: node.data as NodeData
+                  } as ProjectNode))}
+                  edges={edges.map(edge => ({
+                ...edge,
+                type: edge.type as EdgeType || EdgeType.DEFAULT,
+                label: typeof edge.label === 'string' ? edge.label : undefined
+              } as ProjectEdge))}
+              onNodeClick={nodeId => {
+                const node = nodes.find(n => n.id === nodeId);
+                if (node) {
+                  const event = new MouseEvent('click') as unknown as React.MouseEvent;
+                  handleNodeClick(event, node as CustomNodeType);
+                }
+              }}
+              onZoomIn={() => reactFlowInstance?.zoomIn()}
+              onZoomOut={() => reactFlowInstance?.zoomOut()}
+              onFitView={fitViewToNodes}
+              position="bottom-right"
+            />
+          </Panel>
+        </ReactFlow>
+        <FloatingControls position={mousePosition} />
+
+        {/* Node Edit Dialog */}
+        {showEditDialog && selectedNode && (
+          <NodeEditDialog
+            open={showEditDialog}
+            onClose={handleCloseEditDialog}
+            initialData={selectedNode.data as NodeData}
+            initialType={selectedNode.type as NodeTypeModel}
+            onSave={(data, type) => handleNodeUpdate(selectedNode.id, { ...data, type })}
           />
-        </Box>
+        )}
 
-        <Divider sx={{ my: 1 }} />
+        {/* Delete Confirmation Dialog */}
+        {showDeleteDialog && selectedNode && (
+          <DeleteConfirmationDialog
+            open={showDeleteDialog}
+            onClose={handleCloseDeleteDialog}
+            onConfirm={handleConfirmDelete}
+          />
+        )}
 
-        <Typography variant="subtitle2" gutterBottom sx={{ mt: 1 }}>
-          Keyboard Shortcuts
-        </Typography>
-        <MenuItem dense sx={{ py: 0.5 }}>
-          <Typography variant="body2">Ctrl + +: Zoom In</Typography>
-        </MenuItem>
-        <MenuItem dense sx={{ py: 0.5 }}>
-          <Typography variant="body2">Ctrl + -: Zoom Out</Typography>
-        </MenuItem>
-        <MenuItem dense sx={{ py: 0.5 }}>
-          <Typography variant="body2">Ctrl + 0: Fit View</Typography>
-        </MenuItem>
-        <MenuItem dense sx={{ py: 0.5 }}>
-          <Typography variant="body2">F: Fullscreen</Typography>
-        </MenuItem>
-        <MenuItem dense sx={{ py: 0.5 }}>
-          <Typography variant="body2">Delete: Remove Selected</Typography>
-        </MenuItem>
-      </Menu>
-    </div>
+        {/* Chat Panel */}
+        {showChatPanel && selectedNode && (
+          <LLMChatPanel
+            open={showChatPanel}
+            onClose={handleCloseChatPanel}
+            projectId={selectedNode.id}
+            session={{
+              id: 'flow-chat',
+              projectId: selectedNode.id,
+              nodes: [],
+              templateId: '',
+              history: [],
+              created: new Date(),
+              modified: new Date(),
+              isQuick: false,
+            }}
+            onInsightGenerated={() => {}}
+          />
+        )}
+
+        {/* Settings Menu */}
+        <Menu
+          anchorEl={settingsAnchorEl}
+          open={Boolean(settingsAnchorEl)}
+          onClose={handleSettingsClose}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          slotProps={{
+            paper: { sx: { width: 280, p: 2 } },
+          }}
+        >
+          <Typography variant="subtitle2" gutterBottom>
+            Zoom Level: {Math.round(zoomLevel * 100)}%
+          </Typography>
+          <Box sx={{ px: 1, mb: 2 }}>
+            <Slider
+              value={zoomLevel}
+              onChange={handleZoomChange}
+              min={0.1}
+              max={2}
+              step={0.1}
+              marks={[
+                { value: 0.5, label: '50%' },
+                { value: 1, label: '100%' },
+                { value: 1.5, label: '150%' },
+              ]}
+              valueLabelDisplay="auto"
+              valueLabelFormat={value => `${Math.round(value * 100)}%`}
+            />
+          </Box>
+
+          <Divider sx={{ my: 1 }} />
+
+          <Typography variant="subtitle2" gutterBottom sx={{ mt: 1 }}>
+            Keyboard Shortcuts
+          </Typography>
+          <MenuItem dense sx={{ py: 0.5 }}>
+            <Typography variant="body2">Ctrl + +: Zoom In</Typography>
+          </MenuItem>
+          <MenuItem dense sx={{ py: 0.5 }}>
+            <Typography variant="body2">Ctrl + -: Zoom Out</Typography>
+          </MenuItem>
+          <MenuItem dense sx={{ py: 0.5 }}>
+            <Typography variant="body2">Ctrl + 0: Fit View</Typography>
+          </MenuItem>
+          <MenuItem dense sx={{ py: 0.5 }}>
+            <Typography variant="body2">F: Fullscreen</Typography>
+          </MenuItem>
+          <MenuItem dense sx={{ py: 0.5 }}>
+            <Typography variant="body2">Delete: Remove Selected</Typography>
+          </MenuItem>
+        </Menu>
+      </div>
+    </ReactFlowProvider>
   );
 };

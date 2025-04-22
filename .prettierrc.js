@@ -16,5 +16,8 @@ module.exports = {
   requirePragma: false,
   useTabs: false,
   vueIndentScriptAndStyle: false,
-  proseWrap: 'preserve'
+  proseWrap: 'preserve',
+  eslintprettier: true
 };
+
+

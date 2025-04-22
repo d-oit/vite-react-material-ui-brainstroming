@@ -1,7 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
-import { EnhancedBrainstormFlow } from '../EnhancedBrainstormFlow';
+
 import { useSettings } from '../../../contexts/SettingsContext';
+import { EnhancedBrainstormFlow } from '../EnhancedBrainstormFlow';
 
 // Mock the useSettings hook
 vi.mock('../../../contexts/SettingsContext', () => ({

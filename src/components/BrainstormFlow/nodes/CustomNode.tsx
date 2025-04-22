@@ -15,11 +15,13 @@ import {
 import React, { memo, useState, useMemo } from 'react';
 import type { NodeProps } from 'reactflow';
 import { Handle, Position } from 'reactflow';
-import { useSettings } from '../../../contexts/SettingsContext';
 
-interface CustomNodeData {
+import { useSettings } from '../../../contexts/SettingsContext';
+import type { NodeType } from '../../../types/enums';
+
+export interface CustomNodeData {
   label: string;
-  type: 'idea' | 'task' | 'resource' | 'note';
+  type: NodeType;
   notes?: string;
   onEdit?: (node: any) => void;
   onDelete?: (node: any) => void;

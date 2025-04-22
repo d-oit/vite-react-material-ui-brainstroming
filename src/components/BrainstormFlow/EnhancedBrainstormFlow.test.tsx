@@ -1,8 +1,10 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
-import { EnhancedBrainstormFlow } from './EnhancedBrainstormFlow';
-import { useBrainstormStore } from '../../store/brainstormStore';
+
 import { useSettings } from '../../contexts/SettingsContext';
+import { useBrainstormStore } from '../../store/brainstormStore';
+
+import { EnhancedBrainstormFlow } from './EnhancedBrainstormFlow';
 
 // Mock the ReactFlow component and other dependencies
 vi.mock('reactflow', async () => {

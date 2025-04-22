@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
-import EnhancedControls from '../EnhancedControls';
+
 import { useI18n } from '../../../contexts/I18nContext';
+import EnhancedControls from '../EnhancedControls';
 
 // Mock the useI18n hook
 vi.mock('../../../contexts/I18nContext', () => ({
