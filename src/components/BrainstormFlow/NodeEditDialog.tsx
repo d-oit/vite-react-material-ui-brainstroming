@@ -203,7 +203,7 @@ const NodeEditDialog = ({
               {' '}
               {/* Container Grid */}
               {/* Size selection */}
-              <Grid xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 {' '}
                 {/* Direct responsive props */}
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -286,7 +286,7 @@ const NodeEditDialog = ({
                 )}
               </Grid>
               {/* Color selection */}
-              <Grid xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 {' '}
                 {/* Direct responsive props */}
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>

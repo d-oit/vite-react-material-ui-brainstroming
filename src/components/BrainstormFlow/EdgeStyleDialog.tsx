@@ -78,7 +78,7 @@ export const EdgeStyleDialog: React.FC<EdgeStyleDialogProps> = ({
       <DialogTitle>{t('flow.styleEdge') ?? 'Style Edge'}</DialogTitle>
       <DialogContent>
         <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
+          <Grid item size={{ xs: 12, md: 6 }}>
             <Typography variant="h6" gutterBottom>
               {t('flow.appearance') ?? 'Appearance'}
             </Typography>
@@ -123,7 +123,7 @@ export const EdgeStyleDialog: React.FC<EdgeStyleDialogProps> = ({
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid item size={{ xs: 12, md: 6 }}>
             <Typography variant="h6" gutterBottom>
               {t('flow.behavior') ?? 'Behavior'}
             </Typography>

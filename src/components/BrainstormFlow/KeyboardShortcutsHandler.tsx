@@ -382,7 +382,7 @@ export const KeyboardShortcutsHandler: React.FC<KeyboardShortcutsHandlerProps> =
         <DialogContent dividers>
           <Grid container spacing={3}>
             {Object.entries(groupedShortcuts).map(([category, shortcuts]) => (
-              <Grid item xs={12} md={6} key={category}>
+              <Grid item size={{ xs: 12, md: 6 }} key={category}>
                 <Typography variant="h6" gutterBottom sx={{ textTransform: 'capitalize' }}>
                   {t(`shortcuts.category.${category}`) || category}
                 </Typography>

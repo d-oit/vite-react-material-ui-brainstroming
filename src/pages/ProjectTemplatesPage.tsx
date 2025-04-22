@@ -149,11 +149,11 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
     const updatedTemplates = templates.map(t =>
       t.id === selectedTemplate.id
         ? {
-            ...t,
-            name: newProjectName,
-            description: newProjectDescription,
-            updatedAt: new Date().toISOString(),
-          }
+          ...t,
+          name: newProjectName,
+          description: newProjectDescription,
+          updatedAt: new Date().toISOString(),
+        }
         : t
     );
 
@@ -217,7 +217,7 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
 
           <Grid container spacing={3} sx={{ width: '100%' }}>
             {templates.map((template, index) => (
-              <Grid xs={12} sm={6} md={4} key={template.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={template.id}>
                 <Card
                   sx={{
                     height: '100%',

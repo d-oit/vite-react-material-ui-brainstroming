@@ -1,7 +1,7 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
-import { Navigate, Route, Routes, BrowserRouter } from 'react-router-dom';
 import type { PaletteMode, ThemeOptions } from '@mui/material';
 import { Alert, Button, CssBaseline, createTheme, Snackbar, ThemeProvider } from '@mui/material';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { Navigate, Route, Routes, BrowserRouter } from 'react-router-dom';
 import { registerSW } from 'virtual:pwa-register';
 
 // Import all styles
@@ -54,31 +54,31 @@ const getDesignTokens = (mode: PaletteMode): ThemeOptions => {
       mode,
       ...(mode === 'light'
         ? {
-          // Light mode
-          primary: {
-            main: '#2196f3',
-          },
-          secondary: {
-            main: '#f50057',
-          },
-          background: {
-            default: '#f5f5f5',
-            paper: '#ffffff',
-          },
-        }
+            // Light mode
+            primary: {
+              main: '#2196f3',
+            },
+            secondary: {
+              main: '#f50057',
+            },
+            background: {
+              default: '#f5f5f5',
+              paper: '#ffffff',
+            },
+          }
         : {
-          // Dark mode
-          primary: {
-            main: '#90caf9',
-          },
-          secondary: {
-            main: '#f48fb1',
-          },
-          background: {
-            default: '#121212',
-            paper: '#1e1e1e',
-          },
-        }),
+            // Dark mode
+            primary: {
+              main: '#90caf9',
+            },
+            secondary: {
+              main: '#f48fb1',
+            },
+            background: {
+              default: '#121212',
+              paper: '#1e1e1e',
+            },
+          }),
     },
     typography: {
       fontFamily: [

@@ -80,7 +80,7 @@ export const NodeStyleDialog: React.FC<NodeStyleDialogProps> = ({
       <DialogTitle>{t('flow.styleNode') ?? 'Style Node'}</DialogTitle>
       <DialogContent>
         <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
+          <Grid item size={{ xs: 12, md: 6 }}>
             <Typography variant="h6" gutterBottom>
               {t('flow.background') ?? 'Background'}
             </Typography>
@@ -138,7 +138,7 @@ export const NodeStyleDialog: React.FC<NodeStyleDialogProps> = ({
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid item size={{ xs: 12, md: 6 }}>
             <Typography variant="h6" gutterBottom>
               {t('flow.text') ?? 'Text'}
             </Typography>
