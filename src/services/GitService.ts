@@ -1,177 +1,173 @@
-import type { Project } from '../types';
+import type { Project } from '../types'
 
 /**
  * Service for handling Git-like versioning of projects
  */
 export class GitService {
-  private static instance: GitService;
-  private localStorageKey = 'git_projects';
+	private static instance: GitService
+	private localStorageKey = 'git_projects'
 
-  private constructor() {
-    // Initialize if needed
-  }
+	private constructor() {
+		// Initialize if needed
+	}
 
-  public static getInstance(): GitService {
-    if (!GitService.instance) {
-      GitService.instance = new GitService();
-    }
-    return GitService.instance;
-  }
+	public static getInstance(): GitService {
+		if (!GitService.instance) {
+			GitService.instance = new GitService()
+		}
+		return GitService.instance
+	}
 
-  /**
-   * Save a project as a new commit
-   * @param project Project to save
-   * @param commitMessage Commit message
-   * @returns Updated project with new version
-   */
-  public async commit(project: Project, commitMessage: string): Promise<Project> {
-    const projects = this.getProjects();
-    const existingProject = projects.find(p => p.id === project.id);
+	/**
+	 * Save a project as a new commit
+	 * @param project Project to save
+	 * @param commitMessage Commit message
+	 * @returns Updated project with new version
+	 */
+	public async commit(project: Project, commitMessage: string): Promise<Project> {
+		const projects = this.getProjects()
+		const existingProject = projects.find((p) => p.id === project.id)
 
-    // Create a new version based on the current date
-    const now = new Date();
-    const version = `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()}-${now.getHours()}${now.getMinutes()}`;
+		// Create a new version based on the current date
+		const now = new Date()
+		const version = `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()}-${now.getHours()}${now.getMinutes()}`
 
-    // Create a commit object
-    const commit = {
-      id: crypto.randomUUID(),
-      message: commitMessage,
-      timestamp: now.toISOString(),
-      version,
-      projectSnapshot: { ...project },
-    };
+		// Create a commit object
+		const commit = {
+			id: crypto.randomUUID(),
+			message: commitMessage,
+			timestamp: now.toISOString(),
+			version,
+			projectSnapshot: { ...project },
+		}
 
-    if (existingProject) {
-      // Update existing project
-      existingProject.commits = existingProject.commits || [];
-      existingProject.commits.push(commit);
-      existingProject.currentCommitId = commit.id;
-      existingProject.version = version;
-      existingProject.updatedAt = now.toISOString();
+		if (existingProject) {
+			// Update existing project
+			existingProject.commits = existingProject.commits || []
+			existingProject.commits.push(commit)
+			existingProject.currentCommitId = commit.id
+			existingProject.version = version
+			existingProject.updatedAt = now.toISOString()
 
-      // Save updated projects
-      this.saveProjects(projects);
+			// Save updated projects
+			this.saveProjects(projects)
 
-      return {
-        ...project,
-        version,
-        updatedAt: now.toISOString(),
-      };
-    } else {
-      // Create new project entry
-      const newProjectEntry = {
-        id: project.id,
-        name: project.name,
-        description: project.description,
-        createdAt: now.toISOString(),
-        updatedAt: now.toISOString(),
-        version,
-        currentCommitId: commit.id,
-        commits: [commit],
-      };
+			return {
+				...project,
+				version,
+				updatedAt: now.toISOString(),
+			}
+		} else {
+			// Create new project entry
+			const newProjectEntry = {
+				id: project.id,
+				name: project.name,
+				description: project.description,
+				createdAt: now.toISOString(),
+				updatedAt: now.toISOString(),
+				version,
+				currentCommitId: commit.id,
+				commits: [commit],
+			}
 
-      // Save updated projects
-      projects.push(newProjectEntry);
-      this.saveProjects(projects);
+			// Save updated projects
+			projects.push(newProjectEntry)
+			this.saveProjects(projects)
 
-      return {
-        ...project,
-        version,
-        createdAt: now.toISOString(),
-        updatedAt: now.toISOString(),
-      };
-    }
-  }
+			return {
+				...project,
+				version,
+				createdAt: now.toISOString(),
+				updatedAt: now.toISOString(),
+			}
+		}
+	}
 
-  /**
-   * Get all commits for a project
-   * @param projectId Project ID
-   * @returns Array of commits
-   */
-  public getCommits(
-    projectId: string
-  ): { id: string; message: string; date: string; changes: unknown }[] {
-    const projects = this.getProjects();
-    const project = projects.find(p => p.id === projectId);
+	/**
+	 * Get all commits for a project
+	 * @param projectId Project ID
+	 * @returns Array of commits
+	 */
+	public getCommits(projectId: string): { id: string; message: string; date: string; changes: unknown }[] {
+		const projects = this.getProjects()
+		const project = projects.find((p) => p.id === projectId)
 
-    if (!project) {
-      return [];
-    }
+		if (!project) {
+			return []
+		}
 
-    return project.commits || [];
-  }
+		return project.commits || []
+	}
 
-  /**
-   * Checkout a specific commit
-   * @param projectId Project ID
-   * @param commitId Commit ID
-   * @returns Project snapshot from the commit
-   */
-  public checkout(projectId: string, commitId: string): Project | null {
-    const projects = this.getProjects();
-    const project = projects.find(p => p.id === projectId);
+	/**
+	 * Checkout a specific commit
+	 * @param projectId Project ID
+	 * @param commitId Commit ID
+	 * @returns Project snapshot from the commit
+	 */
+	public checkout(projectId: string, commitId: string): Project | null {
+		const projects = this.getProjects()
+		const project = projects.find((p) => p.id === projectId)
 
-    if (!project) {
-      return null;
-    }
+		if (!project) {
+			return null
+		}
 
-    const commit = project.commits?.find(c => c.id === commitId);
+		const commit = project.commits?.find((c) => c.id === commitId)
 
-    if (!commit) {
-      return null;
-    }
+		if (!commit) {
+			return null
+		}
 
-    // Update current commit ID
-    project.currentCommitId = commitId;
-    this.saveProjects(projects);
+		// Update current commit ID
+		project.currentCommitId = commitId
+		this.saveProjects(projects)
 
-    return commit.projectSnapshot;
-  }
+		return commit.projectSnapshot
+	}
 
-  /**
-   * Get the current commit for a project
-   * @param projectId Project ID
-   * @returns Current commit
-   */
-  public getCurrentCommit(
-    projectId: string
-  ): { id: string; message: string; date: string; changes: unknown } | null {
-    const projects = this.getProjects();
-    const project = projects.find(p => p.id === projectId);
+	/**
+	 * Get the current commit for a project
+	 * @param projectId Project ID
+	 * @returns Current commit
+	 */
+	public getCurrentCommit(projectId: string): { id: string; message: string; date: string; changes: unknown } | null {
+		const projects = this.getProjects()
+		const project = projects.find((p) => p.id === projectId)
 
-    if (!project || !project.currentCommitId) {
-      return null;
-    }
+		if (!project || !project.currentCommitId) {
+			return null
+		}
 
-    return project.commits?.find(c => c.id === project.currentCommitId) || null;
-  }
+		return project.commits?.find((c) => c.id === project.currentCommitId) || null
+	}
 
-  /**
-   * Get all projects from local storage
-   */
-  private getProjects(): {
-    id: string;
-    name: string;
-    commits?: { id: string; message: string; date: string; changes: unknown }[];
-    currentCommitId?: string;
-  }[] {
-    const projectsJson = localStorage.getItem(this.localStorageKey);
-    return projectsJson ? JSON.parse(projectsJson) : [];
-  }
+	/**
+	 * Get all projects from local storage
+	 */
+	private getProjects(): {
+		id: string
+		name: string
+		commits?: { id: string; message: string; date: string; changes: unknown }[]
+		currentCommitId?: string
+	}[] {
+		const projectsJson = localStorage.getItem(this.localStorageKey)
+		return projectsJson ? JSON.parse(projectsJson) : []
+	}
 
-  /**
-   * Save projects to local storage
-   */
-  private saveProjects(
-    projects: {
-      id: string;
-      name: string;
-      commits?: { id: string; message: string; date: string; changes: unknown }[];
-      currentCommitId?: string;
-    }[]
-  ): void {
-    localStorage.setItem(this.localStorageKey, JSON.stringify(projects));
-  }
+	/**
+	 * Save projects to local storage
+	 */
+	private saveProjects(
+		projects: {
+			id: string
+			name: string
+			commits?: { id: string; message: string; date: string; changes: unknown }[]
+			currentCommitId?: string
+		}[],
+	): void {
+		localStorage.setItem(this.localStorageKey, JSON.stringify(projects))
+	}
 }
 
-export default GitService.getInstance();
+export default GitService.getInstance()

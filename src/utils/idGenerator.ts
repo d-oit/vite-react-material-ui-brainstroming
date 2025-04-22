@@ -3,9 +3,9 @@
  * @returns A unique string identifier
  */
 export function generateUniqueId(): string {
-  const timestamp = Date.now().toString(36);
-  const randomStr = Math.random().toString(36).substring(2, 8);
-  return `${timestamp}-${randomStr}`;
+	const timestamp = Date.now().toString(36)
+	const randomStr = Math.random().toString(36).substring(2, 8)
+	return `${timestamp}-${randomStr}`
 }
 
 /**
@@ -14,6 +14,6 @@ export function generateUniqueId(): string {
  * @returns True if the ID is valid, false otherwise
  */
 export function isValidId(id: string): boolean {
-  const pattern = /^[a-z0-9]+-[a-z0-9]+$/;
-  return pattern.test(id);
+	const pattern = /^[a-z0-9]+-[a-z0-9]+$/
+	return pattern.test(id)
 }

@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react'
 
-import performanceMonitoring, { PerformanceCategory } from './performanceMonitoring';
+import performanceMonitoring, { PerformanceCategory } from './performanceMonitoring'
 
 /**
  * Debounce function to limit the rate at which a function can fire
@@ -8,22 +8,19 @@ import performanceMonitoring, { PerformanceCategory } from './performanceMonitor
  * @param delay Delay in milliseconds
  * @returns Debounced function
  */
-export function debounce<T extends (...args: any[]) => any>(
-  fn: T,
-  delay: number
-): (...args: Parameters<T>) => void {
-  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+export function debounce<T extends (...args: any[]) => any>(fn: T, delay: number): (...args: Parameters<T>) => void {
+	let timeoutId: ReturnType<typeof setTimeout> | null = null
 
-  return function (...args: Parameters<T>): void {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
+	return function (...args: Parameters<T>): void {
+		if (timeoutId) {
+			clearTimeout(timeoutId)
+		}
 
-    timeoutId = setTimeout(() => {
-      fn(...args);
-      timeoutId = null;
-    }, delay);
-  };
+		timeoutId = setTimeout(() => {
+			fn(...args)
+			timeoutId = null
+		}, delay)
+	}
 }
 
 /**
@@ -32,20 +29,17 @@ export function debounce<T extends (...args: any[]) => any>(
  * @param limit Time limit in milliseconds
  * @returns Throttled function
  */
-export function throttle<T extends (...args: any[]) => any>(
-  fn: T,
-  limit: number
-): (...args: Parameters<T>) => void {
-  let lastCall = 0;
+export function throttle<T extends (...args: any[]) => any>(fn: T, limit: number): (...args: Parameters<T>) => void {
+	let lastCall = 0
 
-  return function (...args: Parameters<T>): void {
-    const now = Date.now();
+	return function (...args: Parameters<T>): void {
+		const now = Date.now()
 
-    if (now - lastCall >= limit) {
-      fn(...args);
-      lastCall = now;
-    }
-  };
+		if (now - lastCall >= limit) {
+			fn(...args)
+			lastCall = now
+		}
+	}
 }
 
 /**
@@ -53,23 +47,21 @@ export function throttle<T extends (...args: any[]) => any>(
  * @param fn Function to memoize
  * @returns Memoized function
  */
-export function memoize<T extends (...args: any[]) => any>(
-  fn: T
-): (...args: Parameters<T>) => ReturnType<T> {
-  const cache = new Map<string, ReturnType<T>>();
+export function memoize<T extends (...args: any[]) => any>(fn: T): (...args: Parameters<T>) => ReturnType<T> {
+	const cache = new Map<string, ReturnType<T>>()
 
-  return function (...args: Parameters<T>): ReturnType<T> {
-    const key = JSON.stringify(args);
+	return function (...args: Parameters<T>): ReturnType<T> {
+		const key = JSON.stringify(args)
 
-    if (cache.has(key)) {
-      return cache.get(key) as ReturnType<T>;
-    }
+		if (cache.has(key)) {
+			return cache.get(key) as ReturnType<T>
+		}
 
-    const result = fn(...args);
-    cache.set(key, result);
+		const result = fn(...args)
+		cache.set(key, result)
 
-    return result;
-  };
+		return result
+	}
 }
 
 /**
@@ -79,51 +71,51 @@ export function memoize<T extends (...args: any[]) => any>(
  * @returns [Component, loading, error]
  */
 export function useLazyLoad<T>(
-  loadFn: () => Promise<T>,
-  options: {
-    immediate?: boolean;
-    onLoad?: (component: T) => void;
-    onError?: (error: Error) => void;
-  } = {}
+	loadFn: () => Promise<T>,
+	options: {
+		immediate?: boolean
+		onLoad?: (component: T) => void
+		onError?: (error: Error) => void
+	} = {},
 ): [T | null, boolean, Error | null] {
-  const [component, setComponent] = useState<T | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Error | null>(null);
+	const [component, setComponent] = useState<T | null>(null)
+	const [loading, setLoading] = useState<boolean>(false)
+	const [error, setError] = useState<Error | null>(null)
 
-  const loadComponent = async () => {
-    if (component !== null || loading === true) return;
+	const loadComponent = async () => {
+		if (component !== null || loading === true) return
 
-    setLoading(true);
+		setLoading(true)
 
-    const metricId = performanceMonitoring.startMeasure('LazyLoad', PerformanceCategory.LOADING);
+		const metricId = performanceMonitoring.startMeasure('LazyLoad', PerformanceCategory.LOADING)
 
-    try {
-      const loadedComponent = await loadFn();
-      setComponent(loadedComponent);
+		try {
+			const loadedComponent = await loadFn()
+			setComponent(loadedComponent)
 
-      if (options.onLoad) {
-        options.onLoad(loadedComponent);
-      }
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      setError(error);
+			if (options.onLoad) {
+				options.onLoad(loadedComponent)
+			}
+		} catch (err) {
+			const error = err instanceof Error ? err : new Error(String(err))
+			setError(error)
 
-      if (options.onError) {
-        options.onError(error);
-      }
-    } finally {
-      setLoading(false);
-      performanceMonitoring.endMeasure(metricId);
-    }
-  };
+			if (options.onError) {
+				options.onError(error)
+			}
+		} finally {
+			setLoading(false)
+			performanceMonitoring.endMeasure(metricId)
+		}
+	}
 
-  useEffect(() => {
-    if (options.immediate === true) {
-      void loadComponent();
-    }
-  }, []);
+	useEffect(() => {
+		if (options.immediate === true) {
+			void loadComponent()
+		}
+	}, [])
 
-  return [component, loading, error];
+	return [component, loading, error]
 }
 
 /**
@@ -133,21 +125,18 @@ export function useLazyLoad<T>(
  * @returns Calculated value
  */
 export function useCalculation<T>(calculateFn: () => T, dependencies: any[]): T {
-  const [value, setValue] = useState<T>(() => calculateFn());
+	const [value, setValue] = useState<T>(() => calculateFn())
 
-  useEffect(() => {
-    const metricId = performanceMonitoring.startMeasure(
-      'Calculation',
-      PerformanceCategory.PROCESSING
-    );
+	useEffect(() => {
+		const metricId = performanceMonitoring.startMeasure('Calculation', PerformanceCategory.PROCESSING)
 
-    const newValue = calculateFn();
-    setValue(newValue);
+		const newValue = calculateFn()
+		setValue(newValue)
 
-    performanceMonitoring.endMeasure(metricId);
-  }, dependencies);
+		performanceMonitoring.endMeasure(metricId)
+	}, dependencies)
 
-  return value;
+	return value
 }
 
 /**
@@ -155,28 +144,26 @@ export function useCalculation<T>(calculateFn: () => T, dependencies: any[]): T 
  * @param options IntersectionObserver options
  * @returns [ref, isVisible]
  */
-export function useInView(
-  options: IntersectionObserverInit = {}
-): [React.RefObject<HTMLElement>, boolean] {
-  const ref = useRef<HTMLElement>(null);
-  const [isVisible, setIsVisible] = useState<boolean>(false);
+export function useInView(options: IntersectionObserverInit = {}): [React.RefObject<HTMLElement>, boolean] {
+	const ref = useRef<HTMLElement>(null)
+	const [isVisible, setIsVisible] = useState<boolean>(false)
 
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
+	useEffect(() => {
+		const element = ref.current
+		if (!element) return
 
-    const observer = new IntersectionObserver(([entry]) => {
-      setIsVisible(entry.isIntersecting);
-    }, options);
+		const observer = new IntersectionObserver(([entry]) => {
+			setIsVisible(entry.isIntersecting)
+		}, options)
 
-    observer.observe(element);
+		observer.observe(element)
 
-    return () => {
-      observer.disconnect();
-    };
-  }, [options]);
+		return () => {
+			observer.disconnect()
+		}
+	}, [options])
 
-  return [ref, isVisible];
+	return [ref, isVisible]
 }
 
 /**
@@ -187,19 +174,19 @@ export function useInView(
  * @returns Optimized event handler
  */
 export function useOptimizedHandler<T extends (...args: any[]) => any>(
-  handler: T,
-  delay: number,
-  dependencies: any[] = []
+	handler: T,
+	delay: number,
+	dependencies: any[] = [],
 ): T {
-  const debouncedHandler = useRef<(...args: Parameters<T>) => void>(debounce(handler, delay));
+	const debouncedHandler = useRef<(...args: Parameters<T>) => void>(debounce(handler, delay))
 
-  useEffect(() => {
-    debouncedHandler.current = debounce(handler, delay);
-  }, dependencies);
+	useEffect(() => {
+		debouncedHandler.current = debounce(handler, delay)
+	}, dependencies)
 
-  return ((...args: Parameters<T>) => {
-    return debouncedHandler.current(...args);
-  }) as T;
+	return ((...args: Parameters<T>) => {
+		return debouncedHandler.current(...args)
+	}) as T
 }
 
 /**
@@ -209,13 +196,13 @@ export function useOptimizedHandler<T extends (...args: any[]) => any>(
  * @returns Memoized value
  */
 export function useDeepMemo<T>(value: T, dependencies: any[]): T {
-  const ref = useRef<T>(value);
+	const ref = useRef<T>(value)
 
-  useEffect(() => {
-    ref.current = value;
-  }, dependencies);
+	useEffect(() => {
+		ref.current = value
+	}, dependencies)
 
-  return ref.current;
+	return ref.current
 }
 
 /**
@@ -226,42 +213,42 @@ export function useDeepMemo<T>(value: T, dependencies: any[]): T {
  * @returns [isAnimating, progress]
  */
 export function useAnimation(
-  animate: (progress: number) => void,
-  duration: number,
-  dependencies: any[] = []
+	animate: (progress: number) => void,
+	duration: number,
+	dependencies: any[] = [],
 ): [boolean, number] {
-  const [isAnimating, setIsAnimating] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(0);
+	const [isAnimating, setIsAnimating] = useState<boolean>(false)
+	const [progress, setProgress] = useState<number>(0)
 
-  useEffect(() => {
-    setIsAnimating(true);
-    setProgress(0);
+	useEffect(() => {
+		setIsAnimating(true)
+		setProgress(0)
 
-    const startTime = performance.now();
-    let animationFrameId: number;
+		const startTime = performance.now()
+		let animationFrameId: number
 
-    const updateAnimation = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const newProgress = Math.min(elapsed / duration, 1);
+		const updateAnimation = (currentTime: number) => {
+			const elapsed = currentTime - startTime
+			const newProgress = Math.min(elapsed / duration, 1)
 
-      setProgress(newProgress);
-      animate(newProgress);
+			setProgress(newProgress)
+			animate(newProgress)
 
-      if (newProgress < 1) {
-        animationFrameId = requestAnimationFrame(updateAnimation);
-      } else {
-        setIsAnimating(false);
-      }
-    };
+			if (newProgress < 1) {
+				animationFrameId = requestAnimationFrame(updateAnimation)
+			} else {
+				setIsAnimating(false)
+			}
+		}
 
-    animationFrameId = requestAnimationFrame(updateAnimation);
+		animationFrameId = requestAnimationFrame(updateAnimation)
 
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, dependencies);
+		return () => {
+			cancelAnimationFrame(animationFrameId)
+		}
+	}, dependencies)
 
-  return [isAnimating, progress];
+	return [isAnimating, progress]
 }
 
 /**
@@ -271,68 +258,65 @@ export function useAnimation(
  * @returns [resource, loading, error]
  */
 export function useResource<T>(
-  resourceUrl: string,
-  options: {
-    fetcher?: (url: string) => Promise<T>;
-    immediate?: boolean;
-    onLoad?: (resource: T) => void;
-    onError?: (error: Error) => void;
-  } = {}
+	resourceUrl: string,
+	options: {
+		fetcher?: (url: string) => Promise<T>
+		immediate?: boolean
+		onLoad?: (resource: T) => void
+		onError?: (error: Error) => void
+	} = {},
 ): [T | null, boolean, Error | null] {
-  const [resource, setResource] = useState<T | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Error | null>(null);
+	const [resource, setResource] = useState<T | null>(null)
+	const [loading, setLoading] = useState<boolean>(false)
+	const [error, setError] = useState<Error | null>(null)
 
-  const loadResource = async () => {
-    if (resource !== null || loading === true) return;
+	const loadResource = async () => {
+		if (resource !== null || loading === true) return
 
-    setLoading(true);
+		setLoading(true)
 
-    const metricId = performanceMonitoring.startMeasure(
-      `ResourceLoad_${resourceUrl}`,
-      PerformanceCategory.LOADING
-    );
+		const metricId = performanceMonitoring.startMeasure(`ResourceLoad_${resourceUrl}`, PerformanceCategory.LOADING)
 
-    try {
-      const fetcher = options.fetcher || ((url: string) => fetch(url).then(res => res.json()));
-      const loadedResource = await fetcher(resourceUrl);
+		try {
+			const fetcher = options.fetcher || ((url: string) => fetch(url).then((res) => res.json()))
+			const loadedResource = await fetcher(resourceUrl)
 
-      setResource(loadedResource);
+			setResource(loadedResource)
 
-      if (options.onLoad) {
-        options.onLoad(loadedResource);
-      }
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      setError(error);
+			if (options.onLoad) {
+				options.onLoad(loadedResource)
+			}
+		} catch (err) {
+			const error = err instanceof Error ? err : new Error(String(err))
+			setError(error)
 
-      if (options.onError) {
-        options.onError(error);
-      }
-    } finally {
-      setLoading(false);
-      performanceMonitoring.endMeasure(metricId);
-    }
-  };
+			if (options.onError) {
+				options.onError(error)
+			}
+		} finally {
+			setLoading(false)
+			performanceMonitoring.endMeasure(metricId)
+		}
+	}
 
-  useEffect(() => {
-    if (options.immediate === true) {
-      void loadResource();
-    }
-  }, [resourceUrl]);
+	useEffect(() => {
+		if (options.immediate === true) {
+			void loadResource()
+		}
+	}, [resourceUrl])
 
-  return [resource, loading, error];
+	return [resource, loading, error]
 }
 
 export default {
-  debounce,
-  throttle,
-  memoize,
-  useLazyLoad,
-  useCalculation,
-  useInView,
-  useOptimizedHandler,
-  useDeepMemo,
-  useAnimation,
-  useResource,
-};
+	debounce,
+	throttle,
+	memoize,
+	useLazyLoad,
+	useCalculation,
+	useInView,
+	useOptimizedHandler,
+	useDeepMemo,
+	useAnimation,
+	useResource,
+}

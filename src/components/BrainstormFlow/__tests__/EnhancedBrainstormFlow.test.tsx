@@ -1,246 +1,244 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react'
+import { vi } from 'vitest'
 
-import { useSettings } from '../../../contexts/SettingsContext';
-import { EnhancedBrainstormFlow } from '../EnhancedBrainstormFlow';
+import { useSettings } from '../../../contexts/SettingsContext'
+import { EnhancedBrainstormFlow } from '../EnhancedBrainstormFlow'
 
 // Mock the useSettings hook
 vi.mock('../../../contexts/SettingsContext', () => ({
-  useSettings: vi.fn(),
-}));
+	useSettings: vi.fn(),
+}))
 
 // Mock the ReactFlow component
 vi.mock('reactflow', () => {
-  const mockZoomTo = vi.fn();
-  const mockGetZoom = vi.fn().mockReturnValue(1);
-  const mockFitView = vi.fn();
-  const mockZoomIn = vi.fn();
-  const mockZoomOut = vi.fn();
+	const mockZoomTo = vi.fn()
+	const mockGetZoom = vi.fn().mockReturnValue(1)
+	const mockFitView = vi.fn()
+	const mockZoomIn = vi.fn()
+	const mockZoomOut = vi.fn()
 
-  const ReactFlowMock = ({ children, onNodeClick, nodes, onInit }: any) => {
-    // Create a mock instance that will be passed to onInit
-    const mockInstance = {
-      zoomTo: mockZoomTo,
-      getZoom: mockGetZoom,
-      fitView: mockFitView,
-      zoomIn: mockZoomIn,
-      zoomOut: mockZoomOut,
-      getNodes: vi.fn().mockReturnValue(nodes || []),
-      getEdges: vi.fn().mockReturnValue([]),
-      screenToFlowPosition: vi.fn().mockImplementation(pos => pos),
-    };
+	const ReactFlowMock = ({ children, onNodeClick, nodes, onInit }: any) => {
+		// Create a mock instance that will be passed to onInit
+		const mockInstance = {
+			zoomTo: mockZoomTo,
+			getZoom: mockGetZoom,
+			fitView: mockFitView,
+			zoomIn: mockZoomIn,
+			zoomOut: mockZoomOut,
+			getNodes: vi.fn().mockReturnValue(nodes || []),
+			getEdges: vi.fn().mockReturnValue([]),
+			screenToFlowPosition: vi.fn().mockImplementation((pos) => pos),
+		}
 
-    // Call onInit with the mock instance if provided
-    if (onInit) {
-      setTimeout(() => onInit(mockInstance), 0);
-    }
+		// Call onInit with the mock instance if provided
+		if (onInit) {
+			setTimeout(() => onInit(mockInstance), 0)
+		}
 
-    return (
-      <div data-testid="react-flow-mock">
-        {children}
-        <button type="button" data-testid="mock-node" onClick={() => onNodeClick({}, nodes[0])}>
-          Mock Node
-        </button>
-      </div>
-    );
-  };
+		return (
+			<div data-testid="react-flow-mock">
+				{children}
+				<button type="button" data-testid="mock-node" onClick={() => onNodeClick({}, nodes[0])}>
+					Mock Node
+				</button>
+			</div>
+		)
+	}
 
-  ReactFlowMock.Panel = ({ children }: any) => <div data-testid="panel-mock">{children}</div>;
-  ReactFlowMock.Background = () => <div data-testid="background-mock" />;
+	ReactFlowMock.Panel = ({ children }: any) => <div data-testid="panel-mock">{children}</div>
+	ReactFlowMock.Background = () => <div data-testid="background-mock" />
 
-  return {
-    __esModule: true,
-    default: ReactFlowMock,
-    ReactFlow: ReactFlowMock,
-    Background: () => <div data-testid="background-mock" />,
-    Controls: () => <div data-testid="controls-mock" />,
-    MiniMap: () => <div data-testid="minimap-mock" />,
-    Panel: ({ children }: any) => <div data-testid="panel-mock">{children}</div>,
-    applyNodeChanges: vi.fn((changes, nodes) => nodes),
-    applyEdgeChanges: vi.fn((changes, edges) => edges),
-    addEdge: vi.fn((connection, edges) => edges),
-    // Export the mock functions for testing
-    mockZoomTo,
-    mockGetZoom,
-    mockFitView,
-    mockZoomIn,
-    mockZoomOut,
-  };
-});
+	return {
+		__esModule: true,
+		default: ReactFlowMock,
+		ReactFlow: ReactFlowMock,
+		Background: () => <div data-testid="background-mock" />,
+		Controls: () => <div data-testid="controls-mock" />,
+		MiniMap: () => <div data-testid="minimap-mock" />,
+		Panel: ({ children }: any) => <div data-testid="panel-mock">{children}</div>,
+		applyNodeChanges: vi.fn((changes, nodes) => nodes),
+		applyEdgeChanges: vi.fn((changes, edges) => edges),
+		addEdge: vi.fn((connection, edges) => edges),
+		// Export the mock functions for testing
+		mockZoomTo,
+		mockGetZoom,
+		mockFitView,
+		mockZoomIn,
+		mockZoomOut,
+	}
+})
 
 // Mock the useBrainstormStore hook
 vi.mock('../../../store/brainstormStore', () => ({
-  useBrainstormStore: vi.fn(() => ({
-    nodes: [],
-    edges: [],
-    setNodes: vi.fn(),
-    setEdges: vi.fn(),
-  })),
-}));
+	useBrainstormStore: vi.fn(() => ({
+		nodes: [],
+		edges: [],
+		setNodes: vi.fn(),
+		setEdges: vi.fn(),
+	})),
+}))
 
 // Mock the EnhancedControls component
 vi.mock('../EnhancedControls', () => ({
-  __esModule: true,
-  default: () => <div data-testid="enhanced-controls-mock" />,
-}));
+	__esModule: true,
+	default: () => <div data-testid="enhanced-controls-mock" />,
+}))
 
 // Mock the EnhancedMiniMap component
 vi.mock('../EnhancedMiniMap', () => ({
-  EnhancedMiniMap: () => <div data-testid="enhanced-minimap-mock" />,
-}));
+	EnhancedMiniMap: () => <div data-testid="enhanced-minimap-mock" />,
+}))
 
 // Mock the FloatingControls component
 vi.mock('../FloatingControls', () => ({
-  FloatingControls: () => <div data-testid="floating-controls-mock" />,
-}));
+	FloatingControls: () => <div data-testid="floating-controls-mock" />,
+}))
 
 // Mock the NodeEditDialog component
 vi.mock('../NodeEditDialog', () => ({
-  __esModule: true,
-  default: () => <div data-testid="node-edit-dialog-mock" />,
-}));
+	__esModule: true,
+	default: () => <div data-testid="node-edit-dialog-mock" />,
+}))
 
 // Mock the DeleteConfirmationDialog component
 vi.mock('../../DeleteConfirmationDialog', () => ({
-  __esModule: true,
-  default: () => <div data-testid="delete-confirmation-dialog-mock" />,
-}));
+	__esModule: true,
+	default: () => <div data-testid="delete-confirmation-dialog-mock" />,
+}))
 
 describe('EnhancedBrainstormFlow', () => {
-  beforeEach(() => {
-    // Mock the useSettings hook
-    (useSettings as any).mockReturnValue({
-      settings: {
-        autoSave: true,
-        preferredNodeSize: 'medium',
-      },
-      nodePreferences: {
-        nodeSizes: {
-          small: { width: 150, fontSize: 0.8 },
-          medium: { width: 200, fontSize: 1 },
-          large: { width: 250, fontSize: 1.2 },
-        },
-      },
-      getNodeColor: vi.fn(() => '#e3f2fd'),
-    });
-  });
+	beforeEach(() => {
+		// Mock the useSettings hook
+		;(useSettings as any).mockReturnValue({
+			settings: {
+				autoSave: true,
+				preferredNodeSize: 'medium',
+			},
+			nodePreferences: {
+				nodeSizes: {
+					small: { width: 150, fontSize: 0.8 },
+					medium: { width: 200, fontSize: 1 },
+					large: { width: 250, fontSize: 1.2 },
+				},
+			},
+			getNodeColor: vi.fn(() => '#e3f2fd'),
+		})
+	})
 
-  it('renders the component correctly', () => {
-    render(
-      <EnhancedBrainstormFlow
-        initialNodes={[
-          {
-            id: '1',
-            type: 'idea',
-            position: { x: 100, y: 100 },
-            data: { label: 'Test Node' },
-          },
-        ]}
-        initialEdges={[]}
-        onSave={vi.fn()}
-      />
-    );
+	it('renders the component correctly', () => {
+		render(
+			<EnhancedBrainstormFlow
+				initialNodes={[
+					{
+						id: '1',
+						type: 'idea',
+						position: { x: 100, y: 100 },
+						data: { label: 'Test Node' },
+					},
+				]}
+				initialEdges={[]}
+				onSave={vi.fn()}
+			/>,
+		)
 
-    // Check if the main components are rendered
-    expect(screen.getByTestId('react-flow-mock')).toBeInTheDocument();
-    expect(screen.getByTestId('background-mock')).toBeInTheDocument();
-    expect(screen.getByTestId('panel-mock')).toBeInTheDocument();
-    expect(screen.getByTestId('enhanced-controls-mock')).toBeInTheDocument();
-    expect(screen.getByTestId('enhanced-minimap-mock')).toBeInTheDocument();
-    expect(screen.getByTestId('floating-controls-mock')).toBeInTheDocument();
-  });
+		// Check if the main components are rendered
+		expect(screen.getByTestId('react-flow-mock')).toBeInTheDocument()
+		expect(screen.getByTestId('background-mock')).toBeInTheDocument()
+		expect(screen.getByTestId('panel-mock')).toBeInTheDocument()
+		expect(screen.getByTestId('enhanced-controls-mock')).toBeInTheDocument()
+		expect(screen.getByTestId('enhanced-minimap-mock')).toBeInTheDocument()
+		expect(screen.getByTestId('floating-controls-mock')).toBeInTheDocument()
+	})
 
-  it('opens the node edit dialog when a node is clicked', () => {
-    render(
-      <EnhancedBrainstormFlow
-        initialNodes={[
-          {
-            id: '1',
-            type: 'idea',
-            position: { x: 100, y: 100 },
-            data: { label: 'Test Node' },
-          },
-        ]}
-        initialEdges={[]}
-        onSave={vi.fn()}
-      />
-    );
+	it('opens the node edit dialog when a node is clicked', () => {
+		render(
+			<EnhancedBrainstormFlow
+				initialNodes={[
+					{
+						id: '1',
+						type: 'idea',
+						position: { x: 100, y: 100 },
+						data: { label: 'Test Node' },
+					},
+				]}
+				initialEdges={[]}
+				onSave={vi.fn()}
+			/>,
+		)
 
-    // Click on the mock node
-    fireEvent.click(screen.getByTestId('mock-node'));
+		// Click on the mock node
+		fireEvent.click(screen.getByTestId('mock-node'))
 
-    // Check if the node edit dialog is rendered
-    expect(screen.getByTestId('node-edit-dialog-mock')).toBeInTheDocument();
-  });
+		// Check if the node edit dialog is rendered
+		expect(screen.getByTestId('node-edit-dialog-mock')).toBeInTheDocument()
+	})
 
-  it('hides save button when autosave is enabled', () => {
-    // Mock the useSettings hook to return autoSave: true
-    (useSettings as any).mockReturnValue({
-      settings: {
-        autoSave: true,
-        preferredNodeSize: 'medium',
-      },
-      nodePreferences: {
-        nodeSizes: {
-          small: { width: 150, fontSize: 0.8 },
-          medium: { width: 200, fontSize: 1 },
-          large: { width: 250, fontSize: 1.2 },
-        },
-      },
-      getNodeColor: vi.fn(() => '#e3f2fd'),
-    });
+	it('hides save button when autosave is enabled', () => {
+		// Mock the useSettings hook to return autoSave: true
+		;(useSettings as any).mockReturnValue({
+			settings: {
+				autoSave: true,
+				preferredNodeSize: 'medium',
+			},
+			nodePreferences: {
+				nodeSizes: {
+					small: { width: 150, fontSize: 0.8 },
+					medium: { width: 200, fontSize: 1 },
+					large: { width: 250, fontSize: 1.2 },
+				},
+			},
+			getNodeColor: vi.fn(() => '#e3f2fd'),
+		})
 
-    const { container } = render(
-      <EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />
-    );
+		const { container } = render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />)
 
-    // The save button should not be visible in the enhanced controls
-    // Note: This is an indirect test since we're mocking EnhancedControls
-    expect(screen.getByTestId('enhanced-controls-mock')).toBeInTheDocument();
-  });
+		// The save button should not be visible in the enhanced controls
+		// Note: This is an indirect test since we're mocking EnhancedControls
+		expect(screen.getByTestId('enhanced-controls-mock')).toBeInTheDocument()
+	})
 
-  it('shows save button when autosave is disabled', () => {
-    // Mock the useSettings hook to return autoSave: false
-    (useSettings as any).mockReturnValue({
-      settings: {
-        autoSave: false,
-        preferredNodeSize: 'medium',
-      },
-      nodePreferences: {
-        nodeSizes: {
-          small: { width: 150, fontSize: 0.8 },
-          medium: { width: 200, fontSize: 1 },
-          large: { width: 250, fontSize: 1.2 },
-        },
-      },
-      getNodeColor: vi.fn(() => '#e3f2fd'),
-    });
+	it('shows save button when autosave is disabled', () => {
+		// Mock the useSettings hook to return autoSave: false
+		;(useSettings as any).mockReturnValue({
+			settings: {
+				autoSave: false,
+				preferredNodeSize: 'medium',
+			},
+			nodePreferences: {
+				nodeSizes: {
+					small: { width: 150, fontSize: 0.8 },
+					medium: { width: 200, fontSize: 1 },
+					large: { width: 250, fontSize: 1.2 },
+				},
+			},
+			getNodeColor: vi.fn(() => '#e3f2fd'),
+		})
 
-    render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />);
+		render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />)
 
-    // The save button should be visible in the enhanced controls
-    // Note: This is an indirect test since we're mocking EnhancedControls
-    expect(screen.getByTestId('enhanced-controls-mock')).toBeInTheDocument();
-  });
+		// The save button should be visible in the enhanced controls
+		// Note: This is an indirect test since we're mocking EnhancedControls
+		expect(screen.getByTestId('enhanced-controls-mock')).toBeInTheDocument()
+	})
 
-  it('uses zoomTo method when zoom level changes', async () => {
-    // Get access to the mock functions
-    const { mockZoomTo } = require('reactflow');
+	it('uses zoomTo method when zoom level changes', async () => {
+		// Get access to the mock functions
+		const { mockZoomTo } = require('reactflow')
 
-    render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />);
+		render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />)
 
-    // Wait for the ReactFlow instance to be initialized
-    await new Promise(resolve => setTimeout(resolve, 10));
+		// Wait for the ReactFlow instance to be initialized
+		await new Promise((resolve) => setTimeout(resolve, 10))
 
-    // Find the settings button and click it
-    const settingsButton = screen.getAllByRole('button')[0];
-    fireEvent.click(settingsButton);
+		// Find the settings button and click it
+		const settingsButton = screen.getAllByRole('button')[0]
+		fireEvent.click(settingsButton)
 
-    // Find the slider and simulate a change
-    const slider = screen.getByRole('slider');
-    fireEvent.change(slider, { target: { value: 1.5 } });
+		// Find the slider and simulate a change
+		const slider = screen.getByRole('slider')
+		fireEvent.change(slider, { target: { value: 1.5 } })
 
-    // Check if zoomTo was called with the correct value
-    expect(mockZoomTo).toHaveBeenCalledWith(1.5);
-  });
-});
+		// Check if zoomTo was called with the correct value
+		expect(mockZoomTo).toHaveBeenCalledWith(1.5)
+	})
+})

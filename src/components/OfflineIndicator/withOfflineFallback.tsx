@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 
-import offlineService from '../../services/OfflineService';
+import offlineService from '../../services/OfflineService'
 
-import { default as OfflineFallbackComponent } from './OfflineFallback';
+import { default as OfflineFallbackComponent } from './OfflineFallback'
 
 interface WithOfflineFallbackOptions {
-  requiresNetwork?: boolean;
-  customFallback?: React.ReactNode;
-  message?: string;
-  showActions?: boolean;
+	requiresNetwork?: boolean
+	customFallback?: React.ReactNode
+	message?: string
+	showActions?: boolean
 }
 
 /**
@@ -18,52 +18,49 @@ interface WithOfflineFallbackOptions {
  * @returns A new component that shows a fallback UI when offline
  */
 export const withOfflineFallback = <P extends object>(
-  WrappedComponent: React.ComponentType<P>,
-  options: WithOfflineFallbackOptions = {}
+	WrappedComponent: React.ComponentType<P>,
+	options: WithOfflineFallbackOptions = {},
 ) => {
-  const { requiresNetwork = true, customFallback, message, showActions = true } = options;
+	const { requiresNetwork = true, customFallback, message, showActions = true } = options
 
-  const WithOfflineFallbackComponent: React.FC<P> = props => {
-    const [isOnline, setIsOnline] = useState(offlineService.getOnlineStatus());
-    const [retryCount, setRetryCount] = useState(0);
+	const WithOfflineFallbackComponent: React.FC<P> = (props) => {
+		const [isOnline, setIsOnline] = useState(offlineService.getOnlineStatus())
+		const [retryCount, setRetryCount] = useState(0)
 
-    useEffect(() => {
-      const removeListener = offlineService.addOnlineStatusListener(online => {
-        setIsOnline(online);
-      });
+		useEffect(() => {
+			const removeListener = offlineService.addOnlineStatusListener((online) => {
+				setIsOnline(online)
+			})
 
-      return () => {
-        removeListener();
-      };
-    }, []);
+			return () => {
+				removeListener()
+			}
+		}, [])
 
-    const handleRetry = () => {
-      // Force a re-render to check online status again
-      setRetryCount(prev => prev + 1);
-    };
+		const handleRetry = () => {
+			// Force a re-render to check online status again
+			setRetryCount((prev) => prev + 1)
+		}
 
-    // If we don't require network or we're online, render the wrapped component
-    if (!requiresNetwork || isOnline) {
-      return <WrappedComponent {...props} />;
-    }
+		// If we don't require network or we're online, render the wrapped component
+		if (!requiresNetwork || isOnline) {
+			return <WrappedComponent {...props} />
+		}
 
-    // Otherwise, render the fallback UI
-    if (customFallback !== undefined && customFallback !== null) {
-      return <>{customFallback}</>;
-    }
+		// Otherwise, render the fallback UI
+		if (customFallback !== undefined && customFallback !== null) {
+			return <>{customFallback}</>
+		}
 
-    return (
-      <OfflineFallbackComponent onRetry={handleRetry} message={message} showActions={showActions} />
-    );
-  };
+		return <OfflineFallbackComponent onRetry={handleRetry} message={message} showActions={showActions} />
+	}
 
-  // Set display name for debugging
-  const wrappedComponentName =
-    (WrappedComponent.displayName ?? WrappedComponent.name) || 'Component';
+	// Set display name for debugging
+	const wrappedComponentName = (WrappedComponent.displayName ?? WrappedComponent.name) || 'Component'
 
-  WithOfflineFallbackComponent.displayName = `WithOfflineFallback(${wrappedComponentName})`;
+	WithOfflineFallbackComponent.displayName = `WithOfflineFallback(${wrappedComponentName})`
 
-  return WithOfflineFallbackComponent;
-};
+	return WithOfflineFallbackComponent
+}
 
-export default withOfflineFallback;
+export default withOfflineFallback

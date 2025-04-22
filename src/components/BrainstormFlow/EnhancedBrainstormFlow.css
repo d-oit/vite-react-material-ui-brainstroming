@@ -1,169 +1,172 @@
 .flow-container {
-  width: 100%;
-  height: 100%;
-  position: relative;
+	width: 100%;
+	height: 80vh; /* Use viewport height instead of percentage */
+	min-height: 500px; /* Ensure minimum height */
+	position: relative;
+	display: flex; /* Ensure children can expand properly */
+	flex-direction: column;
 }
 
 .flow-container.fullscreen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 9999;
-  background-color: white;
-  width: 100vw !important;
-  height: 100vh !important;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 9999;
+	background-color: white;
+	width: 100vw !important;
+	height: 100vh !important;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
 }
 
 .mobile-close-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 10000;
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: 50%;
-  padding: 4px;
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 10000;
+	background-color: rgba(255, 255, 255, 0.8);
+	border-radius: 50%;
+	padding: 4px;
 }
 
 @media (min-width: 600px) {
-  .mobile-close-button {
-    display: none;
-  }
+	.mobile-close-button {
+		display: none;
+	}
 }
 
 /* Custom controls in the top-right corner */
 .flow-controls {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  display: flex;
-  gap: 5px;
-  z-index: 5;
+	position: absolute;
+	right: 10px;
+	top: 10px;
+	display: flex;
+	gap: 5px;
+	z-index: 5;
 }
 
 .flow-controls-button {
-  width: 32px;
-  height: 32px;
-  padding: 6px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+	width: 32px;
+	height: 32px;
+	padding: 6px;
+	background-color: #fff;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 .flow-controls-button:hover {
-  background-color: #f8f8f8;
+	background-color: #f8f8f8;
 }
 
 /* Help button styling */
 .flow-help-button {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  margin: 8px;
-  transition: all 0.2s ease;
+	background: white;
+	border: 1px solid #e0e0e0;
+	border-radius: 50%;
+	width: 40px;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	margin: 8px;
+	transition: all 0.2s ease;
 }
 
 .flow-help-button:hover {
-  background: #f5f5f5;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+	background: #f5f5f5;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .flow-help-button svg {
-  fill: #666;
+	fill: #666;
 }
 
 /* Ensure no overlaps between components */
 .react-flow__panel.bottom-right {
-  margin-bottom: 60px !important;
+	margin-bottom: 60px !important;
 }
 
 .react-flow__minimap {
-  margin-bottom: 20px !important;
+	margin-bottom: 20px !important;
 }
 
 /* Prevent control buttons from overlapping */
 .flow-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 5;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 5;
 }
 
 .flow-controls-button {
-  margin: 2px 0;
+	margin: 2px 0;
 }
 
 /* Enhanced minimap styling */
 .enhanced-minimap {
-  margin-bottom: 20px;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+	margin-bottom: 20px;
+	border: 1px solid #e0e0e0;
+	border-radius: 4px;
+	overflow: hidden;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Panel positioning */
 .react-flow__panel.bottom-right {
-  margin: 20px;
+	margin: 20px;
 }
 
 .react-flow__panel.bottom-left {
-  margin: 20px;
+	margin: 20px;
 }
 
 /* Prevent overlaps */
 .react-flow__controls {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin: 10px;
 }
 
 /* Help button styling */
 .flow-help-button {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: all 0.2s ease;
+	background: white;
+	border: 1px solid #e0e0e0;
+	border-radius: 50%;
+	width: 40px;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	transition: all 0.2s ease;
 }
 
 .flow-help-button:hover {
-  background: #f5f5f5;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+	background: #f5f5f5;
+	transform: translateY(-1px);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .flow-help-button svg {
-  fill: #666;
+	fill: #666;
 }
 
 /* Ensure minimap has proper spacing from edges */
 .react-flow__minimap {
-  margin: 20px !important;
+	margin: 20px !important;
 }

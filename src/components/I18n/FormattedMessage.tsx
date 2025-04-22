@@ -1,12 +1,12 @@
-import React from 'react';
+import React from 'react'
 
-import { useI18n } from '../../contexts/I18nContext';
+import { useI18n } from '../../contexts/I18nContext'
 
 interface FormattedMessageProps {
-  id: string;
-  defaultMessage: string;
-  values?: Record<string, string | number | boolean | null | undefined>;
-  html?: boolean;
+	id: string
+	defaultMessage: string
+	values?: Record<string, string | number | boolean | null | undefined>
+	html?: boolean
 }
 
 /**
@@ -18,28 +18,28 @@ interface FormattedMessageProps {
  * @param html - Whether to render the message as HTML (use with caution)
  */
 export const FormattedMessage: React.FC<FormattedMessageProps> = ({
-  id,
-  defaultMessage,
-  values = {},
-  html = false,
+	id,
+	defaultMessage,
+	values = {},
+	html = false,
 }) => {
-  const { t } = useI18n();
+	const { t } = useI18n()
 
-  // Get the translated message
-  const message = t(id) || defaultMessage;
+	// Get the translated message
+	const message = t(id) || defaultMessage
 
-  // Replace placeholders with values
-  const formattedMessage = Object.entries(values).reduce((msg, [key, value]) => {
-    const regex = new RegExp(`{${key}}`, 'g');
-    return msg.replace(regex, String(value ?? ''));
-  }, message);
+	// Replace placeholders with values
+	const formattedMessage = Object.entries(values).reduce((msg, [key, value]) => {
+		const regex = new RegExp(`{${key}}`, 'g')
+		return msg.replace(regex, String(value ?? ''))
+	}, message)
 
-  // Render as HTML or plain text
-  if (html) {
-    return <span dangerouslySetInnerHTML={{ __html: formattedMessage }} />;
-  }
+	// Render as HTML or plain text
+	if (html) {
+		return <span dangerouslySetInnerHTML={{ __html: formattedMessage }} />
+	}
 
-  return <>{formattedMessage}</>;
-};
+	return <>{formattedMessage}</>
+}
 
-export default FormattedMessage;
+export default FormattedMessage

@@ -1,407 +1,382 @@
 import {
-  Menu as MenuIcon,
-  Brightness4 as DarkIcon,
-  Brightness7 as LightIcon,
-  Home as HomeIcon,
-  Settings as SettingsIcon,
-  Add as AddIcon,
-  History as _HistoryIcon,
-  Chat as _ChatIcon,
-  Close as CloseIcon,
-  FolderOpen as ProjectsIcon,
-  BubbleChart as BrainstormIcon,
-  BarChart as BarChartIcon,
-} from '@mui/icons-material';
+	Menu as MenuIcon,
+	Brightness4 as DarkIcon,
+	Brightness7 as LightIcon,
+	Home as HomeIcon,
+	Settings as SettingsIcon,
+	Add as AddIcon,
+	History as _HistoryIcon,
+	Chat as _ChatIcon,
+	Close as CloseIcon,
+	FolderOpen as ProjectsIcon,
+	BubbleChart as BrainstormIcon,
+	BarChart as BarChartIcon,
+} from '@mui/icons-material'
 import {
-  Box,
-  AppBar,
-  Toolbar,
-  IconButton,
-  Typography,
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-  useMediaQuery,
-  useTheme,
-  Fab,
-  SwipeableDrawer,
-  Backdrop,
-  CircularProgress,
-  Snackbar,
-  Alert,
-} from '@mui/material';
-import type { ReactNode } from 'react';
-import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+	Box,
+	AppBar,
+	Toolbar,
+	IconButton,
+	Typography,
+	Drawer,
+	List,
+	ListItem,
+	ListItemButton,
+	ListItemIcon,
+	ListItemText,
+	Divider,
+	useMediaQuery,
+	useTheme,
+	Fab,
+	SwipeableDrawer,
+	Backdrop,
+	CircularProgress,
+	Snackbar,
+	Alert,
+} from '@mui/material'
+import type { ReactNode } from 'react'
+import { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
-import { useI18n } from '../../contexts/I18nContext';
-import { useSettings } from '../../contexts/SettingsContext';
-import { handleQuickBrainstorm } from '../../features/brainstorming/quickBrainstormUtils';
-import SkipLink from '../Accessibility/SkipLink';
-import LanguageSelector from '../I18n/LanguageSelector';
-import NetworkInfoDialog from '../OfflineIndicator/NetworkInfoDialog';
-import NetworkStatusIcon from '../OfflineIndicator/NetworkStatusIcon';
-import _OfflineIndicator from '../OfflineIndicator/OfflineIndicator';
+import { useI18n } from '../../contexts/I18nContext'
+import { useSettings } from '../../contexts/SettingsContext'
+import { handleQuickBrainstorm } from '../../features/brainstorming/quickBrainstormUtils'
+import SkipLink from '../Accessibility/SkipLink'
+import LanguageSelector from '../I18n/LanguageSelector'
+import NetworkInfoDialog from '../OfflineIndicator/NetworkInfoDialog'
+import NetworkStatusIcon from '../OfflineIndicator/NetworkStatusIcon'
+import _OfflineIndicator from '../OfflineIndicator/OfflineIndicator'
 
 interface AppShellProps {
-  children: ReactNode;
-  title?: string;
-  version?: string | number;
-  loading?: boolean;
-  error?: string | null;
-  onThemeToggle: () => void;
-  isDarkMode: boolean;
-  onCreateNew?: () => void;
+	children: ReactNode
+	title?: string
+	version?: string | number
+	loading?: boolean
+	error?: string | null
+	onThemeToggle: () => void
+	isDarkMode: boolean
+	onCreateNew?: () => void
 }
 
 const AppShell = ({
-  children,
-  title,
-  version,
-  loading = false,
-  error = null,
-  onThemeToggle,
-  isDarkMode,
-  onCreateNew,
+	children,
+	title,
+	version,
+	loading = false,
+	error = null,
+	onThemeToggle,
+	isDarkMode,
+	onCreateNew,
 }: AppShellProps) => {
-  const theme = useTheme();
-  const { t } = useI18n();
-  const { settings: _settings } = useSettings();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+	const theme = useTheme()
+	const { t } = useI18n()
+	const { settings: _settings } = useSettings()
+	const location = useLocation()
+	const navigate = useNavigate()
+	const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+	const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'))
 
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [errorOpen, setErrorOpen] = useState(!!error);
-  const [networkInfoDialogOpen, setNetworkInfoDialogOpen] = useState(false);
+	const [drawerOpen, setDrawerOpen] = useState(false)
+	const [errorOpen, setErrorOpen] = useState(!!error)
+	const [networkInfoDialogOpen, setNetworkInfoDialogOpen] = useState(false)
 
-  // Update error state when prop changes
-  useEffect(() => {
-    setErrorOpen(!!error);
-  }, [error]);
+	// Update error state when prop changes
+	useEffect(() => {
+		setErrorOpen(!!error)
+	}, [error])
 
-  // Function to toggle drawer state
-  const handleToggleDrawer = () => {
-    setDrawerOpen(!drawerOpen);
-  };
+	// Function to toggle drawer state
+	const handleToggleDrawer = () => {
+		setDrawerOpen(!drawerOpen)
+	}
 
-  const handleNavigation = (path: string) => {
-    navigate(path);
-    if (isMobile) {
-      setDrawerOpen(false);
-    }
-  };
+	const handleNavigation = (path: string) => {
+		navigate(path)
+		if (isMobile) {
+			setDrawerOpen(false)
+		}
+	}
 
-  const navigationItems = [
-    {
-      text: t('navigation.home'),
-      icon: <HomeIcon />,
-      path: '/',
-      active: location.pathname === '/',
-    },
-    {
-      text: t('navigation.projects'),
-      icon: <ProjectsIcon />,
-      path: '/projects',
-      active: location.pathname === '/projects',
-    },
-    {
-      text: t('navigation.quickBrainstorm'),
-      icon: <BrainstormIcon />,
-      path: '#',
-      onClick: () => void handleQuickBrainstorm(navigate),
-      active: false,
-    },
-    {
-      text: t('navigation.settings'),
-      icon: <SettingsIcon />,
-      path: '/settings',
-      active: location.pathname === '/settings',
-    },
-    {
-      text: t('navigation.performance'),
-      icon: <BarChartIcon />,
-      path: '/performance',
-      active: location.pathname === '/performance',
-    },
-  ];
+	const navigationItems = [
+		{
+			text: t('navigation.home'),
+			icon: <HomeIcon />,
+			path: '/',
+			active: location.pathname === '/',
+		},
+		{
+			text: t('navigation.projects'),
+			icon: <ProjectsIcon />,
+			path: '/projects',
+			active: location.pathname === '/projects',
+		},
+		{
+			text: t('navigation.quickBrainstorm'),
+			icon: <BrainstormIcon />,
+			path: '#',
+			onClick: () => void handleQuickBrainstorm(navigate),
+			active: false,
+		},
+		{
+			text: t('navigation.settings'),
+			icon: <SettingsIcon />,
+			path: '/settings',
+			active: location.pathname === '/settings',
+		},
+		{
+			text: t('navigation.performance'),
+			icon: <BarChartIcon />,
+			path: '/performance',
+			active: location.pathname === '/performance',
+		},
+	]
 
-  const drawerContent = (
-    <Box
-      sx={{
-        width: isMobile ? '80vw' : 280,
-        maxWidth: 360,
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-      role="presentation"
-    >
-      <Box
-        sx={{
-          p: 2,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          borderBottom: `1px solid ${theme.palette.divider}`,
-        }}
-      >
-        <Typography variant="h6" component="div">
-          {t('app.title')}
-        </Typography>
-        <IconButton onClick={handleToggleDrawer} edge="end">
-          <CloseIcon />
-        </IconButton>
-      </Box>
+	const drawerContent = (
+		<Box
+			sx={{
+				width: isMobile ? '80vw' : 280,
+				maxWidth: 360,
+				height: '100%',
+				display: 'flex',
+				flexDirection: 'column',
+			}}
+			role="presentation">
+			<Box
+				sx={{
+					p: 2,
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'space-between',
+					borderBottom: `1px solid ${theme.palette.divider}`,
+				}}>
+				<Typography variant="h6" component="div">
+					{t('app.title')}
+				</Typography>
+				<IconButton onClick={handleToggleDrawer} edge="end">
+					<CloseIcon />
+				</IconButton>
+			</Box>
 
-      <List sx={{ flexGrow: 1, pt: 0 }}>
-        {navigationItems.map(item => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton
-              onClick={() => {
-                if (item.onClick) item.onClick();
-                else handleNavigation(item.path);
-              }}
-              selected={item.active}
-              sx={{
-                borderRadius: 1,
-                mx: 1,
-                my: 0.5,
-                '&.Mui-selected': {
-                  backgroundColor: theme.palette.primary.main + '20',
-                  '&:hover': {
-                    backgroundColor: theme.palette.primary.main + '30',
-                  },
-                },
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  color: item.active ? theme.palette.primary.main : 'inherit',
-                }}
-              >
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
+			<List sx={{ flexGrow: 1, pt: 0 }}>
+				{navigationItems.map((item) => (
+					<ListItem key={item.text} disablePadding>
+						<ListItemButton
+							onClick={() => {
+								if (item.onClick) item.onClick()
+								else handleNavigation(item.path)
+							}}
+							selected={item.active}
+							sx={{
+								borderRadius: 1,
+								mx: 1,
+								my: 0.5,
+								'&.Mui-selected': {
+									backgroundColor: theme.palette.primary.main + '20',
+									'&:hover': {
+										backgroundColor: theme.palette.primary.main + '30',
+									},
+								},
+							}}>
+							<ListItemIcon
+								sx={{
+									color: item.active ? theme.palette.primary.main : 'inherit',
+								}}>
+								{item.icon}
+							</ListItemIcon>
+							<ListItemText primary={item.text} />
+						</ListItemButton>
+					</ListItem>
+				))}
+			</List>
 
-      <Divider />
+			<Divider />
 
-      <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="body2" color="text.secondary">
-          {t('app.copyright', { year: new Date().getFullYear() }) ||
-            `© ${new Date().getFullYear()}`}
-        </Typography>
-        <IconButton onClick={onThemeToggle} size="small">
-          {isDarkMode ? <LightIcon /> : <DarkIcon />}
-        </IconButton>
-      </Box>
-    </Box>
-  );
+			<Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+				<Typography variant="body2" color="text.secondary">
+					{t('app.copyright', { year: new Date().getFullYear() }) || `© ${new Date().getFullYear()}`}
+				</Typography>
+				<IconButton onClick={onThemeToggle} size="small">
+					{isDarkMode ? <LightIcon /> : <DarkIcon />}
+				</IconButton>
+			</Box>
+		</Box>
+	)
 
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {/* Skip link for keyboard users */}
-      <SkipLink targetId="main-content" />
+	return (
+		<Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+			{/* Skip link for keyboard users */}
+			<SkipLink targetId="main-content" />
 
-      <AppBar
-        position="fixed"
-        elevation={1}
-        sx={{
-          zIndex: theme.zIndex.drawer + 1,
-          backgroundColor:
-            theme.palette.mode === 'dark'
-              ? theme.palette.background.default
-              : theme.palette.primary.main,
-          backdropFilter: 'blur(8px)',
-          height: 64, // Fixed height for consistency
-          ...(theme.palette.mode === 'light' && {
-            boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
-          }),
-        }}
-      >
-        <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            onClick={handleToggleDrawer}
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
+			<AppBar
+				position="fixed"
+				elevation={1}
+				sx={{
+					zIndex: theme.zIndex.drawer + 1,
+					backgroundColor:
+						theme.palette.mode === 'dark' ? theme.palette.background.default : theme.palette.primary.main,
+					backdropFilter: 'blur(8px)',
+					height: 64, // Fixed height for consistency
+					...(theme.palette.mode === 'light' && {
+						boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+					}),
+				}}>
+				<Toolbar>
+					<IconButton
+						size="large"
+						edge="start"
+						color="inherit"
+						aria-label="menu"
+						onClick={handleToggleDrawer}
+						sx={{ mr: 2 }}>
+						<MenuIcon />
+					</IconButton>
 
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{
-              flexGrow: 1,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-            }}
-          >
-            {title || t('app.title')}
-            {/* Display project version if provided, otherwise app version */}
-            {version && (
-              <Typography
-                variant="caption"
-                component="span"
-                sx={{
-                  opacity: 0.7,
-                  display: { xs: 'none', sm: 'inline' },
-                  ml: 1,
-                }}
-              >
-                v{version}
-              </Typography>
-            )}
-          </Typography>
+					<Typography
+						variant="h6"
+						component="div"
+						sx={{
+							flexGrow: 1,
+							whiteSpace: 'nowrap',
+							overflow: 'hidden',
+							textOverflow: 'ellipsis',
+							display: 'flex',
+							alignItems: 'center',
+							gap: 1,
+						}}>
+						{title || t('app.title')}
+						{/* Display project version if provided, otherwise app version */}
+						{version && (
+							<Typography
+								variant="caption"
+								component="span"
+								sx={{
+									opacity: 0.7,
+									display: { xs: 'none', sm: 'inline' },
+									ml: 1,
+								}}>
+								v{version}
+							</Typography>
+						)}
+					</Typography>
 
-          {/* Network status icon in header */}
-          <NetworkStatusIcon onClick={() => setNetworkInfoDialogOpen(true)} />
+					{/* Network status icon in header */}
+					<NetworkStatusIcon onClick={() => setNetworkInfoDialogOpen(true)} />
 
-          {/* Language selector */}
-          <LanguageSelector variant="icon" size="small" />
+					{/* Language selector */}
+					<LanguageSelector variant="icon" size="small" />
 
-          {!isMobile && (
-            <IconButton color="inherit" onClick={onThemeToggle}>
-              {isDarkMode ? <LightIcon /> : <DarkIcon />}
-            </IconButton>
-          )}
-        </Toolbar>
-      </AppBar>
+					{!isMobile && (
+						<IconButton color="inherit" onClick={onThemeToggle}>
+							{isDarkMode ? <LightIcon /> : <DarkIcon />}
+						</IconButton>
+					)}
+				</Toolbar>
+			</AppBar>
 
-      {/* Drawer - different for mobile vs desktop */}
-      {isMobile ? (
-        <SwipeableDrawer
-          anchor="left"
-          open={drawerOpen}
-          onClose={handleToggleDrawer}
-          onOpen={handleToggleDrawer}
-          disableBackdropTransition={!isTablet}
-          disableDiscovery={isTablet}
-          sx={{
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              top: 64, // Position below app bar
-              height: 'calc(100% - 64px)', // Adjust height to account for app bar
-            },
-          }}
-        >
-          {drawerContent}
-        </SwipeableDrawer>
-      ) : (
-        <Drawer
-          variant="temporary"
-          anchor="left"
-          open={drawerOpen}
-          onClose={handleToggleDrawer}
-          sx={{
-            width: 280,
-            flexShrink: 0,
-            '& .MuiDrawer-paper': {
-              width: 280,
-              boxSizing: 'border-box',
-              top: 64, // Position below app bar
-              height: 'calc(100% - 64px)', // Adjust height to account for app bar
-            },
-          }}
-        >
-          {drawerContent}
-        </Drawer>
-      )}
+			{/* Drawer - different for mobile vs desktop */}
+			{isMobile ? (
+				<SwipeableDrawer
+					anchor="left"
+					open={drawerOpen}
+					onClose={handleToggleDrawer}
+					onOpen={handleToggleDrawer}
+					disableBackdropTransition={!isTablet}
+					disableDiscovery={isTablet}
+					sx={{
+						'& .MuiDrawer-paper': {
+							boxSizing: 'border-box',
+							top: 64, // Position below app bar
+							height: 'calc(100% - 64px)', // Adjust height to account for app bar
+						},
+					}}>
+					{drawerContent}
+				</SwipeableDrawer>
+			) : (
+				<Drawer
+					variant="temporary"
+					anchor="left"
+					open={drawerOpen}
+					onClose={handleToggleDrawer}
+					sx={{
+						width: 280,
+						flexShrink: 0,
+						'& .MuiDrawer-paper': {
+							width: 280,
+							boxSizing: 'border-box',
+							top: 64, // Position below app bar
+							height: 'calc(100% - 64px)', // Adjust height to account for app bar
+						},
+					}}>
+					{drawerContent}
+				</Drawer>
+			)}
 
-      {/* Main content */}
-      <Box
-        component="main"
-        id="main-content"
-        tabIndex={-1}
-        aria-label="Main content"
-        sx={{
-          flexGrow: 1,
-          p: { xs: 1, sm: 2 }, // Reduced padding for better space utilization
-          mt: '64px', // AppBar height
-          position: 'relative',
-          display: 'flex',
-          flexDirection: 'column',
-          height: 'calc(100vh - 64px)', // Full height minus AppBar
-          overflow: 'auto', // Changed from 'hidden' to 'auto' for better content handling
-          '&:focus': {
-            outline: 'none',
-          },
-        }}
-      >
-        {children}
+			{/* Main content */}
+			<Box
+				component="main"
+				id="main-content"
+				tabIndex={-1}
+				aria-label="Main content"
+				sx={{
+					flexGrow: 1,
+					p: { xs: 1, sm: 2 }, // Reduced padding for better space utilization
+					mt: '64px', // AppBar height
+					position: 'relative',
+					display: 'flex',
+					flexDirection: 'column',
+					height: 'calc(100vh - 64px)', // Full height minus AppBar
+					overflow: 'auto', // Changed from 'hidden' to 'auto' for better content handling
+					'&:focus': {
+						outline: 'none',
+					},
+				}}>
+				{children}
 
-        {/* Floating action buttons - grouped in a single container */}
-        <Box
-          sx={{
-            position: 'fixed',
-            bottom: 16,
-            right: 16,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-            zIndex: 1000,
-          }}
-        >
-          {onCreateNew && (
-            <Fab color="primary" aria-label="add" onClick={onCreateNew}>
-              <AddIcon />
-            </Fab>
-          )}
-        </Box>
+				{/* Floating action buttons - grouped in a single container */}
+				<Box
+					sx={{
+						position: 'fixed',
+						bottom: 16,
+						right: 16,
+						display: 'flex',
+						flexDirection: 'column',
+						gap: 2,
+						zIndex: 1000,
+					}}>
+					{onCreateNew && (
+						<Fab color="primary" aria-label="add" onClick={onCreateNew}>
+							<AddIcon />
+						</Fab>
+					)}
+				</Box>
 
-        {/* Network info dialog */}
-        <NetworkInfoDialog
-          open={networkInfoDialogOpen}
-          onClose={() => setNetworkInfoDialogOpen(false)}
-        />
-      </Box>
+				{/* Network info dialog */}
+				<NetworkInfoDialog open={networkInfoDialogOpen} onClose={() => setNetworkInfoDialogOpen(false)} />
+			</Box>
 
-      {/* Loading indicator */}
-      <Backdrop
-        sx={{
-          color: '#fff',
-          zIndex: theme.zIndex.drawer + 2,
-          backdropFilter: 'blur(4px)',
-        }}
-        open={loading}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
+			{/* Loading indicator */}
+			<Backdrop
+				sx={{
+					color: '#fff',
+					zIndex: theme.zIndex.drawer + 2,
+					backdropFilter: 'blur(4px)',
+				}}
+				open={loading}>
+				<CircularProgress color="inherit" />
+			</Backdrop>
 
-      {/* Error snackbar */}
-      <Snackbar
-        open={errorOpen}
-        autoHideDuration={6000}
-        onClose={() => setErrorOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={() => setErrorOpen(false)}
-          severity="error"
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
-          {error}
-        </Alert>
-      </Snackbar>
-    </Box>
-  );
-};
+			{/* Error snackbar */}
+			<Snackbar
+				open={errorOpen}
+				autoHideDuration={6000}
+				onClose={() => setErrorOpen(false)}
+				anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+				<Alert onClose={() => setErrorOpen(false)} severity="error" variant="filled" sx={{ width: '100%' }}>
+					{error}
+				</Alert>
+			</Snackbar>
+		</Box>
+	)
+}
 
-export default AppShell;
+export default AppShell

@@ -5,85 +5,85 @@
 
 /* High contrast mode */
 .high-contrast {
-  --high-contrast-text: #ffffff;
-  --high-contrast-bg: #000000;
-  --high-contrast-primary: #ffff00;
-  --high-contrast-secondary: #00ffff;
-  --high-contrast-error: #ff6666;
-  --high-contrast-success: #66ff66;
-  --high-contrast-warning: #ffaa00;
-  --high-contrast-info: #66aaff;
-  --high-contrast-border: #ffffff;
+	--high-contrast-text: #ffffff;
+	--high-contrast-bg: #000000;
+	--high-contrast-primary: #ffff00;
+	--high-contrast-secondary: #00ffff;
+	--high-contrast-error: #ff6666;
+	--high-contrast-success: #66ff66;
+	--high-contrast-warning: #ffaa00;
+	--high-contrast-info: #66aaff;
+	--high-contrast-border: #ffffff;
 }
 
 .high-contrast body {
-  background-color: var(--high-contrast-bg);
-  color: var(--high-contrast-text);
+	background-color: var(--high-contrast-bg);
+	color: var(--high-contrast-text);
 }
 
 .high-contrast a {
-  color: var(--high-contrast-primary);
-  text-decoration: underline;
+	color: var(--high-contrast-primary);
+	text-decoration: underline;
 }
 
 .high-contrast button,
 .high-contrast .MuiButton-root {
-  border: 2px solid var(--high-contrast-border);
-  color: var(--high-contrast-text);
-  background-color: var(--high-contrast-bg);
+	border: 2px solid var(--high-contrast-border);
+	color: var(--high-contrast-text);
+	background-color: var(--high-contrast-bg);
 }
 
 .high-contrast .MuiButton-contained {
-  background-color: var(--high-contrast-primary);
-  color: var(--high-contrast-bg);
+	background-color: var(--high-contrast-primary);
+	color: var(--high-contrast-bg);
 }
 
 .high-contrast .MuiPaper-root {
-  background-color: var(--high-contrast-bg);
-  color: var(--high-contrast-text);
-  border: 1px solid var(--high-contrast-border);
+	background-color: var(--high-contrast-bg);
+	color: var(--high-contrast-text);
+	border: 1px solid var(--high-contrast-border);
 }
 
 .high-contrast .MuiAppBar-root {
-  background-color: var(--high-contrast-bg);
-  color: var(--high-contrast-text);
-  border-bottom: 2px solid var(--high-contrast-border);
+	background-color: var(--high-contrast-bg);
+	color: var(--high-contrast-text);
+	border-bottom: 2px solid var(--high-contrast-border);
 }
 
 /* Reduce motion */
 .reduce-motion * {
-  animation-duration: 0.001s !important;
-  transition-duration: 0.001s !important;
+	animation-duration: 0.001s !important;
+	transition-duration: 0.001s !important;
 }
 
 /* Enhanced focus indicators */
 .enhanced-focus :focus {
-  outline: 3px solid #2196f3 !important;
-  outline-offset: 2px !important;
+	outline: 3px solid #2196f3 !important;
+	outline-offset: 2px !important;
 }
 
 .enhanced-focus .MuiButton-root:focus,
 .enhanced-focus .MuiIconButton-root:focus {
-  box-shadow: 0 0 0 3px #2196f3 !important;
+	box-shadow: 0 0 0 3px #2196f3 !important;
 }
 
 /* Keyboard navigation */
 .keyboard-navigation :focus {
-  outline: 2px solid #2196f3 !important;
-  outline-offset: 2px !important;
+	outline: 2px solid #2196f3 !important;
+	outline-offset: 2px !important;
 }
 
 .keyboard-navigation .MuiButton-root:not(:focus-visible),
 .keyboard-navigation .MuiIconButton-root:not(:focus-visible) {
-  outline: none !important;
-  box-shadow: none !important;
+	outline: none !important;
+	box-shadow: none !important;
 }
 
 /* Keyboard Focus Visible Mode */
 .keyboard-focus-visible *:focus {
-  outline: 3px solid #2196f3 !important;
-  outline-offset: 2px !important;
-  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.4) !important;
+	outline: 3px solid #2196f3 !important;
+	outline-offset: 2px !important;
+	box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.4) !important;
 }
 
 .keyboard-focus-visible .MuiButton-root:focus,
@@ -91,59 +91,59 @@
 .keyboard-focus-visible .MuiListItemButton-root:focus,
 .keyboard-focus-visible .MuiMenuItem-root:focus,
 .keyboard-focus-visible .MuiTab-root:focus {
-  outline: 3px solid #2196f3 !important;
-  outline-offset: 2px !important;
-  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.4) !important;
+	outline: 3px solid #2196f3 !important;
+	outline-offset: 2px !important;
+	box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.4) !important;
 }
 
 /* Screen reader optimizations */
 .screen-reader-optimized .visually-hidden {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0, 0, 0, 0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	clip: rect(0, 0, 0, 0) !important;
+	white-space: nowrap !important;
+	border: 0 !important;
 }
 
 .screen-reader-optimized .sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	border: 0;
 }
 
 .screen-reader-optimized .sr-only-focusable:active,
 .screen-reader-optimized .sr-only-focusable:focus {
-  position: static;
-  width: auto;
-  height: auto;
-  overflow: visible;
-  clip: auto;
-  white-space: normal;
+	position: static;
+	width: auto;
+	height: auto;
+	overflow: visible;
+	clip: auto;
+	white-space: normal;
 }
 
 /* Skip links for keyboard users */
 .skip-link {
-  position: absolute;
-  top: -40px;
-  left: 0;
-  background: #000000;
-  color: white;
-  padding: 8px;
-  z-index: 100;
-  transition: top 0.3s;
+	position: absolute;
+	top: -40px;
+	left: 0;
+	background: #000000;
+	color: white;
+	padding: 8px;
+	z-index: 100;
+	transition: top 0.3s;
 }
 
 .skip-link:focus {
-  top: 0;
+	top: 0;
 }
 
 /* Touch Optimized Mode */
@@ -153,62 +153,62 @@
 .touch-optimized .MuiListItemButton-root,
 .touch-optimized .MuiMenuItem-root,
 .touch-optimized .MuiTab-root {
-  min-height: 48px !important;
-  min-width: 48px !important;
-  padding: 12px !important;
+	min-height: 48px !important;
+	min-width: 48px !important;
+	padding: 12px !important;
 }
 
 .touch-optimized .MuiListItem-root {
-  min-height: 48px !important;
+	min-height: 48px !important;
 }
 
 .touch-optimized .MuiInputBase-root {
-  min-height: 48px !important;
+	min-height: 48px !important;
 }
 
 .touch-optimized .MuiSlider-thumb {
-  width: 24px !important;
-  height: 24px !important;
+	width: 24px !important;
+	height: 24px !important;
 }
 
 .touch-optimized .react-flow__handle {
-  width: 16px !important;
-  height: 16px !important;
+	width: 16px !important;
+	height: 16px !important;
 }
 
 .touch-optimized .react-flow__node {
-  padding: 16px !important;
+	padding: 16px !important;
 }
 
 /* Increase spacing between interactive elements */
 .touch-optimized .MuiList-root .MuiListItem-root {
-  margin: 4px 0 !important;
+	margin: 4px 0 !important;
 }
 
 .touch-optimized .MuiButtonGroup-root .MuiButton-root {
-  margin: 0 2px !important;
+	margin: 0 2px !important;
 }
 
 .touch-optimized .MuiTabs-root .MuiTab-root {
-  margin: 0 4px !important;
+	margin: 0 4px !important;
 }
 
 /* Increase size of form controls */
 .touch-optimized .MuiCheckbox-root,
 .touch-optimized .MuiRadio-root,
 .touch-optimized .MuiSwitch-root {
-  transform: scale(1.2) !important;
+	transform: scale(1.2) !important;
 }
 
 /* Increase size of tooltips */
 .touch-optimized .MuiTooltip-tooltip {
-  font-size: 1rem !important;
-  padding: 8px 12px !important;
+	font-size: 1rem !important;
+	padding: 8px 12px !important;
 }
 
 /* Guided tour highlight */
 .guided-tour-highlight {
-  box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.5) !important;
-  z-index: 1301 !important;
-  position: relative !important;
+	box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.5) !important;
+	z-index: 1301 !important;
+	position: relative !important;
 }

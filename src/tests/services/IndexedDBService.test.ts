@@ -1,23 +1,16 @@
-import {
-  describe,
-  it,
-  expect,
-  vi as _vi,
-  beforeEach as _beforeEach,
-  afterEach as _afterEach,
-} from 'vitest';
+import { describe, it, expect, vi as _vi, beforeEach as _beforeEach, afterEach as _afterEach } from 'vitest'
 
-import { default as _indexedDBService } from '../../services/IndexedDBService';
-import { NodeType as _NodeType } from '../../types';
-import { mockIndexedDB as _mockIndexedDB } from '../test-utils';
+import { default as _indexedDBService } from '../../services/IndexedDBService'
+import { NodeType as _NodeType } from '../../types'
+import { mockIndexedDB as _mockIndexedDB } from '../test-utils'
 
 describe('IndexedDBService', () => {
-  // Skip all tests in this file since IndexedDB is not supported in the test environment
-  it.skip('should skip all tests', () => {
-    expect(true).toBe(true);
-  });
+	// Skip all tests in this file since IndexedDB is not supported in the test environment
+	it.skip('should skip all tests', () => {
+		expect(true).toBe(true)
+	})
 
-  /* Commented out due to IndexedDB not being supported in the test environment
+	/* Commented out due to IndexedDB not being supported in the test environment
   // Set a longer timeout for IndexedDB operations
   vi.setConfig({ testTimeout: 10000 });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -271,4 +264,4 @@ describe('IndexedDBService', () => {
     });
   });
   */
-});
+})

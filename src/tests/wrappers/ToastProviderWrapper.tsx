@@ -1,14 +1,14 @@
-import type { ReactNode } from 'react';
-import React from 'react';
+import type { ReactNode } from 'react'
+import React from 'react'
 
-import { ToastProvider } from '../../contexts/ToastContext';
+import { ToastProvider } from '../../contexts/ToastContext'
 
 interface ToastProviderWrapperProps {
-  children: ReactNode;
+	children: ReactNode
 }
 
 const ToastProviderWrapper: React.FC<ToastProviderWrapperProps> = ({ children }) => {
-  return <ToastProvider>{children}</ToastProvider>;
-};
+	return <ToastProvider>{children}</ToastProvider>
+}
 
-export default ToastProviderWrapper;
+export default ToastProviderWrapper

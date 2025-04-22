@@ -2,39 +2,39 @@
 /// <reference types="@testing-library/jest-dom" />
 
 declare module 'virtual:pwa-register' {
-  export interface RegisterSWOptions {
-    immediate?: boolean;
-    onNeedRefresh?: () => void;
-    onOfflineReady?: () => void;
-    onRegistered?: (registration: ServiceWorkerRegistration) => void;
-    onRegisterError?: (error: Error | unknown) => void;
-  }
+	export interface RegisterSWOptions {
+		immediate?: boolean
+		onNeedRefresh?: () => void
+		onOfflineReady?: () => void
+		onRegistered?: (registration: ServiceWorkerRegistration) => void
+		onRegisterError?: (error: Error | unknown) => void
+	}
 
-  export function registerSW(options?: RegisterSWOptions): {
-    updateServiceWorker: (reloadPage?: boolean) => Promise<void>;
-  };
+	export function registerSW(options?: RegisterSWOptions): {
+		updateServiceWorker: (reloadPage?: boolean) => Promise<void>
+	}
 }
 
 declare global {
-  // Extend jest-dom matchers
-  namespace Vi {
-    interface JestAssertion<T = unknown> extends jest.Matchers<void, T> {
-      toBeInTheDocument(): void;
-      toHaveTextContent(text: string | RegExp): void;
-      toHaveValue(value: string | number | string[]): void;
-    }
-  }
+	// Extend jest-dom matchers
+	namespace Vi {
+		interface JestAssertion<T = unknown> extends jest.Matchers<void, T> {
+			toBeInTheDocument(): void
+			toHaveTextContent(text: string | RegExp): void
+			toHaveValue(value: string | number | string[]): void
+		}
+	}
 
-  // Extend window with test-specific properties
-  interface Window {
-    IntersectionObserver: typeof IntersectionObserver;
-  }
+	// Extend window with test-specific properties
+	interface Window {
+		IntersectionObserver: typeof IntersectionObserver
+	}
 
-  // Add test lifecycle hooks to global scope
-  const beforeAll: (typeof import('vitest'))['beforeAll'];
-  const afterEach: (typeof import('vitest'))['afterEach'];
-  const beforeEach: (typeof import('vitest'))['beforeEach'];
-  const vi: (typeof import('vitest'))['vi'];
+	// Add test lifecycle hooks to global scope
+	const beforeAll: (typeof import('vitest'))['beforeAll']
+	const afterEach: (typeof import('vitest'))['afterEach']
+	const beforeEach: (typeof import('vitest'))['beforeEach']
+	const vi: (typeof import('vitest'))['vi']
 }
 
-export {};
+export {}

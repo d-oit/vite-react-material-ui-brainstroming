@@ -1,8 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react'
 
 interface UseScreenReaderAnnouncerOptions {
-  maxMessages?: number;
-  politeness?: 'polite' | 'assertive';
+	maxMessages?: number
+	politeness?: 'polite' | 'assertive'
 }
 
 /**
@@ -12,48 +12,48 @@ interface UseScreenReaderAnnouncerOptions {
  * @returns An object with the current messages and functions to announce and clear messages
  */
 export function useScreenReaderAnnouncer(options: UseScreenReaderAnnouncerOptions = {}) {
-  const { maxMessages = 5, politeness = 'polite' } = options;
-  const [messages, setMessages] = useState<string[]>([]);
+	const { maxMessages = 5, politeness = 'polite' } = options
+	const [messages, setMessages] = useState<string[]>([])
 
-  /**
-   * Announce a message to screen readers
-   *
-   * @param message - The message to announce
-   * @param priority - If true, uses 'assertive' politeness, otherwise uses the default politeness
-   */
-  const announce = useCallback(
-    (message: string, priority = false) => {
-      if (!message) return;
+	/**
+	 * Announce a message to screen readers
+	 *
+	 * @param message - The message to announce
+	 * @param priority - If true, uses 'assertive' politeness, otherwise uses the default politeness
+	 */
+	const announce = useCallback(
+		(message: string, priority = false) => {
+			if (!message) return
 
-      setMessages(prevMessages => {
-        // Add new message to the end of the array
-        const newMessages = [...prevMessages, message];
+			setMessages((prevMessages) => {
+				// Add new message to the end of the array
+				const newMessages = [...prevMessages, message]
 
-        // Limit the number of messages
-        return newMessages.slice(-maxMessages);
-      });
+				// Limit the number of messages
+				return newMessages.slice(-maxMessages)
+			})
 
-      // If the message is a priority, log it to the console as well
-      if (priority) {
-        console.log(`[Screen Reader Announcement] ${message}`);
-      }
-    },
-    [maxMessages]
-  );
+			// If the message is a priority, log it to the console as well
+			if (priority) {
+				console.log(`[Screen Reader Announcement] ${message}`)
+			}
+		},
+		[maxMessages],
+	)
 
-  /**
-   * Clear all messages
-   */
-  const clearMessages = useCallback(() => {
-    setMessages([]);
-  }, []);
+	/**
+	 * Clear all messages
+	 */
+	const clearMessages = useCallback(() => {
+		setMessages([])
+	}, [])
 
-  return {
-    messages,
-    announce,
-    clearMessages,
-    politeness,
-  };
+	return {
+		messages,
+		announce,
+		clearMessages,
+		politeness,
+	}
 }
 
-export default useScreenReaderAnnouncer;
+export default useScreenReaderAnnouncer
