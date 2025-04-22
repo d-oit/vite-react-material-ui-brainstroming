@@ -10,24 +10,47 @@ vi.mock('../../../contexts/SettingsContext', () => ({
 
 // Mock the ReactFlow component
 vi.mock('reactflow', () => {
-  const ReactFlowMock = ({ children, onNodeClick, nodes }: any) => (
-    <div data-testid="react-flow-mock">
-      {children}
-      <button
-        data-testid="mock-node"
-        onClick={() => onNodeClick({}, nodes[0])}
-      >
-        Mock Node
-      </button>
-    </div>
-  );
-  
+  const mockZoomTo = vi.fn();
+  const mockGetZoom = vi.fn().mockReturnValue(1);
+  const mockFitView = vi.fn();
+  const mockZoomIn = vi.fn();
+  const mockZoomOut = vi.fn();
+
+  const ReactFlowMock = ({ children, onNodeClick, nodes, onInit }: any) => {
+    // Create a mock instance that will be passed to onInit
+    const mockInstance = {
+      zoomTo: mockZoomTo,
+      getZoom: mockGetZoom,
+      fitView: mockFitView,
+      zoomIn: mockZoomIn,
+      zoomOut: mockZoomOut,
+      getNodes: vi.fn().mockReturnValue(nodes || []),
+      getEdges: vi.fn().mockReturnValue([]),
+      screenToFlowPosition: vi.fn().mockImplementation(pos => pos),
+    };
+
+    // Call onInit with the mock instance if provided
+    if (onInit) {
+      setTimeout(() => onInit(mockInstance), 0);
+    }
+
+    return (
+      <div data-testid="react-flow-mock">
+        {children}
+        <button type="button" data-testid="mock-node" onClick={() => onNodeClick({}, nodes[0])}>
+          Mock Node
+        </button>
+      </div>
+    );
+  };
+
   ReactFlowMock.Panel = ({ children }: any) => <div data-testid="panel-mock">{children}</div>;
   ReactFlowMock.Background = () => <div data-testid="background-mock" />;
-  
+
   return {
     __esModule: true,
     default: ReactFlowMock,
+    ReactFlow: ReactFlowMock,
     Background: () => <div data-testid="background-mock" />,
     Controls: () => <div data-testid="controls-mock" />,
     MiniMap: () => <div data-testid="minimap-mock" />,
@@ -35,6 +58,12 @@ vi.mock('reactflow', () => {
     applyNodeChanges: vi.fn((changes, nodes) => nodes),
     applyEdgeChanges: vi.fn((changes, edges) => edges),
     addEdge: vi.fn((connection, edges) => edges),
+    // Export the mock functions for testing
+    mockZoomTo,
+    mockGetZoom,
+    mockFitView,
+    mockZoomIn,
+    mockZoomOut,
   };
 });
 
@@ -161,11 +190,7 @@ describe('EnhancedBrainstormFlow', () => {
     });
 
     const { container } = render(
-      <EnhancedBrainstormFlow
-        initialNodes={[]}
-        initialEdges={[]}
-        onSave={vi.fn()}
-      />
+      <EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />
     );
 
     // The save button should not be visible in the enhanced controls
@@ -190,16 +215,31 @@ describe('EnhancedBrainstormFlow', () => {
       getNodeColor: vi.fn(() => '#e3f2fd'),
     });
 
-    render(
-      <EnhancedBrainstormFlow
-        initialNodes={[]}
-        initialEdges={[]}
-        onSave={vi.fn()}
-      />
-    );
+    render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />);
 
     // The save button should be visible in the enhanced controls
     // Note: This is an indirect test since we're mocking EnhancedControls
     expect(screen.getByTestId('enhanced-controls-mock')).toBeInTheDocument();
+  });
+
+  it('uses zoomTo method when zoom level changes', async () => {
+    // Get access to the mock functions
+    const { mockZoomTo } = require('reactflow');
+
+    render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />);
+
+    // Wait for the ReactFlow instance to be initialized
+    await new Promise(resolve => setTimeout(resolve, 10));
+
+    // Find the settings button and click it
+    const settingsButton = screen.getAllByRole('button')[0];
+    fireEvent.click(settingsButton);
+
+    // Find the slider and simulate a change
+    const slider = screen.getByRole('slider');
+    fireEvent.change(slider, { target: { value: 1.5 } });
+
+    // Check if zoomTo was called with the correct value
+    expect(mockZoomTo).toHaveBeenCalledWith(1.5);
   });
 });

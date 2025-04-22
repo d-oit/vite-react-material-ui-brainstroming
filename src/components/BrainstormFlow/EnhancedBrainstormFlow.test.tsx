@@ -8,7 +8,9 @@ import { useSettings } from '../../contexts/SettingsContext';
 vi.mock('reactflow', async () => {
   return {
     Background: () => <div data-testid="background" />,
-    Panel: ({ children }: { children: React.ReactNode }) => <div data-testid="panel">{children}</div>,
+    Panel: ({ children }: { children: React.ReactNode }) => (
+      <div data-testid="panel">{children}</div>
+    ),
     addEdge: vi.fn(),
     applyNodeChanges: vi.fn(),
     applyEdgeChanges: vi.fn(),
@@ -68,26 +70,14 @@ describe('EnhancedBrainstormFlow', () => {
   });
 
   it('renders without crashing', () => {
-    render(
-      <EnhancedBrainstormFlow
-        initialNodes={[]}
-        initialEdges={[]}
-        onSave={vi.fn()}
-      />
-    );
+    render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />);
 
     // Check if the main components are rendered
     expect(screen.getByTestId('react-flow')).toBeInTheDocument();
   });
 
   it('renders controls and minimap', () => {
-    render(
-      <EnhancedBrainstormFlow
-        initialNodes={[]}
-        initialEdges={[]}
-        onSave={vi.fn()}
-      />
-    );
+    render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />);
 
     // Check if controls and minimap are rendered
     expect(screen.getByTestId('panel')).toBeInTheDocument();
@@ -109,13 +99,7 @@ describe('EnhancedBrainstormFlow', () => {
       writable: true,
     });
 
-    render(
-      <EnhancedBrainstormFlow
-        initialNodes={[]}
-        initialEdges={[]}
-        onSave={vi.fn()}
-      />
-    );
+    render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />);
 
     // Find and click the fullscreen button
     const fullscreenButton = screen.getAllByRole('button')[2]; // Third button is fullscreen

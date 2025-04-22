@@ -3,7 +3,15 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import SaveIcon from '@mui/icons-material/Save';
-import { Box, IconButton, Paper, TextField, Typography, useTheme, useMediaQuery } from '@mui/material';
+import {
+  Box,
+  IconButton,
+  Paper,
+  TextField,
+  Typography,
+  useTheme,
+  useMediaQuery,
+} from '@mui/material';
 import React, { memo, useState, useMemo } from 'react';
 import type { NodeProps } from 'reactflow';
 import { Handle, Position } from 'reactflow';
@@ -60,7 +68,7 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected, id })
 
     return {
       width: width,
-      fontSize: sizeConfig.fontSize
+      fontSize: sizeConfig.fontSize,
     };
   }, [nodePreferences, settings.preferredNodeSize, isMobile]);
 
@@ -126,7 +134,7 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected, id })
           <IconButton
             size="small"
             color="error"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation(); // Prevent node selection
               data.onDelete?.({ id, data });
             }}

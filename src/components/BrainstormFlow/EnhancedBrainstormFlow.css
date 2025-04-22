@@ -62,3 +62,108 @@
 .flow-controls-button:hover {
   background-color: #f8f8f8;
 }
+
+/* Help button styling */
+.flow-help-button {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin: 8px;
+  transition: all 0.2s ease;
+}
+
+.flow-help-button:hover {
+  background: #f5f5f5;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.flow-help-button svg {
+  fill: #666;
+}
+
+/* Ensure no overlaps between components */
+.react-flow__panel.bottom-right {
+  margin-bottom: 60px !important;
+}
+
+.react-flow__minimap {
+  margin-bottom: 20px !important;
+}
+
+/* Prevent control buttons from overlapping */
+.flow-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+}
+
+.flow-controls-button {
+  margin: 2px 0;
+}
+
+/* Enhanced minimap styling */
+.enhanced-minimap {
+  margin-bottom: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Panel positioning */
+.react-flow__panel.bottom-right {
+  margin: 20px;
+}
+
+.react-flow__panel.bottom-left {
+  margin: 20px;
+}
+
+/* Prevent overlaps */
+.react-flow__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px;
+}
+
+/* Help button styling */
+.flow-help-button {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+}
+
+.flow-help-button:hover {
+  background: #f5f5f5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.flow-help-button svg {
+  fill: #666;
+}
+
+/* Ensure minimap has proper spacing from edges */
+.react-flow__minimap {
+  margin: 20px !important;
+}

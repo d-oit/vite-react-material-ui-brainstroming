@@ -139,7 +139,7 @@ const NodeEditDialog = ({
           margin: { xs: '16px', sm: '32px' },
           width: { xs: 'calc(100% - 32px)', sm: 'auto' },
           maxHeight: { xs: 'calc(100% - 32px)', sm: 'auto' },
-        }
+        },
       }}
     >
       <DialogTitle>{isEditMode ? 'Edit Node' : 'Add New Node'}</DialogTitle>

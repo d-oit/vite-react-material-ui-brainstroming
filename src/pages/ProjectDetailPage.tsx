@@ -192,7 +192,7 @@ const ProjectDetailPage = () => {
     return (
       <AppShell
         title={t('project.title')}
-        onThemeToggle={() => { }}
+        onThemeToggle={() => {}}
         isDarkMode={theme.palette.mode === 'dark'}
         loading={true}
       >
@@ -226,7 +226,7 @@ const ProjectDetailPage = () => {
     return (
       <AppShell
         title={t('project.title')}
-        onThemeToggle={() => { }}
+        onThemeToggle={() => {}}
         isDarkMode={theme.palette.mode === 'dark'}
         error={error}
       >
@@ -246,7 +246,7 @@ const ProjectDetailPage = () => {
     <AppShell
       title={project.name}
       version={project.version}
-      onThemeToggle={() => { }}
+      onThemeToggle={() => {}}
       isDarkMode={theme.palette.mode === 'dark'}
     >
       {/* Status indicators */}
@@ -464,8 +464,8 @@ const ProjectDetailPage = () => {
           ) : (
             <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
               {project.description !== null &&
-                project.description !== undefined &&
-                project.description !== ''
+              project.description !== undefined &&
+              project.description !== ''
                 ? project.description
                 : t('project.noDescriptionProvided')}
             </Typography>

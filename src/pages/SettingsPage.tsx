@@ -171,11 +171,11 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
         'autoSave' | 'autoBackup' | 'skipDeleteConfirmation'
       >
     ) =>
-      (event: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = event.target.checked;
-        setPreferences({ ...preferences, [name]: newValue });
-        updateSettings({ [name]: newValue });
-      };
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = event.target.checked;
+      setPreferences({ ...preferences, [name]: newValue });
+      updateSettings({ [name]: newValue });
+    };
 
   const handleFontSizeChange = (_event: Event, newValue: number | number[]) => {
     const fontSize = newValue as number;
@@ -316,7 +316,7 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
   return (
     <AppShell
       title={t('settings.title')}
-      onThemeToggle={onThemeToggle || (() => { })}
+      onThemeToggle={onThemeToggle || (() => {})}
       isDarkMode={isDarkMode || theme.palette.mode === 'dark'}
     >
       <Container
