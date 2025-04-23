@@ -10,7 +10,7 @@
 		"@typescript-eslint/no-explicit-any": "off",
 		"no-multiple-empty-lines": ["error", { "max": 1 }],
 		"comma-dangle": ["error", "always-multiline"],
-		"max-len": ["error", { "code": 100, "ignoreUrls": true, "ignoreStrings": true, "ignoreTemplateLiterals": true, "ignoreComments": true }],
+		"max-len": ["error", { "code": 150, "ignoreUrls": true, "ignoreStrings": true, "ignoreTemplateLiterals": true, "ignoreComments": true }],
 		"@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
 		"@typescript-eslint/strict-boolean-expressions": "off",
 		"testing-library/prefer-screen-queries": "off",

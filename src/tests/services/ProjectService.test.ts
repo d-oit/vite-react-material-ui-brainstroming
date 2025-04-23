@@ -242,10 +242,10 @@ describe('ProjectService', () => {
 		})
 
 		it('should handle errors when creating a project', async () => {
-			const error = new Error('Failed to save project')
+			const _error = new Error('Failed to save project')
 
 			// Override the mock to throw an error
-			vi.spyOn(projectService, 'createProject').mockRejectedValueOnce(error)
+			vi.spyOn(projectService, 'createProject').mockRejectedValueOnce(_error)
 
 			await expect(projectService.createProject('Test', 'Description', ProjectTemplate.CUSTOM)).rejects.toThrow()
 		})
@@ -260,7 +260,7 @@ describe('ProjectService', () => {
 		})
 
 		it('should handle errors when getting projects', async () => {
-			const error = new Error('Failed to get projects')
+			const _error = new Error('Failed to get projects')
 
 			// Override the mock to return an empty array
 			vi.spyOn(projectService, 'getProjects').mockResolvedValueOnce([])
@@ -336,10 +336,10 @@ describe('ProjectService', () => {
 		})
 
 		it('should handle errors when deleting a project', async () => {
-			const error = new Error('Failed to delete project')
+			const _error = new Error('Failed to delete project')
 
 			// Override the mock to throw an error
-			vi.spyOn(projectService, 'deleteProject').mockRejectedValueOnce(error)
+			vi.spyOn(projectService, 'deleteProject').mockRejectedValueOnce(_error)
 
 			await expect(projectService.deleteProject('1')).rejects.toThrow()
 		})
