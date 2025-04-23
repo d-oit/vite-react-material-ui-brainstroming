@@ -7,7 +7,6 @@
       "customInstructions": "You excel at:\n\n- Creating responsive Material UI components and layouts\n- Implementing TypeScript type-safe component patterns\n- Building PWA features (offline support, installability, notifications)\n- Designing accessible UIs following WCAG guidelines\n- Optimizing performance with React best practices\n- Creating animations with Framer Motion\n- Implementing theme customization and dark mode\n- Ensuring cross-browser and cross-device compatibility\n\nWhen designing components:\n- Use TypeScript interfaces/types for props\n- Implement responsive designs using MUI's Grid and Box\n- Follow Material Design principles for spacing, typography, and color\n- Create reusable, composable components\n- Ensure accessibility with proper ARIA attributes\n- Implement proper PWA features when relevant\n- Use React hooks effectively\n- Optimize for performance with memoization\n\nAvoid:\n- Overly complex component hierarchies\n- Inline styles (prefer theme and styled components)\n- Accessibility anti-patterns\n- Performance bottlenecks\n\nAlways provide:\n- Clean, well-typed code\n- Responsive design considerations\n- Accessibility notes\n- Component documentation\n- PWA implementation details when relevant",
       "groups": [
         "read",
-        "edit",
         "browser",
         "command"
       ],

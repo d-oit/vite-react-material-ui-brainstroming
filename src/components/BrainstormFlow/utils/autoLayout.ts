@@ -1,10 +1,10 @@
-import dagre from 'dagre';
-import type { Node, Edge } from 'reactflow';
+import dagre from 'dagre'
+import type { Node, Edge } from 'reactflow'
 
-const NODE_WIDTH = 250;
-const NODE_HEIGHT = 150;
-const HORIZONTAL_SPACING = 100;
-const VERTICAL_SPACING = 100;
+const NODE_WIDTH = 250
+const NODE_HEIGHT = 150
+const HORIZONTAL_SPACING = 100
+const VERTICAL_SPACING = 100
 
 type LayoutDirection = 'TB' | 'LR';
 type LayoutAlign = 'UL' | 'DL' | 'UR' | 'DR';
@@ -25,56 +25,56 @@ interface LayoutResult {
 }
 
 export function getLayoutedElements(
-  nodes: Node[],
-  edges: Edge[],
-  options: LayoutOptions = {}
+	nodes: Node[],
+	edges: Edge[],
+	options: LayoutOptions = {},
 ): LayoutResult {
-  const {
-    direction = 'TB',
-    align = 'UL',
-    ranker = 'network-simplex',
-    nodesep = HORIZONTAL_SPACING,
-    edgesep = 10,
-    ranksep = VERTICAL_SPACING,
-  } = options;
+	const {
+		direction = 'TB',
+		align = 'UL',
+		ranker = 'network-simplex',
+		nodesep = HORIZONTAL_SPACING,
+		edgesep = 10,
+		ranksep = VERTICAL_SPACING,
+	} = options
 
-  const dagreGraph = new dagre.graphlib.Graph();
-  dagreGraph.setDefaultEdgeLabel(() => ({}));
-  
-  dagreGraph.setGraph({
-    rankdir: direction,
-    align,
-    ranker,
-    nodesep,
-    edgesep,
-    ranksep,
-    marginx: 50,
-    marginy: 50,
-  });
+	const dagreGraph = new dagre.graphlib.Graph()
+	dagreGraph.setDefaultEdgeLabel(() => ({}))
 
-  nodes.forEach((node) => {
-    dagreGraph.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
-  });
+	dagreGraph.setGraph({
+		rankdir: direction,
+		align,
+		ranker,
+		nodesep,
+		edgesep,
+		ranksep,
+		marginx: 50,
+		marginy: 50,
+	})
 
-  edges.forEach((edge) => {
-    dagreGraph.setEdge(edge.source, edge.target);
-  });
+	nodes.forEach((node) => {
+		dagreGraph.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT })
+	})
 
-  dagre.layout(dagreGraph);
+	edges.forEach((edge) => {
+		dagreGraph.setEdge(edge.source, edge.target)
+	})
 
-  const layoutedNodes = nodes.map((node) => {
-    const nodeWithPosition = dagreGraph.node(node.id);
-    return {
-      ...node,
-      position: {
-        x: nodeWithPosition.x - NODE_WIDTH / 2,
-        y: nodeWithPosition.y - NODE_HEIGHT / 2,
-      },
-    };
-  });
+	dagre.layout(dagreGraph)
 
-  return {
-    nodes: layoutedNodes,
-    edges,
-  };
+	const layoutedNodes = nodes.map((node) => {
+		const nodeWithPosition = dagreGraph.node(node.id)
+		return {
+			...node,
+			position: {
+				x: nodeWithPosition.x - NODE_WIDTH / 2,
+				y: nodeWithPosition.y - NODE_HEIGHT / 2,
+			},
+		}
+	})
+
+	return {
+		nodes: layoutedNodes,
+		edges,
+	}
 }

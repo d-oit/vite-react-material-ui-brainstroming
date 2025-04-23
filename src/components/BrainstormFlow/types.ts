@@ -13,6 +13,7 @@ export interface NodeData {
 	color?: string
 	type: NodeType
 	label?: string
+	isArchived?: boolean
 	onEdit?: (id: string) => void
 	onDelete?: (id: string, event: React.MouseEvent) => void
 	onChat?: (id: string) => void
@@ -48,6 +49,7 @@ export interface ControlsPanelProps {
 	toggleFullscreen: () => Promise<void>
 	zoomIn: () => void
 	zoomOut: () => void
+	handleAutoLayout?: () => void
 }
 
 export interface EnhancedMiniMapProps {

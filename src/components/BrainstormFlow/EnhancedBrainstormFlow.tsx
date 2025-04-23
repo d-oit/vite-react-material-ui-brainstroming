@@ -27,44 +27,29 @@ import { useSettings } from '../../contexts/SettingsContext'
 import LLMChatPanel from '../../features/brainstorming/LLMChatPanel'
 import { useBrainstormStore } from '../../store/brainstormStore'
 import { NodeType, EdgeType } from '../../types/enums'
-import type { Node as ProjectNode, Edge as ProjectEdge } from '../../types/models'
 import DeleteConfirmationDialog from '../DeleteConfirmationDialog'
 
 // Local Components
 import ControlsPanel from './ControlsPanel'
 import { EnhancedMiniMap } from './EnhancedMiniMap'
 import { FloatingControls } from './FloatingControls'
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import NodeEditDialog from './NodeEditDialog'
 import CustomNodeComponent from './nodes/CustomNode'
-import type { CustomNodeData } from './nodes/CustomNode'
+import type { CustomNodeType, CustomEdge, NodeData } from './types'
 import { getLayoutedElements } from './utils/autoLayout'
-import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
-
-interface NodeData extends CustomNodeData {
-	id: string
-	title: string
-	content: string
-	createdAt: string
-	updatedAt: string
-	tags?: string[]
-	color?: string
-}
-
-interface CustomNodeType extends Omit<ReactFlowNode<NodeData>, 'type' | 'style'> {
-	type: NodeType
-	style?: Record<string, unknown>
-}
-
-interface CustomEdge extends Omit<ReactFlowEdge, 'type' | 'label'> {
-	type: EdgeType
-	label?: string
-}
 
 const nodeTypes = {
 	[NodeType.IDEA]: CustomNodeComponent,
 	[NodeType.TASK]: CustomNodeComponent,
 	[NodeType.RESOURCE]: CustomNodeComponent,
 	[NodeType.NOTE]: CustomNodeComponent,
+}
+
+interface NodeEditDialogResult {
+	title: string
+	content: string
+	type: NodeType
 }
 
 interface EnhancedBrainstormFlowProps {
@@ -81,21 +66,50 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 	const theme = useTheme()
 	const flowRef = useRef<HTMLDivElement>(null)
 	const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null)
-	const { nodes: storeNodes, edges: storeEdges, setNodes, setEdges } = useBrainstormStore()
-	const nodes = storeNodes as CustomNodeType[]
-	const edges = storeEdges as CustomEdge[]
+	const {
+		nodes: storeNodes,
+		edges: storeEdges,
+		setNodes,
+		setEdges,
+		updateNodeData,
+		toggleArchiveNode,
+	} = useBrainstormStore()
+
+	const [showArchived, setShowArchived] = useState(false)
+	const nodes = (storeNodes as CustomNodeType[]).filter(
+		(node) => showArchived || !node.data.isArchived,
+	)
+	const edges = (storeEdges as CustomEdge[]).filter((edge) => {
+		const sourceNode = storeNodes.find((n) => n.id === edge.source)
+		const targetNode = storeNodes.find((n) => n.id === edge.target)
+		return (
+			(showArchived || !sourceNode?.data.isArchived) &&
+			(showArchived || !targetNode?.data.isArchived)
+		)
+	})
 
 	// UI State
-	const [mousePosition, setMousePosition] = useState({ x: 100, y: 100 })
+	const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({ x: 100, y: 100 })
 	const [showEditDialog, setShowEditDialog] = useState(false)
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 	const [showChatPanel, setShowChatPanel] = useState(false)
 	const [selectedNode, setSelectedNode] = useState<CustomNodeType | null>(null)
 	const [isFullscreen, setIsFullscreen] = useState(false)
 	const [settingsAnchorEl, setSettingsAnchorEl] = useState<HTMLElement | null>(null)
-	const [zoomLevel, setZoomLevel] = useState<number>(1)
-	const [showGrid, setShowGrid] = useState<boolean>(true)
+	const [zoomLevel, setZoomLevel] = useState(1)
+	const [showGrid, setShowGrid] = useState(true)
 	const { settings } = useSettings()
+
+	// Track mouse position for new node placement
+	const handleMouseMove = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+		const bounds = flowRef.current?.getBoundingClientRect()
+		if (bounds) {
+			setMousePosition({
+				x: event.clientX - bounds.left,
+				y: event.clientY - bounds.top,
+			})
+		}
+	}, [])
 
 	const onNodesChange = useCallback(
 		(changes: NodeChange[]) => {
@@ -104,25 +118,24 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 				return updatedNodes.map((node) => ({
 					...node,
 					type: node.type as NodeType,
-					data: node.data as NodeData,
 				})) as CustomNodeType[]
 			})
 		},
-		[setNodes]
+		[setNodes],
 	)
 
 	const onEdgesChange = useCallback(
 		(changes: EdgeChange[]) => {
 			setEdges((currentEdges) => applyEdgeChanges(changes, currentEdges) as CustomEdge[])
 		},
-		[setEdges]
+		[setEdges],
 	)
 
 	const onConnect = useCallback(
 		(connection: Connection) => {
-			setEdges((currentEdges) => addEdge(connection, currentEdges) as CustomEdge[])
+			setEdges((currentEdges) => addEdge({ ...connection, type: EdgeType.DEFAULT }, currentEdges) as CustomEdge[])
 		},
-		[setEdges]
+		[setEdges],
 	)
 
 	const handleNodeClick = useCallback<NodeMouseHandler>(
@@ -130,11 +143,17 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 			setSelectedNode({
 				...node,
 				type: node.type as NodeType,
-				data: node.data as NodeData,
 			} as CustomNodeType)
 			setShowEditDialog(true)
 		},
-		[]
+		[],
+	)
+
+	const handleToggleArchiveNode = useCallback(
+		(nodeId: string) => {
+			toggleArchiveNode(nodeId)
+		},
+		[toggleArchiveNode],
 	)
 
 	const handleAutoLayout = useCallback(() => {
@@ -212,7 +231,8 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 					minHeight: '500px',
 					display: 'flex',
 					flexDirection: 'column',
-				}}>
+				}}
+				onMouseMove={handleMouseMove}>
 				<ReactFlow
 					nodes={nodes}
 					edges={edges}
@@ -247,6 +267,12 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 						/>
 					</Panel>
 
+					<FloatingControls
+						position={mousePosition}
+						showArchived={showArchived}
+						onToggleArchived={() => setShowArchived((prev: boolean) => !prev)}
+					/>
+
 					{/* Settings Menu */}
 					<Menu
 						anchorEl={settingsAnchorEl}
@@ -279,7 +305,7 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 									{ value: 1.5, label: '150%' },
 								]}
 								valueLabelDisplay="auto"
-								valueLabelFormat={(value) => `${Math.round(value * 100)}%`}
+								valueLabelFormat={(value: number) => `${Math.round(value * 100)}%`}
 							/>
 						</Box>
 
@@ -312,25 +338,15 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 						<NodeEditDialog
 							open={showEditDialog}
 							onClose={handleCloseEditDialog}
-							initialData={selectedNode.data as NodeData}
-							initialType={selectedNode.type as NodeType}
-							onSave={({ title, content, type }) => {
-								setNodes((nodes) =>
-									nodes.map((node) =>
-										node.id === selectedNode.id
-											? {
-													...node,
-													type,
-													data: {
-														...node.data,
-														title,
-														content,
-														type,
-													},
-											  }
-											: node
-									)
-								)
+							initialData={selectedNode.data}
+							initialType={selectedNode.type}
+							onSave={({ title, content, type }: NodeEditDialogResult) => {
+								updateNodeData(selectedNode.id, {
+									title,
+									content,
+									type,
+									updatedAt: new Date().toISOString(),
+								})
 								handleCloseEditDialog()
 							}}
 						/>
