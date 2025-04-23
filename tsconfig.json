@@ -53,9 +53,11 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
+    "services/**/*.ts",
     "e2e/**/*",
     "src/types/*.d.ts",
-    "src/tests/**/*"
+    "src/tests/**/*",
+    "playwright.config.ts"
   ],
   "exclude": [
     "node_modules",

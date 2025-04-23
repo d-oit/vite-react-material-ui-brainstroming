@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 import _gitService from '../../services/GitService'
-import indexedDBService from '../../services/IndexedDBService'
-import loggerService from '../../services/LoggerService'
+import _indexedDBService from '../../services/IndexedDBService'
+import _loggerService from '../../services/LoggerService'
 import _offlineService from '../../services/OfflineService'
 import { ProjectService } from '../../services/ProjectService'
 import _s3Service from '../../services/S3Service'
 // Import correct types
 import type { Project, ProjectHistoryEntry, Node, Edge } from '../../types'
 // Import ProjectTemplate enum and SyncSettings type from correct path
-import { ProjectTemplate, type SyncSettings } from '../../types/project'
+import { ProjectTemplate, type SyncSettings as _SyncSettings } from '../../types/project'
 
 // Mock dependencies
 vi.mock('../../services/IndexedDBService', () => ({
@@ -155,7 +155,7 @@ describe('ProjectService', () => {
 		projectService = ProjectService.getInstance()
 
 		// Mock the methods directly
-		vi.spyOn(projectService, 'createProject').mockImplementation(async (name, description, template) => {
+		vi.spyOn(projectService, 'createProject').mockImplementation(async (name, description, template = ProjectTemplate.CUSTOM) => {
 			return {
 				id: mockUUID,
 				name,
@@ -163,8 +163,8 @@ describe('ProjectService', () => {
 				template,
 				createdAt: mockDate.toISOString(),
 				updatedAt: mockDate.toISOString(),
-				nodes: [],
-				edges: [],
+				nodes: [] as Node[],
+				edges: [] as Edge[],
 				version: '1.0.0',
 				syncSettings: { enableS3Sync: false, syncFrequency: 'manual' },
 			}
@@ -181,9 +181,14 @@ describe('ProjectService', () => {
 
 		vi.spyOn(projectService, 'updateProject').mockImplementation(async (projectOrId) => {
 			const updatedProject =
-				typeof projectOrId === 'string'
-					? { ...mockProject, ...projectOrId }
-					: { ...mockProject, ...projectOrId, updatedAt: mockDate.toISOString() }
+				typeof projectOrId === 'string' ? {
+					...mockProject,
+					id: projectOrId,
+				} : {
+					...mockProject,
+					...projectOrId as Project,
+					updatedAt: mockDate.toISOString(),
+				}
 			return updatedProject
 		})
 

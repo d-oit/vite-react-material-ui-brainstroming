@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 
 import indexedDBService from '../../services/IndexedDBService'
 import projectService from '../../services/ProjectService'
 // Import project-specific types including Node, Edge
 import type { Project, ProjectHistoryEntry, Node, Edge } from '../../types'
 // Import ProjectTemplate enum and SyncSettings type
-import { ProjectTemplate, type SyncSettings } from '../../types/project'
+import { ProjectTemplate, type SyncSettings as _SyncSettings } from '../../types/project'
 
 // Mock the dependencies
 vi.mock('../../services/IndexedDBService', () => ({

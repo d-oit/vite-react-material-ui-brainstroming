@@ -8,7 +8,7 @@ export default defineConfig({
 		globals: true,
 		environment: 'jsdom',
 		setupFiles: ['./src/setupTests.ts'],
-		testTimeout: 60000, // Increased from 30000 to 60000
+		testTimeout: 20000,
 		include: [
 			'src/**/*.{test,spec}.{js,jsx,ts,tsx}',
 		],
@@ -39,5 +39,14 @@ export default defineConfig({
 				'@emotion/styled',
 			],
 		},
+		// Add performance optimizations
+		pool: 'forks', // Use forks instead of threads to avoid hanging issues
+		poolOptions: {
+			forks: {
+				singleFork: true, // Run tests in a single fork for better performance
+			},
+		},
+		fileParallelism: false, // Disable file parallelism to reduce resource contention
+		isolate: false, // Disable isolation for better performance
 	},
 })

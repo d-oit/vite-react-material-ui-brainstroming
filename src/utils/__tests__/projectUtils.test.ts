@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import type { Project } from '../../types'
+import { NodeType, EdgeType } from '../../types/enums'
 import { ProjectTemplate } from '../../types/project'
 import { performanceTracker } from '../performanceMonitoring'
 import { hasProjectChanged } from '../projectUtils'
@@ -32,7 +33,7 @@ describe('projectUtils', () => {
 			nodes: [
 				{
 					id: 'node1',
-					type: 'idea',
+					type: NodeType.IDEA,
 					position: { x: 100, y: 100 },
 					data: {
 						id: 'node1',
@@ -40,7 +41,7 @@ describe('projectUtils', () => {
 						content: 'Content 1',
 						createdAt: '2023-01-01T00:00:00.000Z',
 						updatedAt: '2023-01-01T00:00:00.000Z',
-						type: 'idea',
+						type: NodeType.IDEA,
 					},
 				},
 			],
@@ -49,7 +50,7 @@ describe('projectUtils', () => {
 					id: 'edge1',
 					source: 'node1',
 					target: 'node2',
-					type: 'default',
+					type: EdgeType.DEFAULT,
 				},
 			],
 			syncSettings: {
@@ -112,7 +113,7 @@ describe('projectUtils', () => {
 						id: 'edge2',
 						source: 'node2',
 						target: 'node3',
-						type: 'default',
+						type: EdgeType.DEFAULT,
 					},
 				],
 			}
@@ -218,7 +219,7 @@ describe('projectUtils', () => {
 			const project1 = { ...baseProject }
 			const project2 = { ...baseProject }
 
-			// @ts-ignore - Testing edge case with undefined
+			// @ts-expect-error Testing edge case with intentionally undefined nodes property
 			delete project2.nodes
 
 			expect(hasProjectChanged(project1, project2)).toBe(true)
@@ -232,7 +233,7 @@ describe('projectUtils', () => {
 					.fill(null)
 					.map((_, index) => ({
 						id: `node${index}`,
-						type: 'idea',
+						type: NodeType.IDEA,
 						position: { x: index * 10, y: index * 10 },
 						data: {
 							id: `node${index}`,
@@ -240,7 +241,7 @@ describe('projectUtils', () => {
 							content: `Content ${index}`,
 							createdAt: '2023-01-01T00:00:00.000Z',
 							updatedAt: '2023-01-01T00:00:00.000Z',
-							type: 'idea',
+							type: NodeType.IDEA,
 						},
 					})),
 				edges: Array(50)
