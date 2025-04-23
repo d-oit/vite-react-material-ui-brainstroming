@@ -248,7 +248,7 @@ export function useDeviceType(): {
 	isTablet: boolean
 	isDesktop: boolean
 	isLargeDesktop: boolean
-} {
+	} {
 	const theme = useTheme()
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 	const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'))

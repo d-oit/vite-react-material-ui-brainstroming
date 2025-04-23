@@ -16,7 +16,6 @@ module.exports = {
     'plugin:import/typescript',
     'plugin:security/recommended',
     'plugin:testing-library/react',
-    'prettier',
   ],
 
   parser: '@typescript-eslint/parser',
@@ -35,7 +34,6 @@ module.exports = {
     'jsx-a11y',
     'import',
     'security',
-    'prettier',
     'testing-library',
   ],
   rules: {
@@ -115,9 +113,26 @@ module.exports = {
     'security/detect-possible-timing-attacks': 'warn',
     'security/detect-non-literal-regexp': 'warn',
 
-    // Prettier - Ensure Prettier runs and reports errors, but configuration is sourced from .prettierrc.js
-    'prettier/prettier': 'error',
-    // 'linebreak-style' is handled by Prettier (via endOfLine: 'lf' in .prettierrc.js)
+    // Formatting rules
+    'indent': ['error', 'tab'],
+    'linebreak-style': ['error', 'unix'], // Changed from 'lf' to 'unix'
+    'quotes': ['error', 'single', { 'avoidEscape': true }],
+    'semi': ['error', 'never'],
+    'max-len': ['error', { 'code': 100, 'ignoreUrls': true, 'ignoreStrings': true, 'ignoreTemplateLiterals': true }],
+    'comma-dangle': ['error', 'always-multiline'],
+    'arrow-parens': ['error', 'always'],
+    'object-curly-spacing': ['error', 'always'],
+    'array-bracket-spacing': ['error', 'never'], // Fixed: added 'error' as first parameter
+    'key-spacing': ['error', { 'beforeColon': false, 'afterColon': true }],
+    'keyword-spacing': ['error', { 'before': true, 'after': true }],
+    'space-before-blocks': ['error', 'always'],
+    'space-before-function-paren': ['error', { 'anonymous': 'always', 'named': 'never', 'asyncArrow': 'always' }],
+    'space-in-parens': ['error', 'never'],
+    'space-infix-ops': 'error',
+    'eol-last': ['error', 'always'],
+    'no-trailing-spaces': 'error',
+    'no-multiple-empty-lines': ['error', { 'max': 1, 'maxEOF': 0 }],
+    'no-tabs': 'off', // Since you're using tabs for indentation
   },
   settings: {
     react: {
@@ -212,3 +227,7 @@ module.exports = {
     },
   ],
 };
+
+
+
+

@@ -14,9 +14,7 @@
     "lint:fix-all": "eslint . --fix --quiet --rule \"@typescript-eslint/no-unused-vars: off\" --rule \"@typescript-eslint/no-explicit-any: off\"",
     "ci:lint": "eslint . --max-warnings=0 --no-fix",
     "lint:staged": "lint-staged --concurrent false",
-    "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,md,json}'",
-    "format:check": "prettier --check 'src/**/*.{js,jsx,ts,tsx,css,md,json}'",
-    "ci:verify": "npm run typecheck && npm run ci:lint && npm run format:check",
+    "ci:verify": "npm run typecheck && npm run ci:lint",
     "preview": "vite preview",
     "test": "vitest run --config vitest.config.ts",
     "test:watch": "vitest --config vitest.config.ts",
@@ -25,15 +23,18 @@
     "test:e2e:ui": "playwright test --ui",
     "test:a11y": "playwright test src/tests/accessibility/a11y-audit.ts",
     "test:a11y:report": "playwright test src/tests/accessibility/a11y-audit.ts --reporter=html && open playwright-report/index.html",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "format": "eslint . --fix"
   },
   "dependencies": {
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^7.0.1",
+    "@types/dagre": "^0.7.52",
     "aws-sdk": "^2.1584.0",
     "buffer": "^6.0.3",
+    "dagre": "^0.8.5",
     "framer-motion": "^12.6.3",
     "openai": "^4.35.0",
     "process": "^0.11.10",
@@ -51,11 +52,10 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --fix --max-warnings=0",
-      "prettier --write"
+      "eslint --fix --max-warnings=0"
     ],
     "*.{json,css,md}": [
-      "prettier --write"
+      "eslint --fix --max-warnings=0"
     ],
     "package.json": [
       "sort-package-json"
@@ -76,12 +76,10 @@
     "@typescript-eslint/parser": "^8.29.0",
     "@vitejs/plugin-react": "^4.2.1",
     "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jsx-a11y": "^6.10.2",
-    "eslint-plugin-prettier": "^5.1.3",
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-security": "^1.7.1",
@@ -89,7 +87,6 @@
     "husky": "^9.1.7",
     "jsdom": "^24.0.0",
     "lint-staged": "^15.5.0",
-    "prettier": "^3.5.3",
     "sort-package-json": "^2.8.0",
     "typescript": "^5.4.3",
     "vite": "^6.2.5",
@@ -97,3 +94,5 @@
     "vitest": "^3.1.1"
   }
 }
+
+

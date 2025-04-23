@@ -427,31 +427,31 @@ const ChatPanel = ({ projectId, projectContext, onAddNodes, onClose }: ChatPanel
 									'&::before':
 										message.role !== 'user'
 											? {
-													content: '""',
-													position: 'absolute',
-													top: 10,
-													left: -8,
-													width: 0,
-													height: 0,
-													borderTop: '8px solid transparent',
-													borderBottom: '8px solid transparent',
-													borderRight: (theme) =>
-														`8px solid ${theme.palette.background.paper}`,
-												}
+												content: '""',
+												position: 'absolute',
+												top: 10,
+												left: -8,
+												width: 0,
+												height: 0,
+												borderTop: '8px solid transparent',
+												borderBottom: '8px solid transparent',
+												borderRight: (theme) =>
+													`8px solid ${theme.palette.background.paper}`,
+											}
 											: {},
 									'&::after':
 										message.role === 'user'
 											? {
-													content: '""',
-													position: 'absolute',
-													top: 10,
-													right: -8,
-													width: 0,
-													height: 0,
-													borderTop: '8px solid transparent',
-													borderBottom: '8px solid transparent',
-													borderLeft: (theme) => `8px solid ${theme.palette.primary.light}`,
-												}
+												content: '""',
+												position: 'absolute',
+												top: 10,
+												right: -8,
+												width: 0,
+												height: 0,
+												borderTop: '8px solid transparent',
+												borderBottom: '8px solid transparent',
+												borderLeft: (theme) => `8px solid ${theme.palette.primary.light}`,
+											}
 											: {},
 								}}>
 								<Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>

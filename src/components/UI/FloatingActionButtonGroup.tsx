@@ -32,15 +32,15 @@ const FloatingActionButtonGroup: React.FC<FloatingActionButtonGroupProps> = ({
 	// Calculate position styles
 	const getPositionStyles = () => {
 		switch (position) {
-			case 'top-left':
-				return { top: 80, left: 16 }
-			case 'top-right':
-				return { top: 80, right: 16 }
-			case 'bottom-left':
-				return { bottom: 100, left: 16 }
-			case 'bottom-right':
-			default:
-				return { bottom: 100, right: 16 }
+		case 'top-left':
+			return { top: 80, left: 16 }
+		case 'top-right':
+			return { top: 80, right: 16 }
+		case 'bottom-left':
+			return { bottom: 100, left: 16 }
+		case 'bottom-right':
+		default:
+			return { bottom: 100, right: 16 }
 		}
 	}
 

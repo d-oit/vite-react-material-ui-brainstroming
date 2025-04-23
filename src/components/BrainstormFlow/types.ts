@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 import type { Node, Edge } from 'reactflow'
 
-import { NodeType, EdgeType } from '../../types/enums'
+import type { NodeType, EdgeType } from '../../types/enums'
 
 export interface NodeData {
 	id: string

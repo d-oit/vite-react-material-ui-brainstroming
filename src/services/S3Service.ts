@@ -229,15 +229,15 @@ export class S3Service {
 			for (const operation of queue) {
 				try {
 					switch (operation.type) {
-						case 'upload':
-							await this.uploadProject(operation.data.project)
-							break
-						case 'download':
-							// Implement download processing
-							break
-						case 'delete':
-							// Implement delete processing
-							break
+					case 'upload':
+						await this.uploadProject(operation.data.project)
+						break
+					case 'download':
+						// Implement download processing
+						break
+					case 'delete':
+						// Implement delete processing
+						break
 					}
 				} catch (error) {
 					loggerService.error(

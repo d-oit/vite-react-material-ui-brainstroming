@@ -285,16 +285,16 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
 		// Fallback colors if no active scheme
 		switch (type) {
-			case NodeType.IDEA:
-				return '#e3f2fd' // Light blue
-			case NodeType.TASK:
-				return '#e8f5e9' // Light green
-			case NodeType.NOTE:
-				return '#fff8e1' // Light yellow
-			case NodeType.RESOURCE:
-				return '#f3e5f5' // Light purple
-			default:
-				return '#f5f5f5' // Light grey
+		case NodeType.IDEA:
+			return '#e3f2fd' // Light blue
+		case NodeType.TASK:
+			return '#e8f5e9' // Light green
+		case NodeType.NOTE:
+			return '#fff8e1' // Light yellow
+		case NodeType.RESOURCE:
+			return '#f3e5f5' // Light purple
+		default:
+			return '#f5f5f5' // Light grey
 		}
 	}
 

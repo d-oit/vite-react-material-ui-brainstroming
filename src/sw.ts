@@ -281,7 +281,7 @@ const offlineOperationsSyncPlugin = new BackgroundSyncPlugin('offline-operations
 					return true // Request succeeded
 				} catch (error) {
 					failedItems++
-					console.error(`Failed to replay queued request:`, error)
+					console.error('Failed to replay queued request:', error)
 
 					// Check if we should stop retrying based on the error
 					if (error.name === 'TypeError' || error.name === 'NetworkError') {

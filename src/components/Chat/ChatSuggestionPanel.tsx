@@ -65,16 +65,16 @@ function ChatSuggestionPanel({ suggestion, onAcceptNode, onAcceptAll, onDismiss 
 
 	const getNodeTypeColor = (type: string) => {
 		switch (type) {
-			case 'idea':
-				return 'primary'
-			case 'task':
-				return 'secondary'
-			case 'note':
-				return 'info'
-			case 'resource':
-				return 'success'
-			default:
-				return 'default'
+		case 'idea':
+			return 'primary'
+		case 'task':
+			return 'secondary'
+		case 'note':
+			return 'info'
+		case 'resource':
+			return 'success'
+		default:
+			return 'default'
 		}
 	}
 

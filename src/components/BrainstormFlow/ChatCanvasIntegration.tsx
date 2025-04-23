@@ -442,7 +442,7 @@ export const useChatCanvasIntegration = (props: ChatCanvasIntegrationProps) => {
 				...props,
 				ref: (ref: React.RefObject<typeof ChatCanvasIntegration>) => {
 					if (ref !== null && typeof ref === 'object' && 'handleOpenNodeToMessageDialog' in ref) {
-						;(
+						(
 							ref as unknown as { handleOpenNodeToMessageDialog: (node: Node) => void }
 						).handleOpenNodeToMessageDialog(node)
 					}
@@ -455,7 +455,7 @@ export const useChatCanvasIntegration = (props: ChatCanvasIntegrationProps) => {
 				...props,
 				ref: (ref: React.RefObject<typeof ChatCanvasIntegration>) => {
 					if (ref !== null && typeof ref === 'object' && 'handleOpenMessageToNodeDialog' in ref) {
-						;(
+						(
 							ref as unknown as { handleOpenMessageToNodeDialog: (message: ChatMessage) => void }
 						).handleOpenMessageToNodeDialog(message)
 					}

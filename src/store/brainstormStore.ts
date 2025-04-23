@@ -48,13 +48,13 @@ export const useBrainstormStore = create<BrainstormState>((set) => ({
 			nodes: state.nodes.map((node) =>
 				node.id === update.id
 					? {
-							...node,
-							data: {
-								...node.data,
-								...(update.label && { label: update.label }),
-								...(update.notes && { notes: update.notes }),
-							},
-						}
+						...node,
+						data: {
+							...node.data,
+							...(update.label && { label: update.label }),
+							...(update.notes && { notes: update.notes }),
+						},
+					}
 					: node,
 			),
 		})),

@@ -78,15 +78,15 @@ export const EnhancedControls: React.FC<EnhancedControlsProps> = ({
 	// Calculate position styles
 	const getPositionStyles = () => {
 		switch (position) {
-			case 'top-left':
-				return { top: 10, left: 10 }
-			case 'top-right':
-				return { top: 10, right: 10 }
-			case 'bottom-left':
-				return { bottom: 10, left: 10 }
-			case 'bottom-right':
-			default:
-				return { top: 10, right: 10 } // Changed to top-right to avoid overlap with minimap
+		case 'top-left':
+			return { top: 10, left: 10 }
+		case 'top-right':
+			return { top: 10, right: 10 }
+		case 'bottom-left':
+			return { bottom: 10, left: 10 }
+		case 'bottom-right':
+		default:
+			return { top: 10, right: 10 } // Changed to top-right to avoid overlap with minimap
 		}
 	}
 

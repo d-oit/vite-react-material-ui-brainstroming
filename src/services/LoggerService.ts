@@ -254,11 +254,11 @@ export class LoggerService {
 	public async error(message: string, error?: Error, context?: Partial<StructuredLogContext>): Promise<void> {
 		const errorContext = error
 			? {
-					...context,
-					errorMessage: error.message,
-					stack: error.stack,
-					name: error.name,
-				}
+				...context,
+				errorMessage: error.message,
+				stack: error.stack,
+				name: error.name,
+			}
 			: context
 
 		await this.log('error', message, errorContext)
@@ -273,11 +273,11 @@ export class LoggerService {
 	public async critical(message: string, error?: Error, context?: Partial<StructuredLogContext>): Promise<void> {
 		const errorContext = error
 			? {
-					...context,
-					errorMessage: error.message,
-					stack: error.stack,
-					name: error.name,
-				}
+				...context,
+				errorMessage: error.message,
+				stack: error.stack,
+				name: error.name,
+			}
 			: context
 
 		await this.log('critical', message, errorContext)
@@ -455,21 +455,21 @@ export class LoggerService {
 		const formattedMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`
 
 		switch (level) {
-			case 'debug':
-				console.debug(formattedMessage, context || '')
-				break
-			case 'info':
-				console.info(formattedMessage, context || '')
-				break
-			case 'warn':
-				console.warn(formattedMessage, context || '')
-				break
-			case 'error':
-				console.error(formattedMessage, context || '')
-				break
-			case 'critical':
-				console.error(`%c${formattedMessage}`, 'color: red; font-weight: bold', context || '')
-				break
+		case 'debug':
+			console.debug(formattedMessage, context || '')
+			break
+		case 'info':
+			console.info(formattedMessage, context || '')
+			break
+		case 'warn':
+			console.warn(formattedMessage, context || '')
+			break
+		case 'error':
+			console.error(formattedMessage, context || '')
+			break
+		case 'critical':
+			console.error(`%c${formattedMessage}`, 'color: red; font-weight: bold', context || '')
+			break
 		}
 	}
 

@@ -191,13 +191,13 @@ class IndexedDBStorageService implements StorageManager {
 			for (const change of changes) {
 				try {
 					switch (change.type) {
-						case 'create':
-						case 'update':
-							await this.saveProject(change.data as Project)
-							break
-						case 'delete':
-							await this.deleteProject((change.data as { id: string }).id)
-							break
+					case 'create':
+					case 'update':
+						await this.saveProject(change.data as Project)
+						break
+					case 'delete':
+						await this.deleteProject((change.data as { id: string }).id)
+						break
 					}
 
 					// Remove processed change

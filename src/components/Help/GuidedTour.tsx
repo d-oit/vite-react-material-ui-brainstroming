@@ -86,22 +86,22 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
 		let left = 0
 
 		switch (placement) {
-			case 'top':
-				top = targetRect.top - tooltipHeight - padding
-				left = targetRect.left + targetRect.width / 2 - tooltipWidth / 2
-				break
-			case 'right':
-				top = targetRect.top + targetRect.height / 2 - tooltipHeight / 2
-				left = targetRect.right + padding
-				break
-			case 'bottom':
-				top = targetRect.bottom + padding
-				left = targetRect.left + targetRect.width / 2 - tooltipWidth / 2
-				break
-			case 'left':
-				top = targetRect.top + targetRect.height / 2 - tooltipHeight / 2
-				left = targetRect.left - tooltipWidth - padding
-				break
+		case 'top':
+			top = targetRect.top - tooltipHeight - padding
+			left = targetRect.left + targetRect.width / 2 - tooltipWidth / 2
+			break
+		case 'right':
+			top = targetRect.top + targetRect.height / 2 - tooltipHeight / 2
+			left = targetRect.right + padding
+			break
+		case 'bottom':
+			top = targetRect.bottom + padding
+			left = targetRect.left + targetRect.width / 2 - tooltipWidth / 2
+			break
+		case 'left':
+			top = targetRect.top + targetRect.height / 2 - tooltipHeight / 2
+			left = targetRect.left - tooltipWidth - padding
+			break
 		}
 
 		// Ensure tooltip is within viewport

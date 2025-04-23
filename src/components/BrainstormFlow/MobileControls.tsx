@@ -98,89 +98,89 @@ const MobileControls: React.FC<MobileControlsProps> = ({
 		const actions = [
 			...(onAddNode
 				? [
-						{
-							icon: <AddIcon />,
-							name: t('brainstorm.addNode') || 'Add Node',
-							onClick: () => {
-								onAddNode(NodeType.IDEA)
-								handleClose()
-							},
+					{
+						icon: <AddIcon />,
+						name: t('brainstorm.addNode') || 'Add Node',
+						onClick: () => {
+							onAddNode(NodeType.IDEA)
+							handleClose()
 						},
-					]
+					},
+				]
 				: []),
 			...(onSave
 				? [
-						{
-							icon: <SaveIcon />,
-							name: t('common.save') || 'Save',
-							onClick: () => {
-								onSave()
-								handleClose()
-							},
+					{
+						icon: <SaveIcon />,
+						name: t('common.save') || 'Save',
+						onClick: () => {
+							onSave()
+							handleClose()
 						},
-					]
+					},
+				]
 				: []),
 			...(onUndo && canUndo
 				? [
-						{
-							icon: <UndoIcon />,
-							name: t('common.undo') || 'Undo',
-							onClick: () => {
-								onUndo()
-								handleClose()
-							},
+					{
+						icon: <UndoIcon />,
+						name: t('common.undo') || 'Undo',
+						onClick: () => {
+							onUndo()
+							handleClose()
 						},
-					]
+					},
+				]
 				: []),
 			...(onRedo && canRedo
 				? [
-						{
-							icon: <RedoIcon />,
-							name: t('common.redo') || 'Redo',
-							onClick: () => {
-								onRedo()
-								handleClose()
-							},
+					{
+						icon: <RedoIcon />,
+						name: t('common.redo') || 'Redo',
+						onClick: () => {
+							onRedo()
+							handleClose()
 						},
-					]
+					},
+				]
 				: []),
 			...(onToggleGrid
 				? [
-						{
-							icon: showGrid ? <GridOffIcon /> : <GridOnIcon />,
-							name: showGrid
-								? t('brainstorm.hideGrid') || 'Hide Grid'
-								: t('brainstorm.showGrid') || 'Show Grid',
-							onClick: () => {
-								onToggleGrid()
-								handleClose()
-							},
+					{
+						icon: showGrid ? <GridOffIcon /> : <GridOnIcon />,
+						name: showGrid
+							? t('brainstorm.hideGrid') || 'Hide Grid'
+							: t('brainstorm.showGrid') || 'Show Grid',
+						onClick: () => {
+							onToggleGrid()
+							handleClose()
 						},
-					]
+					},
+				]
 				: []),
 			...(onCopy
 				? [
-						{
-							icon: <CopyIcon />,
-							name: t('common.copy') || 'Copy',
-							onClick: () => {
-								onCopy()
-								handleClose()
-							},
+					{
+						icon: <CopyIcon />,
+						name: t('common.copy') || 'Copy',
+						onClick: () => {
+							onCopy()
+							handleClose()
 						},
-					]
+					},
+				]
 				: []),
 			...(onPaste && canPaste
 				? [
-						{
-							icon: <PasteIcon />,
-							name: t('common.paste') || 'Paste',
-							onClick: () => {
-								onPaste()
-								handleClose()
-							},
+					{
+						icon: <PasteIcon />,
+						name: t('common.paste') || 'Paste',
+						onClick: () => {
+							onPaste()
+							handleClose()
 						},
-					]
+					},
+				]
 				: []),
 		]
 

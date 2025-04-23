@@ -119,19 +119,17 @@ Run CI-level linting (zero warnings):
 npm run ci:lint
 ```
 
-#### Formatting
+## Code Formatting
 
-Format code with Prettier:
+This project uses ESLint for both linting and code formatting. The formatting rules are enforced automatically when you save files in VS Code (with the ESLint extension installed).
+
+To manually format all files, run:
 
 ```bash
 npm run format
 ```
 
-Check if code is properly formatted:
-
-```bash
-npm run format:check
-```
+When you commit code, the pre-commit hook will automatically format your changes using ESLint.
 
 #### Pre-commit Hooks
 
@@ -168,3 +166,4 @@ This project uses Husky and lint-staged to automatically lint and format code be
 - Efficient state management
 - Responsive image loading
 - Browser caching strategies
+

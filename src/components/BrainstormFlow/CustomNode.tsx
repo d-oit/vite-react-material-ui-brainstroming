@@ -58,17 +58,17 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
 		// Use a type-safe approach to avoid object injection
 		let sizeConfig
 		switch (validSize) {
-			case 'small':
-				sizeConfig = nodePreferences.nodeSizes.small
-				break
-			case 'medium':
-				sizeConfig = nodePreferences.nodeSizes.medium
-				break
-			case 'large':
-				sizeConfig = nodePreferences.nodeSizes.large
-				break
-			default:
-				sizeConfig = null
+		case 'small':
+			sizeConfig = nodePreferences.nodeSizes.small
+			break
+		case 'medium':
+			sizeConfig = nodePreferences.nodeSizes.medium
+			break
+		case 'large':
+			sizeConfig = nodePreferences.nodeSizes.large
+			break
+		default:
+			sizeConfig = null
 		}
 
 		if (!sizeConfig) {
@@ -237,16 +237,16 @@ const CustomNode = ({ data, id, type }: CustomNodeProps) => {
 							// Hide tags on mobile if there are more than 2
 							...(isMobile &&
 								data.tags.length > 2 && {
-									'& .MuiChip-root:nth-of-type(n+3)': {
-										display: 'none',
-									},
-									'&::after': {
-										content: data.tags.length > 2 ? '"..."' : 'none',
-										fontSize: '0.75rem',
-										opacity: 0.7,
-										marginLeft: '4px',
-									},
-								}),
+								'& .MuiChip-root:nth-of-type(n+3)': {
+									display: 'none',
+								},
+								'&::after': {
+									content: data.tags.length > 2 ? '"..."' : 'none',
+									fontSize: '0.75rem',
+									opacity: 0.7,
+									marginLeft: '4px',
+								},
+							}),
 						}}
 						aria-label="Tags"
 						role="group">

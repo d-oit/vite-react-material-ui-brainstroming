@@ -207,91 +207,91 @@ export const KeyboardShortcutsHandler: React.FC<KeyboardShortcutsHandlerProps> =
 
 			if (event.ctrlKey) {
 				switch (event.key) {
-					case '+':
-					case '=': // Both keys are often used for zoom in
-						if (onZoomIn) {
-							onZoomIn()
-							event.preventDefault()
-						}
-						break
-					case '-':
-						if (onZoomOut) {
-							onZoomOut()
-							event.preventDefault()
-						}
-						break
-					case '0':
-						if (onFitView) {
-							onFitView()
-							event.preventDefault()
-						}
-						break
-					case 'z':
-						if (onUndo && !event.shiftKey) {
-							onUndo()
-							event.preventDefault()
-						} else if (onRedo && event.shiftKey) {
-							onRedo()
-							event.preventDefault()
-						}
-						break
-					case 'y':
-						if (onRedo) {
-							onRedo()
-							event.preventDefault()
-						}
-						break
-					case 's':
-						if (onSave) {
-							onSave()
-							event.preventDefault()
-						}
-						break
-					case 'c':
-						if (onCopy && !event.shiftKey) {
-							onCopy()
-							// Don't prevent default to allow browser copy
-						} else if (onToggleChat && event.shiftKey) {
-							onToggleChat()
-							event.preventDefault()
-						}
-						break
-					case 'v':
-						if (onPaste) {
-							onPaste()
-							// Don't prevent default to allow browser paste
-						}
-						break
-					case 'x':
-						if (onCut) {
-							onCut()
-							// Don't prevent default to allow browser cut
-						}
-						break
-					case 'a':
-						if (onSelectAll) {
-							onSelectAll()
-							event.preventDefault()
-						}
-						break
-					case 'n':
-						if (onAddNode) {
-							onAddNode()
-							event.preventDefault()
-						}
-						break
-					case 'g':
-						if (onToggleGrid) {
-							onToggleGrid()
-							event.preventDefault()
-						}
-						break
-					case 'f':
-						if (onToggleFullscreen && event.shiftKey) {
-							onToggleFullscreen()
-							event.preventDefault()
-						}
-						break
+				case '+':
+				case '=': // Both keys are often used for zoom in
+					if (onZoomIn) {
+						onZoomIn()
+						event.preventDefault()
+					}
+					break
+				case '-':
+					if (onZoomOut) {
+						onZoomOut()
+						event.preventDefault()
+					}
+					break
+				case '0':
+					if (onFitView) {
+						onFitView()
+						event.preventDefault()
+					}
+					break
+				case 'z':
+					if (onUndo && !event.shiftKey) {
+						onUndo()
+						event.preventDefault()
+					} else if (onRedo && event.shiftKey) {
+						onRedo()
+						event.preventDefault()
+					}
+					break
+				case 'y':
+					if (onRedo) {
+						onRedo()
+						event.preventDefault()
+					}
+					break
+				case 's':
+					if (onSave) {
+						onSave()
+						event.preventDefault()
+					}
+					break
+				case 'c':
+					if (onCopy && !event.shiftKey) {
+						onCopy()
+						// Don't prevent default to allow browser copy
+					} else if (onToggleChat && event.shiftKey) {
+						onToggleChat()
+						event.preventDefault()
+					}
+					break
+				case 'v':
+					if (onPaste) {
+						onPaste()
+						// Don't prevent default to allow browser paste
+					}
+					break
+				case 'x':
+					if (onCut) {
+						onCut()
+						// Don't prevent default to allow browser cut
+					}
+					break
+				case 'a':
+					if (onSelectAll) {
+						onSelectAll()
+						event.preventDefault()
+					}
+					break
+				case 'n':
+					if (onAddNode) {
+						onAddNode()
+						event.preventDefault()
+					}
+					break
+				case 'g':
+					if (onToggleGrid) {
+						onToggleGrid()
+						event.preventDefault()
+					}
+					break
+				case 'f':
+					if (onToggleFullscreen && event.shiftKey) {
+						onToggleFullscreen()
+						event.preventDefault()
+					}
+					break
 				}
 			} else if (event.key === 'Delete' || event.key === 'Backspace') {
 				if (onDelete) {

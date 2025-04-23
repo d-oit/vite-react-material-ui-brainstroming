@@ -45,16 +45,16 @@ export const NetworkStatusIcon: React.FC<NetworkStatusIconProps> = ({ onClick, s
 		if (!isOnline) return <OfflineIcon />
 
 		switch (networkStatus.effectiveType) {
-			case '4g':
-				return <GoodSignalIcon />
-			case '3g':
-				return <MediumSignalIcon />
-			case '2g':
-				return <LowSignalIcon />
-			case 'slow-2g':
-				return <WeakSignalIcon />
-			default:
-				return networkStatus.type && networkStatus.type === 'wifi' ? <WifiIcon /> : <CellularIcon />
+		case '4g':
+			return <GoodSignalIcon />
+		case '3g':
+			return <MediumSignalIcon />
+		case '2g':
+			return <LowSignalIcon />
+		case 'slow-2g':
+			return <WeakSignalIcon />
+		default:
+			return networkStatus.type && networkStatus.type === 'wifi' ? <WifiIcon /> : <CellularIcon />
 		}
 	}
 

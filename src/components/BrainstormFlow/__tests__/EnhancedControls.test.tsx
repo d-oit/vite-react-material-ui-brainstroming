@@ -12,7 +12,7 @@ vi.mock('../../../contexts/I18nContext', () => ({
 describe('EnhancedControls', () => {
 	beforeEach(() => {
 		// Mock the useI18n hook
-		;(useI18n as any).mockReturnValue({
+		(useI18n as any).mockReturnValue({
 			t: (key: string) => key,
 		})
 	})

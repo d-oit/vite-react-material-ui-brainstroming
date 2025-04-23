@@ -8,7 +8,7 @@ import performanceMonitoring, { PerformanceCategory } from './performanceMonitor
  * @param delay Delay in milliseconds
  * @returns Debounced function
  */
-export function debounce<T extends (...args: any[]) => any>(fn: T, delay: number): (...args: Parameters<T>) => void {
+export function debounce<T extends(...args: any[]) => any>(fn: T, delay: number): (...args: Parameters<T>) => void {
 	let timeoutId: ReturnType<typeof setTimeout> | null = null
 
 	return function (...args: Parameters<T>): void {
@@ -29,7 +29,7 @@ export function debounce<T extends (...args: any[]) => any>(fn: T, delay: number
  * @param limit Time limit in milliseconds
  * @returns Throttled function
  */
-export function throttle<T extends (...args: any[]) => any>(fn: T, limit: number): (...args: Parameters<T>) => void {
+export function throttle<T extends(...args: any[]) => any>(fn: T, limit: number): (...args: Parameters<T>) => void {
 	let lastCall = 0
 
 	return function (...args: Parameters<T>): void {
@@ -47,7 +47,7 @@ export function throttle<T extends (...args: any[]) => any>(fn: T, limit: number
  * @param fn Function to memoize
  * @returns Memoized function
  */
-export function memoize<T extends (...args: any[]) => any>(fn: T): (...args: Parameters<T>) => ReturnType<T> {
+export function memoize<T extends(...args: any[]) => any>(fn: T): (...args: Parameters<T>) => ReturnType<T> {
 	const cache = new Map<string, ReturnType<T>>()
 
 	return function (...args: Parameters<T>): ReturnType<T> {
@@ -173,7 +173,7 @@ export function useInView(options: IntersectionObserverInit = {}): [React.RefObj
  * @param dependencies Dependencies array
  * @returns Optimized event handler
  */
-export function useOptimizedHandler<T extends (...args: any[]) => any>(
+export function useOptimizedHandler<T extends(...args: any[]) => any>(
 	handler: T,
 	delay: number,
 	dependencies: any[] = [],

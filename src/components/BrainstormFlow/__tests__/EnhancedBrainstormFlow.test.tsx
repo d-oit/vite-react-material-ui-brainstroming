@@ -109,7 +109,7 @@ vi.mock('../../DeleteConfirmationDialog', () => ({
 describe('EnhancedBrainstormFlow', () => {
 	beforeEach(() => {
 		// Mock the useSettings hook
-		;(useSettings as any).mockReturnValue({
+		(useSettings as any).mockReturnValue({
 			settings: {
 				autoSave: true,
 				preferredNodeSize: 'medium',
@@ -175,7 +175,7 @@ describe('EnhancedBrainstormFlow', () => {
 
 	it('hides save button when autosave is enabled', () => {
 		// Mock the useSettings hook to return autoSave: true
-		;(useSettings as any).mockReturnValue({
+		(useSettings as any).mockReturnValue({
 			settings: {
 				autoSave: true,
 				preferredNodeSize: 'medium',
@@ -199,7 +199,7 @@ describe('EnhancedBrainstormFlow', () => {
 
 	it('shows save button when autosave is disabled', () => {
 		// Mock the useSettings hook to return autoSave: false
-		;(useSettings as any).mockReturnValue({
+		(useSettings as any).mockReturnValue({
 			settings: {
 				autoSave: false,
 				preferredNodeSize: 'medium',

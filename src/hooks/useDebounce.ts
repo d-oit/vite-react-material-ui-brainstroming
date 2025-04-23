@@ -8,7 +8,7 @@ import { useRef, useEffect, useCallback } from 'react'
  * @param dependencies Dependencies that should trigger a reset of the debounce timer
  * @returns A debounced version of the callback
  */
-export function useDebounce<T extends (...args: any[]) => any>(
+export function useDebounce<T extends(...args: any[]) => any>(
 	callback: T,
 	delay: number,
 	dependencies: React.DependencyList = [],

@@ -65,69 +65,69 @@ export const FormattedDate: React.FC<FormattedDateProps> = ({
 		}
 
 		switch (format) {
-			case 'short':
-				return {
-					year: year || 'numeric',
-					month: month || '2-digit',
-					day: day || '2-digit',
-					hour: hour || undefined,
-					minute: minute || undefined,
-					second: second || undefined,
-					timeZoneName: timeZoneName || undefined,
-					hour12: hour12 !== undefined ? hour12 : undefined,
-					timeZone,
-				}
-			case 'medium':
-				return {
-					year: year || 'numeric',
-					month: month || 'short',
-					day: day || 'numeric',
-					hour: hour || undefined,
-					minute: minute || undefined,
-					second: second || undefined,
-					timeZoneName: timeZoneName || undefined,
-					hour12: hour12 !== undefined ? hour12 : undefined,
-					timeZone,
-				}
-			case 'long':
-				return {
-					year: year || 'numeric',
-					month: month || 'long',
-					day: day || 'numeric',
-					weekday: weekday || 'long',
-					hour: hour || undefined,
-					minute: minute || undefined,
-					second: second || undefined,
-					timeZoneName: timeZoneName || undefined,
-					hour12: hour12 !== undefined ? hour12 : undefined,
-					timeZone,
-				}
-			case 'full':
-				return {
-					year: year || 'numeric',
-					month: month || 'long',
-					day: day || 'numeric',
-					weekday: weekday || 'long',
-					hour: hour || '2-digit',
-					minute: minute || '2-digit',
-					second: second || '2-digit',
-					timeZoneName: timeZoneName || 'long',
-					hour12: hour12 !== undefined ? hour12 : undefined,
-					timeZone,
-				}
-			default:
-				return {
-					year,
-					month,
-					day,
-					weekday,
-					hour,
-					minute,
-					second,
-					timeZoneName,
-					hour12,
-					timeZone,
-				}
+		case 'short':
+			return {
+				year: year || 'numeric',
+				month: month || '2-digit',
+				day: day || '2-digit',
+				hour: hour || undefined,
+				minute: minute || undefined,
+				second: second || undefined,
+				timeZoneName: timeZoneName || undefined,
+				hour12: hour12 !== undefined ? hour12 : undefined,
+				timeZone,
+			}
+		case 'medium':
+			return {
+				year: year || 'numeric',
+				month: month || 'short',
+				day: day || 'numeric',
+				hour: hour || undefined,
+				minute: minute || undefined,
+				second: second || undefined,
+				timeZoneName: timeZoneName || undefined,
+				hour12: hour12 !== undefined ? hour12 : undefined,
+				timeZone,
+			}
+		case 'long':
+			return {
+				year: year || 'numeric',
+				month: month || 'long',
+				day: day || 'numeric',
+				weekday: weekday || 'long',
+				hour: hour || undefined,
+				minute: minute || undefined,
+				second: second || undefined,
+				timeZoneName: timeZoneName || undefined,
+				hour12: hour12 !== undefined ? hour12 : undefined,
+				timeZone,
+			}
+		case 'full':
+			return {
+				year: year || 'numeric',
+				month: month || 'long',
+				day: day || 'numeric',
+				weekday: weekday || 'long',
+				hour: hour || '2-digit',
+				minute: minute || '2-digit',
+				second: second || '2-digit',
+				timeZoneName: timeZoneName || 'long',
+				hour12: hour12 !== undefined ? hour12 : undefined,
+				timeZone,
+			}
+		default:
+			return {
+				year,
+				month,
+				day,
+				weekday,
+				hour,
+				minute,
+				second,
+				timeZoneName,
+				hour12,
+				timeZone,
+			}
 		}
 	}
 

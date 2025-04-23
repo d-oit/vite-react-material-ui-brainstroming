@@ -13,14 +13,14 @@ const NavigationErrorDisplay = ({ error }: NavigationErrorDisplayProps) => {
 
 	const getErrorMessage = () => {
 		switch (error.type) {
-			case 'load':
-				return 'Failed to load navigation items'
-			case 'permission':
-				return 'You do not have permission to access some navigation items'
-			case 'network':
-				return 'Network error while loading navigation'
-			default:
-				return 'An error occurred'
+		case 'load':
+			return 'Failed to load navigation items'
+		case 'permission':
+			return 'You do not have permission to access some navigation items'
+		case 'network':
+			return 'Network error while loading navigation'
+		default:
+			return 'An error occurred'
 		}
 	}
 

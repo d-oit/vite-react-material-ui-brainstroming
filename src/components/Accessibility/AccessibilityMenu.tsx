@@ -137,17 +137,17 @@ export const AccessibilityMenu = ({ position = 'bottom-left', _open = false, onC
 	// Position styles with adjustments to prevent overlap
 	const getPositionStyles = () => {
 		switch (position) {
-			case 'top-right':
-				return { top: 80, right: 16 } // Below AppBar
-			case 'bottom-right':
-				return { bottom: 80, right: 16 } // Above bottom navigation
-			case 'top-left':
-				return { top: 80, left: 16 } // Below AppBar
-			case 'center':
-				return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' } // Centered
-			case 'bottom-left':
-			default:
-				return { bottom: 80, left: 16 } // Above bottom navigation
+		case 'top-right':
+			return { top: 80, right: 16 } // Below AppBar
+		case 'bottom-right':
+			return { bottom: 80, right: 16 } // Above bottom navigation
+		case 'top-left':
+			return { top: 80, left: 16 } // Below AppBar
+		case 'center':
+			return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' } // Centered
+		case 'bottom-left':
+		default:
+			return { bottom: 80, left: 16 } // Above bottom navigation
 		}
 	}
 

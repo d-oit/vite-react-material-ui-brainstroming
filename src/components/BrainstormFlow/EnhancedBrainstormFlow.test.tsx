@@ -43,7 +43,7 @@ vi.mock('./FloatingControls', () => ({
 describe('EnhancedBrainstormFlow', () => {
 	beforeEach(() => {
 		// Setup mocks
-		;(useBrainstormStore as any).mockReturnValue({
+		(useBrainstormStore as any).mockReturnValue({
 			nodes: [],
 			edges: [],
 			setNodes: vi.fn(),

@@ -59,47 +59,47 @@ export const ProjectHistoryPanel: React.FC<ProjectHistoryPanelProps> = ({ projec
 
 	const getActionIcon = (action: string) => {
 		switch (action) {
-			case 'create':
-				return <CreateIcon color="primary" />
-			case 'update':
-				return <UpdateIcon color="info" />
-			case 'archive':
-				return <ArchiveIcon color="warning" />
-			case 'unarchive':
-				return <UnarchiveIcon color="success" />
-			case 'delete':
-				return <DeleteIcon color="error" />
-			case 'view':
-				return <ViewIcon color="action" />
-			case 'export':
-				return <ExportIcon color="secondary" />
-			case 'share':
-				return <ShareIcon color="info" />
-			default:
-				return <HistoryIcon />
+		case 'create':
+			return <CreateIcon color="primary" />
+		case 'update':
+			return <UpdateIcon color="info" />
+		case 'archive':
+			return <ArchiveIcon color="warning" />
+		case 'unarchive':
+			return <UnarchiveIcon color="success" />
+		case 'delete':
+			return <DeleteIcon color="error" />
+		case 'view':
+			return <ViewIcon color="action" />
+		case 'export':
+			return <ExportIcon color="secondary" />
+		case 'share':
+			return <ShareIcon color="info" />
+		default:
+			return <HistoryIcon />
 		}
 	}
 
 	const getActionText = (entry: ProjectHistoryEntry) => {
 		switch (entry.action) {
-			case 'create':
-				return 'Project created'
-			case 'update':
-				return entry.details?.commitMessage ? `Updated: ${entry.details.commitMessage}` : 'Project updated'
-			case 'archive':
-				return 'Project archived'
-			case 'unarchive':
-				return 'Project unarchived'
-			case 'delete':
-				return 'Project deleted'
-			case 'view':
-				return 'Project viewed'
-			case 'export':
-				return `Exported to ${entry.details?.destination || 'external storage'}`
-			case 'share':
-				return `Shared with ${entry.details?.recipient || 'someone'}`
-			default:
-				return 'Action performed'
+		case 'create':
+			return 'Project created'
+		case 'update':
+			return entry.details?.commitMessage ? `Updated: ${entry.details.commitMessage}` : 'Project updated'
+		case 'archive':
+			return 'Project archived'
+		case 'unarchive':
+			return 'Project unarchived'
+		case 'delete':
+			return 'Project deleted'
+		case 'view':
+			return 'Project viewed'
+		case 'export':
+			return `Exported to ${entry.details?.destination || 'external storage'}`
+		case 'share':
+			return `Shared with ${entry.details?.recipient || 'someone'}`
+		default:
+			return 'Action performed'
 		}
 	}
 

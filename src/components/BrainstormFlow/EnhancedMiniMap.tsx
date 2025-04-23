@@ -5,13 +5,13 @@ import {
 	FullscreenExit as CollapseIcon,
 	Visibility as ShowIcon,
 	VisibilityOff as HideIcon,
-} from '@mui/icons-material';
-import { Box, IconButton, Tooltip, useTheme } from '@mui/material';
-import React, { useState } from 'react';
-import { MiniMap as ReactFlowMiniMap } from 'reactflow';
+} from '@mui/icons-material'
+import { Box, IconButton, Tooltip, useTheme } from '@mui/material'
+import React, { useState } from 'react'
+import { MiniMap as ReactFlowMiniMap } from 'reactflow'
 
-import { useI18n } from '../../contexts/I18nContext';
-import type { Node, Edge } from '../../types';
+import { useI18n } from '../../contexts/I18nContext'
+import type { Node, Edge } from '../../types'
 
 interface EnhancedMiniMapProps {
 	nodes: Node[];
@@ -53,22 +53,22 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
 	defaultVisible = true,
 	defaultExpanded = false,
 }) => {
-	const theme = useTheme();
-	const { t } = useI18n();
-	const [visible, setVisible] = useState(defaultVisible);
-	const [expanded, setExpanded] = useState(defaultExpanded);
+	const theme = useTheme()
+	const { t } = useI18n()
+	const [visible, setVisible] = useState(defaultVisible)
+	const [expanded, setExpanded] = useState(defaultExpanded)
 
 	// Default colors based on theme
 	const defaultBackgroundColor =
-		theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[100];
+		theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[100]
 
-	const defaultBorderColor = theme.palette.divider;
+	const defaultBorderColor = theme.palette.divider
 
 	const defaultMaskColor =
-		theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.6)';
+		theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.6)'
 
 	const defaultNodeStrokeColor =
-		theme.palette.mode === 'dark' ? theme.palette.grey[300] : theme.palette.grey[700];
+		theme.palette.mode === 'dark' ? theme.palette.grey[300] : theme.palette.grey[700]
 
 	// If not visible, just show the toggle button
 	if (!visible) {
@@ -96,7 +96,7 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
 					</IconButton>
 				</Tooltip>
 			</Box>
-		);
+		)
 	}
 
 	return (
@@ -166,13 +166,7 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
 				/>
 			</Box>
 		</Box>
-	);
-};
+	)
+}
 
-export default EnhancedMiniMap;
-
-
-
-
-
-
+export default EnhancedMiniMap

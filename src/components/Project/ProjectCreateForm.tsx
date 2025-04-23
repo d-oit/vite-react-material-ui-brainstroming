@@ -80,60 +80,60 @@ export const ProjectCreateForm = ({ onSubmit, onCancel, loading = false }: Proje
 	const getTemplateName = (templateType: ProjectTemplate): string => {
 		// Use a type-safe approach to avoid object injection
 		switch (templateType) {
-			case 'blank':
-				return projectTemplates.blank?.name || templateType
-			case 'business':
-				return projectTemplates.business?.name || templateType
-			case 'education':
-				return projectTemplates.education?.name || templateType
-			case 'personal':
-				return projectTemplates.personal?.name || templateType
-			case 'research':
-				return projectTemplates.research?.name || templateType
-			case 'software':
-				return projectTemplates.software?.name || templateType
-			default:
-				return templateType
+		case 'blank':
+			return projectTemplates.blank?.name || templateType
+		case 'business':
+			return projectTemplates.business?.name || templateType
+		case 'education':
+			return projectTemplates.education?.name || templateType
+		case 'personal':
+			return projectTemplates.personal?.name || templateType
+		case 'research':
+			return projectTemplates.research?.name || templateType
+		case 'software':
+			return projectTemplates.software?.name || templateType
+		default:
+			return templateType
 		}
 	}
 
 	const getTemplateDescription = (templateType: ProjectTemplate): string => {
 		// Use a type-safe approach to avoid object injection
 		switch (templateType) {
-			case 'blank':
-				return projectTemplates.blank?.description || ''
-			case 'business':
-				return projectTemplates.business?.description || ''
-			case 'education':
-				return projectTemplates.education?.description || ''
-			case 'personal':
-				return projectTemplates.personal?.description || ''
-			case 'research':
-				return projectTemplates.research?.description || ''
-			case 'software':
-				return projectTemplates.software?.description || ''
-			default:
-				return ''
+		case 'blank':
+			return projectTemplates.blank?.description || ''
+		case 'business':
+			return projectTemplates.business?.description || ''
+		case 'education':
+			return projectTemplates.education?.description || ''
+		case 'personal':
+			return projectTemplates.personal?.description || ''
+		case 'research':
+			return projectTemplates.research?.description || ''
+		case 'software':
+			return projectTemplates.software?.description || ''
+		default:
+			return ''
 		}
 	}
 
 	const getTemplateFeatures = (templateType: ProjectTemplate): string[] => {
 		// Use a type-safe approach to avoid object injection
 		switch (templateType) {
-			case 'blank':
-				return projectTemplates.blank?.features || []
-			case 'business':
-				return projectTemplates.business?.features || []
-			case 'education':
-				return projectTemplates.education?.features || []
-			case 'personal':
-				return projectTemplates.personal?.features || []
-			case 'research':
-				return projectTemplates.research?.features || []
-			case 'software':
-				return projectTemplates.software?.features || []
-			default:
-				return []
+		case 'blank':
+			return projectTemplates.blank?.features || []
+		case 'business':
+			return projectTemplates.business?.features || []
+		case 'education':
+			return projectTemplates.education?.features || []
+		case 'personal':
+			return projectTemplates.personal?.features || []
+		case 'research':
+			return projectTemplates.research?.features || []
+		case 'software':
+			return projectTemplates.software?.features || []
+		default:
+			return []
 		}
 	}
 
@@ -152,24 +152,24 @@ export const ProjectCreateForm = ({ onSubmit, onCancel, loading = false }: Proje
 			// Use a type-safe approach to avoid object injection
 			let templateName = ''
 			switch (template) {
-				case 'blank':
-					templateName = projectTemplates.blank?.name || ''
-					break
-				case 'business':
-					templateName = projectTemplates.business?.name || ''
-					break
-				case 'education':
-					templateName = projectTemplates.education?.name || ''
-					break
-				case 'personal':
-					templateName = projectTemplates.personal?.name || ''
-					break
-				case 'research':
-					templateName = projectTemplates.research?.name || ''
-					break
-				case 'software':
-					templateName = projectTemplates.software?.name || ''
-					break
+			case 'blank':
+				templateName = projectTemplates.blank?.name || ''
+				break
+			case 'business':
+				templateName = projectTemplates.business?.name || ''
+				break
+			case 'education':
+				templateName = projectTemplates.education?.name || ''
+				break
+			case 'personal':
+				templateName = projectTemplates.personal?.name || ''
+				break
+			case 'research':
+				templateName = projectTemplates.research?.name || ''
+				break
+			case 'software':
+				templateName = projectTemplates.software?.name || ''
+				break
 			}
 			if (templateName) {
 				setName(`${templateName} - ${new Date().toLocaleDateString()}`)

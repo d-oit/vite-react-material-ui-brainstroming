@@ -1,33 +1,20 @@
-# Build outputs
-dist
-build
-coverage
+# Build artifacts
+dist/
+build/
+coverage/
 
-# Package manager files
-node_modules
+# Node modules
+node_modules/
 
-# Generated files
-*.generated.*
-*.min.*
-*.bundle.*
+# Environment files
+.env
+.env.*
 
-# Environment and config files
-.env*
-!.env.example
-
-# Cache directories
-.cache
+# Cache
+.cache/
 .eslintcache
-.npm
-.parcel-cache
 
-# Vite config
-vite.config.ts
-vitest.config.ts
+# Misc
+*.log
+*.lock
 
-# Playwright
-playwright.config.ts
-tests-examples
-
-# Public assets
-public/

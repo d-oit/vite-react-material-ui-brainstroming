@@ -45,16 +45,16 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected, id })
 		// Get the size configuration
 		let sizeConfig
 		switch (preferredSize) {
-			case 'small':
-				sizeConfig = nodePreferences.nodeSizes.small
-				break
-			case 'large':
-				sizeConfig = nodePreferences.nodeSizes.large
-				break
-			case 'medium':
-			default:
-				sizeConfig = nodePreferences.nodeSizes.medium
-				break
+		case 'small':
+			sizeConfig = nodePreferences.nodeSizes.small
+			break
+		case 'large':
+			sizeConfig = nodePreferences.nodeSizes.large
+			break
+		case 'medium':
+		default:
+			sizeConfig = nodePreferences.nodeSizes.medium
+			break
 		}
 
 		// Adjust size for mobile devices

@@ -63,21 +63,21 @@ const NavigationContainer = ({ open, onClose, ariaLabelledby }: NavigationContai
 			if (!open) return
 
 			switch (e.key) {
-				case 'Escape':
-					onClose()
-					break
-				case '/':
-					if (e.ctrlKey || e.metaKey) {
-						e.preventDefault()
-						// Focus search input
-						const searchInput = containerRef.current?.querySelector('input[type="search"]')
-						if (searchInput) {
-							;(searchInput as HTMLInputElement).focus()
-						}
+			case 'Escape':
+				onClose()
+				break
+			case '/':
+				if (e.ctrlKey || e.metaKey) {
+					e.preventDefault()
+					// Focus search input
+					const searchInput = containerRef.current?.querySelector('input[type="search"]')
+					if (searchInput) {
+						(searchInput as HTMLInputElement).focus()
 					}
-					break
-				default:
-					break
+				}
+				break
+			default:
+				break
 			}
 		}
 

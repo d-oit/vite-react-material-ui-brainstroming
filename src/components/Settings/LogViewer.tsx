@@ -64,12 +64,12 @@ export const LogViewer = () => {
 			// Apply search filter if needed
 			const filteredLogs = searchTerm
 				? fetchedLogs.filter(
-						(log) =>
-							log.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
+					(log) =>
+						log.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
 							JSON.stringify(log.context || {})
 								.toLowerCase()
 								.includes(searchTerm.toLowerCase()),
-					)
+				)
 				: fetchedLogs
 
 			setLogs(filteredLogs)
@@ -137,35 +137,35 @@ export const LogViewer = () => {
 	// Get icon for log level
 	const getLevelIcon = (level: LogLevel) => {
 		switch (level) {
-			case 'info':
-				return <InfoIcon color="info" />
-			case 'warn':
-				return <WarningIcon color="warning" />
-			case 'error':
-				return <ErrorIcon color="error" />
-			case 'debug':
-				return <InfoIcon color="action" />
-			case 'critical':
-				return <ErrorIcon color="error" />
-			default:
-				return <InfoIcon />
+		case 'info':
+			return <InfoIcon color="info" />
+		case 'warn':
+			return <WarningIcon color="warning" />
+		case 'error':
+			return <ErrorIcon color="error" />
+		case 'debug':
+			return <InfoIcon color="action" />
+		case 'critical':
+			return <ErrorIcon color="error" />
+		default:
+			return <InfoIcon />
 		}
 	}
 
 	// Get color for log level
 	const getLevelColor = (level: LogLevel) => {
 		switch (level) {
-			case 'info':
-				return 'info'
-			case 'warn':
-				return 'warning'
-			case 'error':
-			case 'critical':
-				return 'error'
-			case 'debug':
-				return 'default'
-			default:
-				return 'default'
+		case 'info':
+			return 'info'
+		case 'warn':
+			return 'warning'
+		case 'error':
+		case 'critical':
+			return 'error'
+		case 'debug':
+			return 'default'
+		default:
+			return 'default'
 		}
 	}
 

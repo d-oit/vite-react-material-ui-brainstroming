@@ -66,35 +66,35 @@ export const useKeyboardNavigation = (
 			let nextIndex = currentIndex
 
 			switch (e.key) {
-				case 'ArrowRight':
-					nextIndex = Math.min(currentIndex + 1, nodeElements.length - 1)
-					break
-				case 'ArrowLeft':
-					nextIndex = Math.max(currentIndex - 1, 0)
-					break
-				case 'ArrowUp':
-					// Simplified logic for example, might need adjustment based on layout
-					nextIndex = Math.max(currentIndex - 1, 0) // Adjust based on visual layout if needed
-					break
-				case 'ArrowDown':
-					// Simplified logic for example, might need adjustment based on layout
-					nextIndex = Math.min(currentIndex + 1, nodeElements.length - 1) // Adjust based on visual layout if needed
-					break
-				case 'Home':
-					nextIndex = 0
-					break
-				case 'End':
-					nextIndex = nodeElements.length - 1
-					break
-				case ' ':
-				case 'Enter':
-					if (typeof currentIndex === 'number' && currentIndex >= 0 && currentIndex < nodeElements.length) {
-						e.preventDefault()
-						updateNodeSelection(nodeElements[currentIndex])
-					}
-					return
-				default:
-					return
+			case 'ArrowRight':
+				nextIndex = Math.min(currentIndex + 1, nodeElements.length - 1)
+				break
+			case 'ArrowLeft':
+				nextIndex = Math.max(currentIndex - 1, 0)
+				break
+			case 'ArrowUp':
+				// Simplified logic for example, might need adjustment based on layout
+				nextIndex = Math.max(currentIndex - 1, 0) // Adjust based on visual layout if needed
+				break
+			case 'ArrowDown':
+				// Simplified logic for example, might need adjustment based on layout
+				nextIndex = Math.min(currentIndex + 1, nodeElements.length - 1) // Adjust based on visual layout if needed
+				break
+			case 'Home':
+				nextIndex = 0
+				break
+			case 'End':
+				nextIndex = nodeElements.length - 1
+				break
+			case ' ':
+			case 'Enter':
+				if (typeof currentIndex === 'number' && currentIndex >= 0 && currentIndex < nodeElements.length) {
+					e.preventDefault()
+					updateNodeSelection(nodeElements[currentIndex])
+				}
+				return
+			default:
+				return
 			}
 
 			if (

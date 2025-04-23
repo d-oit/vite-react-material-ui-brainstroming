@@ -26,6 +26,7 @@ jobs:
 
     - name: Type check
       run: npm run typecheck
+    # Remove any format:check steps if present
 
   test:
     runs-on: ubuntu-latest
@@ -123,3 +124,4 @@ jobs:
         folder: dist
         branch: gh-pages
         clean: true
+

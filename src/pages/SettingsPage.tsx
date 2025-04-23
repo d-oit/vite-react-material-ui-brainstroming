@@ -161,11 +161,11 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
 
 	const handleSwitchChange =
 		(name: keyof Pick<ExtendedUserPreferences, 'autoSave' | 'autoBackup' | 'skipDeleteConfirmation'>) =>
-		(event: React.ChangeEvent<HTMLInputElement>) => {
-			const newValue = event.target.checked
-			setPreferences({ ...preferences, [name]: newValue })
-			updateSettings({ [name]: newValue })
-		}
+			(event: React.ChangeEvent<HTMLInputElement>) => {
+				const newValue = event.target.checked
+				setPreferences({ ...preferences, [name]: newValue })
+				updateSettings({ [name]: newValue })
+			}
 
 	const handleFontSizeChange = (_event: Event, newValue: number | number[]) => {
 		const fontSize = newValue as number

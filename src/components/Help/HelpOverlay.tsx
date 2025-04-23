@@ -504,5 +504,3 @@ export const HelpOverlay: React.FC<HelpOverlayProps> = ({ tours = [], tips = [],
 }
 
 export default HelpOverlay
-
-

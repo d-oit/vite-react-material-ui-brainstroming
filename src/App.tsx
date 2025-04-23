@@ -54,31 +54,31 @@ const getDesignTokens = (mode: PaletteMode): ThemeOptions => {
 			mode,
 			...(mode === 'light'
 				? {
-						// Light mode
-						primary: {
-							main: '#2196f3',
-						},
-						secondary: {
-							main: '#f50057',
-						},
-						background: {
-							default: '#f5f5f5',
-							paper: '#ffffff',
-						},
-					}
+					// Light mode
+					primary: {
+						main: '#2196f3',
+					},
+					secondary: {
+						main: '#f50057',
+					},
+					background: {
+						default: '#f5f5f5',
+						paper: '#ffffff',
+					},
+				}
 				: {
-						// Dark mode
-						primary: {
-							main: '#90caf9',
-						},
-						secondary: {
-							main: '#f48fb1',
-						},
-						background: {
-							default: '#121212',
-							paper: '#1e1e1e',
-						},
-					}),
+					// Dark mode
+					primary: {
+						main: '#90caf9',
+					},
+					secondary: {
+						main: '#f48fb1',
+					},
+					background: {
+						default: '#121212',
+						paper: '#1e1e1e',
+					},
+				}),
 		},
 		typography: {
 			fontFamily: [
@@ -257,7 +257,7 @@ const AppWithTheme = () => {
 
 				// Use requestIdleCallback if available, otherwise use setTimeout with 0
 				if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-					;(window as any).requestIdleCallback(initNonCriticalServices)
+					(window as any).requestIdleCallback(initNonCriticalServices)
 				} else {
 					setTimeout(initNonCriticalServices, 0)
 				}

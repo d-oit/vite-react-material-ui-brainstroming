@@ -67,16 +67,16 @@ export const NetworkInfoDialog: React.FC<NetworkInfoDialogProps> = ({ open, onCl
 		if (!isOnline) return <OfflineIcon />
 
 		switch (networkStatus.effectiveType) {
-			case '4g':
-				return <GoodSignalIcon />
-			case '3g':
-				return <MediumSignalIcon />
-			case '2g':
-				return <LowSignalIcon />
-			case 'slow-2g':
-				return <WeakSignalIcon />
-			default:
-				return networkStatus.type && networkStatus.type === 'wifi' ? <WifiIcon /> : <CellularIcon />
+		case '4g':
+			return <GoodSignalIcon />
+		case '3g':
+			return <MediumSignalIcon />
+		case '2g':
+			return <LowSignalIcon />
+		case 'slow-2g':
+			return <WeakSignalIcon />
+		default:
+			return networkStatus.type && networkStatus.type === 'wifi' ? <WifiIcon /> : <CellularIcon />
 		}
 	}
 
@@ -106,16 +106,16 @@ export const NetworkInfoDialog: React.FC<NetworkInfoDialogProps> = ({ open, onCl
 		const signalStrength = networkStatus.signalStrength || 0
 
 		switch (signalStrength) {
-			case 1:
-				return <WeakSignalIcon />
-			case 2:
-				return <LowSignalIcon />
-			case 3:
-				return <MediumSignalIcon />
-			case 4:
-				return <GoodSignalIcon />
-			default:
-				return networkStatus.type && networkStatus.type === 'wifi' ? <WifiIcon /> : <CellularIcon />
+		case 1:
+			return <WeakSignalIcon />
+		case 2:
+			return <LowSignalIcon />
+		case 3:
+			return <MediumSignalIcon />
+		case 4:
+			return <GoodSignalIcon />
+		default:
+			return networkStatus.type && networkStatus.type === 'wifi' ? <WifiIcon /> : <CellularIcon />
 		}
 	}
 
@@ -138,16 +138,16 @@ export const NetworkInfoDialog: React.FC<NetworkInfoDialogProps> = ({ open, onCl
 		if (!isOnline) return 'warning'
 
 		switch (networkStatus.effectiveType) {
-			case '4g':
-				return 'success'
-			case '3g':
-				return 'info'
-			case '2g':
-				return 'warning'
-			case 'slow-2g':
-				return 'error'
-			default:
-				return 'primary'
+		case '4g':
+			return 'success'
+		case '3g':
+			return 'info'
+		case '2g':
+			return 'warning'
+		case 'slow-2g':
+			return 'error'
+		default:
+			return 'primary'
 		}
 	}
 

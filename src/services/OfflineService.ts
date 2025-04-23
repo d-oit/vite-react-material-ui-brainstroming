@@ -557,23 +557,23 @@ export class OfflineService {
 
 		// Base signal strength on effective connection type
 		switch (effectiveType) {
-			case 'slow-2g':
-				return 1
-			case '2g':
-				return 2
-			case '3g':
-				return 3
-			case '4g':
-				return 4
-			default:
-				// Fallback to downlink-based calculation if available
-				if (typeof downlink === 'number') {
-					if (downlink < 0.5) return 1 // Very slow
-					if (downlink < 1) return 2 // Slow
-					if (downlink < 5) return 3 // Medium
-					return 4 // Fast
-				}
-				return 0 // Unknown
+		case 'slow-2g':
+			return 1
+		case '2g':
+			return 2
+		case '3g':
+			return 3
+		case '4g':
+			return 4
+		default:
+			// Fallback to downlink-based calculation if available
+			if (typeof downlink === 'number') {
+				if (downlink < 0.5) return 1 // Very slow
+				if (downlink < 1) return 2 // Slow
+				if (downlink < 5) return 3 // Medium
+				return 4 // Fast
+			}
+			return 0 // Unknown
 		}
 	}
 

@@ -60,7 +60,7 @@ describe('LoggerService', () => {
 	describe('log', () => {
 		it('should log messages to IndexedDB', async () => {
 			// Mock dependencies
-			;(offlineService.getOnlineStatus as any).mockReturnValue(true)
+			(offlineService.getOnlineStatus as any).mockReturnValue(true)
 
 			// Override the implementation for this test
 			const originalLog = loggerService.log
@@ -213,7 +213,7 @@ describe('LoggerService', () => {
 
 		it('should handle errors', async () => {
 			// Mock dependencies
-			;(indexedDBService.getLogs as any).mockRejectedValueOnce(new Error('Test error'))
+			(indexedDBService.getLogs as any).mockRejectedValueOnce(new Error('Test error'))
 
 			// Override the implementation for this test
 			const originalGetLogs = loggerService.getLogs
@@ -277,7 +277,7 @@ describe('LoggerService', () => {
 
 		it('should handle errors', async () => {
 			// Mock dependencies to throw an error
-			;(indexedDBService.clearLogs as any).mockRejectedValueOnce(new Error('Test error'))
+			(indexedDBService.clearLogs as any).mockRejectedValueOnce(new Error('Test error'))
 
 			// Override the implementation for this test
 			const originalClearLogs = loggerService.clearLogs

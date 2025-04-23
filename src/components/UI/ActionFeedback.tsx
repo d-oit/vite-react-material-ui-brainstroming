@@ -80,35 +80,35 @@ const ActionFeedback: React.FC<ActionFeedbackProps> = ({
 	// Get icon based on type
 	const getIcon = () => {
 		switch (type) {
-			case 'success':
-				return <CheckCircleIcon />
-			case 'error':
-				return <ErrorIcon />
-			case 'info':
-				return <InfoIcon />
-			case 'warning':
-				return <WarningIcon />
-			case 'loading':
-				return <CircularProgress size={24} color="inherit" />
-			default:
-				return null
+		case 'success':
+			return <CheckCircleIcon />
+		case 'error':
+			return <ErrorIcon />
+		case 'info':
+			return <InfoIcon />
+		case 'warning':
+			return <WarningIcon />
+		case 'loading':
+			return <CircularProgress size={24} color="inherit" />
+		default:
+			return null
 		}
 	}
 
 	// Get color based on type
 	const getColor = (): AlertProps['severity'] => {
 		switch (type) {
-			case 'success':
-				return 'success'
-			case 'error':
-				return 'error'
-			case 'info':
-			case 'loading':
-				return 'info'
-			case 'warning':
-				return 'warning'
-			default:
-				return 'info'
+		case 'success':
+			return 'success'
+		case 'error':
+			return 'error'
+		case 'info':
+		case 'loading':
+			return 'info'
+		case 'warning':
+			return 'warning'
+		default:
+			return 'info'
 		}
 	}
 

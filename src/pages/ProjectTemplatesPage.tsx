@@ -149,11 +149,11 @@ export const ProjectTemplatesPage = ({ onThemeToggle, isDarkMode }: ProjectTempl
 		const updatedTemplates = templates.map((t) =>
 			t.id === selectedTemplate.id
 				? {
-						...t,
-						name: newProjectName,
-						description: newProjectDescription,
-						updatedAt: new Date().toISOString(),
-					}
+					...t,
+					name: newProjectName,
+					description: newProjectDescription,
+					updatedAt: new Date().toISOString(),
+				}
 				: t,
 		)
 

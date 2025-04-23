@@ -446,20 +446,20 @@ export function createProjectFromTemplate(templateType: ProjectTemplate, name: s
 	// Use a type-safe approach to avoid object injection
 	let template
 	switch (templateType) {
-		case ProjectTemplate.BUSINESS_PLAN:
-			template = projectTemplates[ProjectTemplate.BUSINESS_PLAN]
-			break
-		case ProjectTemplate.MARKETING_CAMPAIGN:
-			template = projectTemplates[ProjectTemplate.MARKETING_CAMPAIGN]
-			break
-		case ProjectTemplate.RESEARCH_PROJECT:
-			template = projectTemplates[ProjectTemplate.RESEARCH_PROJECT]
-			break
-		case ProjectTemplate.SOFTWARE_DEVELOPMENT:
-			template = projectTemplates[ProjectTemplate.SOFTWARE_DEVELOPMENT]
-			break
-		default:
-			template = projectTemplates[ProjectTemplate.CUSTOM]
+	case ProjectTemplate.BUSINESS_PLAN:
+		template = projectTemplates[ProjectTemplate.BUSINESS_PLAN]
+		break
+	case ProjectTemplate.MARKETING_CAMPAIGN:
+		template = projectTemplates[ProjectTemplate.MARKETING_CAMPAIGN]
+		break
+	case ProjectTemplate.RESEARCH_PROJECT:
+		template = projectTemplates[ProjectTemplate.RESEARCH_PROJECT]
+		break
+	case ProjectTemplate.SOFTWARE_DEVELOPMENT:
+		template = projectTemplates[ProjectTemplate.SOFTWARE_DEVELOPMENT]
+		break
+	default:
+		template = projectTemplates[ProjectTemplate.CUSTOM]
 	}
 	const now = new Date().toISOString()
 

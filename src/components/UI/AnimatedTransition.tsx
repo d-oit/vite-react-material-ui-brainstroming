@@ -46,21 +46,21 @@ export type AnimationType = 'fade' | 'slideUp' | 'slideDown' | 'slideLeft' | 'sl
 // Get animation variant based on type
 const getVariant = (type: AnimationType) => {
 	switch (type) {
-		case 'fade':
-			return fadeVariants
-		case 'slideUp':
-			return slideUpVariants
-		case 'slideDown':
-			return slideDownVariants
-		case 'slideLeft':
-			return slideLeftVariants
-		case 'slideRight':
-			return slideRightVariants
-		case 'scale':
-			return scaleVariants
-		case 'none':
-		default:
-			return {}
+	case 'fade':
+		return fadeVariants
+	case 'slideUp':
+		return slideUpVariants
+	case 'slideDown':
+		return slideDownVariants
+	case 'slideLeft':
+		return slideLeftVariants
+	case 'slideRight':
+		return slideRightVariants
+	case 'scale':
+		return scaleVariants
+	case 'none':
+	default:
+		return {}
 	}
 }
 

@@ -51,12 +51,12 @@ export const SettingsExportImport = () => {
 		title: string
 		message: string
 		onConfirm: () => void
-	}>({
-		open: false,
-		title: '',
-		message: '',
-		onConfirm: () => {},
-	})
+			}>({
+				open: false,
+				title: '',
+				message: '',
+				onConfirm: () => {},
+			})
 
 	const [loading, setLoading] = useState(false)
 	const [validationResult, setValidationResult] = useState<{

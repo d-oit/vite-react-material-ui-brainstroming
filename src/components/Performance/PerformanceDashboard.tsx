@@ -166,23 +166,23 @@ export const PerformanceDashboard: React.FC = () => {
 		if (!duration) return theme.palette.info.main
 
 		switch (category) {
-			case MetricCategory.RENDER:
-				if (duration > 50) return theme.palette.error.main
-				if (duration > 16) return theme.palette.warning.main
-				return theme.palette.success.main
+		case MetricCategory.RENDER:
+			if (duration > 50) return theme.palette.error.main
+			if (duration > 16) return theme.palette.warning.main
+			return theme.palette.success.main
 
-			case MetricCategory.NETWORK:
-				if (duration > 3000) return theme.palette.error.main
-				if (duration > 1000) return theme.palette.warning.main
-				return theme.palette.success.main
+		case MetricCategory.NETWORK:
+			if (duration > 3000) return theme.palette.error.main
+			if (duration > 1000) return theme.palette.warning.main
+			return theme.palette.success.main
 
-			case MetricCategory.INTERACTION:
-				if (duration > 500) return theme.palette.error.main
-				if (duration > 100) return theme.palette.warning.main
-				return theme.palette.success.main
+		case MetricCategory.INTERACTION:
+			if (duration > 500) return theme.palette.error.main
+			if (duration > 100) return theme.palette.warning.main
+			return theme.palette.success.main
 
-			default:
-				return theme.palette.info.main
+		default:
+			return theme.palette.info.main
 		}
 	}
 

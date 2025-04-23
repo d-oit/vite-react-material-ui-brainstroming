@@ -42,13 +42,13 @@ import { NodeType, NodeSize } from '../../types'
 // Helper to map string literal size to NodeSize enum
 const mapStringToNodeSize = (sizeString?: 'small' | 'medium' | 'large'): NodeSize => {
 	switch (sizeString) {
-		case 'small':
-			return NodeSize.SMALL
-		case 'large':
-			return NodeSize.LARGE
-		case 'medium':
-		default:
-			return NodeSize.MEDIUM
+	case 'small':
+		return NodeSize.SMALL
+	case 'large':
+		return NodeSize.LARGE
+	case 'medium':
+	default:
+		return NodeSize.MEDIUM
 	}
 }
 

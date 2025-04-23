@@ -78,31 +78,31 @@ export const AddToBrainstormButton: React.FC<AddToBrainstormButtonProps> = ({ me
 
 	const getNodeTypeIcon = (type: NodeType) => {
 		switch (type) {
-			case NodeType.IDEA:
-				return <IdeaIcon />
-			case NodeType.TASK:
-				return <TaskIcon />
-			case NodeType.NOTE:
-				return <NoteIcon />
-			case NodeType.RESOURCE:
-				return <ResourceIcon />
-			default:
-				return <IdeaIcon />
+		case NodeType.IDEA:
+			return <IdeaIcon />
+		case NodeType.TASK:
+			return <TaskIcon />
+		case NodeType.NOTE:
+			return <NoteIcon />
+		case NodeType.RESOURCE:
+			return <ResourceIcon />
+		default:
+			return <IdeaIcon />
 		}
 	}
 
 	const getNodeTypeLabel = (type: NodeType) => {
 		switch (type) {
-			case NodeType.IDEA:
-				return t('nodeTypes.idea') || 'Idea'
-			case NodeType.TASK:
-				return t('nodeTypes.task') || 'Task'
-			case NodeType.NOTE:
-				return t('nodeTypes.note') || 'Note'
-			case NodeType.RESOURCE:
-				return t('nodeTypes.resource') || 'Resource'
-			default:
-				return t('nodeTypes.idea') || 'Idea'
+		case NodeType.IDEA:
+			return t('nodeTypes.idea') || 'Idea'
+		case NodeType.TASK:
+			return t('nodeTypes.task') || 'Task'
+		case NodeType.NOTE:
+			return t('nodeTypes.note') || 'Note'
+		case NodeType.RESOURCE:
+			return t('nodeTypes.resource') || 'Resource'
+		default:
+			return t('nodeTypes.idea') || 'Idea'
 		}
 	}
 

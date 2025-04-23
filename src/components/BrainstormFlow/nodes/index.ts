@@ -1,4 +1,5 @@
 import { NodeType } from '../../../types/enums'
+
 import CustomNodeComponent from './CustomNode'
 
 export const nodeTypes = {

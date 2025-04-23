@@ -1,12 +1,13 @@
 module.exports = {
   '*.{js,jsx,ts,tsx}': [
     'eslint --fix',
-    'prettier --write',
+    // Remove 'prettier --write'
   ],
   '*.{json,md,yml,yaml}': [
-    'prettier --write',
+    // Remove 'prettier --write'
   ],
   '*.{css,scss}': [
-    'prettier --write',
+    // Remove 'prettier --write'
   ],
 };
+

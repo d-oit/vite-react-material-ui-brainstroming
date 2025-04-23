@@ -19,7 +19,7 @@ const toBeValidSession = function (received: Partial<BrainstormSession>) {
 	return {
 		message: () =>
 			hasRequiredFields
-				? `Expected session not to have required fields`
+				? 'Expected session not to have required fields'
 				: `Expected session to have required fields: ${requiredFields.join(', ')}`,
 		pass: hasRequiredFields,
 	}

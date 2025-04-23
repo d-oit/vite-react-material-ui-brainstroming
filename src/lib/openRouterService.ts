@@ -111,7 +111,7 @@ export const sendMessage = async (messages: ChatMessage[]): Promise<ChatMessage>
 		return {
 			id: `error-${Date.now()}`,
 			role: 'assistant',
-			content: `Error: Unable to get a response from the assistant. Please try again later.`,
+			content: 'Error: Unable to get a response from the assistant. Please try again later.',
 			timestamp: new Date().toISOString(),
 		}
 	}
