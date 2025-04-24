@@ -6,6 +6,7 @@ import TaskIcon from '@mui/icons-material/Task'
 import UnarchiveIcon from '@mui/icons-material/Unarchive'
 import { SpeedDial, SpeedDialAction, SpeedDialIcon, IconButton, Tooltip } from '@mui/material'
 import React from 'react'
+import { useReactFlow } from 'reactflow'
 
 import { useBrainstormStore } from '../../store/brainstormStore'
 import { NodeType } from '../../types/enums'
@@ -35,12 +36,14 @@ export const FloatingControls: React.FC<FloatingControlsProps> = ({
     viewport = { zoom: 1, x: 0, y: 0 }
 }) => {
     const addNode = useBrainstormStore((state) => state.addNode)
+    const { fitView } = useReactFlow()
 
     const handleAddNode = (type: NodeType) => {
-        // Convert screen coordinates to flow coordinates
+        
+        // Calculate position in viewport center
         const flowPosition = {
-            x: (position.x - viewport.x) / viewport.zoom,
-            y: (position.y - viewport.y) / viewport.zoom
+            x: -viewport.x / viewport.zoom + window.innerWidth / (2 * viewport.zoom),
+            y: -viewport.y / viewport.zoom + window.innerHeight / (2 * viewport.zoom)
         }
 
         addNode({
@@ -48,6 +51,9 @@ export const FloatingControls: React.FC<FloatingControlsProps> = ({
             label: `New ${type}`,
             position: flowPosition,
         })
+
+        // Fit view to include all nodes with animation
+        fitView({ duration: 500, padding: 0.2 })
     }
 
     return (
