@@ -1,6 +1,6 @@
 import { FullscreenExit as FullscreenExitIcon } from '@mui/icons-material'
 import { Box, IconButton, Menu, MenuItem, Typography, Divider, Slider, useTheme } from '@mui/material'
-import React, { useCallback, useRef, useState, useEffect } from 'react'
+import React, { useCallback, useRef, useState, useEffect, useMemo } from 'react'
 import type {
 	ReactFlowInstance,
 	Connection,
@@ -10,6 +10,7 @@ import type {
 	NodeChange,
 	EdgeChange,
 	NodeMouseHandler,
+	Viewport,
 } from 'reactflow'
 import ReactFlow, {
 	Background,
@@ -25,6 +26,7 @@ import 'reactflow/dist/style.css'
 // Project imports
 import { useSettings } from '../../contexts/SettingsContext'
 import LLMChatPanel from '../../features/brainstorming/LLMChatPanel'
+import type { BrainstormNode } from '../../features/brainstorming/types'
 import { useBrainstormStore } from '../../store/brainstormStore'
 import { NodeType, EdgeType } from '../../types/enums'
 import DeleteConfirmationDialog from '../DeleteConfirmationDialog'
@@ -46,26 +48,31 @@ const nodeTypes = {
 	[NodeType.NOTE]: CustomNodeComponent,
 }
 
-interface NodeEditDialogResult {
-	title: string
-	content: string
-	type: NodeType
+interface NodeEditDialogProps {
+    open: boolean
+    onClose: () => void
+    initialData: NodeData
+    initialType: NodeType
+    onSave: (data: Partial<NodeData>, type: NodeType) => void
 }
 
 interface EnhancedBrainstormFlowProps {
-	initialNodes: CustomNodeType[]
-	initialEdges: CustomEdge[]
-	onSave?: (nodes: CustomNodeType[], edges: CustomEdge[]) => void
+    initialNodes: CustomNodeType[]
+    initialEdges: CustomEdge[]
+    projectId: string
+    onSave?: (nodes: CustomNodeType[], edges: CustomEdge[]) => void
 }
 
 export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 	initialNodes,
 	initialEdges,
+	projectId,
 	onSave,
 }) => {
 	const theme = useTheme()
 	const flowRef = useRef<HTMLDivElement>(null)
 	const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null)
+	const [viewport, setViewport] = useState<Viewport>({ x: 0, y: 0, zoom: 1 })
 	const {
 		nodes: storeNodes,
 		edges: storeEdges,
@@ -73,22 +80,10 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 		setEdges,
 		updateNodeData,
 		toggleArchiveNode,
+		removeNode,
 	} = useBrainstormStore()
 
 	const [showArchived, setShowArchived] = useState(false)
-	const nodes = (storeNodes as CustomNodeType[]).filter(
-		(node) => showArchived || !node.data.isArchived,
-	)
-	const edges = (storeEdges as CustomEdge[]).filter((edge) => {
-		const sourceNode = storeNodes.find((n) => n.id === edge.source)
-		const targetNode = storeNodes.find((n) => n.id === edge.target)
-		return (
-			(showArchived || !sourceNode?.data.isArchived) &&
-			(showArchived || !targetNode?.data.isArchived)
-		)
-	})
-
-	// UI State
 	const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({ x: 100, y: 100 })
 	const [showEditDialog, setShowEditDialog] = useState(false)
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -100,7 +95,39 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 	const [showGrid, setShowGrid] = useState(true)
 	const { settings } = useSettings()
 
-	// Track mouse position for new node placement
+	const handleInsightGenerated = useCallback((insight: BrainstormNode) => {
+		const newNode: CustomNodeType = {
+			id: insight.id,
+			type: insight.type as NodeType,
+			position: insight.position || { x: 0, y: 0 },
+			data: {
+				id: insight.id,
+				type: insight.type as NodeType,
+				title: 'Generated Insight',
+				content: insight.content,
+				label: 'Generated Insight',
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString(),
+				tags: insight.tags || [],
+				color: insight.color,
+			},
+		}
+		setNodes((nodes) => [...nodes, newNode])
+	}, [setNodes])
+
+	const nodesWithHandlers = useMemo(() => {
+		return (storeNodes as CustomNodeType[]).map((node) => ({
+			...node,
+			data: {
+				...node.data,
+				onEdit: (id: string): void => handleEditNode(id),
+				onDelete: (id: string, event: React.MouseEvent): void =>
+					handleDeleteNode(id, event),
+				onChat: (id: string): void => handleChatNode(id),
+			},
+		})).filter((node) => showArchived || !node.data.isArchived)
+	}, [storeNodes, showArchived])
+
 	const handleMouseMove = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
 		const bounds = flowRef.current?.getBoundingClientRect()
 		if (bounds) {
@@ -133,92 +160,71 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 
 	const onConnect = useCallback(
 		(connection: Connection) => {
-			setEdges((currentEdges) => addEdge({ ...connection, type: EdgeType.DEFAULT }, currentEdges) as CustomEdge[])
+			setEdges((currentEdges) => {
+				const edge = { ...connection, type: EdgeType.DEFAULT }
+				return addEdge(edge, currentEdges) as CustomEdge[]
+			})
 		},
 		[setEdges],
 	)
 
-	const handleNodeClick = useCallback<NodeMouseHandler>(
-		(_event: React.MouseEvent, node: ReactFlowNode) => {
-			setSelectedNode({
-				...node,
-				type: node.type as NodeType,
-			} as CustomNodeType)
+	const handleEditNode = useCallback((nodeId: string): void => {
+		const node = nodesWithHandlers.find((n: CustomNodeType) => n.id === nodeId)
+		if (node) {
+			setSelectedNode(node)
 			setShowEditDialog(true)
-		},
-		[],
-	)
-
-	const handleToggleArchiveNode = useCallback(
-		(nodeId: string) => {
-			toggleArchiveNode(nodeId)
-		},
-		[toggleArchiveNode],
-	)
-
-	const handleAutoLayout = useCallback(() => {
-		if (!nodes?.length) return
-
-		const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(nodes, edges)
-		setNodes(layoutedNodes as CustomNodeType[])
-		setEdges(layoutedEdges as CustomEdge[])
-
-		setTimeout(() => {
-			reactFlowInstance?.fitView()
-		}, 50)
-	}, [nodes, edges, setNodes, setEdges, reactFlowInstance])
-
-	useKeyboardShortcuts({
-		onAutoLayout: handleAutoLayout,
-		onZoomIn: () => reactFlowInstance?.zoomIn(),
-		onZoomOut: () => reactFlowInstance?.zoomOut(),
-		onFitView: () => reactFlowInstance?.fitView(),
-		onToggleFullscreen: () => void toggleFullscreen(),
-	})
-
-	const handleSettingsOpen = useCallback((event: React.MouseEvent<HTMLElement>) => {
-		setSettingsAnchorEl(event.currentTarget)
-		if (reactFlowInstance) {
-			setZoomLevel(reactFlowInstance.getZoom())
 		}
-	}, [reactFlowInstance])
+	}, [nodesWithHandlers])
 
-	const handleSettingsClose = useCallback(() => {
-		setSettingsAnchorEl(null)
-	}, [])
-
-	const handleZoomChange = useCallback((_event: Event, newValue: number | number[]) => {
-		const zoom = Array.isArray(newValue) ? newValue[0] : newValue
-		setZoomLevel(zoom)
-		if (reactFlowInstance) {
-			reactFlowInstance.zoomTo(zoom)
+	const handleDeleteNode = useCallback((nodeId: string, event: React.MouseEvent): void => {
+		event.stopPropagation()
+		const node = nodesWithHandlers.find((n: CustomNodeType) => n.id === nodeId)
+		if (node) {
+			setSelectedNode(node)
+			setShowDeleteDialog(true)
 		}
-	}, [reactFlowInstance])
+	}, [nodesWithHandlers])
+
+	const handleChatNode = useCallback((nodeId: string): void => {
+		const node = nodesWithHandlers.find((n: CustomNodeType) => n.id === nodeId)
+		if (node) {
+			setSelectedNode(node)
+			setShowChatPanel(true)
+		}
+	}, [nodesWithHandlers])
+
+	const handleSaveNodeEdit = useCallback(
+		(nodeId: string, updates: Partial<NodeData>, type: NodeType) => {
+			updateNodeData(nodeId, {
+				...updates,
+				type,
+				updatedAt: new Date().toISOString(),
+			})
+		},
+		[updateNodeData],
+	)
 
 	const handleCloseEditDialog = useCallback(() => {
 		setShowEditDialog(false)
 		setSelectedNode(null)
 	}, [])
 
-	const toggleFullscreen = useCallback(async () => {
-		const newFullscreenState = !isFullscreen
-		setIsFullscreen(newFullscreenState)
-
-		try {
-			if (newFullscreenState) {
-				await document.documentElement?.requestFullscreen?.()
-			} else {
-				await document.exitFullscreen?.()
-			}
-		} catch (error) {
-			console.error('Error with fullscreen API:', error)
+	const handleConfirmDelete = useCallback(() => {
+		if (selectedNode) {
+			removeNode(selectedNode.id)
+			setShowDeleteDialog(false)
+			setSelectedNode(null)
 		}
-	}, [isFullscreen])
+	}, [selectedNode, removeNode])
 
 	useEffect(() => {
 		setNodes(initialNodes)
 		setEdges(initialEdges)
 	}, [initialNodes, initialEdges, setNodes, setEdges])
+
+	const handleViewportChange = useCallback((_: MouseEvent | TouchEvent, viewport: Viewport) => {
+		setViewport(viewport)
+	}, [])
 
 	return (
 		<ReactFlowProvider>
@@ -234,14 +240,14 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 				}}
 				onMouseMove={handleMouseMove}>
 				<ReactFlow
-					nodes={nodes}
-					edges={edges}
+					nodes={nodesWithHandlers}
+					edges={storeEdges}
 					onNodesChange={onNodesChange}
 					onEdgesChange={onEdgesChange}
 					onConnect={onConnect}
 					onInit={setReactFlowInstance}
+					onMove={handleViewportChange}
 					nodeTypes={nodeTypes}
-					onNodeClick={handleNodeClick}
 					fitView
 					minZoom={0.1}
 					maxZoom={1.5}
@@ -254,85 +260,12 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 					style={{ width: '100%', height: '100%', flex: 1 }}>
 					{showGrid && <Background />}
 
-					<Panel position="top-right">
-						<ControlsPanel
-							handleSettingsOpen={handleSettingsOpen}
-							toggleGrid={() => setShowGrid(!showGrid)}
-							toggleFullscreen={() => void toggleFullscreen()}
-							zoomIn={() => reactFlowInstance?.zoomIn()}
-							zoomOut={() => reactFlowInstance?.zoomOut()}
-							handleAutoLayout={handleAutoLayout}
-							isFullscreen={isFullscreen}
-							showGrid={showGrid}
-						/>
-					</Panel>
-
 					<FloatingControls
 						position={mousePosition}
 						showArchived={showArchived}
-						onToggleArchived={() => setShowArchived((prev: boolean) => !prev)}
+						onToggleArchived={() => setShowArchived(!showArchived)}
+						viewport={viewport}
 					/>
-
-					{/* Settings Menu */}
-					<Menu
-						anchorEl={settingsAnchorEl}
-						open={Boolean(settingsAnchorEl)}
-						onClose={handleSettingsClose}
-						anchorOrigin={{
-							vertical: 'bottom',
-							horizontal: 'right',
-						}}
-						transformOrigin={{
-							vertical: 'top',
-							horizontal: 'right',
-						}}
-						slotProps={{
-							paper: { sx: { width: 280, p: 2 } },
-						}}>
-						<Typography variant="subtitle2" gutterBottom>
-							Zoom Level: {Math.round(zoomLevel * 100)}%
-						</Typography>
-						<Box sx={{ px: 1, mb: 2 }}>
-							<Slider
-								value={zoomLevel}
-								onChange={handleZoomChange}
-								min={0.1}
-								max={2}
-								step={0.1}
-								marks={[
-									{ value: 0.5, label: '50%' },
-									{ value: 1, label: '100%' },
-									{ value: 1.5, label: '150%' },
-								]}
-								valueLabelDisplay="auto"
-								valueLabelFormat={(value: number) => `${Math.round(value * 100)}%`}
-							/>
-						</Box>
-
-						<Divider sx={{ my: 1 }} />
-
-						<Typography variant="subtitle2" gutterBottom sx={{ mt: 1 }}>
-							Keyboard Shortcuts
-						</Typography>
-						<MenuItem dense sx={{ py: 0.5 }}>
-							<Typography variant="body2">Ctrl + L: Auto Layout</Typography>
-						</MenuItem>
-						<MenuItem dense sx={{ py: 0.5 }}>
-							<Typography variant="body2">Ctrl + +: Zoom In</Typography>
-						</MenuItem>
-						<MenuItem dense sx={{ py: 0.5 }}>
-							<Typography variant="body2">Ctrl + -: Zoom Out</Typography>
-						</MenuItem>
-						<MenuItem dense sx={{ py: 0.5 }}>
-							<Typography variant="body2">Ctrl + 0: Fit View</Typography>
-						</MenuItem>
-						<MenuItem dense sx={{ py: 0.5 }}>
-							<Typography variant="body2">F: Fullscreen</Typography>
-						</MenuItem>
-						<MenuItem dense sx={{ py: 0.5 }}>
-							<Typography variant="body2">Delete: Remove Selected</Typography>
-						</MenuItem>
-					</Menu>
 
 					{showEditDialog && selectedNode && (
 						<NodeEditDialog
@@ -340,15 +273,35 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 							onClose={handleCloseEditDialog}
 							initialData={selectedNode.data}
 							initialType={selectedNode.type}
-							onSave={({ title, content, type }: NodeEditDialogResult) => {
-								updateNodeData(selectedNode.id, {
-									title,
-									content,
-									type,
-									updatedAt: new Date().toISOString(),
-								})
+							onSave={(data: Partial<NodeData>, type: NodeType) => {
+								handleSaveNodeEdit(selectedNode.id, data, type)
 								handleCloseEditDialog()
 							}}
+						/>
+					)}
+
+					{showDeleteDialog && selectedNode && (
+						<DeleteConfirmationDialog
+							open={showDeleteDialog}
+							onClose={() => {
+								setShowDeleteDialog(false)
+								setSelectedNode(null)
+							}}
+							onConfirm={handleConfirmDelete}
+							title="Delete Node"
+							message={`Are you sure you want to delete "${selectedNode.data.title}"? This action cannot be undone.`}
+						/>
+					)}
+
+					{showChatPanel && selectedNode && (
+						<LLMChatPanel
+							projectId={projectId}
+							open={showChatPanel}
+							onClose={() => {
+								setShowChatPanel(false)
+								setSelectedNode(null)
+							}}
+							onInsightGenerated={handleInsightGenerated}
 						/>
 					)}
 				</ReactFlow>

@@ -11,84 +11,97 @@ import { useBrainstormStore } from '../../store/brainstormStore'
 import { NodeType } from '../../types/enums'
 
 interface FloatingControlsProps {
-	position?: { x: number; y: number }
-	showArchived: boolean
-	onToggleArchived: () => void
+    position: { x: number; y: number }
+    showArchived: boolean
+    onToggleArchived: () => void
+    viewport?: { zoom: number; x: number; y: number }
 }
 
 const nodeTypes: Array<{
-	type: NodeType
-	icon: React.ReactNode
-	label: string
+    type: NodeType
+    icon: React.ReactNode
+    label: string
 }> = [
-	{ type: NodeType.IDEA, icon: <BoltIcon />, label: 'Add Idea' },
-	{ type: NodeType.TASK, icon: <TaskIcon />, label: 'Add Task' },
-	{ type: NodeType.RESOURCE, icon: <StorageIcon />, label: 'Add Resource' },
-	{ type: NodeType.NOTE, icon: <NoteIcon />, label: 'Add Note' },
+    { type: NodeType.IDEA, icon: <BoltIcon />, label: 'Add Idea' },
+    { type: NodeType.TASK, icon: <TaskIcon />, label: 'Add Task' },
+    { type: NodeType.RESOURCE, icon: <StorageIcon />, label: 'Add Resource' },
+    { type: NodeType.NOTE, icon: <NoteIcon />, label: 'Add Note' },
 ]
 
 export const FloatingControls: React.FC<FloatingControlsProps> = ({
-	position = { x: 100, y: 100 },
-	showArchived,
-	onToggleArchived,
+    position,
+    showArchived,
+    onToggleArchived,
+    viewport = { zoom: 1, x: 0, y: 0 }
 }) => {
-	const addNode = useBrainstormStore((state) => state.addNode)
+    const addNode = useBrainstormStore((state) => state.addNode)
 
-	const handleAddNode = (type: NodeType) => {
-		addNode({
-			type,
-			label: `New ${type}`,
-			position: {
-				x: position.x,
-				y: position.y,
-			},
-		})
-	}
+    const handleAddNode = (type: NodeType) => {
+        // Convert screen coordinates to flow coordinates
+        const flowPosition = {
+            x: (position.x - viewport.x) / viewport.zoom,
+            y: (position.y - viewport.y) / viewport.zoom
+        }
 
-	return (
-		<>
-			<SpeedDial
-				ariaLabel="Add node"
-				sx={{
-					position: 'absolute',
-					bottom: 16,
-					right: 16,
-					zIndex: 1000,
-					'& .MuiSpeedDial-fab': {
-						width: 56,
-						height: 56,
-						boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
-					},
-				}}
-				icon={<SpeedDialIcon />}>
-				{nodeTypes.map(({ type, icon, label }) => (
-					<SpeedDialAction
-						key={type}
-						icon={icon}
-						tooltipTitle={label}
-						onClick={() => handleAddNode(type)}
-					/>
-				))}
-			</SpeedDial>
+        addNode({
+            type,
+            label: `New ${type}`,
+            position: flowPosition,
+        })
+    }
 
-			<Tooltip title={showArchived ? 'Hide archived nodes' : 'Show archived nodes'}>
-				<IconButton
-					aria-label="Toggle archived nodes"
-					onClick={onToggleArchived}
-					sx={{
-						position: 'absolute',
-						bottom: 16,
-						left: 16,
-						zIndex: 1000,
-						bgcolor: 'background.paper',
-						boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-						'&:hover': {
-							bgcolor: 'action.hover',
-						},
-					}}>
-					{showArchived ? <UnarchiveIcon /> : <ArchiveIcon />}
-				</IconButton>
-			</Tooltip>
-		</>
-	)
+    return (
+        <>
+            <SpeedDial
+                ariaLabel="Add node"
+                sx={(theme) => ({
+                    position: 'absolute',
+                    bottom: theme.spacing(4),
+                    right: theme.spacing(4),
+                    zIndex: theme.zIndex.speedDial,
+                    '& .MuiSpeedDial-fab': {
+                        width: 56,
+                        height: 56,
+                        boxShadow: theme.shadows[4],
+                        backgroundColor: theme.palette.primary.main,
+                        '&:hover': {
+                            backgroundColor: theme.palette.primary.dark,
+                        },
+                    },
+                    '& .MuiSpeedDial-actions': {
+                        paddingBottom: theme.spacing(0.5),
+                        gap: theme.spacing(1),
+                    },
+                })}
+                icon={<SpeedDialIcon />}>
+                {nodeTypes.map(({ type, icon, label }) => (
+                    <SpeedDialAction
+                        key={type}
+                        icon={icon}
+                        tooltipTitle={label}
+                        onClick={() => handleAddNode(type)}
+                    />
+                ))}
+            </SpeedDial>
+
+            <Tooltip title={showArchived ? 'Hide archived nodes' : 'Show archived nodes'}>
+                <IconButton
+                    aria-label="Toggle archived nodes"
+                    onClick={onToggleArchived}
+                    sx={(theme) => ({
+                        position: 'absolute',
+                        bottom: theme.spacing(4),
+                        left: theme.spacing(4),
+                        zIndex: theme.zIndex.speedDial,
+                        bgcolor: theme.palette.background.paper,
+                        boxShadow: theme.shadows[2],
+                        '&:hover': {
+                            bgcolor: theme.palette.action.hover,
+                        },
+                    })}>
+                    {showArchived ? <UnarchiveIcon /> : <ArchiveIcon />}
+                </IconButton>
+            </Tooltip>
+        </>
+    )
 }

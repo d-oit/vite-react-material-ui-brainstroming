@@ -2,34 +2,17 @@ import ChatIcon from '@mui/icons-material/Chat'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import NoteAddIcon from '@mui/icons-material/NoteAdd'
-import SaveIcon from '@mui/icons-material/Save'
-import { Box, IconButton, Paper, TextField, Typography, useTheme, useMediaQuery } from '@mui/material'
+import { Box, IconButton, Paper, Typography, useTheme, useMediaQuery, Chip } from '@mui/material'
 import React, { memo, useState, useMemo } from 'react'
 import type { NodeProps } from 'reactflow'
 import { Handle, Position } from 'reactflow'
 
 import { useSettings } from '../../../contexts/SettingsContext'
+import type { NodeData } from '../types'
 import type { NodeType } from '../../../types/enums'
 
-export interface CustomNodeData {
-	label: string
-	type: NodeType
-	notes?: string
-	onEdit?: (node: any) => void
-	onDelete?: (node: any) => void
-	onChat?: (node: any) => void
-}
-
-const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected, id }) => {
-	const [isEditing, setIsEditing] = useState(false)
+const CustomNode: React.FC<NodeProps<NodeData>> = ({ data, selected, id }) => {
 	const [showNotes, setShowNotes] = useState(false)
-	const [label, setLabel] = useState(data.label)
-	const [notes, setNotes] = useState(data.notes || '')
-
-	const handleSave = () => {
-		// Save will be implemented through store
-		setIsEditing(false)
-	}
 
 	const { getNodeColor, nodePreferences, settings } = useSettings()
 	const theme = useTheme()
@@ -76,7 +59,7 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected, id })
 		}
 
 		// Get color from settings
-		const backgroundColor = getNodeColor(data.type)
+		const backgroundColor = data.color || getNodeColor(data.type)
 
 		return {
 			...baseStyle,
@@ -90,17 +73,37 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected, id })
 			<Handle type="target" position={Position.Top} />
 
 			<Box sx={{ p: 1 }}>
-				{isEditing ? (
-					<TextField
-						fullWidth
-						value={label}
-						onChange={(e) => setLabel(e.target.value)}
-						size="small"
-						autoFocus
-						onKeyPress={(e) => e.key === 'Enter' && handleSave()}
-					/>
-				) : (
-					<Typography variant="body1">{data.label}</Typography>
+				<Typography variant="body1">{data.label || data.title}</Typography>
+
+				{data.tags && data.tags.length > 0 && (
+					<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5, mb: 1 }}>
+						{data.tags.map((tag) => (
+							<Chip
+								key={tag}
+								label={tag}
+								size="small"
+								sx={{
+									height: 20,
+									fontSize: '0.7rem',
+									backgroundColor: `${theme.palette.primary.main}20`,
+								}}
+							/>
+						))}
+					</Box>
+				)}
+
+				{data.content && (
+					<Typography
+						variant="body2"
+						sx={{
+							mt: 1,
+							color: theme.palette.text.secondary,
+							fontSize: '0.85em',
+							whiteSpace: 'pre-wrap',
+							wordBreak: 'break-word',
+						}}>
+						{data.content}
+					</Typography>
 				)}
 
 				<Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5, mt: 1 }}>
@@ -112,23 +115,16 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected, id })
 					</IconButton>
 					<IconButton
 						size="small"
-						onClick={() => {
-							if (isEditing) {
-								handleSave()
-							} else {
-								data.onEdit?.({ id, data })
-								setIsEditing(true)
-							}
-						}}
+						onClick={() => data.onEdit?.(id)}
 						data-testid={`edit-${id}`}>
-						{isEditing ? <SaveIcon fontSize="small" /> : <EditIcon fontSize="small" />}
+						<EditIcon fontSize="small" />
 					</IconButton>
 					<IconButton
 						size="small"
 						color="error"
 						onClick={(e) => {
 							e.stopPropagation() // Prevent node selection
-							data.onDelete?.({ id, data })
+							data.onDelete?.(id, e)
 						}}
 						data-testid={`delete-${id}`}
 						aria-label="Delete node"
@@ -138,23 +134,18 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected, id })
 					<IconButton
 						size="small"
 						color="primary"
-						onClick={() => data.onChat?.({ id, data })}
+						onClick={() => data.onChat?.(id)}
 						data-testid={`chat-${id}`}>
 						<ChatIcon fontSize="small" />
 					</IconButton>
 				</Box>
 
-				{showNotes && (
-					<TextField
-						fullWidth
-						multiline
-						rows={2}
-						value={notes}
-						onChange={(e) => setNotes(e.target.value)}
-						placeholder="Add notes..."
-						size="small"
-						sx={{ mt: 1 }}
-					/>
+				{showNotes && data.content && (
+					<Box sx={{ mt: 1, p: 1, bgcolor: 'rgba(0,0,0,0.03)', borderRadius: 1 }}>
+						<Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+							{data.content}
+						</Typography>
+					</Box>
 				)}
 			</Box>
 
