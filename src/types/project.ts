@@ -16,6 +16,7 @@ export const SyncSettingsSchema = z.object({
 	intervalMinutes: z.number().optional(),
 	lastSyncedAt: z.string().optional(),
 	s3Path: z.string().optional(),
+	autoSave: z.boolean().default(true),  // Add autoSave to sync settings
 })
 
 export type SyncSettings = z.infer<typeof SyncSettingsSchema>
@@ -112,6 +113,7 @@ export function createEmptyProject(
 		syncSettings: {
 			enableS3Sync: false,
 			syncFrequency: 'manual',
+			autoSave: true,  // Set default autoSave in createEmptyProject
 		},
 	}
 }

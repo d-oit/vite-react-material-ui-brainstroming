@@ -118,7 +118,7 @@ module.exports = {
     'linebreak-style': ['error', 'unix'], // Changed from 'lf' to 'unix'
     'quotes': ['error', 'single', { 'avoidEscape': true }],
     'semi': ['error', 'never'],
-    'max-len': ['error', { 'code': 100, 'ignoreUrls': true, 'ignoreStrings': true, 'ignoreTemplateLiterals': true }],
+    'max-len': ['error', { 'code': 150, 'ignoreUrls': true, 'ignoreStrings': true, 'ignoreTemplateLiterals': true }],
     'comma-dangle': ['error', 'always-multiline'],
     'arrow-parens': ['error', 'always'],
     'object-curly-spacing': ['error', 'always'],

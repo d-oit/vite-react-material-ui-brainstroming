@@ -18,7 +18,7 @@ interface I18nContextType {
 }
 
 // Create the context
-const I18nContext = createContext<I18nContextType | undefined>(undefined)
+export const I18nContext = createContext<I18nContextType | undefined>(undefined)
 
 // Default translations are imported from '../i18n/en'
 
@@ -120,3 +120,4 @@ export const useI18n = () => {
 	}
 	return context
 }
+

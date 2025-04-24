@@ -423,7 +423,7 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
 													onChange={handleSwitchChange('autoSave')}
 												/>
 											}
-											label="Auto-save projects (every 5 seconds)"
+											label="Auto-save projects"
 										/>
 
 										<FormControlLabel
@@ -532,7 +532,6 @@ const SettingsPage = ({ onThemeToggle, isDarkMode }: SettingsPageProps) => {
 										margin="normal"
 										helperText={openRouterApiKeyError || 'Your OpenRouter API key for AI assistant'}
 										error={!!openRouterApiKeyError}
-										required
 									/>
 
 									<FormControl fullWidth margin="normal">

@@ -1,15 +1,30 @@
-import { NodeType } from '../types'
+import { NodeType, Node, Edge } from '../types'
+import { ProjectTemplate } from '../types/project'
 import { encrypt, decrypt, isEncryptionAvailable } from '../utils/encryption'
+import loggerService from '../services/LoggerService'
+
+export interface SyncSettings {
+	enableS3Sync: boolean
+	syncFrequency: 'manual' | 'onSave' | 'interval'
+	intervalMinutes?: number
+	lastSyncedAt?: string
+	s3Path?: string
+}
 
 export interface Project {
 	id: string
 	name: string
-	description?: string
+	description: string  // Required, not optional
 	isArchived?: boolean
 	createdAt: string
 	updatedAt: string
 	lastAccessedAt?: string
 	tags?: string[]
+	nodes: Node[]
+	edges: Edge[]
+	version: string     // Required from app's Project type
+	template: ProjectTemplate  // Required from app's Project type
+	syncSettings: SyncSettings // Required from app's Project type
 }
 
 export interface ProjectHistoryEntry {
@@ -1629,6 +1644,10 @@ export class IndexedDBService {
 	 */
 	public async saveProject(project: Project): Promise<string> {
 		const initialized = await this.init()
+		loggerService.debug('saveProject: Starting save operation', {
+			projectId: project.id,
+			dbInitialized: initialized
+		})
 
 		// Update the updatedAt timestamp
 		const updatedProject = {
@@ -1659,10 +1678,27 @@ export class IndexedDBService {
 				const store = transaction.objectStore(STORES.PROJECTS)
 
 				const request = store.put(updatedProject)
+				
+				loggerService.debug('saveProject: Executing IndexedDB put operation', {
+					projectId: project.id,
+					store: STORES.PROJECTS,
+					nodeCount: (updatedProject.nodes || []).length,
+					edgeCount: (updatedProject.edges || []).length
+				})
 
-				request.onsuccess = () => resolve(project.id)
+				request.onsuccess = () => {
+					loggerService.debug('saveProject: Successfully saved to IndexedDB', {
+						projectId: project.id
+					})
+					resolve(project.id)
+				}
 				request.onerror = (event: Event) => {
-					console.error('Error saving project:', event)
+					const error = (event.target as IDBRequest).error
+					loggerService.error('saveProject: Error saving to IndexedDB', {
+						projectId: project.id,
+						errorName: error?.name,
+						errorMessage: error?.message
+					})
 					// Still return the project ID to prevent cascading errors
 					resolve(project.id)
 				}

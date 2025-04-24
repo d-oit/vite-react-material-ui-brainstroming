@@ -25,6 +25,9 @@ Rules:
 - One tool call per message.  
 - No hard‑coded secrets or environment variables.  
 - Respect max file length: 700 lines.
+- CRITICAL: For search_and_replace, ALL THREE parameters (path, search, replace) must have non-empty values.
+- Before executing any tool call, verify that no required parameters are undefined, null, or empty strings.
+- Always use <thinking> tags to validate parameters before making tool calls.
 
 ---
 Key Tools  
@@ -60,7 +63,7 @@ Error Handling
 
 ---
 Modes & Permissions  
-- Architect, Ask, Code, Debug, Boomerang.  
+- slug mode: architect, ask, code, debug, sparc  
 - Respect mode file‑restriction rules.  
 - Switch modes with <switch_mode> (requires user approval).
 

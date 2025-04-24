@@ -36,6 +36,7 @@ import { useI18n } from '../contexts/I18nContext'
 import { useProject } from '../hooks/useProject'
 import type { Node, Edge, Project } from '../types'
 import type { NodeSuggestion } from '../types/chat'
+import { useBrainstormStore } from '../store/brainstormStore' // Import the store
 
 interface TabPanelProps {
 	children?: React.ReactNode
@@ -82,8 +83,21 @@ const ProjectDetailPage = () => {
 		autoSave: true,
 	})
 
+	// Get the load function from the store
+	const loadNodes = useBrainstormStore((state) => state.loadNodesWithPositions)
+
+	useEffect(() => {
+		// Load nodes into the store when projectId is available
+		if (projectId) {
+			console.log(`ProjectDetailPage: Loading nodes for projectId: ${projectId}`)
+			loadNodes(projectId)
+		}
+	}, [projectId, loadNodes])
+
+
 	useEffect(() => {
 		if (project !== null && project !== undefined) {
+			// This local state might become redundant if ProjectBrainstormingSection reads directly from the store
 			setNodes(project.nodes)
 			setEdges(project.edges)
 			setEditedName(project.name)

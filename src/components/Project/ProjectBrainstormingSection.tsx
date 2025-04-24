@@ -223,7 +223,7 @@ export const ProjectBrainstormingSection = ({
 							initialEdges={flowEdges}
 							onSave={handleSaveFromFlow}
 							aria-label="Brainstorming Flow"
-							key={`flow-${projectId}-${Date.now()}`} // Add timestamp to force re-render
+							key={`flow-${projectId}`} // Only recreate when projectId changes
 						/>
 					</ErrorBoundary>
 				</Box>

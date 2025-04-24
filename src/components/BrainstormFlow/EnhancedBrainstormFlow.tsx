@@ -1,5 +1,5 @@
-import { FullscreenExit as FullscreenExitIcon } from '@mui/icons-material'
-import { Box, IconButton, Menu, MenuItem, Typography, Divider, Slider, useTheme } from '@mui/material'
+import { FullscreenExit as FullscreenExitIcon, Save as SaveIcon } from '@mui/icons-material'
+import { Box, IconButton, Menu, MenuItem, Typography, Divider, Slider, useTheme, Button } from '@mui/material'
 import React, { useCallback, useRef, useState, useEffect, useMemo } from 'react'
 import type {
 	ReactFlowInstance,
@@ -8,9 +8,11 @@ import type {
 	Edge as ReactFlowEdge,
 	NodeProps,
 	NodeChange,
+	NodeDragHandler,
 	EdgeChange,
 	NodeMouseHandler,
 	Viewport,
+	OnMove,
 } from 'reactflow'
 import ReactFlow, {
 	Background,
@@ -21,6 +23,7 @@ import ReactFlow, {
 	useReactFlow,
 	ReactFlowProvider,
 } from 'reactflow'
+import { useDebouncedCallback } from 'use-debounce'
 import 'reactflow/dist/style.css'
 
 // Project imports
@@ -34,6 +37,7 @@ import DeleteConfirmationDialog from '../DeleteConfirmationDialog'
 // Local Components
 import ControlsPanel from './ControlsPanel'
 import { EnhancedMiniMap } from './EnhancedMiniMap'
+import EnhancedZoomControls from './EnhancedZoomControls'
 import { FloatingControls } from './FloatingControls'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import NodeEditDialog from './NodeEditDialog'
@@ -48,13 +52,7 @@ const nodeTypes = {
 	[NodeType.NOTE]: CustomNodeComponent,
 }
 
-interface NodeEditDialogProps {
-    open: boolean
-    onClose: () => void
-    initialData: NodeData
-    initialType: NodeType
-    onSave: (data: Partial<NodeData>, type: NodeType) => void
-}
+// Removed redundant interface as it's likely defined in NodeEditDialog component
 
 interface EnhancedBrainstormFlowProps {
     initialNodes: CustomNodeType[]
@@ -81,6 +79,7 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 		updateNodeData,
 		toggleArchiveNode,
 		removeNode,
+		updateNodePositions,
 	} = useBrainstormStore()
 
 	const [showArchived, setShowArchived] = useState(false)
@@ -94,6 +93,41 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 	const [zoomLevel, setZoomLevel] = useState(1)
 	const [showGrid, setShowGrid] = useState(true)
 	const { settings } = useSettings()
+
+	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+	const [isSaving, setIsSaving] = useState(false)
+	const isAutosaveEnabled = settings?.autoSave ?? false
+
+	// Function to save the current state
+	const saveCurrentState = useCallback(() => {
+		if (!onSave) return
+
+		setIsSaving(true)
+		try {
+			onSave(storeNodes, storeEdges)
+			setHasUnsavedChanges(false)
+		} catch (error) {
+			console.error('Error saving brainstorm:', error)
+		} finally {
+			setTimeout(() => setIsSaving(false), 500) // Show saving indicator briefly
+		}
+	}, [onSave, storeNodes, storeEdges])
+
+	// Debounced save function for autosave
+	const debouncedSave = useDebouncedCallback(saveCurrentState, 1500)
+
+	// Track changes and trigger autosave
+	useEffect(() => {
+		if (storeNodes.length || storeEdges.length) {
+			// Only mark as unsaved if we have actual nodes or edges and initial load is done
+			setHasUnsavedChanges(true)
+
+			// Trigger autosave if enabled
+			if (isAutosaveEnabled === true && onSave) {
+				debouncedSave()
+			}
+		}
+	}, [storeNodes, storeEdges, isAutosaveEnabled, debouncedSave, onSave])
 
 	const handleInsightGenerated = useCallback((insight: BrainstormNode) => {
 		const newNode: CustomNodeType = {
@@ -153,7 +187,13 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 
 	const onEdgesChange = useCallback(
 		(changes: EdgeChange[]) => {
-			setEdges((currentEdges) => applyEdgeChanges(changes, currentEdges) as CustomEdge[])
+			setEdges((currentEdges) => {
+				const updatedEdges = applyEdgeChanges(changes, currentEdges)
+				return updatedEdges.map((edge) => ({
+					...edge,
+					type: edge.type || EdgeType.DEFAULT,
+				})) as CustomEdge[]
+			})
 		},
 		[setEdges],
 	)
@@ -200,8 +240,12 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 				type,
 				updatedAt: new Date().toISOString(),
 			})
+			setHasUnsavedChanges(true)
+			if (isAutosaveEnabled === true && onSave) {
+				debouncedSave()
+			}
 		},
-		[updateNodeData],
+		[updateNodeData, isAutosaveEnabled, onSave, debouncedSave],
 	)
 
 	const handleCloseEditDialog = useCallback(() => {
@@ -214,17 +258,34 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 			removeNode(selectedNode.id)
 			setShowDeleteDialog(false)
 			setSelectedNode(null)
+			setHasUnsavedChanges(true)
+			if (isAutosaveEnabled === true && onSave) {
+				debouncedSave()
+			}
 		}
-	}, [selectedNode, removeNode])
+	}, [selectedNode, removeNode, isAutosaveEnabled, onSave, debouncedSave])
 
 	useEffect(() => {
 		setNodes(initialNodes)
 		setEdges(initialEdges)
 	}, [initialNodes, initialEdges, setNodes, setEdges])
 
-	const handleViewportChange = useCallback((_: MouseEvent | TouchEvent, viewport: Viewport) => {
+	const handleViewportChange = useCallback<OnMove>((event, viewport) => {
 		setViewport(viewport)
 	}, [])
+
+	const onNodeDragStop: NodeDragHandler = useCallback((event, node, nodes) => {
+		// Update positions of all dragged nodes
+		const updatedNodes = nodes
+			.filter((n) => n.dragging)
+			.map((n) => ({
+				id: n.id,
+				position: n.position,
+			}))
+		if (updatedNodes.length > 0) {
+			updateNodePositions(updatedNodes)
+		}
+	}, [updateNodePositions])
 
 	return (
 		<ReactFlowProvider>
@@ -237,15 +298,28 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 					minHeight: '500px',
 					display: 'flex',
 					flexDirection: 'column',
+					position: 'relative',
 				}}
 				onMouseMove={handleMouseMove}>
+				<EnhancedZoomControls
+					zoomIn={() => reactFlowInstance?.zoomIn()}
+					zoomOut={() => reactFlowInstance?.zoomOut()}
+					fitView={() => reactFlowInstance?.fitView()}
+					zoomLevel={viewport.zoom}
+					onZoomChange={(zoom) => reactFlowInstance?.setViewport({ x: viewport.x, y: viewport.y, zoom })}
+					showGrid={showGrid}
+					onToggleGrid={() => setShowGrid(!showGrid)}
+					isFullscreen={isFullscreen}
+					onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+				/>
 				<ReactFlow
 					nodes={nodesWithHandlers}
 					edges={storeEdges}
 					onNodesChange={onNodesChange}
 					onEdgesChange={onEdgesChange}
 					onConnect={onConnect}
-					onInit={setReactFlowInstance}
+					onNodeDragStop={onNodeDragStop}
+					onInit={(instance: ReactFlowInstance) => setReactFlowInstance(instance)}
 					onMove={handleViewportChange}
 					nodeTypes={nodeTypes}
 					fitView

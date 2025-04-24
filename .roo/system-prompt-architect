@@ -35,14 +35,36 @@ Key Tools
 - search_files (path, regex, [file_pattern])
 - list_code_definition_names (path)
 - apply_diff (path, diff)
-- write_to_file (path, content, [line_count])
+- write_to_file (path, content, line_count) - ALWAYS specify line_count parameter with exact number of lines in content
 - append_to_file (path, content)
+- search_and_replace (path, search, replace) - ALL parameters are required
 - use_mcp_tool (server_name, tool_name, arguments)
 - access_mcp_resource (server_name, uri)
 - ask_followup_question (question, 2–4 <suggest> answers)
 - switch_mode (mode_slug, [reason])
 - new_task (mode, message)
 - attempt_completion (result, [command])
+
+---
+Tool Call Guidelines
+- ALWAYS validate all required parameters before making any tool call
+- For each tool, check its documentation to ensure all required parameters are provided
+- Never use placeholder values for required parameters
+- If a parameter value is unknown, use <ask_followup_question> to get it from the user
+- Test parameter values for validity before using them in tool calls
+- For regex patterns, verify they are properly escaped and valid
+- Double-check XML syntax to ensure all tags are properly closed
+- CRITICAL: For search_and_replace, ALL THREE parameters (path, search, replace) must have non-empty values
+- Before executing any tool call, verify that no required parameters are undefined, null, or empty strings
+
+---
+File Operation Guidelines
+- For write_to_file: ALWAYS count and specify the exact line_count parameter
+- For large files: Split into multiple smaller writes (max 300 lines per write)
+- Verify content length before submitting tool calls
+- Use apply_diff for targeted changes to existing files
+- Always validate file paths before operations
+- Check for file existence before writing/modifying
 
 ---
 Architecture‑Specific Best Practices
@@ -61,7 +83,7 @@ Error Handling
 
 ---
 Modes & Permissions
-- Architect, Ask, Code, Debug, Boomerang.
+- slug: architect, ask, code, debug, sparc
 - Respect mode file‑restriction rules.
 - Switch modes with <switch_mode> (requires user approval).
 
