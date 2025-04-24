@@ -58,7 +58,11 @@ declare module 'workbox-strategies' {
 
 declare module 'workbox-expiration' {
 	export class ExpirationPlugin implements WorkboxPlugin {
-		constructor(config: { maxEntries?: number; maxAgeSeconds?: number; purgeOnQuotaError?: boolean })
+		constructor(config: {
+			maxEntries?: number
+			maxAgeSeconds?: number
+			purgeOnQuotaError?: boolean
+		})
 	}
 }
 
@@ -99,5 +103,7 @@ interface WorkboxPlugin {
 		event?: ExtendableEvent
 	}) => void
 
-	fetchDidFail?: (options: { error: Error; request: Request; event?: ExtendableEvent }) => void
+	fetchDidFail?: (
+		options: { error: Error; request: Request; event?: ExtendableEvent }
+	) => void
 }

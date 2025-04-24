@@ -9,7 +9,9 @@ declare module 'virtual:pwa-register' {
 		onRegisterError?: (error: Error) => void
 	}
 
-	export function registerSW(options?: RegisterSWOptions): (reloadPage?: boolean) => Promise<void>
+	export function registerSW(
+		options?: RegisterSWOptions
+	): (reloadPage?: boolean) => Promise<void>
 }
 
 declare module 'workbox-window' {
@@ -30,7 +32,9 @@ declare module 'workbox-precaching' {
 
 	export function precacheAndRoute(entries: Array<string | PrecacheEntry>): void
 	export function cleanupOutdatedCaches(): void
-	export function createHandlerBoundToURL(url: string): (options: { request: Request }) => Response
+	export function createHandlerBoundToURL(
+		url: string
+	): (options: { request: Request }) => Response
 }
 
 declare module 'workbox-routing' {
@@ -69,7 +73,9 @@ declare module 'workbox-strategies' {
 			event?: ExtendableEvent
 		}) => void
 
-		cacheKeyWillBeUsed?: (options: { request: Request; mode: string }) => Promise<Request | string>
+		cacheKeyWillBeUsed?: (
+			options: { request: Request; mode: string }
+		) => Promise<Request | string>
 
 		cachedResponseWillBeUsed?: (options: {
 			cacheName: string
@@ -81,7 +87,9 @@ declare module 'workbox-strategies' {
 
 		requestWillFetch?: (options: { request: Request }) => Promise<Request>
 
-		fetchDidFail?: (options: { error: Error; request: Request; event?: ExtendableEvent }) => void
+		fetchDidFail?: (
+			options: { error: Error; request: Request; event?: ExtendableEvent }
+		) => void
 	}
 
 	export interface StrategyOptions {

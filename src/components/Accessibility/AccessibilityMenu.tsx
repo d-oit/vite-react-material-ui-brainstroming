@@ -34,7 +34,7 @@ interface AccessibilityMenuProps {
 	onClose?: () => void
 }
 
-export const AccessibilityMenu = ({ position = 'bottom-left', _open = false, onClose }: AccessibilityMenuProps) => {
+export const AccessibilityMenu = ({ position = 'bottom-left', open = false, onClose }: AccessibilityMenuProps) => {
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 	const { settings, updateSettings } = useSettings()
 	const { showError } = useErrorNotification()
@@ -257,7 +257,8 @@ export const AccessibilityMenu = ({ position = 'bottom-left', _open = false, onC
 							'&:hover': {
 								backgroundColor: theme.palette.background.default,
 							},
-							zIndex: theme.zIndex.appBar - 2, // Below AppBar and drawer but above content
+							// Below AppBar and drawer but above content
+							zIndex: theme.zIndex.appBar - 2,
 						}}>
 						<AccessibilityIcon />
 					</IconButton>

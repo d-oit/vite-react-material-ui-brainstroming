@@ -56,7 +56,11 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
 			open={open}
 			onClose={onClose}
 			anchorReference="anchorPosition"
-			anchorPosition={anchorPosition !== null ? { top: anchorPosition.y, left: anchorPosition.x } : undefined}
+			anchorPosition={
+				anchorPosition !== null
+					? { top: anchorPosition.y, left: anchorPosition.x }
+					: undefined
+			}
 			// Ensure the menu is properly labeled for screen readers
 			MenuListProps={{
 				'aria-label': t('flow.canvasContextMenu') || 'Canvas context menu',

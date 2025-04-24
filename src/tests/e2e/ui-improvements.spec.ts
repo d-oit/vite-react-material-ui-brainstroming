@@ -32,7 +32,8 @@ test.describe('UI Improvements', () => {
 			// Check that toolbar is horizontally centered
 			const pageWidth = await page.evaluate(() => window.innerWidth)
 			const toolbarCenter = toolbarBox.x + toolbarBox.width / 2
-			expect(Math.abs(toolbarCenter - pageWidth / 2)).toBeLessThan(50) // Allow some margin of error
+			// Allow some margin of error
+			expect(Math.abs(toolbarCenter - pageWidth / 2)).toBeLessThan(50)
 		}
 
 		// Add a node to the canvas
@@ -256,7 +257,8 @@ test.describe('UI Improvements', () => {
 			// Check that mobile controls are horizontally centered
 			const pageWidth = await page.evaluate(() => window.innerWidth)
 			const controlsCenter = mobileControlsBox.x + mobileControlsBox.width / 2
-			expect(Math.abs(controlsCenter - pageWidth / 2)).toBeLessThan(50) // Allow some margin of error
+			// Allow some margin of error
+			expect(Math.abs(controlsCenter - pageWidth / 2)).toBeLessThan(50)
 		}
 
 		// Add a node to the canvas
@@ -273,7 +275,8 @@ test.describe('UI Improvements', () => {
 			// Check that dialog width is appropriate for mobile screen
 			const pageWidth = await page.evaluate(() => window.innerWidth)
 			expect(dialogBox.width).toBeLessThanOrEqual(pageWidth)
-			expect(dialogBox.width).toBeGreaterThan(pageWidth * 0.7) // Dialog should take up most of the screen width
+			// Dialog should take up most of the screen width
+			expect(dialogBox.width).toBeGreaterThan(pageWidth * 0.7)
 		}
 
 		// Fill in the node details
@@ -300,7 +303,8 @@ test.describe('UI Improvements', () => {
 		if (chatPanelBox) {
 			// Check that chat panel width is appropriate for mobile screen
 			const pageWidth = await page.evaluate(() => window.innerWidth)
-			expect(chatPanelBox.width).toBeGreaterThan(pageWidth * 0.7) // Chat panel should take up most of the screen width
+			// Chat panel should take up most of the screen width
+			expect(chatPanelBox.width).toBeGreaterThan(pageWidth * 0.7)
 		}
 	})
 })

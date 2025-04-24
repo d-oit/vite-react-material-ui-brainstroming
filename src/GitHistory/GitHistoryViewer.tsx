@@ -58,15 +58,20 @@ export const GitHistoryViewer = ({ projectId }: GitHistoryViewerProps) => {
 		void fetchHistory() // Use void to explicitly ignore the promise
 	}, [projectId])
 
-	const handleCommitClick = async (commit: GitCommit) => {
+	const handleCommitClick = (commit: GitCommit) => {
 		setSelectedCommit(commit)
 	}
 
 	const handleCompareClick = (commit: GitCommit) => {
-		if (selectedCommit !== null && selectedCommit !== undefined && selectedCommit.hash !== commit.hash) {
+		if (
+			selectedCommit !== null &&
+			selectedCommit !== undefined &&
+			selectedCommit.hash !== commit.hash
+		) {
 			setCompareCommit(commit)
 			setCompareDialogOpen(true)
-			void performComparison(selectedCommit.hash, commit.hash) // Use void to explicitly ignore the promise
+			// Use void to explicitly ignore the promise
+			void performComparison(selectedCommit.hash, commit.hash)
 		}
 	}
 
@@ -114,10 +119,15 @@ export const GitHistoryViewer = ({ projectId }: GitHistoryViewerProps) => {
 					{commits.map((commit) => (
 						<Box key={commit.hash}>
 							<ListItem
+								component="div"
 								alignItems="flex-start"
-								button
-								selected={selectedCommit?.hash === commit.hash}
-								onClick={() => handleCommitClick(commit)}>
+								sx={{
+									cursor: 'pointer',
+									bgcolor: selectedCommit?.hash === commit.hash ? 'action.selected' : 'inherit',
+								}}
+								onClick={() => {
+									void handleCommitClick(commit)
+								}}>
 								<ListItemAvatar>
 									<Avatar>
 										<CommitIcon />
@@ -221,7 +231,15 @@ export const GitHistoryViewer = ({ projectId }: GitHistoryViewerProps) => {
 				<DialogTitle>
 					Compare Commits
 					<Typography variant="subtitle2" color="text.secondary">
-						{selectedCommit?.hash.substring(0, 7)} vs {compareCommit?.hash.substring(0, 7)}
+						<Box component="span">
+							<Typography variant="body2" component="span">
+								{selectedCommit?.hash.substring(0, 7)}
+							</Typography>
+							{' vs '}
+							<Typography variant="body2" component="span">
+								{compareCommit?.hash.substring(0, 7)}
+							</Typography>
+						</Box>
 					</Typography>
 				</DialogTitle>
 

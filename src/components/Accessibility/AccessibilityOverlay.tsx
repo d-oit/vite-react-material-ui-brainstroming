@@ -57,7 +57,8 @@ export const AccessibilityOverlay: React.FC<AccessibilityOverlayProps> = ({ onAp
 		largeText: accessibilityPreferences?.largeText === true,
 		reducedMotion: accessibilityPreferences?.reducedMotion === true,
 		touchOptimized: accessibilityPreferences?.touchOptimized === true,
-		keyboardFocusVisible: accessibilityPreferences?.keyboardFocusVisible !== false, // Default to true
+		// Default keyboard focus visible to true
+		keyboardFocusVisible: accessibilityPreferences?.keyboardFocusVisible ?? true,
 		textSpacing: accessibilityPreferences?.textSpacing ?? 1,
 		colorBlindMode: accessibilityPreferences?.colorBlindMode ?? 'none',
 	})
@@ -113,7 +114,8 @@ export const AccessibilityOverlay: React.FC<AccessibilityOverlayProps> = ({ onAp
 						position: 'fixed',
 						bottom: 80, // Adjusted to prevent overlap with bottom navigation
 						right: 16,
-						zIndex: theme.zIndex.appBar - 2, // Below AppBar and drawer but above content
+						// Below AppBar and drawer but above content
+						zIndex: theme.zIndex.appBar - 2,
 					}}>
 					<AccessibilityIcon />
 				</Fab>
@@ -282,8 +284,10 @@ export const AccessibilityOverlay: React.FC<AccessibilityOverlayProps> = ({ onAp
 
 					<Box sx={{ mt: 2 }}>
 						<Typography variant="body2" color="textSecondary">
-							{t('accessibility.description') ||
-								'These settings help make the application more accessible. Changes will be saved for your next visit.'}
+							{t('accessibility.description') || (
+								'These settings help make the application more accessible. ' +
+								'Changes will be saved for your next visit.'
+							)}
 						</Typography>
 					</Box>
 				</DialogContent>

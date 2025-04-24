@@ -127,7 +127,8 @@ const AppWithTheme = () => {
 	const [mode, setMode] = useState<PaletteMode>('light')
 	const [drawerOpen, setDrawerOpen] = useState(false)
 	const [updateAvailable, setUpdateAvailable] = useState(false)
-	const [updateSWFunction, setUpdateSWFunction] = useState<((reload?: boolean) => Promise<void>) | null>(null)
+	type UpdateFunction = ((reload?: boolean) => Promise<void>) | null
+	const [updateSWFunction, setUpdateSWFunction] = useState<UpdateFunction>(null)
 	const { t: _t } = useI18n() // t is not used in this file but kept for future use
 
 	// Update the theme only when the mode changes
@@ -257,7 +258,7 @@ const AppWithTheme = () => {
 
 				// Use requestIdleCallback if available, otherwise use setTimeout with 0
 				if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-					(window as any).requestIdleCallback(initNonCriticalServices)
+					window.requestIdleCallback?.(initNonCriticalServices)
 				} else {
 					setTimeout(initNonCriticalServices, 0)
 				}

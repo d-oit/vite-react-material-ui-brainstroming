@@ -118,7 +118,12 @@ export function sanitizeUrl(url: string, allowedProtocols = ['http:', 'https:'],
  * @param requireHttps Whether to require HTTPS (default: true)
  * @returns Object with validation result and error message
  */
-export function validateApiEndpoint(url: string, requireHttps = true): { isValid: boolean; message: string } {
+type ValidationResult = { isValid: boolean; message: string }
+
+export function validateApiEndpoint(
+	url: string,
+	requireHttps = true,
+): ValidationResult {
 	if (!url || url.trim() === '') {
 		return { isValid: false, message: 'URL is required' }
 	}
@@ -174,7 +179,10 @@ export function validateApiEndpoint(url: string, requireHttps = true): { isValid
  * @param allowHttp Whether to allow HTTP for local development (default: true)
  * @returns Object with validation result and error message
  */
-export function validateS3Endpoint(url: string, allowHttp = false): { isValid: boolean; message: string } {
+export function validateS3Endpoint(
+	url: string,
+	allowHttp = false,
+): ValidationResult {
 	if (!url || url.trim() === '') {
 		return { isValid: true, message: '' } // S3 is optional, so empty is valid
 	}
@@ -233,7 +241,10 @@ export function validateS3Endpoint(url: string, allowHttp = false): { isValid: b
  * @param allowRelative Whether to allow relative URLs (default: true)
  * @returns Object with validation result and error message
  */
-export function validateNavigationUrl(url: string, allowRelative = true): { isValid: boolean; message: string } {
+export function validateNavigationUrl(
+	url: string,
+	allowRelative = true,
+): ValidationResult {
 	if (!url || url.trim() === '') {
 		return { isValid: false, message: 'URL is required' }
 	}

@@ -17,18 +17,21 @@ interface AccessibleNodeProps {
  * An accessible version of the node component that can be navigated with keyboard
  * This is used for screen readers and keyboard navigation
  */
-const AccessibleNode: React.FC<AccessibleNodeProps> = ({ data, isSelected, onSelect, onEdit, onDelete, style }) => {
+const AccessibleNode: React.FC<AccessibleNodeProps> = ({
+	data,
+	isSelected,
+	onSelect,
+	onEdit,
+	onDelete,
+	style,
+}) => {
 	const theme = useTheme()
 	const { t: _t } = useI18n() // Unused variable prefixed with underscore
 
 	// Default colors if not provided
-	const backgroundColor =
-		style?.backgroundColor !== undefined && style.backgroundColor !== null
-			? style.backgroundColor
-			: theme.palette.background.paper
-	const borderColor =
-		style?.borderColor !== undefined && style.borderColor !== null ? style.borderColor : theme.palette.primary.main
-	const textColor = style?.color !== undefined && style.color !== null ? style.color : theme.palette.text.primary
+	const backgroundColor = style?.backgroundColor ?? theme.palette.background.paper
+	const borderColor = style?.borderColor ?? theme.palette.primary.main
+	const textColor = style?.color ?? theme.palette.text.primary
 
 	return (
 		<Card
