@@ -1,55 +1,54 @@
-import { useEffect, useCallback } from 'react'
+import { useEffect } from 'react';
+import { ReactFlowInstance, useReactFlow } from 'reactflow';
+import { getLayoutedElements } from '../utils/autoLayout';
 
-interface KeyboardShortcutHandlers {
-	onAutoLayout?: () => void
-	onZoomIn?: () => void
-	onZoomOut?: () => void
-	onFitView?: () => void
-	onToggleFullscreen?: () => void
+interface UseKeyboardShortcutsProps {
+  reactFlowInstance: ReactFlowInstance | null;
+  saveCurrentState: () => void;
+  removeNode: (id: string) => void;
+  nodeSpacing: number;
 }
 
-export function useKeyboardShortcuts({
-	onAutoLayout,
-	onZoomIn,
-	onZoomOut,
-	onFitView,
-	onToggleFullscreen,
-}: KeyboardShortcutHandlers) {
-	const handleKeyDown = useCallback(
-		(event: KeyboardEvent) => {
-			if (
-				event.target instanceof HTMLInputElement ||
-				event.target instanceof HTMLTextAreaElement
-			) {
-				return
-			}
+export const useKeyboardShortcuts = ({
+  reactFlowInstance,
+  saveCurrentState,
+  removeNode,
+  nodeSpacing,
+}: UseKeyboardShortcutsProps) => {
+  const { getNodes, getEdges, setNodes, setEdges } = useReactFlow();
 
-			const ctrlKey = event.ctrlKey || event.metaKey // metaKey for Mac
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // Save - Ctrl+S
+      if (event.ctrlKey && event.key === 's') {
+        event.preventDefault();
+        saveCurrentState();
+      }
+      
+      // Auto-layout - Ctrl+L
+      if (event.ctrlKey && event.key === 'l') {
+        event.preventDefault();
+        if (reactFlowInstance) {
+          const { nodes, edges } = getLayoutedElements(
+            getNodes(),
+            getEdges(),
+            'TB',
+            nodeSpacing
+          );
+          setNodes(nodes);
+          setEdges(edges);
+          setTimeout(() => reactFlowInstance.fitView(), 50);
+        }
+      }
 
-			if (ctrlKey && event.key.toLowerCase() === 'l') {
-				event.preventDefault()
-				onAutoLayout?.()
-			} else if (ctrlKey && event.key === '=') {
-				event.preventDefault()
-				onZoomIn?.()
-			} else if (ctrlKey && event.key === '-') {
-				event.preventDefault()
-				onZoomOut?.()
-			} else if (ctrlKey && event.key === '0') {
-				event.preventDefault()
-				onFitView?.()
-			} else if (event.key.toLowerCase() === 'f') {
-				event.preventDefault()
-				onToggleFullscreen?.()
-			}
-		},
-		[onAutoLayout, onZoomIn, onZoomOut, onFitView, onToggleFullscreen],
-	)
+      // Delete - Del
+      if (event.key === 'Delete') {
+        const selectedNodes = getNodes().filter(node => node.selected);
+        selectedNodes.forEach(node => removeNode(node.id));
+      }
+    };
 
-	useEffect(() => {
-		document.addEventListener('keydown', handleKeyDown)
-		return () => {
-			document.removeEventListener('keydown', handleKeyDown)
-		}
-	}, [handleKeyDown])
-}
+    document.addEventListener('keydown', handleKeyPress);
+    return () => document.removeEventListener('keydown', handleKeyPress);
+  }, [reactFlowInstance, getNodes, getEdges, setNodes, setEdges, removeNode, saveCurrentState, nodeSpacing]);
+};

@@ -1,80 +1,65 @@
-import dagre from 'dagre'
-import type { Node, Edge } from 'reactflow'
-
-const NODE_WIDTH = 250
-const NODE_HEIGHT = 150
-const HORIZONTAL_SPACING = 100
-const VERTICAL_SPACING = 100
-
-type LayoutDirection = 'TB' | 'LR';
-type LayoutAlign = 'UL' | 'DL' | 'UR' | 'DR';
-type LayoutRanker = 'network-simplex' | 'tight-tree' | 'longest-path';
+import dagre from 'dagre';
+import { Edge } from 'reactflow';
+import { NodeType } from '../../../types/enums';
+import type { CustomNodeType } from '../types';
 
 interface LayoutOptions {
-  direction?: LayoutDirection;
-  align?: LayoutAlign;
-  ranker?: LayoutRanker;
-  nodesep?: number;
-  edgesep?: number;
-  ranksep?: number;
+  direction?: 'TB' | 'LR';
+  spacing?: number;
 }
 
-interface LayoutResult {
-  nodes: Node[];
-  edges: Edge[];
-}
+const DEFAULT_OPTIONS: LayoutOptions = {
+  direction: 'TB',
+  spacing: 50,
+};
 
-export function getLayoutedElements(
-	nodes: Node[],
-	edges: Edge[],
-	options: LayoutOptions = {},
-): LayoutResult {
-	const {
-		direction = 'TB',
-		align = 'UL',
-		ranker = 'network-simplex',
-		nodesep = HORIZONTAL_SPACING,
-		edgesep = 10,
-		ranksep = VERTICAL_SPACING,
-	} = options
+export const getLayoutedElements = (
+  nodes: CustomNodeType[],
+  edges: Edge[],
+  options: LayoutOptions = DEFAULT_OPTIONS,
+) => {
+  const { direction = 'TB', spacing = 50 } = options;
 
-	const dagreGraph = new dagre.graphlib.Graph()
-	dagreGraph.setDefaultEdgeLabel(() => ({}))
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-	dagreGraph.setGraph({
-		rankdir: direction,
-		align,
-		ranker,
-		nodesep,
-		edgesep,
-		ranksep,
-		marginx: 50,
-		marginy: 50,
-	})
+  const isHorizontal = direction === 'LR';
+  dagreGraph.setGraph({ rankdir: direction, ranksep: spacing, nodesep: spacing });
 
-	nodes.forEach((node) => {
-		dagreGraph.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT })
-	})
+  // Add nodes to dagre
+  nodes.forEach((node) => {
+    dagreGraph.setNode(node.id, {
+      width: 150, // Default width
+      height: 50, // Default height
+    });
+  });
 
-	edges.forEach((edge) => {
-		dagreGraph.setEdge(edge.source, edge.target)
-	})
+  // Add edges to dagre
+  edges.forEach((edge) => {
+    if (edge.source && edge.target) {
+      dagreGraph.setEdge(edge.source, edge.target);
+    }
+  });
 
-	dagre.layout(dagreGraph)
+  // Calculate layout
+  dagre.layout(dagreGraph);
 
-	const layoutedNodes = nodes.map((node) => {
-		const nodeWithPosition = dagreGraph.node(node.id)
-		return {
-			...node,
-			position: {
-				x: nodeWithPosition.x - NODE_WIDTH / 2,
-				y: nodeWithPosition.y - NODE_HEIGHT / 2,
-			},
-		}
-	})
+  // Retrieve positions while preserving node type and data
+  const layoutedNodes: CustomNodeType[] = nodes.map((node) => {
+    const nodeWithPosition = dagreGraph.node(node.id);
+    
+    return {
+      ...node,
+      position: {
+        x: nodeWithPosition.x - 75, // half of default width
+        y: nodeWithPosition.y - 25, // half of default height
+      },
+      type: node.type || NodeType.IDEA, // Ensure node type is preserved
+    };
+  });
 
-	return {
-		nodes: layoutedNodes,
-		edges,
-	}
-}
+  return {
+    nodes: layoutedNodes,
+    edges,
+  };
+};

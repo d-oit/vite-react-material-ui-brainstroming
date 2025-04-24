@@ -92,6 +92,7 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 	const [settingsAnchorEl, setSettingsAnchorEl] = useState<HTMLElement | null>(null)
 	const [zoomLevel, setZoomLevel] = useState(1)
 	const [showGrid, setShowGrid] = useState(true)
+	const [nodeSpacing, setNodeSpacing] = useState(50)
 	const { settings } = useSettings()
 
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
@@ -287,6 +288,23 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 		}
 	}, [updateNodePositions])
 
+	// Add auto-layout handler
+	const handleAutoLayout = useCallback(() => {
+		if (reactFlowInstance) {
+			const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+				storeNodes,
+				storeEdges,
+				{ direction: 'TB', spacing: nodeSpacing },
+			)
+			setNodes(layoutedNodes)
+			setEdges(layoutedEdges)
+			setTimeout(() => reactFlowInstance.fitView(), 50)
+		}
+	}, [reactFlowInstance, storeNodes, storeEdges, nodeSpacing, setNodes, setEdges])
+
+	// Initialize keyboard shortcuts
+	useKeyboardShortcuts({ reactFlowInstance, saveCurrentState, removeNode, nodeSpacing })
+
 	return (
 		<ReactFlowProvider>
 			<div
@@ -333,6 +351,43 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 					panOnScroll={false}
 					style={{ width: '100%', height: '100%', flex: 1 }}>
 					{showGrid && <Background />}
+					
+					<EnhancedMiniMap
+						style={{
+							position: 'absolute',
+							bottom: 20,
+							right: 20,
+							background: theme.palette.background.paper,
+							border: `1px solid ${theme.palette.divider}`,
+							borderRadius: theme.shape.borderRadius,
+						}}
+						zoomable
+						pannable
+					/>
+
+					<Panel position="top-right" style={{ marginRight: 10, marginTop: 10 }}>
+						<Box sx={{ p: 1, bgcolor: 'background.paper', borderRadius: 1 }}>
+							<Button
+								variant="contained"
+								size="small"
+								onClick={handleAutoLayout}
+								sx={{ mb: 1 }}
+							>
+								Auto Layout (Ctrl+L)
+							</Button>
+							<Typography variant="caption" display="block" gutterBottom>
+								Node Spacing
+							</Typography>
+							<Slider
+								value={nodeSpacing}
+								onChange={(_, value) => setNodeSpacing(value as number)}
+								min={20}
+								max={200}
+								step={10}
+								sx={{ width: 120 }}
+							/>
+						</Box>
+					</Panel>
 
 					<FloatingControls
 						position={mousePosition}
