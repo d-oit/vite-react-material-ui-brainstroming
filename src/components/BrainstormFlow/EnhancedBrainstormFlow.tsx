@@ -114,21 +114,8 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 		}
 	}, [onSave, storeNodes, storeEdges])
 
-	// Debounced save function for autosave
+	// Debounced save function for manual saves only
 	const debouncedSave = useDebouncedCallback(saveCurrentState, 1500)
-
-	// Track changes and trigger autosave
-	useEffect(() => {
-		if (storeNodes.length || storeEdges.length) {
-			// Only mark as unsaved if we have actual nodes or edges and initial load is done
-			setHasUnsavedChanges(true)
-
-			// Trigger autosave if enabled
-			if (isAutosaveEnabled === true && onSave) {
-				debouncedSave()
-			}
-		}
-	}, [storeNodes, storeEdges, isAutosaveEnabled, debouncedSave, onSave])
 
 	const handleInsightGenerated = useCallback((insight: BrainstormNode) => {
 		const newNode: CustomNodeType = {
@@ -175,39 +162,51 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 
 	const onNodesChange = useCallback(
 		(changes: NodeChange[]) => {
+			// Batch node changes
 			setNodes((currentNodes) => {
 				const updatedNodes = applyNodeChanges(changes, currentNodes)
+				// Ensure proper type conversion for each node
 				return updatedNodes.map((node) => ({
 					...node,
 					type: node.type as NodeType,
+					data: {
+						...node.data,
+						type: node.type as NodeType,
+						updatedAt: new Date().toISOString(),
+					},
 				})) as CustomNodeType[]
 			})
+			setHasUnsavedChanges(true)
 		},
 		[setNodes],
 	)
 
 	const onEdgesChange = useCallback(
 		(changes: EdgeChange[]) => {
+			// Batch edge changes
 			setEdges((currentEdges) => {
 				const updatedEdges = applyEdgeChanges(changes, currentEdges)
 				return updatedEdges.map((edge) => ({
 					...edge,
-					type: edge.type || EdgeType.DEFAULT,
+					type: (edge.type as EdgeType) ?? EdgeType.DEFAULT,
 				})) as CustomEdge[]
 			})
+			setHasUnsavedChanges(true)
 		},
 		[setEdges],
 	)
 
-	const onConnect = useCallback(
-		(connection: Connection) => {
-			setEdges((currentEdges) => {
-				const edge = { ...connection, type: EdgeType.DEFAULT }
-				return addEdge(edge, currentEdges) as CustomEdge[]
-			})
-		},
-		[setEdges],
-	)
+	const onConnect = useCallback((connection: Connection) => {
+		setEdges((currentEdges) => {
+			const edge = {
+				...connection,
+				type: EdgeType.DEFAULT,
+				id: `e${connection.source}-${connection.target}`,
+			}
+			return addEdge(edge, currentEdges) as CustomEdge[]
+		})
+		setHasUnsavedChanges(true)
+	}, [setEdges])
 
 	const handleEditNode = useCallback((nodeId: string): void => {
 		const node = nodesWithHandlers.find((n: CustomNodeType) => n.id === nodeId)
@@ -266,10 +265,29 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 		}
 	}, [selectedNode, removeNode, isAutosaveEnabled, onSave, debouncedSave])
 
+	// Only set initial nodes/edges if the store is empty
 	useEffect(() => {
-		setNodes(initialNodes)
-		setEdges(initialEdges)
-	}, [initialNodes, initialEdges, setNodes, setEdges])
+		if ((initialNodes?.length > 0 || initialEdges?.length > 0) && storeNodes.length === 0) {
+			// Convert and set initial nodes with proper type information
+			const convertedNodes = initialNodes.map((node) => ({
+				...node,
+				type: node.type as NodeType,
+				data: {
+					...node.data,
+					type: node.type as NodeType,
+					updatedAt: node.data?.updatedAt ?? new Date().toISOString(),
+				},
+			})) as CustomNodeType[]
+
+			const convertedEdges = initialEdges.map((edge) => ({
+				...edge,
+				type: (edge.type as EdgeType) ?? EdgeType.DEFAULT,
+			})) as CustomEdge[]
+
+			setNodes(convertedNodes)
+			setEdges(convertedEdges)
+		}
+	}, [initialNodes, initialEdges, setNodes, setEdges, storeNodes.length])
 
 	const handleViewportChange = useCallback<OnMove>((event, viewport) => {
 		setViewport(viewport)
@@ -288,7 +306,7 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 		}
 	}, [updateNodePositions])
 
-	// Add auto-layout handler
+	// Add auto-layout handler with proper type conversion
 	const handleAutoLayout = useCallback(() => {
 		if (reactFlowInstance) {
 			const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
@@ -296,8 +314,14 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 				storeEdges,
 				{ direction: 'TB', spacing: nodeSpacing },
 			)
-			setNodes(layoutedNodes)
-			setEdges(layoutedEdges)
+			setNodes(layoutedNodes.map((node) => ({
+				...node,
+				type: node.type as NodeType,
+			})) as CustomNodeType[])
+			setEdges(layoutedEdges.map((edge) => ({
+				...edge,
+				type: (edge.type as EdgeType) ?? EdgeType.DEFAULT,
+			})) as CustomEdge[])
 			setTimeout(() => reactFlowInstance.fitView(), 50)
 		}
 	}, [reactFlowInstance, storeNodes, storeEdges, nodeSpacing, setNodes, setEdges])
@@ -351,18 +375,48 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 				style={{ width: '100%', height: '100%', flex: 1 }}>
 				{showGrid && <Background />}
 
-				<EnhancedMiniMap
-					style={{
+				<Box
+					sx={{
 						position: 'absolute',
 						bottom: 20,
 						right: 20,
-						background: theme.palette.background.paper,
-						border: `1px solid ${theme.palette.divider}`,
-						borderRadius: theme.shape.borderRadius,
+						zIndex: 5,
 					}}
-					zoomable
-					pannable
-				/>
+				>
+					<EnhancedMiniMap
+						zoomable
+						pannable
+						nodes={nodesWithHandlers.map((node) => {
+							// Remove handlers from data to match Node interface
+							const { onEdit, onDelete, onChat, ...nodeData } = node.data
+							// Convert CSSProperties to plain object
+							const styleObj = node.style ? Object.fromEntries(Object.entries(node.style)) : {}
+							return {
+								id: node.id,
+								type: node.type,
+								position: node.position,
+								data: nodeData,
+								style: styleObj,
+							} as Node
+						})}
+						edges={storeEdges.map((edge) => {
+							// Convert CSSProperties to plain object
+							const styleObj = edge.style ? Object.fromEntries(Object.entries(edge.style)) : {}
+							return {
+								id: edge.id,
+								source: edge.source,
+								target: edge.target,
+								type: edge.type,
+								label: edge.label?.toString(),
+								style: styleObj,
+							} as Edge
+						})}
+						onNodeClick={handleEditNode}
+						backgroundColor={theme.palette.background.paper}
+						borderColor={theme.palette.divider}
+						nodeBorderRadius={4}
+					/>
+				</Box>
 
 				<FloatingControls
 					position={mousePosition}

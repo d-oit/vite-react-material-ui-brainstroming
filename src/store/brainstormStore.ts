@@ -86,14 +86,20 @@ const convertToProjectEdge = (edge: CustomEdge): ProjectEdge => {
 // Configure logger to show debug messages
 loggerService.configure({ minLogLevel: 'debug' })
 
+// Create a single debounced save instance
 const debouncedSave = debounce(async (projectId: string, nodes: CustomNodeType[], edges: CustomEdge[], shouldAutoSave: boolean) => {
-	console.log('🔄 debouncedSave triggered', {
-		projectId,
-		nodesCount: nodes.length,
-		edgesCount: edges.length,
-		shouldAutoSave,
-		autoSaveFromState: useBrainstormStore.getState().autoSave
-	})
+    // Get fresh state to ensure we're saving the latest data
+    const currentState = useBrainstormStore.getState();
+    const currentNodes = currentState.nodes;
+    const currentEdges = currentState.edges;
+
+    console.log('🔄 debouncedSave triggered', {
+        projectId,
+        nodesCount: currentNodes.length,
+        edgesCount: currentEdges.length,
+        shouldAutoSave,
+        autoSaveFromState: currentState.autoSave
+    })
 	loggerService.info('Saving project changes', { projectId, nodesCount: nodes.length, edgesCount: edges.length })
 	
 	if (!projectId || !shouldAutoSave) {
@@ -284,11 +290,27 @@ export const useBrainstormStore = create<BrainstormState>((set, get) => ({
             })
 
             if (project) {
+                // Convert nodes and edges with proper type information
+                const convertedNodes = (project.nodes || []).map(node => ({
+                    ...node,
+                    type: node.type as NodeType,
+                    data: {
+                        ...node.data,
+                        type: node.type as NodeType,
+                        updatedAt: node.data?.updatedAt || new Date().toISOString()
+                    }
+                })) as CustomNodeType[];
+
+                const convertedEdges = (project.edges || []).map(edge => ({
+                    ...edge,
+                    type: edge.type || EdgeType.DEFAULT
+                })) as CustomEdge[];
+
                 const storeState = {
-                    nodes: project.nodes as CustomNodeType[],
-                    edges: project.edges as CustomEdge[],
+                    nodes: convertedNodes,
+                    edges: convertedEdges,
                     projectId,
-                    autoSave: project.syncSettings?.autoSave ?? true, // Initialize autoSave from sync settings
+                    autoSave: project.syncSettings?.autoSave ?? true,
                 };
                 
                 // Set the state
