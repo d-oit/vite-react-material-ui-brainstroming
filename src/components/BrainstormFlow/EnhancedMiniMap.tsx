@@ -8,50 +8,22 @@ import {
 } from '@mui/icons-material'
 import { Box, IconButton, Tooltip, useTheme } from '@mui/material'
 import React, { useState } from 'react'
-import { MiniMap as ReactFlowMiniMap } from 'reactflow'
+import { MiniMap as ReactFlowMiniMap, Node, MiniMapProps } from 'reactflow'
 
 import { useI18n } from '../../contexts/I18nContext'
-import type { Node, Edge } from '../../types'
+import type { Edge } from '../../types'
 
-interface EnhancedMiniMapProps {
-	nodes: Node[];
-	edges: Edge[];
-	onNodeClick: (nodeId: string) => void;
-	onZoomIn?: () => void;
-	onZoomOut?: () => void;
-	onFitView?: () => void;
-	nodeColor?: string | ((node: Node) => string);
-	nodeBorderRadius?: number;
-	nodeStrokeWidth?: number;
-	nodeStrokeColor?: string;
-	maskColor?: string;
-	backgroundColor?: string;
-	borderColor?: string;
-	zoomable?: boolean;
-	pannable?: boolean;
+interface EnhancedMiniMapProps extends Omit<MiniMapProps, 'onNodeClick'> {
 	defaultVisible?: boolean;
 	defaultExpanded?: boolean;
+	onNodeClick: (nodeId: string) => void;
 }
 
 export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
-	nodes,
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	edges,
-	onNodeClick,
-	onZoomIn,
-	onZoomOut,
-	onFitView,
-	nodeColor,
-	nodeBorderRadius = 4,
-	nodeStrokeWidth = 2,
-	nodeStrokeColor,
-	maskColor,
-	backgroundColor,
-	borderColor,
-	zoomable = true,
-	pannable = true,
 	defaultVisible = true,
 	defaultExpanded = false,
+	onNodeClick,
+	...miniMapProps
 }) => {
 	const theme = useTheme()
 	const { t } = useI18n()
@@ -143,24 +115,8 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
 				</Box>
 
 				<ReactFlowMiniMap
-					nodes={nodes}
-					nodeColor={nodeColor}
-					nodeBorderRadius={nodeBorderRadius}
-					nodeStrokeWidth={nodeStrokeWidth}
-					nodeStrokeColor={nodeStrokeColor || defaultNodeStrokeColor}
-					maskColor={maskColor || defaultMaskColor}
-					zoomable={zoomable}
-					pannable={pannable}
-					onNodeClick={onNodeClick}
-					style={{
-						backgroundColor: backgroundColor || defaultBackgroundColor,
-						border: `1px solid ${borderColor || defaultBorderColor}`,
-						width: expanded ? 240 : 160,
-						height: expanded ? 180 : 120,
-						transition: 'width 0.3s ease, height 0.3s ease',
-						boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
-						borderRadius: 4,
-					}}
+					{...miniMapProps}
+					onNodeClick={(_, node) => onNodeClick(node.id)}
 					aria-hidden="true"
 					id="minimap-container"
 				/>

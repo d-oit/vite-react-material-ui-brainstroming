@@ -386,35 +386,14 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 					<EnhancedMiniMap
 						zoomable
 						pannable
-						nodes={nodesWithHandlers.map((node) => {
-							// Remove handlers from data to match Node interface
-							const { onEdit, onDelete, onChat, ...nodeData } = node.data
-							// Convert CSSProperties to plain object
-							const styleObj = node.style ? Object.fromEntries(Object.entries(node.style)) : {}
-							return {
-								id: node.id,
-								type: node.type,
-								position: node.position,
-								data: nodeData,
-								style: styleObj,
-							} as Node
-						})}
-						edges={storeEdges.map((edge) => {
-							// Convert CSSProperties to plain object
-							const styleObj = edge.style ? Object.fromEntries(Object.entries(edge.style)) : {}
-							return {
-								id: edge.id,
-								source: edge.source,
-								target: edge.target,
-								type: edge.type,
-								label: edge.label?.toString(),
-								style: styleObj,
-							} as Edge
-						})}
 						onNodeClick={handleEditNode}
-						backgroundColor={theme.palette.background.paper}
-						borderColor={theme.palette.divider}
-						nodeBorderRadius={4}
+						style={{
+							backgroundColor: theme.palette.background.paper,
+							border: `1px solid ${theme.palette.divider}`,
+							width: 160,
+							height: 120,
+							borderRadius: 4
+						}}
 					/>
 				</Box>
 
