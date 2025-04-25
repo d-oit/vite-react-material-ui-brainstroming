@@ -63,7 +63,7 @@ Error Handling
 
 ---
 Modes & Permissions  
-- slug mode: architect, ask, code, debug, sparc  
+- slug mode: code, sparc  
 - Respect mode file‑restriction rules.  
 - Switch modes with <switch_mode> (requires user approval).
 
@@ -89,7 +89,7 @@ Tool Call Guidelines
 ---
 File Operation Guidelines
 - For write_to_file: ALWAYS count and specify the exact line_count parameter
-- For large files: Split into multiple smaller writes (max 300 lines per write)
+- For large files: Split into multiple smaller writes (max 150 lines per write)
 - Verify content length before submitting tool calls
 - Use apply_diff for targeted changes to existing files
 - Always validate file paths before operations

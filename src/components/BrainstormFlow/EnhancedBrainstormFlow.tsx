@@ -306,135 +306,109 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 	useKeyboardShortcuts({ reactFlowInstance, saveCurrentState, removeNode, nodeSpacing })
 
 	return (
-		<ReactFlowProvider>
-			<div
-				ref={flowRef}
-				className={`flow-container ${isFullscreen ? 'fullscreen' : ''}`}
-				style={{
-					width: '100%',
-					height: isFullscreen ? '100vh' : '80vh',
-					minHeight: '500px',
-					display: 'flex',
-					flexDirection: 'column',
-					position: 'relative',
-				}}
-				onMouseMove={handleMouseMove}>
-				<EnhancedZoomControls
-					zoomIn={() => reactFlowInstance?.zoomIn()}
-					zoomOut={() => reactFlowInstance?.zoomOut()}
-					fitView={() => reactFlowInstance?.fitView()}
-					zoomLevel={viewport.zoom}
-					onZoomChange={(zoom) => reactFlowInstance?.setViewport({ x: viewport.x, y: viewport.y, zoom })}
-					showGrid={showGrid}
-					onToggleGrid={() => setShowGrid(!showGrid)}
-					isFullscreen={isFullscreen}
-					onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+		<div
+			ref={flowRef}
+			className={`flow-container ${isFullscreen ? 'fullscreen' : ''}`}
+			style={{
+				width: '100%',
+				height: isFullscreen ? '100vh' : '80vh',
+				minHeight: '500px',
+				display: 'flex',
+				flexDirection: 'column',
+				position: 'relative',
+			}}
+			onMouseMove={handleMouseMove}>
+			<EnhancedZoomControls
+				zoomIn={() => reactFlowInstance?.zoomIn()}
+				zoomOut={() => reactFlowInstance?.zoomOut()}
+				fitView={() => reactFlowInstance?.fitView()}
+				zoomLevel={viewport.zoom}
+				onZoomChange={(zoom) => reactFlowInstance?.setViewport({ x: viewport.x, y: viewport.y, zoom })}
+				showGrid={showGrid}
+				onToggleGrid={() => setShowGrid(!showGrid)}
+				isFullscreen={isFullscreen}
+				onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+			/>
+			<ReactFlow
+				nodes={nodesWithHandlers}
+				edges={storeEdges}
+				onNodesChange={onNodesChange}
+				onEdgesChange={onEdgesChange}
+				onConnect={onConnect}
+				onNodeDragStop={onNodeDragStop}
+				onInit={(instance: ReactFlowInstance) => setReactFlowInstance(instance)}
+				onMove={handleViewportChange}
+				nodeTypes={nodeTypes}
+				fitView
+				minZoom={0.1}
+				maxZoom={1.5}
+				attributionPosition="bottom-left"
+				draggable={true}
+				selectionOnDrag={true}
+				panOnDrag={true}
+				zoomOnScroll={true}
+				panOnScroll={false}
+				style={{ width: '100%', height: '100%', flex: 1 }}>
+				{showGrid && <Background />}
+
+				<EnhancedMiniMap
+					style={{
+						position: 'absolute',
+						bottom: 20,
+						right: 20,
+						background: theme.palette.background.paper,
+						border: `1px solid ${theme.palette.divider}`,
+						borderRadius: theme.shape.borderRadius,
+					}}
+					zoomable
+					pannable
 				/>
-				<ReactFlow
-					nodes={nodesWithHandlers}
-					edges={storeEdges}
-					onNodesChange={onNodesChange}
-					onEdgesChange={onEdgesChange}
-					onConnect={onConnect}
-					onNodeDragStop={onNodeDragStop}
-					onInit={(instance: ReactFlowInstance) => setReactFlowInstance(instance)}
-					onMove={handleViewportChange}
-					nodeTypes={nodeTypes}
-					fitView
-					minZoom={0.1}
-					maxZoom={1.5}
-					attributionPosition="bottom-left"
-					draggable={true}
-					selectionOnDrag={true}
-					panOnDrag={true}
-					zoomOnScroll={true}
-					panOnScroll={false}
-					style={{ width: '100%', height: '100%', flex: 1 }}>
-					{showGrid && <Background />}
-					
-					<EnhancedMiniMap
-						style={{
-							position: 'absolute',
-							bottom: 20,
-							right: 20,
-							background: theme.palette.background.paper,
-							border: `1px solid ${theme.palette.divider}`,
-							borderRadius: theme.shape.borderRadius,
+
+				<FloatingControls
+					position={mousePosition}
+					showArchived={showArchived}
+					onToggleArchived={() => setShowArchived(!showArchived)}
+					viewport={viewport}
+				/>
+
+				{showEditDialog && selectedNode && (
+					<NodeEditDialog
+						open={showEditDialog}
+						onClose={handleCloseEditDialog}
+						initialData={selectedNode.data}
+						initialType={selectedNode.type}
+						onSave={(data: Partial<NodeData>, type: NodeType) => {
+							handleSaveNodeEdit(selectedNode.id, data, type)
+							handleCloseEditDialog()
 						}}
-						zoomable
-						pannable
 					/>
+				)}
 
-					<Panel position="top-right" style={{ marginRight: 10, marginTop: 10 }}>
-						<Box sx={{ p: 1, bgcolor: 'background.paper', borderRadius: 1 }}>
-							<Button
-								variant="contained"
-								size="small"
-								onClick={handleAutoLayout}
-								sx={{ mb: 1 }}
-							>
-								Auto Layout (Ctrl+L)
-							</Button>
-							<Typography variant="caption" display="block" gutterBottom>
-								Node Spacing
-							</Typography>
-							<Slider
-								value={nodeSpacing}
-								onChange={(_, value) => setNodeSpacing(value as number)}
-								min={20}
-								max={200}
-								step={10}
-								sx={{ width: 120 }}
-							/>
-						</Box>
-					</Panel>
-
-					<FloatingControls
-						position={mousePosition}
-						showArchived={showArchived}
-						onToggleArchived={() => setShowArchived(!showArchived)}
-						viewport={viewport}
+				{showDeleteDialog && selectedNode && (
+					<DeleteConfirmationDialog
+						open={showDeleteDialog}
+						onClose={() => {
+							setShowDeleteDialog(false)
+							setSelectedNode(null)
+						}}
+						onConfirm={handleConfirmDelete}
+						title="Delete Node"
+						message={`Are you sure you want to delete "${selectedNode.data.title}"? This action cannot be undone.`}
 					/>
+				)}
 
-					{showEditDialog && selectedNode && (
-						<NodeEditDialog
-							open={showEditDialog}
-							onClose={handleCloseEditDialog}
-							initialData={selectedNode.data}
-							initialType={selectedNode.type}
-							onSave={(data: Partial<NodeData>, type: NodeType) => {
-								handleSaveNodeEdit(selectedNode.id, data, type)
-								handleCloseEditDialog()
-							}}
-						/>
-					)}
-
-					{showDeleteDialog && selectedNode && (
-						<DeleteConfirmationDialog
-							open={showDeleteDialog}
-							onClose={() => {
-								setShowDeleteDialog(false)
-								setSelectedNode(null)
-							}}
-							onConfirm={handleConfirmDelete}
-							title="Delete Node"
-							message={`Are you sure you want to delete "${selectedNode.data.title}"? This action cannot be undone.`}
-						/>
-					)}
-
-					{showChatPanel && selectedNode && (
-						<LLMChatPanel
-							projectId={projectId}
-							open={showChatPanel}
-							onClose={() => {
-								setShowChatPanel(false)
-								setSelectedNode(null)
-							}}
-							onInsightGenerated={handleInsightGenerated}
-						/>
-					)}
-				</ReactFlow>
-			</div>
-		</ReactFlowProvider>
+				{showChatPanel && selectedNode && (
+					<LLMChatPanel
+						projectId={projectId}
+						open={showChatPanel}
+						onClose={() => {
+							setShowChatPanel(false)
+							setSelectedNode(null)
+						}}
+						onInsightGenerated={handleInsightGenerated}
+					/>
+				)}
+			</ReactFlow>
+		</div>
 	)
 }

@@ -1,6 +1,7 @@
 import { Box, Paper, Typography, Chip, CircularProgress, Snackbar, Alert } from '@mui/material'
 import { useState, useCallback, useMemo, useRef } from 'react'
 import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from 'reactflow' // Use aliases for clarity
+import { ReactFlowProvider } from 'reactflow'
 
 import { useFocusManagement } from '../../hooks/useFocusManagement'
 import { useKeyboardNavigation } from '../../hooks/useKeyboardNavigation'
@@ -218,13 +219,15 @@ export const ProjectBrainstormingSection = ({
 							setEdges(initialEdges)
 							setErrorMessage(null)
 						}}>
-						<EnhancedBrainstormFlow
+						<ReactFlowProvider>
+							<EnhancedBrainstormFlow
 							initialNodes={flowNodes}
 							initialEdges={flowEdges}
 							onSave={handleSaveFromFlow}
 							aria-label="Brainstorming Flow"
 							key={`flow-${projectId}`} // Only recreate when projectId changes
-						/>
+							/>
+						</ReactFlowProvider>
 					</ErrorBoundary>
 				</Box>
 			</Paper>

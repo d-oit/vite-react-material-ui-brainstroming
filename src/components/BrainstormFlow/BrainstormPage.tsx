@@ -2,6 +2,7 @@ import SaveIcon from '@mui/icons-material/Save'
 import { Box, Paper, Typography, Fab } from '@mui/material'
 import React, { Suspense } from 'react'
 import type { Node, Edge } from 'reactflow'
+import { ReactFlowProvider } from 'reactflow'
 
 import { useI18n } from '../../contexts/I18nContext'
 import { useBrainstormStore } from '../../store/brainstormStore'
@@ -95,11 +96,13 @@ const BrainstormPage: React.FC<BrainstormPageProps> = ({
 								position: 'relative',
 								height: '100%',
 							}}>
-							<EnhancedBrainstormFlow
+							<ReactFlowProvider>
+								<EnhancedBrainstormFlow
 								initialNodes={initialNodes}
 								initialEdges={initialEdges}
 								onSave={handleSave}
-							/>
+								/>
+							</ReactFlowProvider>
 						</Paper>
 					</Suspense>
 				</BrainstormErrorBoundary>
