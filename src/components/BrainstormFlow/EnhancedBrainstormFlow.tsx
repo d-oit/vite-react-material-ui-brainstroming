@@ -1,4 +1,4 @@
-import { FullscreenExit as FullscreenExitIcon, Save as SaveIcon } from '@mui/icons-material'
+import { FullscreenExit as FullscreenExitIcon, Fullscreen as FullscreenIcon, Save as SaveIcon } from '@mui/icons-material'
 import { Box, IconButton, Menu, MenuItem, Typography, Divider, Slider, useTheme, Button } from '@mui/material'
 import React, { useCallback, useRef, useState, useEffect, useMemo } from 'react'
 import type {
@@ -94,6 +94,37 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 	const [showGrid, setShowGrid] = useState(true)
 	const [nodeSpacing, setNodeSpacing] = useState(50)
 	const { settings } = useSettings()
+
+	// Fullscreen handling
+	const toggleFullscreen = useCallback(() => {
+		if (!flowRef.current) return
+
+		if (!document.fullscreenElement) {
+			flowRef.current.requestFullscreen().then(() => {
+				setIsFullscreen(true)
+			}).catch((err) => {
+				console.error('Error attempting to enable fullscreen:', err)
+			})
+		} else {
+			document.exitFullscreen().then(() => {
+				setIsFullscreen(false)
+			}).catch((err) => {
+				console.error('Error attempting to exit fullscreen:', err)
+			})
+		}
+	}, [])
+
+	// Handle fullscreen change events
+	useEffect(() => {
+		const handleFullscreenChange = () => {
+			setIsFullscreen(!!document.fullscreenElement)
+		}
+
+		document.addEventListener('fullscreenchange', handleFullscreenChange)
+		return () => {
+			document.removeEventListener('fullscreenchange', handleFullscreenChange)
+		}
+	}, [])
 
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 	const [isSaving, setIsSaving] = useState(false)
@@ -351,8 +382,22 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 				showGrid={showGrid}
 				onToggleGrid={() => setShowGrid(!showGrid)}
 				isFullscreen={isFullscreen}
-				onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+				onToggleFullscreen={toggleFullscreen}
 			/>
+			<Panel position="top-right" style={{ margin: '10px' }}>
+				<IconButton
+					onClick={toggleFullscreen}
+					sx={{
+						backgroundColor: theme.palette.background.paper,
+						'&:hover': {
+							backgroundColor: theme.palette.action.hover,
+						},
+					}}
+					size="large"
+				>
+					{isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+				</IconButton>
+			</Panel>
 			<ReactFlow
 				nodes={nodesWithHandlers}
 				edges={storeEdges}
@@ -392,7 +437,7 @@ export const EnhancedBrainstormFlow: React.FC<EnhancedBrainstormFlowProps> = ({
 							border: `1px solid ${theme.palette.divider}`,
 							width: 160,
 							height: 120,
-							borderRadius: 4
+							borderRadius: 4,
 						}}
 					/>
 				</Box>
