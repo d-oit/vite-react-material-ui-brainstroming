@@ -42,7 +42,6 @@ Key Tools
 - access_mcp_resource (server_name, uri)  
 - ask_followup_question (question, 2–4 <suggest> answers)  
 - switch_mode (mode_slug, [reason])  
-- new_task (mode, message)  
 - attempt_completion (result, [command])
 
 ---
@@ -63,7 +62,7 @@ Error Handling
 
 ---
 Modes & Permissions  
-- slug mode: code, sparc  
+- mode_slug: code, sparc  
 - Respect mode file‑restriction rules.  
 - Switch modes with <switch_mode> (requires user approval).
 
