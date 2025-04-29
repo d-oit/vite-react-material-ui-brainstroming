@@ -1,19 +1,25 @@
-import '@testing-library/jest-dom'
 import type { TestingLibraryMatchers } from '@testing-library/jest-dom/matchers'
-import { cleanup } from '@testing-library/react'
+import type { ReactNode, MouseEvent } from 'react'
 import React from 'react'
-import type { ReactNode } from 'react'
+import type { Node, Edge, NodeChange, EdgeChange, Connection, XYPosition } from 'reactflow'
+import '@testing-library/jest-dom'
 import { vi, beforeEach, afterEach } from 'vitest'
 
+interface CustomMatchers<R = unknown> {
+	toHaveTestId(id: string): R
+}
+
 declare module 'vitest' {
-	interface Assertion<T = any> extends TestingLibraryMatchers<typeof expect.stringContaining, T> {}
+	interface Assertion extends TestingLibraryMatchers<typeof expect.stringContaining, void> {
+		toHaveTestId(id: string): void
+	}
 }
 
 // Mock window.matchMedia
 beforeEach(() => {
 	Object.defineProperty(window, 'matchMedia', {
 		writable: true,
-		value: vi.fn().mockImplementation((query) => ({
+		value: vi.fn().mockImplementation((query: string) => ({
 			matches: false,
 			media: query,
 			onchange: null,
@@ -45,13 +51,9 @@ class MockIntersectionObserver implements IntersectionObserver {
 	takeRecords = vi.fn()
 }
 
-Object.defineProperty(window, 'IntersectionObserver', {
-	writable: true,
-	configurable: true,
-	value: MockIntersectionObserver,
-})
+window.IntersectionObserver = MockIntersectionObserver
 
-// Mock ResizeObserver - Ensure this is correctly assigned globally
+// Mock ResizeObserver
 class MockResizeObserver implements ResizeObserver {
 	constructor() {
 		this.observe = vi.fn()
@@ -64,38 +66,87 @@ class MockResizeObserver implements ResizeObserver {
 	disconnect = vi.fn()
 }
 
-Object.defineProperty(window, 'ResizeObserver', {
-	writable: true,
-	configurable: true,
-	value: MockResizeObserver,
-})
+window.ResizeObserver = MockResizeObserver
 
 // Mock fetch
 window.fetch = vi.fn()
 
-// Create a mock React component
-const MockReactFlow = ({ children }: { children: ReactNode }) => {
-	return React.createElement('div', null, children)
+interface ReactFlowProps {
+	children?: ReactNode
+	onNodesChange?: (changes: NodeChange[]) => void
+	onEdgesChange?: (changes: EdgeChange[]) => void
+	onConnect?: (connection: Connection) => void
+	onNodeClick?: (event: MouseEvent, node: Node) => void
+	onNodeDragStop?: (event: MouseEvent, node: Node) => void
 }
 
-// Mock react-flow
+const MockReactFlow: React.FC<ReactFlowProps> = ({
+	children,
+	onNodesChange,
+	onEdgesChange,
+	onConnect,
+	onNodeClick,
+	onNodeDragStop,
+}) => {
+	return React.createElement('div', {
+		'data-testid': 'react-flow',
+		onClick: (e: MouseEvent) => {
+			if (onNodeClick) {
+				onNodeClick(e, { id: 'test-node' } as Node)
+			}
+		},
+		onDragEnd: (e: MouseEvent) => {
+			if (onNodeDragStop) {
+				onNodeDragStop(e, { id: 'test-node' } as Node)
+			}
+		},
+	}, children)
+}
+
+// Enhanced React Flow mock
 vi.mock('reactflow', async () => {
 	const actual = await vi.importActual('reactflow')
+	const mockNodes: Node[] = []
+	const mockEdges: Edge[] = []
+
 	return {
 		...actual,
-		default: MockReactFlow, // Add default export
 		ReactFlow: MockReactFlow,
 		Background: () => null,
 		Controls: () => null,
-		useNodesState: () => [React.useState([])[0], vi.fn(), vi.fn()],
-		useEdgesState: () => [React.useState([])[0], vi.fn(), vi.fn()],
+		useNodesState: () => {
+			const [nodes, setNodes] = React.useState<Node[]>(mockNodes)
+			const onNodesChange = (changes: NodeChange[]) => {
+				changes.forEach((change) => {
+					if (change.type === 'remove') {
+						mockNodes.splice(mockNodes.findIndex((n) => n.id === change.id), 1)
+					}
+				})
+				setNodes([...mockNodes])
+			}
+			return [nodes, setNodes, onNodesChange]
+		},
+		useEdgesState: () => {
+			const [edges, setEdges] = React.useState<Edge[]>(mockEdges)
+			const onEdgesChange = (changes: EdgeChange[]) => {
+				changes.forEach((change) => {
+					if (change.type === 'remove') {
+						mockEdges.splice(mockEdges.findIndex((e) => e.id === change.id), 1)
+					}
+				})
+				setEdges([...mockEdges])
+			}
+			return [edges, setEdges, onEdgesChange]
+		},
 		MarkerType: {
 			ArrowClosed: 'arrowclosed',
 		},
-		// Add additional exports that might be used
 		Panel: () => null,
 		MiniMap: () => null,
-		addEdge: vi.fn((params, edges) => [...edges, { id: `${params.source}-${params.target}`, ...params }]),
+		addEdge: vi.fn((params: Connection, edges: Edge[]) => [
+			...edges,
+			{ id: `${params.source}-${params.target}`, ...params },
+		]),
 		Position: {
 			Left: 'left',
 			Top: 'top',
@@ -107,27 +158,41 @@ vi.mock('reactflow', async () => {
 			zoomIn: vi.fn(),
 			zoomOut: vi.fn(),
 			setCenter: vi.fn(),
-			getNodes: vi.fn().mockReturnValue([]),
-			getEdges: vi.fn().mockReturnValue([]),
-			setNodes: vi.fn(),
-			setEdges: vi.fn(),
-			project: vi.fn().mockImplementation(({ x, y }) => ({ x, y })),
+			getNodes: vi.fn().mockReturnValue(mockNodes),
+			getEdges: vi.fn().mockReturnValue(mockEdges),
+			setNodes: vi.fn((nodes: Node[]) => {
+				mockNodes.length = 0
+				mockNodes.push(...nodes)
+			}),
+			setEdges: vi.fn((edges: Edge[]) => {
+				mockEdges.length = 0
+				mockEdges.push(...edges)
+			}),
+			project: vi.fn().mockImplementation((position: XYPosition) => position),
+			deleteElements: vi.fn(({ nodes, edges }: { nodes?: Node[]; edges?: Edge[] }) => {
+				if (nodes?.length) {
+					const nodeIds = nodes.map((n) => n.id)
+					mockNodes.splice(0, mockNodes.length, ...mockNodes.filter((n) => !nodeIds.includes(n.id)))
+				}
+				if (edges?.length) {
+					const edgeIds = edges.map((e) => e.id)
+					mockEdges.splice(0, mockEdges.length, ...mockEdges.filter((e) => !edgeIds.includes(e.id)))
+				}
+			}),
 		}),
 	}
 })
 
-// Mock idGenerator - Keep actual isValidId, mock generateUniqueId with counter and better format
+// Mock ID generator
 vi.mock('./utils/idGenerator', async () => {
 	const actual = await vi.importActual<typeof import('./utils/idGenerator')>('./utils/idGenerator')
 	let counter = 0
 	return {
-		...actual, // Keep actual implementation for isValidId
-		generateUniqueId: vi.fn(() => `abc-${counter++}`), // Generate format closer to regex
+		...actual,
+		generateUniqueId: vi.fn(() => `test-node-${counter++}`),
 	}
 })
 
-// Clean up after each test
 afterEach(() => {
-	cleanup()
 	vi.clearAllMocks()
 })

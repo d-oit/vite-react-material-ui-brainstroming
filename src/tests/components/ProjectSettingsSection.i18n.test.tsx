@@ -69,7 +69,8 @@ describe('ProjectSettingsSection i18n', () => {
 		template: ProjectTemplate.CUSTOM,
 		syncSettings: {
 			enableS3Sync: true,
-			syncFrequency: 'interval',
+			syncFrequency: 'interval' as 'interval' | 'onSave' | 'manual',
+			autoSave: false,
 			intervalMinutes: 30,
 		},
 	}
@@ -95,7 +96,7 @@ describe('ProjectSettingsSection i18n', () => {
 		expect(screen.getByText('S3 Synchronization')).toBeInTheDocument()
 		expect(screen.getByText('Enable S3 Synchronization')).toBeInTheDocument()
 		expect(screen.getAllByText('Sync Frequency')[0]).toBeInTheDocument()
-		expect(screen.getByText('Interval (minutes)')).toBeInTheDocument()
+		expect(screen.getByLabelText('Interval (minutes)')).toBeInTheDocument()
 		expect(screen.getByText('Sync Now')).toBeInTheDocument()
 
 		// Check Import/Export section translations
@@ -115,7 +116,7 @@ describe('ProjectSettingsSection i18n', () => {
 		expect(screen.getByText('S3 Synchronisation')).toBeInTheDocument()
 		expect(screen.getByText('S3-Synchronisation aktivieren')).toBeInTheDocument()
 		expect(screen.getAllByText('Synchronisationshäufigkeit')[0]).toBeInTheDocument()
-		expect(screen.getByText('Intervall (Minuten)')).toBeInTheDocument()
+		expect(screen.getByLabelText('Intervall (Minuten)')).toBeInTheDocument()
 		expect(screen.getByText('Jetzt synchronisieren')).toBeInTheDocument()
 
 		// Check Import/Export section translations
@@ -135,7 +136,7 @@ describe('ProjectSettingsSection i18n', () => {
 		expect(screen.getByText('Synchronisation S3')).toBeInTheDocument()
 		expect(screen.getByText('Activer la synchronisation S3')).toBeInTheDocument()
 		expect(screen.getAllByText('Fréquence de synchronisation')[0]).toBeInTheDocument()
-		expect(screen.getByText('Intervalle (minutes)')).toBeInTheDocument()
+		expect(screen.getByLabelText('Intervalle (minutes)')).toBeInTheDocument()
 		expect(screen.getByText('Synchroniser maintenant')).toBeInTheDocument()
 
 		// Check Import/Export section translations
@@ -155,7 +156,7 @@ describe('ProjectSettingsSection i18n', () => {
 		expect(screen.getByText('Sincronización S3')).toBeInTheDocument()
 		expect(screen.getByText('Habilitar sincronización S3')).toBeInTheDocument()
 		expect(screen.getAllByText('Frecuencia de sincronización')[0]).toBeInTheDocument()
-		expect(screen.getByText('Intervalo (minutos)')).toBeInTheDocument()
+		expect(screen.getByLabelText('Intervalo (minutos)')).toBeInTheDocument()
 		expect(screen.getByText('Sincronizar ahora')).toBeInTheDocument()
 
 		// Check Import/Export section translations

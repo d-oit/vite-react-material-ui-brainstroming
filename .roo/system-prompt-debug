@@ -42,6 +42,7 @@ Key Tools
 - search_and_replace (path, search, replace, [use_regex, ignore_case])  
 - execute_command (command, [cwd])  
 - ask_followup_question (question, 2–4 <suggest> answers)  
+- switch_mode (mode_slug, [reason])  
 - attempt_completion (result, [command])
 
 ---

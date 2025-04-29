@@ -4,7 +4,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { EnhancedBrainstormFlow } from '../../components/BrainstormFlow/EnhancedBrainstormFlow'
 import { I18nProvider } from '../../contexts/I18nContext'
 import { SettingsProvider } from '../../contexts/SettingsContext'
-import { NodeType } from '../../types'
+import { NodeType, EdgeType } from '../../types'
+import { createTestNode, createTestEdge } from '../../types/test-utils'
 import { mockResizeObserver } from '../test-utils'
 
 // Mock ReactFlow
@@ -21,7 +22,7 @@ interface MockReactFlowProps {
 // Mock components used in the test
 vi.mock('../../components/BrainstormFlow/NodeEditDialog', () => ({
 	default: ({ open, onClose, dialogTitle = 'Edit Node', node }: any) =>
-		open ? (
+		open === true ? (
 			<div role="dialog" aria-label={dialogTitle} data-testid="edit-node-dialog">
 				<h2>{dialogTitle}</h2>
 				<div data-testid="edit-form">
@@ -36,7 +37,7 @@ vi.mock('../../components/BrainstormFlow/NodeEditDialog', () => ({
 
 vi.mock('../../components/DeleteConfirmationDialog', () => ({
 	default: ({ open, onClose, onConfirm, title = 'Delete Confirmation' }: any) =>
-		open ? (
+		open === true ? (
 			<div
 				role="dialog"
 				aria-labelledby="delete-confirmation-dialog-title"
@@ -66,7 +67,7 @@ vi.mock('../../components/DeleteConfirmationDialog', () => ({
 
 vi.mock('../../features/brainstorming/LLMChatPanel', () => ({
 	default: ({ open, onClose }: any) =>
-		open ? (
+		open === true ? (
 			<div role="dialog" aria-label="Chat" data-testid="chat-panel-dialog">
 				<h2>Chat Panel</h2>
 				<textarea placeholder="Type your message..." data-testid="chat-input" />
@@ -85,14 +86,24 @@ vi.mock('reactflow', async () => {
 	const mockNodes = new Map()
 
 	const NodeComponent = ({ id, data }: { id: string; data?: { label?: string } }) => (
-		<div key={id} data-testid={`node-${id}`} onClick={() => mockNodes.get(id)?.onClick?.()}>
+		<div
+			key={id}
+			data-testid={`node-${id}`}
+			role="button"
+			tabIndex={0}
+			onClick={() => mockNodes.get(id)?.onClick?.()}
+			onKeyDown={(e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					mockNodes.get(id)?.onClick?.()
+				}
+			}}
+>
 			{data?.label}
 			<button
 				type="button"
 				aria-label="Delete node"
 				data-testid={`delete-${id}`}
-				onClick={(e) => {
-					e.stopPropagation()
+				onClick={() => {
 					mockNodes.get(id)?.onDelete?.()
 				}}
 			/>
@@ -125,7 +136,7 @@ vi.mock('reactflow', async () => {
 				mockNodes.set(node.id, {
 					onClick: () => {
 						// Simulate node click for edit
-						if (node.data?.onEdit) {
+						if (typeof node.data?.onEdit === 'function') {
 							node.data.onEdit(node)
 						} else {
 							onNodeClick?.(undefined, node)
@@ -133,7 +144,7 @@ vi.mock('reactflow', async () => {
 					},
 					onDelete: () => {
 						// Simulate delete action
-						if (node.data?.onDelete) {
+						if (typeof node.data?.onDelete === 'function') {
 							node.data.onDelete(node)
 						} else {
 							mockDispatch({ type: 'SHOW_DELETE_DIALOG', node })
@@ -162,7 +173,7 @@ vi.mock('reactflow', async () => {
 					},
 					onChat: () => {
 						// Simulate chat action
-						if (node.data?.onChat) {
+						if (typeof node.data?.onChat === 'function') {
 							node.data.onChat(node)
 						} else {
 							mockDispatch({ type: 'SHOW_CHAT_PANEL', node })
@@ -199,22 +210,24 @@ vi.mock('reactflow', async () => {
 		Background: vi.fn().mockImplementation(() => <div data-testid="background" />),
 	}
 
+	const useReactFlow = vi.fn().mockReturnValue({
+		fitView: vi.fn(),
+		zoomIn: vi.fn(),
+		zoomOut: vi.fn(),
+		setCenter: vi.fn(),
+		getNodes: vi.fn().mockReturnValue([]),
+		getEdges: vi.fn().mockReturnValue([]),
+		setNodes: vi.fn(),
+		setEdges: vi.fn(),
+		project: vi.fn().mockImplementation(({ x, y }) => ({ x, y })),
+	})
+
 	return {
 		__esModule: true,
 		default: MockReactFlow,
 		ReactFlow: MockReactFlow,
 		...mockComponents,
-		useReactFlow: vi.fn().mockReturnValue({
-			fitView: vi.fn(),
-			zoomIn: vi.fn(),
-			zoomOut: vi.fn(),
-			setCenter: vi.fn(),
-			getNodes: vi.fn().mockReturnValue([]),
-			getEdges: vi.fn().mockReturnValue([]),
-			setNodes: vi.fn(),
-			setEdges: vi.fn(),
-			project: vi.fn().mockImplementation(({ x, y }) => ({ x, y })),
-		}),
+		useReactFlow,
 		Background: vi.fn().mockImplementation(() => <div data-testid="background" />),
 		Controls: vi.fn().mockImplementation(() => <div data-testid="controls" />),
 		MiniMap: vi.fn().mockImplementation(() => <div data-testid="minimap" />),
@@ -244,41 +257,50 @@ describe('EnhancedBrainstormFlow', () => {
 	})
 
 	it('renders with the correct initial nodes and edges', () => {
-		// Create test data
 		const nodes = [
-			{
+			createTestNode({
 				id: 'node-1',
 				type: NodeType.IDEA,
 				data: {
+					id: 'node-1',
+					title: 'Test Node 1',
+					content: 'This is test node 1',
 					label: 'Test Node 1',
-					type: NodeType.IDEA,
-					notes: 'This is test node 1',
+					createdAt: new Date().toISOString(),
+					updatedAt: new Date().toISOString(),
 				},
 				position: { x: 0, y: 0 },
-			},
-			{
+			}),
+			createTestNode({
 				id: 'node-2',
 				type: NodeType.TASK,
 				data: {
+					id: 'node-2',
+					title: 'Test Node 2',
+					content: 'This is test node 2',
 					label: 'Test Node 2',
-					type: NodeType.TASK,
-					notes: 'This is test node 2',
+					createdAt: new Date().toISOString(),
+					updatedAt: new Date().toISOString(),
 				},
 				position: { x: 200, y: 0 },
-			},
+			}),
 		]
 
-		const edges = [
-			{
-				id: 'edge-1',
-				source: 'node-1',
-				target: 'node-2',
-				type: 'smoothstep',
-			},
-		]
+		const edges = [createTestEdge({
+			id: 'edge-1',
+			source: 'node-1',
+			target: 'node-2',
+			type: EdgeType.DEFAULT,
+		})]
 
 		// Render the component
-		renderWithProviders(<EnhancedBrainstormFlow initialNodes={nodes} initialEdges={edges} />)
+		renderWithProviders(
+			<EnhancedBrainstormFlow
+				projectId="test-project"
+				initialNodes={nodes}
+				initialEdges={edges}
+			/>
+		)
 
 		// Check that the component is rendered
 		expect(screen.getByTestId('react-flow')).toBeInTheDocument()
@@ -290,7 +312,7 @@ describe('EnhancedBrainstormFlow', () => {
 
 	it.skip('opens the add node dialog when the add button is clicked', async () => {
 		// Render the component
-		renderWithProviders(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} />)
+		renderWithProviders(<EnhancedBrainstormFlow projectId="test-project" initialNodes={[]} initialEdges={[]} />)
 
 		// Click the add button
 		const addNodeButton = screen.getByRole('button', { name: 'Add node' })
@@ -317,7 +339,7 @@ describe('EnhancedBrainstormFlow', () => {
 		const mockOnNodesChange = vi.fn()
 
 		// Render the component
-		renderWithProviders(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} />)
+		renderWithProviders(<EnhancedBrainstormFlow projectId="test-project" initialNodes={[]} initialEdges={[]} />)
 
 		// Click the add button
 		const addNodeButton = screen.getByRole('button', { name: 'Add node' })
@@ -350,20 +372,29 @@ describe('EnhancedBrainstormFlow', () => {
 	it('opens the edit node dialog when a node is clicked', async () => {
 		// Create test data
 		const nodes = [
-			{
+			createTestNode({
 				id: 'node-1',
 				type: NodeType.IDEA,
 				data: {
+					id: 'node-1',
+					title: 'Test Node',
+					content: 'This is a test node',
 					label: 'Test Node',
-					type: NodeType.IDEA,
-					notes: 'This is a test node',
+					createdAt: new Date().toISOString(),
+					updatedAt: new Date().toISOString(),
 				},
 				position: { x: 0, y: 0 },
-			},
+			}),
 		]
 
 		// Render the component
-		renderWithProviders(<EnhancedBrainstormFlow initialNodes={nodes} initialEdges={[]} />)
+		renderWithProviders(
+			<EnhancedBrainstormFlow
+				projectId="test-project"
+				initialNodes={nodes}
+				initialEdges={[]}
+			/>
+		)
 
 		// Simulate a node click
 		// Since ReactFlow is mocked, we need to simulate the onNodeClick callback directly
@@ -388,23 +419,32 @@ describe('EnhancedBrainstormFlow', () => {
 	it('shows a confirmation dialog when a node is deleted', async () => {
 		// Create test data
 		const nodes = [
-			{
+			createTestNode({
 				id: 'node-1',
 				type: NodeType.IDEA,
 				data: {
+					id: 'node-1',
+					title: 'Test Node',
+					content: 'This is a test node',
 					label: 'Test Node',
-					type: NodeType.IDEA,
-					notes: 'This is a test node',
+					createdAt: new Date().toISOString(),
+					updatedAt: new Date().toISOString(),
 					onDelete: vi.fn(),
 					onEdit: vi.fn(),
 					onChat: vi.fn(),
 				},
 				position: { x: 0, y: 0 },
-			},
+			}),
 		]
 
 		// Render the component
-		renderWithProviders(<EnhancedBrainstormFlow initialNodes={nodes} initialEdges={[]} />)
+		renderWithProviders(
+			<EnhancedBrainstormFlow
+				projectId="test-project"
+				initialNodes={nodes}
+				initialEdges={[]}
+			/>
+		)
 
 		// Click the delete button
 		const deleteButton = screen.getByTestId('delete-node-1')
@@ -446,7 +486,13 @@ describe('EnhancedBrainstormFlow', () => {
 		]
 
 		// Render the component
-		renderWithProviders(<EnhancedBrainstormFlow initialNodes={nodes} initialEdges={[]} />)
+		renderWithProviders(
+			<EnhancedBrainstormFlow
+				projectId="test-project"
+				initialNodes={nodes}
+				initialEdges={[]}
+			/>
+		)
 
 		// Find and click the chat button
 		const chatButton = screen.getByTestId('chat-node-1')
@@ -508,7 +554,13 @@ describe('EnhancedBrainstormFlow', () => {
 		]
 
 		// Render the component
-		renderWithProviders(<EnhancedBrainstormFlow initialNodes={nodes} initialEdges={[]} />)
+		renderWithProviders(
+			<EnhancedBrainstormFlow
+				projectId="test-project"
+				initialNodes={nodes}
+				initialEdges={[]}
+			/>
+		)
 
 		// Click the delete button
 		const deleteButton = screen.getByTestId('delete-node-1')
