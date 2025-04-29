@@ -1,7 +1,14 @@
 import '@testing-library/jest-dom'
+
 import { vi, expect } from 'vitest'
 
-import { mockIndexedDB, mockIntersectionObserver, mockLocalStorage } from './test-utils'
+import {
+	mockIndexedDB,
+	mockIntersectionObserver,
+	mockLocalStorage,
+	mockReactFlowBoundingBox,
+	mockAnimationFrame,
+} from './test-utils'
 
 // Extend matchers
 expect.extend({
@@ -14,29 +21,36 @@ expect.extend({
 	},
 })
 
-// Setup mocks
+// Setup global mocks
 beforeAll(() => {
+	// Initialize basic mocks
 	mockIndexedDB()
 	mockIntersectionObserver()
 	mockLocalStorage()
+	mockReactFlowBoundingBox()
+	mockAnimationFrame()
 
 	// Mock window.fetch
 	global.fetch = vi.fn()
 
 	// Mock service worker
-	global.navigator.serviceWorker = {
-		register: vi.fn().mockResolvedValue({}),
-		ready: Promise.resolve({
-			active: {
-				postMessage: vi.fn(),
-			},
-		}),
-	} as unknown as ServiceWorkerContainer
+	Object.defineProperty(global.navigator, 'serviceWorker', {
+		value: {
+			register: vi.fn().mockResolvedValue({}),
+			ready: Promise.resolve({
+				active: {
+					postMessage: vi.fn(),
+				},
+			}),
+		},
+		configurable: true,
+	})
 })
 
 // Cleanup after each test
 afterEach(() => {
 	vi.clearAllMocks()
+	document.body.innerHTML = ''
 })
 
 beforeEach(() => {
@@ -72,5 +86,33 @@ beforeEach(() => {
 	vi.mock('aws-sdk/clients/s3', async () => {
 		const { S3 } = await import('./mocks/aws-sdk')
 		return { S3 }
+	})
+
+	// Mock React Flow
+	vi.mock('reactflow', async () => {
+		const actual = await vi.importActual('reactflow')
+		return {
+			...actual,
+			useReactFlow: vi.fn().mockReturnValue({
+				fitView: vi.fn(),
+				zoomIn: vi.fn(),
+				zoomOut: vi.fn(),
+				setCenter: vi.fn(),
+				getNodes: vi.fn().mockReturnValue([]),
+				getEdges: vi.fn().mockReturnValue([]),
+				setNodes: vi.fn(),
+				setEdges: vi.fn(),
+				project: vi.fn(({ x, y }) => ({ x, y })),
+			}),
+			// Properly typed state hooks
+			useNodesState: vi.fn().mockImplementation((initialNodes) => {
+				const [nodes, setNodes] = [initialNodes, vi.fn()]
+				return [nodes, setNodes]
+			}),
+			useEdgesState: vi.fn().mockImplementation((initialEdges) => {
+				const [edges, setEdges] = [initialEdges, vi.fn()]
+				return [edges, setEdges]
+			}),
+		}
 	})
 })

@@ -1,7 +1,9 @@
-import { NodeType, Node, Edge } from '../types'
-import { ProjectTemplate } from '../types/project'
+import type { Node, Edge } from '../types'
+import { NodeType } from '../types'
+import type { ProjectTemplate } from '../types/project'
 import { encrypt, decrypt, isEncryptionAvailable } from '../utils/encryption'
-import loggerService from '../services/LoggerService'
+
+import loggerService from './LoggerService'
 
 export interface SyncSettings {
 	enableS3Sync: boolean
@@ -1646,7 +1648,7 @@ export class IndexedDBService {
 		const initialized = await this.init()
 		loggerService.debug('saveProject: Starting save operation', {
 			projectId: project.id,
-			dbInitialized: initialized
+			dbInitialized: initialized,
 		})
 
 		// Update the updatedAt timestamp
@@ -1678,17 +1680,17 @@ export class IndexedDBService {
 				const store = transaction.objectStore(STORES.PROJECTS)
 
 				const request = store.put(updatedProject)
-				
+
 				loggerService.debug('saveProject: Executing IndexedDB put operation', {
 					projectId: project.id,
 					store: STORES.PROJECTS,
 					nodeCount: (updatedProject.nodes || []).length,
-					edgeCount: (updatedProject.edges || []).length
+					edgeCount: (updatedProject.edges || []).length,
 				})
 
 				request.onsuccess = () => {
 					loggerService.debug('saveProject: Successfully saved to IndexedDB', {
-						projectId: project.id
+						projectId: project.id,
 					})
 					resolve(project.id)
 				}
@@ -1697,7 +1699,7 @@ export class IndexedDBService {
 					loggerService.error('saveProject: Error saving to IndexedDB', {
 						projectId: project.id,
 						errorName: error?.name,
-						errorMessage: error?.message
+						errorMessage: error?.message,
 					})
 					// Still return the project ID to prevent cascading errors
 					resolve(project.id)

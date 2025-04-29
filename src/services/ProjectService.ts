@@ -233,14 +233,14 @@ export class ProjectService {
 		try {
 			loggerService.debug('updateProject: Starting update', {
 				projectId,
-				updateType: typeof projectOrId === 'string' ? 'partial' : 'full'
+				updateType: typeof projectOrId === 'string' ? 'partial' : 'full',
 			})
 
 			// Get the existing project
 			projectToUpdate = await indexedDBService.getProject(projectId)
 			loggerService.debug('updateProject: Retrieved existing project', {
 				projectId,
-				found: !!projectToUpdate
+				found: !!projectToUpdate,
 			})
 
 			if (!projectToUpdate) {
@@ -252,15 +252,15 @@ export class ProjectService {
 				projectId,
 				existingNodes: (projectToUpdate.nodes || []).length,
 				existingEdges: (projectToUpdate.edges || []).length,
-				nodeSample: projectToUpdate.nodes?.[0] ? JSON.stringify(projectToUpdate.nodes[0]).substring(0, 200) : 'no nodes'
+				nodeSample: projectToUpdate.nodes?.[0] ? JSON.stringify(projectToUpdate.nodes[0]).substring(0, 200) : 'no nodes',
 			})
-			
+
 			loggerService.debug('updateProject: Update data', {
 				projectId,
 				updateNodes: (updates?.nodes || []).length,
 				updateEdges: (updates?.edges || []).length,
 				updateNodeSample: updates?.nodes?.[0] ? JSON.stringify(updates.nodes[0]).substring(0, 200) : 'no nodes',
-				updateType: Array.isArray(updates?.nodes) ? 'array' : typeof updates?.nodes
+				updateType: Array.isArray(updates?.nodes) ? 'array' : typeof updates?.nodes,
 			})
 
 			// Create the updated project by merging existing with updates
@@ -279,7 +279,7 @@ export class ProjectService {
 				finalNodeCount: updatedNodes.length,
 				finalEdgeCount: updatedEdges.length,
 				nodeSample: updatedNodes?.[0] ? JSON.stringify(updatedNodes[0]).substring(0, 200) : 'no nodes',
-				nodesType: 'array'
+				nodesType: 'array',
 			})
 
 			// @ts-ignore - Will fix type issues in separate PR
@@ -294,7 +294,7 @@ export class ProjectService {
 			loggerService.info('Final project to save:', {
 				projectId,
 				nodeCount: finalProject.nodes.length,
-				nodeSample: finalProject.nodes[0] ? JSON.stringify(finalProject.nodes[0]).substring(0, 200) : 'no nodes'
+				nodeSample: finalProject.nodes[0] ? JSON.stringify(finalProject.nodes[0]).substring(0, 200) : 'no nodes',
 			})
 
 			await indexedDBService.saveProject(finalProject)

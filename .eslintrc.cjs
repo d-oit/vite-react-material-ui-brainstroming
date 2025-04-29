@@ -115,7 +115,6 @@ module.exports = {
 
     // Formatting rules
     'indent': ['error', 'tab'],
-    'linebreak-style': ['error', 'unix'], // Changed from 'lf' to 'unix'
     'quotes': ['error', 'single', { 'avoidEscape': true }],
     'semi': ['error', 'never'],
     'max-len': ['error', { 'code': 150, 'ignoreUrls': true, 'ignoreStrings': true, 'ignoreTemplateLiterals': true }],

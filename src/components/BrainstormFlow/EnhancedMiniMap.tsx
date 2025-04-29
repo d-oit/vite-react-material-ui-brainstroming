@@ -8,7 +8,8 @@ import {
 } from '@mui/icons-material'
 import { Box, IconButton, Tooltip, useTheme } from '@mui/material'
 import React, { useState } from 'react'
-import { MiniMap as ReactFlowMiniMap, Node, MiniMapProps } from 'reactflow'
+import type { MiniMapProps } from 'reactflow'
+import { MiniMap as ReactFlowMiniMap, Node } from 'reactflow'
 
 import { useI18n } from '../../contexts/I18nContext'
 import type { Edge } from '../../types'

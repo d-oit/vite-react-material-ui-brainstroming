@@ -98,9 +98,9 @@ const BrainstormPage: React.FC<BrainstormPageProps> = ({
 							}}>
 							<ReactFlowProvider>
 								<EnhancedBrainstormFlow
-								initialNodes={initialNodes}
-								initialEdges={initialEdges}
-								onSave={handleSave}
+									initialNodes={initialNodes}
+									initialEdges={initialEdges}
+									onSave={handleSave}
 								/>
 							</ReactFlowProvider>
 						</Paper>

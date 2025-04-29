@@ -8,8 +8,8 @@ import type { NodeProps } from 'reactflow'
 import { Handle, Position } from 'reactflow'
 
 import { useSettings } from '../../../contexts/SettingsContext'
-import type { NodeData } from '../types'
 import type { NodeType } from '../../../types/enums'
+import type { NodeData } from '../types'
 
 const CustomNode: React.FC<NodeProps<NodeData>> = ({ data, selected, id }) => {
 	const [showNotes, setShowNotes] = useState(false)

@@ -1,197 +1,197 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { useBrainstormStore } from '../brainstormStore'
-import projectService from '../../services/ProjectService'
+
 import type { CustomNodeType, CustomEdge } from '../../components/BrainstormFlow/types'
-import { NodeType } from '../../types/enums'
-import { EdgeType } from '../../types/enums'
-import { ProjectTemplate } from '../../types/project'
+import projectService from '../../services/ProjectService'
 import type { Project } from '../../types'
+import { NodeType , EdgeType } from '../../types/enums'
+import { ProjectTemplate } from '../../types/project'
+import { useBrainstormStore } from '../brainstormStore'
 
 // Mock projectService
 vi.mock('../../services/ProjectService', () => ({
-    default: {
-        updateProject: vi.fn(),
-        getProject: vi.fn()
-    }
+	default: {
+		updateProject: vi.fn(),
+		getProject: vi.fn(),
+	},
 }))
 
 describe('brainstormStore', () => {
-    beforeEach(() => {
-        // Clear store state
-        useBrainstormStore.setState({
-            projectId: null,
-            nodes: [],
-            edges: [],
-            isLoading: false,
-            error: null,
-            activeStep: -1,
-            activeTab: 1,
-            autoSave: true
-        })
-        // Clear mocks
-        vi.clearAllMocks()
-    })
+	beforeEach(() => {
+		// Clear store state
+		useBrainstormStore.setState({
+			projectId: null,
+			nodes: [],
+			edges: [],
+			isLoading: false,
+			error: null,
+			activeStep: -1,
+			activeTab: 1,
+			autoSave: true,
+		})
+		// Clear mocks
+		vi.clearAllMocks()
+	})
 
-    describe('saveAllNodes', () => {
-        it('should do nothing if projectId is null', async () => {
-            const store = useBrainstormStore.getState()
-            await store.saveAllNodes()
-            
-            expect(projectService.updateProject).not.toHaveBeenCalled()
-            expect(store.isLoading).toBe(false)
-            expect(store.error).toBeNull()
-        })
+	describe('saveAllNodes', () => {
+		it('should do nothing if projectId is null', async () => {
+			const store = useBrainstormStore.getState()
+			await store.saveAllNodes()
 
-        it('should save nodes and edges successfully', async () => {
-            // Setup test data
-            const testNode: CustomNodeType = {
-                id: 'test-node',
-                type: NodeType.NOTE,
-                position: { x: 0, y: 0 },
-                data: {
-                    id: 'test-node',
-                    type: NodeType.NOTE,
-                    title: 'Test Node',
-                    content: 'Test content',
-                    label: 'Test Node',
-                    createdAt: '2025-04-24T00:00:00.000Z',
-                    updatedAt: '2025-04-24T00:00:00.000Z',
-                    tags: [],
-                    color: undefined
-                }
-            }
+			expect(projectService.updateProject).not.toHaveBeenCalled()
+			expect(store.isLoading).toBe(false)
+			expect(store.error).toBeNull()
+		})
 
-            const testEdge: CustomEdge = {
-                id: 'test-edge',
-                source: 'test-node',
-                target: 'test-node-2',
-                type: EdgeType.DEFAULT
-            }
+		it('should save nodes and edges successfully', async () => {
+			// Setup test data
+			const testNode: CustomNodeType = {
+				id: 'test-node',
+				type: NodeType.NOTE,
+				position: { x: 0, y: 0 },
+				data: {
+					id: 'test-node',
+					type: NodeType.NOTE,
+					title: 'Test Node',
+					content: 'Test content',
+					label: 'Test Node',
+					createdAt: '2025-04-24T00:00:00.000Z',
+					updatedAt: '2025-04-24T00:00:00.000Z',
+					tags: [],
+					color: undefined,
+				},
+			}
 
-            useBrainstormStore.setState({
-                projectId: 'test-project',
-                nodes: [testNode],
-                edges: [testEdge]
-            })
+			const testEdge: CustomEdge = {
+				id: 'test-edge',
+				source: 'test-node',
+				target: 'test-node-2',
+				type: EdgeType.DEFAULT,
+			}
 
-            const store = useBrainstormStore.getState()
-            await store.saveAllNodes()
+			useBrainstormStore.setState({
+				projectId: 'test-project',
+				nodes: [testNode],
+				edges: [testEdge],
+			})
 
-            expect(projectService.updateProject).toHaveBeenCalledWith('test-project', {
-                nodes: expect.arrayContaining([expect.objectContaining({ id: 'test-node' })]),
-                edges: expect.arrayContaining([expect.objectContaining({ id: 'test-edge' })])
-            })
-            expect(store.isLoading).toBe(false)
-            expect(store.error).toBeNull()
-        })
+			const store = useBrainstormStore.getState()
+			await store.saveAllNodes()
 
-        it('should handle errors when saving', async () => {
-            // Setup error case
-            vi.mocked(projectService.updateProject).mockRejectedValueOnce(new Error('Save failed'))
-            
-            useBrainstormStore.setState({
-                projectId: 'test-project',
-                nodes: [],
-                edges: []
-            })
+			expect(projectService.updateProject).toHaveBeenCalledWith('test-project', {
+				nodes: expect.arrayContaining([expect.objectContaining({ id: 'test-node' })]),
+				edges: expect.arrayContaining([expect.objectContaining({ id: 'test-edge' })]),
+			})
+			expect(store.isLoading).toBe(false)
+			expect(store.error).toBeNull()
+		})
 
-            const store = useBrainstormStore.getState()
-            await store.saveAllNodes()
+		it('should handle errors when saving', async () => {
+			// Setup error case
+			vi.mocked(projectService.updateProject).mockRejectedValueOnce(new Error('Save failed'))
 
-            expect(store.error).toBe('Failed to save nodes')
-            expect(store.isLoading).toBe(false)
-        })
-    })
+			useBrainstormStore.setState({
+				projectId: 'test-project',
+				nodes: [],
+				edges: [],
+			})
 
-    describe('loadNodesWithPositions', () => {
-        it('should load nodes and edges successfully', async () => {
-            const mockProject: Project = {
-                id: 'test-project',
-                name: 'Test Project',
-                description: 'Test Description',
-                version: '1.0.0',
-                template: ProjectTemplate.CUSTOM,
-                createdAt: '2025-04-24T00:00:00.000Z',
-                updatedAt: '2025-04-24T00:00:00.000Z',
-                syncSettings: {
-                    enableS3Sync: false,
-                    syncFrequency: 'manual'
-                },
-                nodes: [{
-                    id: 'test-node',
-                    type: NodeType.NOTE,
-                    position: { x: 0, y: 0 },
-                    data: {
-                        id: 'test-node',
-                        type: NodeType.NOTE,
-                        title: 'Test Node',
-                        content: '',
-                        label: 'Test Node',
-                        createdAt: '2025-04-24T00:00:00.000Z',
-                        updatedAt: '2025-04-24T00:00:00.000Z',
-                        tags: [],
-                        color: undefined
-                    }
-                }],
-                edges: [{
-                    id: 'test-edge',
-                    source: 'test-node',
-                    target: 'test-node-2',
-                    type: EdgeType.DEFAULT
-                }]
-            }
+			const store = useBrainstormStore.getState()
+			await store.saveAllNodes()
 
-            vi.mocked(projectService.getProject).mockResolvedValueOnce(mockProject)
+			expect(store.error).toBe('Failed to save nodes')
+			expect(store.isLoading).toBe(false)
+		})
+	})
 
-            const store = useBrainstormStore.getState()
-            await store.loadNodesWithPositions('test-project')
+	describe('loadNodesWithPositions', () => {
+		it('should load nodes and edges successfully', async () => {
+			const mockProject: Project = {
+				id: 'test-project',
+				name: 'Test Project',
+				description: 'Test Description',
+				version: '1.0.0',
+				template: ProjectTemplate.CUSTOM,
+				createdAt: '2025-04-24T00:00:00.000Z',
+				updatedAt: '2025-04-24T00:00:00.000Z',
+				syncSettings: {
+					enableS3Sync: false,
+					syncFrequency: 'manual',
+				},
+				nodes: [{
+					id: 'test-node',
+					type: NodeType.NOTE,
+					position: { x: 0, y: 0 },
+					data: {
+						id: 'test-node',
+						type: NodeType.NOTE,
+						title: 'Test Node',
+						content: '',
+						label: 'Test Node',
+						createdAt: '2025-04-24T00:00:00.000Z',
+						updatedAt: '2025-04-24T00:00:00.000Z',
+						tags: [],
+						color: undefined,
+					},
+				}],
+				edges: [{
+					id: 'test-edge',
+					source: 'test-node',
+					target: 'test-node-2',
+					type: EdgeType.DEFAULT,
+				}],
+			}
 
-            expect(projectService.getProject).toHaveBeenCalledWith('test-project')
-            expect(store.nodes).toHaveLength(1)
-            expect(store.edges).toHaveLength(1)
-            expect(store.projectId).toBe('test-project')
-            expect(store.isLoading).toBe(false)
-            expect(store.error).toBeNull()
-        })
+			vi.mocked(projectService.getProject).mockResolvedValueOnce(mockProject)
 
-        it('should handle errors when loading', async () => {
-            vi.mocked(projectService.getProject).mockRejectedValueOnce(new Error('Load failed'))
+			const store = useBrainstormStore.getState()
+			await store.loadNodesWithPositions('test-project')
 
-            const store = useBrainstormStore.getState()
-            await store.loadNodesWithPositions('test-project')
+			expect(projectService.getProject).toHaveBeenCalledWith('test-project')
+			expect(store.nodes).toHaveLength(1)
+			expect(store.edges).toHaveLength(1)
+			expect(store.projectId).toBe('test-project')
+			expect(store.isLoading).toBe(false)
+			expect(store.error).toBeNull()
+		})
 
-            expect(store.error).toBe('Failed to load nodes')
-            expect(store.isLoading).toBe(false)
-            expect(store.nodes).toHaveLength(0)
-            expect(store.edges).toHaveLength(0)
-        })
+		it('should handle errors when loading', async () => {
+			vi.mocked(projectService.getProject).mockRejectedValueOnce(new Error('Load failed'))
 
-        it('should set loading state while fetching', async () => {
-            const mockProject: Project = {
-                id: 'test-project',
-                name: 'Test Project',
-                description: 'Test Description',
-                version: '1.0.0',
-                template: ProjectTemplate.CUSTOM,
-                createdAt: '2025-04-24T00:00:00.000Z',
-                updatedAt: '2025-04-24T00:00:00.000Z',
-                syncSettings: {
-                    enableS3Sync: false,
-                    syncFrequency: 'manual'
-                },
-                nodes: [],
-                edges: []
-            }
+			const store = useBrainstormStore.getState()
+			await store.loadNodesWithPositions('test-project')
 
-            vi.mocked(projectService.getProject).mockImplementationOnce(async () => {
-                expect(useBrainstormStore.getState().isLoading).toBe(true)
-                return mockProject
-            })
+			expect(store.error).toBe('Failed to load nodes')
+			expect(store.isLoading).toBe(false)
+			expect(store.nodes).toHaveLength(0)
+			expect(store.edges).toHaveLength(0)
+		})
 
-            const store = useBrainstormStore.getState()
-            await store.loadNodesWithPositions('test-project')
+		it('should set loading state while fetching', async () => {
+			const mockProject: Project = {
+				id: 'test-project',
+				name: 'Test Project',
+				description: 'Test Description',
+				version: '1.0.0',
+				template: ProjectTemplate.CUSTOM,
+				createdAt: '2025-04-24T00:00:00.000Z',
+				updatedAt: '2025-04-24T00:00:00.000Z',
+				syncSettings: {
+					enableS3Sync: false,
+					syncFrequency: 'manual',
+				},
+				nodes: [],
+				edges: [],
+			}
 
-            expect(store.isLoading).toBe(false)
-        })
-    })
+			vi.mocked(projectService.getProject).mockImplementationOnce(async () => {
+				expect(useBrainstormStore.getState().isLoading).toBe(true)
+				return mockProject
+			})
+
+			const store = useBrainstormStore.getState()
+			await store.loadNodesWithPositions('test-project')
+
+			expect(store.isLoading).toBe(false)
+		})
+	})
 })

@@ -1,6 +1,7 @@
 import { ZoomIn, ZoomOut, FitScreen, GridOn, GridOff, Fullscreen, FullscreenExit } from '@mui/icons-material'
 import { Box, IconButton, Tooltip, Slider, alpha, useTheme } from '@mui/material'
 import React from 'react'
+
 import { useI18n } from '../../hooks/useI18n'
 
 interface EnhancedZoomControlsProps {
@@ -46,24 +47,24 @@ const EnhancedZoomControls: React.FC<EnhancedZoomControlsProps> = ({
 				boxShadow: theme.shadows[3],
 			}}
 		>
-			<Tooltip title={t('flow.zoomIn') || "Zoom In"}>
+			<Tooltip title={t('flow.zoomIn') || 'Zoom In'}>
 				<IconButton onClick={zoomIn} size="small">
 					<ZoomIn fontSize="small" />
 				</IconButton>
 			</Tooltip>
-			
-			<Tooltip title={t('flow.zoomOut') || "Zoom Out"}>
+
+			<Tooltip title={t('flow.zoomOut') || 'Zoom Out'}>
 				<IconButton onClick={zoomOut} size="small">
 					<ZoomOut fontSize="small" />
 				</IconButton>
 			</Tooltip>
-			
-			<Tooltip title={t('flow.fitView') || "Fit View"}>
+
+			<Tooltip title={t('flow.fitView') || 'Fit View'}>
 				<IconButton onClick={fitView} size="small">
 					<FitScreen fontSize="small" />
 				</IconButton>
 			</Tooltip>
-			
+
 			<Slider
 				orientation="vertical"
 				min={0.1}
@@ -73,14 +74,14 @@ const EnhancedZoomControls: React.FC<EnhancedZoomControlsProps> = ({
 				onChange={(_, value) => onZoomChange(value as number)}
 				sx={{ height: 80, my: 1 }}
 			/>
-			
-			<Tooltip title={t('flow.toggleGrid') || (showGrid ? "Hide Grid" : "Show Grid")}>
+
+			<Tooltip title={t('flow.toggleGrid') || (showGrid ? 'Hide Grid' : 'Show Grid')}>
 				<IconButton onClick={onToggleGrid} size="small">
 					{showGrid ? <GridOff fontSize="small" /> : <GridOn fontSize="small" />}
 				</IconButton>
 			</Tooltip>
-			
-			<Tooltip title={t('flow.toggleFullscreen') || (isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen")}>
+
+			<Tooltip title={t('flow.toggleFullscreen') || (isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen')}>
 				<IconButton onClick={onToggleFullscreen} size="small">
 					{isFullscreen ? <FullscreenExit fontSize="small" /> : <Fullscreen fontSize="small" />}
 				</IconButton>
@@ -91,4 +92,3 @@ const EnhancedZoomControls: React.FC<EnhancedZoomControlsProps> = ({
 
 export default EnhancedZoomControls
 export { EnhancedZoomControls }
-

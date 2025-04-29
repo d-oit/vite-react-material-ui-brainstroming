@@ -88,20 +88,20 @@ loggerService.configure({ minLogLevel: 'debug' })
 
 // Create a single debounced save instance
 const debouncedSave = debounce(async (projectId: string, nodes: CustomNodeType[], edges: CustomEdge[], shouldAutoSave: boolean) => {
-    // Get fresh state to ensure we're saving the latest data
-    const currentState = useBrainstormStore.getState();
-    const currentNodes = currentState.nodes;
-    const currentEdges = currentState.edges;
+	// Get fresh state to ensure we're saving the latest data
+	const currentState = useBrainstormStore.getState()
+	const currentNodes = currentState.nodes
+	const currentEdges = currentState.edges
 
-    console.log('🔄 debouncedSave triggered', {
-        projectId,
-        nodesCount: currentNodes.length,
-        edgesCount: currentEdges.length,
-        shouldAutoSave,
-        autoSaveFromState: currentState.autoSave
-    })
+	console.log('🔄 debouncedSave triggered', {
+		projectId,
+		nodesCount: currentNodes.length,
+		edgesCount: currentEdges.length,
+		shouldAutoSave,
+		autoSaveFromState: currentState.autoSave,
+	})
 	loggerService.info('Saving project changes', { projectId, nodesCount: nodes.length, edgesCount: edges.length })
-	
+
 	if (!projectId || !shouldAutoSave) {
 		console.log('❌ debouncedSave skipped:', !projectId ? 'no projectId' : 'autoSave disabled')
 		loggerService.info('Save operation skipped', { reason: !projectId ? 'no projectId' : 'autoSave disabled' })
@@ -116,19 +116,19 @@ const debouncedSave = debounce(async (projectId: string, nodes: CustomNodeType[]
 			edgesToSave: edges.length,
 			sampleNode: nodes[0] ? JSON.stringify(nodes[0]).substring(0, 100) : 'no nodes',
 			autoSave: shouldAutoSave,
-			autoSaveFromState: useBrainstormStore.getState().autoSave
+			autoSaveFromState: useBrainstormStore.getState().autoSave,
 		})
-		
+
 		const updates = {
 			nodes: nodes.map(convertToProjectNode),
 			edges: edges.map(convertToProjectEdge),
 		}
-		
+
 		loggerService.info('Converted nodes ready to save', {
 			convertedNodeCount: updates.nodes.length,
-			sampleConvertedNode: updates.nodes[0] ? JSON.stringify(updates.nodes[0]).substring(0, 100) : 'no nodes'
+			sampleConvertedNode: updates.nodes[0] ? JSON.stringify(updates.nodes[0]).substring(0, 100) : 'no nodes',
 		})
-		
+
 		await projectService.updateProject(projectId, updates)
 		loggerService.info('Project data saved automatically')
 	} catch (error) {
@@ -203,13 +203,13 @@ export const useBrainstormStore = create<BrainstormState>((set, get) => ({
 			loggerService.info('State update for new node', {
 				hasProjectId: !!state.projectId,
 				autoSave: state.autoSave,
-				nodeCount: newNodes.length
+				nodeCount: newNodes.length,
 			})
 			if (state.projectId) {
 				console.log('🔄 Triggering save after node addition', {
 					projectId: state.projectId,
 					autoSave: state.autoSave,
-					nodeCount: newNodes.length
+					nodeCount: newNodes.length,
 				})
 				debouncedSave(state.projectId, newNodes, state.edges, state.autoSave)
 			} else {
@@ -217,7 +217,7 @@ export const useBrainstormStore = create<BrainstormState>((set, get) => ({
 			}
 			return {
 				...state,  // Preserve all existing state
-				nodes: newNodes
+				nodes: newNodes,
 			}
 		})
 	},
@@ -233,147 +233,147 @@ export const useBrainstormStore = create<BrainstormState>((set, get) => ({
 			return {
 				...state,
 				nodes: newNodes,
-				edges: newEdges
+				edges: newEdges,
 			}
 		}),
 	updateNodePositions: (updatedNodes) =>
 		      set((state) => {
 		          const newNodes = state.nodes.map((node) => {
-		              const updatedNode = updatedNodes.find((n) => n.id === node.id);
+		              const updatedNode = updatedNodes.find((n) => n.id === node.id)
 		              if (updatedNode) {
 		                  return {
 		                      ...node,
 		                      position: updatedNode.position,
-		                  };
+		                  }
 		              }
-		              return node;
-		          });
+		              return node
+		          })
 		          if (state.projectId) {
-                debouncedSave(state.projectId, newNodes, state.edges, state.autoSave);
-            }
-            return {
-                ...state,
-                nodes: newNodes
-            };
-        }),
+				debouncedSave(state.projectId, newNodes, state.edges, state.autoSave)
+			}
+			return {
+				...state,
+				nodes: newNodes,
+			}
+		}),
 
-    saveAllNodes: async () => {
-        const state = get();
-        if (!state.projectId) return;
-        
-        try {
-            set({ isLoading: true });
-            await projectService.updateProject(state.projectId, {
-                nodes: state.nodes.map(convertToProjectNode),
-                edges: state.edges.map(convertToProjectEdge),
-            });
-            loggerService.info('All nodes saved successfully');
-        } catch (error) {
-            loggerService.error('Error saving nodes', error instanceof Error ? error : new Error(String(error)));
-            set({ error: 'Failed to save nodes' });
-        } finally {
-            set({ isLoading: false });
-        }
-    },
+	saveAllNodes: async () => {
+		const state = get()
+		if (!state.projectId) return
 
-    loadNodesWithPositions: async (projectId) => {
-        loggerService.info('Loading nodes for project', { projectId })
-        try {
-            set({ isLoading: true });
-            const project = await projectService.getProject(projectId);
-            
-            // First log the loaded project
-            loggerService.info('Project loaded from database', {
-                hasProject: !!project,
-                nodeCount: project?.nodes?.length || 0,
-                autoSave: project?.syncSettings?.autoSave ?? true
-            })
+		try {
+			set({ isLoading: true })
+			await projectService.updateProject(state.projectId, {
+				nodes: state.nodes.map(convertToProjectNode),
+				edges: state.edges.map(convertToProjectEdge),
+			})
+			loggerService.info('All nodes saved successfully')
+		} catch (error) {
+			loggerService.error('Error saving nodes', error instanceof Error ? error : new Error(String(error)))
+			set({ error: 'Failed to save nodes' })
+		} finally {
+			set({ isLoading: false })
+		}
+	},
 
-            if (project) {
-                // Convert nodes and edges with proper type information
-                const convertedNodes = (project.nodes || []).map(node => ({
-                    ...node,
-                    type: node.type as NodeType,
-                    data: {
-                        ...node.data,
-                        type: node.type as NodeType,
-                        updatedAt: node.data?.updatedAt || new Date().toISOString()
-                    }
-                })) as CustomNodeType[];
+	loadNodesWithPositions: async (projectId) => {
+		loggerService.info('Loading nodes for project', { projectId })
+		try {
+			set({ isLoading: true })
+			const project = await projectService.getProject(projectId)
 
-                const convertedEdges = (project.edges || []).map(edge => ({
-                    ...edge,
-                    type: edge.type || EdgeType.DEFAULT
-                })) as CustomEdge[];
+			// First log the loaded project
+			loggerService.info('Project loaded from database', {
+				hasProject: !!project,
+				nodeCount: project?.nodes?.length || 0,
+				autoSave: project?.syncSettings?.autoSave ?? true,
+			})
 
-                const storeState = {
-                    nodes: convertedNodes,
-                    edges: convertedEdges,
-                    projectId,
-                    autoSave: project.syncSettings?.autoSave ?? true,
-                };
-                
-                // Set the state
-                set(storeState);
-                
-                // Log after state update
-                loggerService.info('Project state updated in store', {
-                    projectId,
-                    nodeCount: project.nodes?.length || 0,
-                    edgeCount: project.edges?.length || 0,
-                    autoSave: project.syncSettings?.autoSave ?? true,
-                    sampleNode: project.nodes?.[0] ? JSON.stringify(project.nodes[0]).substring(0, 100) : 'no nodes'
-                });
-            }
-        } catch (error) {
-            loggerService.error('Error loading nodes', error instanceof Error ? error : new Error(String(error)));
-            set({ error: 'Failed to load nodes' });
-        } finally {
-            set({ isLoading: false });
-        }
-    },
+			if (project) {
+				// Convert nodes and edges with proper type information
+				const convertedNodes = (project.nodes || []).map((node) => ({
+					...node,
+					type: node.type as NodeType,
+					data: {
+						...node.data,
+						type: node.type as NodeType,
+						updatedAt: node.data?.updatedAt || new Date().toISOString(),
+					},
+				})) as CustomNodeType[]
 
-    addTag: (nodeId, tag) =>
-        set((state) => {
-            const newNodes = state.nodes.map((node) =>
-                node.id === nodeId && !node.data.tags?.includes(tag)
-                    ? {
-                        ...node,
-                        data: {
-                            ...node.data,
-                            tags: [...(node.data.tags || []), tag],
-                            updatedAt: new Date().toISOString(),
-                        },
-                    }
-                    : node,
-            );
-            if (state.projectId) {
-                debouncedSave(state.projectId, newNodes, state.edges, state.autoSave);
-            }
-            return { nodes: newNodes };
-        }),
+				const convertedEdges = (project.edges || []).map((edge) => ({
+					...edge,
+					type: edge.type || EdgeType.DEFAULT,
+				})) as CustomEdge[]
 
-    removeTag: (nodeId, tag) =>
-        set((state) => {
-            const newNodes = state.nodes.map((node) =>
-                node.id === nodeId
-                    ? {
-                        ...node,
-                        data: {
-                            ...node.data,
-                            tags: node.data.tags?.filter((t) => t !== tag) || [],
-                            updatedAt: new Date().toISOString(),
-                        },
-                    }
-                    : node,
-            );
-            if (state.projectId) {
-                debouncedSave(state.projectId, newNodes, state.edges, state.autoSave);
-            }
-            return { nodes: newNodes };
-        }),
+				const storeState = {
+					nodes: convertedNodes,
+					edges: convertedEdges,
+					projectId,
+					autoSave: project.syncSettings?.autoSave ?? true,
+				}
 
-    toggleArchiveNode: (nodeId) =>
+				// Set the state
+				set(storeState)
+
+				// Log after state update
+				loggerService.info('Project state updated in store', {
+					projectId,
+					nodeCount: project.nodes?.length || 0,
+					edgeCount: project.edges?.length || 0,
+					autoSave: project.syncSettings?.autoSave ?? true,
+					sampleNode: project.nodes?.[0] ? JSON.stringify(project.nodes[0]).substring(0, 100) : 'no nodes',
+				})
+			}
+		} catch (error) {
+			loggerService.error('Error loading nodes', error instanceof Error ? error : new Error(String(error)))
+			set({ error: 'Failed to load nodes' })
+		} finally {
+			set({ isLoading: false })
+		}
+	},
+
+	addTag: (nodeId, tag) =>
+		set((state) => {
+			const newNodes = state.nodes.map((node) =>
+				node.id === nodeId && !node.data.tags?.includes(tag)
+					? {
+						...node,
+						data: {
+							...node.data,
+							tags: [...(node.data.tags || []), tag],
+							updatedAt: new Date().toISOString(),
+						},
+					}
+					: node,
+			)
+			if (state.projectId) {
+				debouncedSave(state.projectId, newNodes, state.edges, state.autoSave)
+			}
+			return { nodes: newNodes }
+		}),
+
+	removeTag: (nodeId, tag) =>
+		set((state) => {
+			const newNodes = state.nodes.map((node) =>
+				node.id === nodeId
+					? {
+						...node,
+						data: {
+							...node.data,
+							tags: node.data.tags?.filter((t) => t !== tag) || [],
+							updatedAt: new Date().toISOString(),
+						},
+					}
+					: node,
+			)
+			if (state.projectId) {
+				debouncedSave(state.projectId, newNodes, state.edges, state.autoSave)
+			}
+			return { nodes: newNodes }
+		}),
+
+	toggleArchiveNode: (nodeId) =>
 		set((state) => {
 			const newNodes = state.nodes.map((node) =>
 				node.id === nodeId

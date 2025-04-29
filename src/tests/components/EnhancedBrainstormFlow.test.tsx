@@ -97,7 +97,7 @@ vi.mock('reactflow', async () => {
 					mockNodes.get(id)?.onClick?.()
 				}
 			}}
->
+		>
 			{data?.label}
 			<button
 				type="button"
@@ -299,7 +299,7 @@ describe('EnhancedBrainstormFlow', () => {
 				projectId="test-project"
 				initialNodes={nodes}
 				initialEdges={edges}
-			/>
+			/>,
 		)
 
 		// Check that the component is rendered
@@ -393,7 +393,7 @@ describe('EnhancedBrainstormFlow', () => {
 				projectId="test-project"
 				initialNodes={nodes}
 				initialEdges={[]}
-			/>
+			/>,
 		)
 
 		// Simulate a node click
@@ -443,7 +443,7 @@ describe('EnhancedBrainstormFlow', () => {
 				projectId="test-project"
 				initialNodes={nodes}
 				initialEdges={[]}
-			/>
+			/>,
 		)
 
 		// Click the delete button
@@ -491,7 +491,7 @@ describe('EnhancedBrainstormFlow', () => {
 				projectId="test-project"
 				initialNodes={nodes}
 				initialEdges={[]}
-			/>
+			/>,
 		)
 
 		// Find and click the chat button
@@ -559,7 +559,7 @@ describe('EnhancedBrainstormFlow', () => {
 				projectId="test-project"
 				initialNodes={nodes}
 				initialEdges={[]}
-			/>
+			/>,
 		)
 
 		// Click the delete button

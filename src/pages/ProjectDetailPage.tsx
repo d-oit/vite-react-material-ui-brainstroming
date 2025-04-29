@@ -34,9 +34,9 @@ import ProjectSettingsSection from '../components/Project/ProjectSettingsSection
 import StatusIndicator from '../components/UI/StatusIndicator'
 import { useI18n } from '../contexts/I18nContext'
 import { useProject } from '../hooks/useProject'
+import { useBrainstormStore } from '../store/brainstormStore' // Import the store
 import type { Node, Edge, Project } from '../types'
 import type { NodeSuggestion } from '../types/chat'
-import { useBrainstormStore } from '../store/brainstormStore' // Import the store
 
 interface TabPanelProps {
 	children?: React.ReactNode
@@ -93,7 +93,6 @@ const ProjectDetailPage = () => {
 			loadNodes(projectId)
 		}
 	}, [projectId, loadNodes])
-
 
 	useEffect(() => {
 		if (project !== null && project !== undefined) {

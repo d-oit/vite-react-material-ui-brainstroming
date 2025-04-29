@@ -1,86 +1,70 @@
-import type { RenderOptions } from '@testing-library/react'
-import { render as rtlRender, screen, fireEvent, waitFor } from '@testing-library/react'
-import React from 'react'
 import { vi } from 'vitest'
 
-import { I18nProvider } from '../contexts/I18nContext'
-import { SettingsProvider } from '../contexts/SettingsContext'
-
-// Re-export testing utilities
-export { screen, fireEvent, waitFor }
-
-const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
-	return (
-		<I18nProvider>
-			<SettingsProvider>{children}</SettingsProvider>
-		</I18nProvider>
-	)
+export const mockIndexedDB = () => {
+	const IDBMock = {
+		open: vi.fn(),
+		deleteDatabase: vi.fn(),
+		databases: vi.fn(),
+	}
+	global.indexedDB = IDBMock as unknown as IDBFactory
 }
-type CustomRenderOptions = Omit<RenderOptions, 'wrapper'>
 
-// Custom render function with providers
-export const render = (ui: React.ReactElement, options?: CustomRenderOptions): ReturnType<typeof rtlRender> =>
-	rtlRender(ui, { wrapper: AllTheProviders, ...options })
-
-// Legacy alias (kept for backward compatibility)
-export { render as renderWithProviders }
-
-/**
- * Mock ResizeObserver for testing
- */
-export const mockResizeObserver = (): void => {
-	class ResizeObserverMock {
+export const mockIntersectionObserver = () => {
+	class IntersectionObserverMock {
 		observe = vi.fn()
 		unobserve = vi.fn()
 		disconnect = vi.fn()
 	}
 
-	// Set up the mock
-	window.ResizeObserver = ResizeObserverMock
+	global.IntersectionObserver = IntersectionObserverMock as unknown as typeof IntersectionObserver
 }
 
-/**
- * Mock localStorage for testing
- */
-export const mockStorage = {
-	storage: {} as { [key: string]: string },
-	getItem: vi.fn((key: string) => mockStorage.storage[key] || null),
-	setItem: vi.fn((key: string, value: string) => {
-		mockStorage.storage[key] = value
-	}),
-	removeItem: vi.fn((key: string) => {
-		delete mockStorage.storage[key]
-	}),
-	clear: vi.fn(() => {
-		mockStorage.storage = {}
-	}),
-	length: 0,
-	key: vi.fn((index: number) => Object.keys(mockStorage.storage)[index] || null),
-}
-
-// Initialize storage object
-mockStorage.storage = {}
-
-export const mockLocalStorage = (): typeof mockStorage => {
-	// Ensure storage is initialized
-	if (!mockStorage.storage) {
-		mockStorage.storage = {}
+export const mockLocalStorage = () => {
+	const localStorageMock = {
+		getItem: vi.fn(),
+		setItem: vi.fn(),
+		removeItem: vi.fn(),
+		clear: vi.fn(),
+		key: vi.fn(),
+		length: 0,
 	}
 
-	Object.defineProperty(window, 'localStorage', {
-		value: mockStorage,
-		writable: true,
-	})
-
-	return mockStorage
+	global.localStorage = localStorageMock as unknown as Storage
 }
 
-/**
- * Mock online status for testing
- */
-export const mockOnlineStatus = (online: boolean): void => {
-	Object.defineProperty(window.navigator, 'onLine', {
-		value: online,
-		writable: true,
+// Helper function to create a DOMRect for getBoundingClientRect mock
+export const createDOMRect = (
+	x = 0,
+	y = 0,
+	width = 1000,
+	height = 1000,
+): DOMRect => {
+	const rect = {
+		x,
+		y,
+		width,
+		height,
+		top: y,
+		right: x + width,
+		bottom: y + height,
+		left: x,
+		toJSON: () => rect,
+	}
+	return rect as DOMRect
+}
+
+// Mock for React Flow's element bounding box
+export const mockReactFlowBoundingBox = () => {
+	Element.prototype.getBoundingClientRect = vi.fn(() => createDOMRect())
+}
+
+// Mock for animation frame functions
+export const mockAnimationFrame = () => {
+	global.requestAnimationFrame = vi.fn((callback: FrameRequestCallback): number => {
+		return setTimeout(() => callback(Date.now()), 0) as unknown as number
+	})
+
+	global.cancelAnimationFrame = vi.fn((handle: number) => {
+		clearTimeout(handle)
 	})
 }

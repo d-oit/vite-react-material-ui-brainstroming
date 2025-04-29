@@ -221,11 +221,11 @@ export const ProjectBrainstormingSection = ({
 						}}>
 						<ReactFlowProvider>
 							<EnhancedBrainstormFlow
-							initialNodes={flowNodes}
-							initialEdges={flowEdges}
-							onSave={handleSaveFromFlow}
-							aria-label="Brainstorming Flow"
-							key={`flow-${projectId}`} // Only recreate when projectId changes
+								initialNodes={flowNodes}
+								initialEdges={flowEdges}
+								onSave={handleSaveFromFlow}
+								aria-label="Brainstorming Flow"
+								key={`flow-${projectId}`} // Only recreate when projectId changes
 							/>
 						</ReactFlowProvider>
 					</ErrorBoundary>
