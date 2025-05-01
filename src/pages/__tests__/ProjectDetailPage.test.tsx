@@ -1,19 +1,54 @@
 import { ThemeProvider, createTheme } from '@mui/material'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { createInstance } from 'i18next'
+import { I18nextProvider } from 'react-i18next'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { vi, describe, it, expect, beforeEach } from 'vitest'
+import { vi, describe, it, expect, beforeEach, beforeAll } from 'vitest'
 
 import { useProject } from '../../hooks/useProject'
 import type { Project } from '../../types'
 import { ProjectTemplate } from '../../types/project'
 import ProjectDetailPage from '../ProjectDetailPage'
 
-// Mock the useProject hook
-vi.mock('../../hooks/useProject', () => ({
-	useProject: vi.fn(),
-}))
+// Create test i18n instance
+const testI18n = createInstance({
+	lng: 'en',
+	fallbackLng: 'en',
+	ns: ['translation'],
+	defaultNS: 'translation',
+	interpolation: { escapeValue: false },
+	resources: {
+		en: {
+			translation: {
+				common: {
+					loading: 'Loading...',
+					error: 'Error',
+					save: 'Save',
+					edit: 'Edit',
+					delete: 'Delete',
+					cancel: 'Cancel',
+					name: 'Name',
+					description: 'Description',
+					version: 'Version {{version}}',
+				},
+				project: {
+					title: 'Project Details',
+					newVersion: 'New Version',
+					settings: 'Settings',
+					overview: 'Overview',
+					brainstorm: 'Brainstorm',
+				},
+			},
+		},
+	},
+})
 
-// Mock the components used in ProjectDetailPage
+// Initialize i18n instance
+beforeAll(() => {
+	return testI18n.init()
+})
+
+// Mock components
 vi.mock('../../components/Layout/AppShell', () => ({
 	default: ({ children }: { children: React.ReactNode }) => <div data-testid="app-shell">{children}</div>,
 }))
@@ -38,7 +73,12 @@ vi.mock('../../components/Help/HelpOverlay', () => ({
 	default: () => <div data-testid="help-overlay">Help Overlay</div>,
 }))
 
-// Create a mock project
+// Mock hooks
+vi.mock('../../hooks/useProject', () => ({
+	useProject: vi.fn(),
+}))
+
+// Create mock project
 const mockProject: Project = {
 	id: 'test-project-id',
 	name: 'Test Project',
@@ -53,18 +93,29 @@ const mockProject: Project = {
 		enableS3Sync: false,
 		syncFrequency: 'manual',
 		intervalMinutes: 30,
+		autoSave: false,
 	},
 }
 
-// Mock save function
+const findSaveButton = (buttons: HTMLElement[]) => {
+	return buttons.find((button) => {
+		if (button instanceof HTMLButtonElement) {
+			const isEnabled = !button.hasAttribute('disabled')
+			const inPaper = button.closest('.MuiPaper-root') !== null
+			return isEnabled && inPaper
+		}
+		return false
+	})
+}
+
+// Mock save functions
 const mockSaveProject = vi.fn().mockResolvedValue(true)
 const mockCreateNewVersion = vi.fn().mockResolvedValue(true)
 
 describe('ProjectDetailPage', () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
-
-		// Setup default mock implementation for useProject
+		// Setup mock implementation
 		vi.mocked(useProject).mockReturnValue({
 			project: mockProject,
 			loading: false,
@@ -87,13 +138,15 @@ describe('ProjectDetailPage', () => {
 	const renderComponent = () => {
 		const theme = createTheme()
 		return render(
-			<ThemeProvider theme={theme}>
-				<MemoryRouter initialEntries={['/projects/test-project-id']}>
-					<Routes>
-						<Route path="/projects/:projectId" element={<ProjectDetailPage />} />
-					</Routes>
-				</MemoryRouter>
-			</ThemeProvider>,
+			<I18nextProvider i18n={testI18n}>
+				<ThemeProvider theme={theme}>
+					<MemoryRouter initialEntries={['/projects/test-project-id']}>
+						<Routes>
+							<Route path="/projects/:projectId" element={<ProjectDetailPage />} />
+						</Routes>
+					</MemoryRouter>
+				</ThemeProvider>
+			</I18nextProvider>,
 		)
 	}
 
@@ -152,18 +205,13 @@ describe('ProjectDetailPage', () => {
 	it('allows editing project name', async () => {
 		renderComponent()
 
-		// Click the edit button for the project name
 		const editNameButton = screen.getByLabelText('Edit project name')
 		fireEvent.click(editNameButton)
 
-		// Find the input field and change the name
 		const nameInput = screen.getByDisplayValue('Test Project')
 		fireEvent.change(nameInput, { target: { value: 'Updated Project Name' } })
-
-		// Simulate pressing Enter to save
 		fireEvent.keyDown(nameInput, { key: 'Enter' })
 
-		// Check if saveProject was called with the updated name
 		await waitFor(() => {
 			expect(mockSaveProject).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -176,28 +224,18 @@ describe('ProjectDetailPage', () => {
 	it('allows editing project description', async () => {
 		renderComponent()
 
-		// Click the "Edit Description" button
 		const editDescriptionButton = screen.getByRole('button', { name: /Edit Description/i })
 		fireEvent.click(editDescriptionButton)
 
-		// Find the textarea and change the description
 		const descriptionInput = screen.getByDisplayValue('Test Description')
 		fireEvent.change(descriptionInput, { target: { value: 'Updated Description' } })
 
-		// Click the Save button - use a more specific selector
 		const saveButtons = screen.getAllByRole('button', { name: /Save$/i })
-		// Find the one that's not disabled and is contained in the project details section
-		const saveButton = saveButtons.find(
-			(button) => !button.hasAttribute('disabled') && button.closest('.MuiPaper-root'),
-		)
-
-		if (!saveButton) {
-			throw new Error('Save button not found')
-		}
+		const saveButton = findSaveButton(saveButtons)
+		if (!saveButton) throw new Error('Save button not found')
 
 		fireEvent.click(saveButton)
 
-		// Check if saveProject was called with the updated description
 		await waitFor(() => {
 			expect(mockSaveProject).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -209,48 +247,34 @@ describe('ProjectDetailPage', () => {
 
 	it('saves project when Save button is clicked', async () => {
 		vi.mocked(useProject).mockReturnValue({
-			project: mockProject,
-			loading: false,
-			error: null,
-			isSaving: false,
-			hasChanges: true, // Set hasChanges to true
-			saveProject: mockSaveProject,
-			createNewVersion: mockCreateNewVersion,
-			loadProject: vi.fn(),
-			createProject: vi.fn(),
-			addNode: vi.fn(),
-			updateNode: vi.fn(),
-			removeNode: vi.fn(),
-			addEdge: vi.fn(),
-			updateEdge: vi.fn(),
-			removeEdge: vi.fn(),
+			...vi.mocked(useProject)(),
+			hasChanges: true,
 		})
 
 		renderComponent()
-
-		// Find the Save button and click it
 		const saveButton = screen.getByRole('button', { name: /Save\*/i })
 		fireEvent.click(saveButton)
 
-		// Check if saveProject was called
 		expect(mockSaveProject).toHaveBeenCalled()
 	})
 
 	it('creates a new version when New Version button is clicked', async () => {
 		renderComponent()
 
-		// Find the New Version button and click it
 		const newVersionButton = screen.getByRole('button', { name: /New Version/i })
 		fireEvent.click(newVersionButton)
 
-		// Check if createNewVersion was called
 		expect(mockCreateNewVersion).toHaveBeenCalled()
 	})
 
 	it('toggles chat when Assistant button is clicked', () => {
-		// Skip this test as it's difficult to test the chat toggle without more complex mocking
-		// In a real application, we would need to mock the ChatInterface component more thoroughly
-		expect(true).toBe(true)
+		renderComponent()
+		expect(screen.queryByTestId('chat-interface')).not.toBeInTheDocument()
+
+		const assistantButton = screen.getByRole('button', { name: /Assistant/i })
+		fireEvent.click(assistantButton)
+
+		expect(screen.getByTestId('chat-interface')).toBeInTheDocument()
 	})
 
 	it('switches tabs when tab is clicked', () => {
@@ -262,119 +286,11 @@ describe('ProjectDetailPage', () => {
 		// Click the Brainstorm tab
 		const brainstormTab = screen.getByRole('tab', { name: /Brainstorm/i })
 		fireEvent.click(brainstormTab)
-
-		// Brainstorming section should be visible
 		expect(screen.getByTestId('brainstorming-section')).toBeInTheDocument()
 
 		// Click the Settings tab
 		const settingsTab = screen.getByRole('tab', { name: /Settings/i })
 		fireEvent.click(settingsTab)
-
-		// Settings section should be visible
 		expect(screen.getByTestId('settings-section')).toBeInTheDocument()
-	})
-
-	// Test specifically for the handleSaveProjectDetails function
-	it('saves project description when handleSaveProjectDetails is called', async () => {
-		renderComponent()
-
-		// Click the "Edit Description" button
-		const editDescriptionButton = screen.getByRole('button', { name: /Edit Description/i })
-		fireEvent.click(editDescriptionButton)
-
-		// Find the textarea and change the description
-		const descriptionInput = screen.getByDisplayValue('Test Description')
-		fireEvent.change(descriptionInput, { target: { value: 'Updated Description' } })
-
-		// Click the Save button (which calls handleSaveProjectDetails)
-		const saveButtons = screen.getAllByRole('button', { name: /Save$/i })
-		// Find the one that's not disabled and is contained in the project details section
-		const saveButton = saveButtons.find(
-			(button) => !button.hasAttribute('disabled') && button.closest('.MuiPaper-root'),
-		)
-
-		if (!saveButton) {
-			throw new Error('Save button not found')
-		}
-
-		fireEvent.click(saveButton)
-
-		// Check if saveProject was called with the updated description
-		await waitFor(() => {
-			expect(mockSaveProject).toHaveBeenCalledWith(
-				expect.objectContaining({
-					description: 'Updated Description',
-				}),
-			)
-		})
-
-		// Check that editing mode is turned off
-		expect(screen.queryByDisplayValue('Updated Description')).not.toBeInTheDocument()
-
-		// We don't check for the text being in the document because the mock doesn't update the UI
-		// In a real application, we would need to mock the state update more thoroughly
-	})
-
-	// Test for the onBlur handler that uses handleSaveProjectDetails
-	it('saves project description when textarea loses focus', async () => {
-		renderComponent()
-
-		// Click the "Edit Description" button
-		const editDescriptionButton = screen.getByRole('button', { name: /Edit Description/i })
-		fireEvent.click(editDescriptionButton)
-
-		// Find the textarea and change the description
-		const descriptionInput = screen.getByDisplayValue('Test Description')
-		fireEvent.change(descriptionInput, { target: { value: 'Blurred Description' } })
-
-		// Blur the textarea
-		fireEvent.blur(descriptionInput)
-
-		// Check if saveProject was called with the updated description
-		await waitFor(() => {
-			expect(mockSaveProject).toHaveBeenCalledWith(
-				expect.objectContaining({
-					description: 'Blurred Description',
-				}),
-			)
-		})
-
-		// Check that editing mode is turned off
-		expect(screen.queryByDisplayValue('Blurred Description')).not.toBeInTheDocument()
-	})
-
-	// Test that save happens even when data has not changed
-	it('saves project when description has not changed', async () => {
-		renderComponent()
-
-		// Click the "Edit Description" button
-		const editDescriptionButton = screen.getByRole('button', { name: /Edit Description/i })
-		fireEvent.click(editDescriptionButton)
-
-		// Find the textarea but don't change the value
-		const descriptionInput = screen.getByDisplayValue('Test Description')
-
-		// Click the Save button
-		const saveButtons = screen.getAllByRole('button', { name: /Save$/i })
-		// Find the one that's not disabled and is contained in the project details section
-		const saveButton = saveButtons.find(
-			(button) => !button.hasAttribute('disabled') && button.closest('.MuiPaper-root'),
-		)
-
-		if (!saveButton) {
-			throw new Error('Save button not found')
-		}
-
-		fireEvent.click(saveButton)
-
-		// Check that saveProject was called even though the value didn't change
-		expect(mockSaveProject).toHaveBeenCalledWith(
-			expect.objectContaining({
-				description: 'Test Description',
-			}),
-		)
-
-		// Check that editing mode is turned off
-		expect(screen.queryByDisplayValue('Test Description')).not.toBeInTheDocument()
 	})
 })

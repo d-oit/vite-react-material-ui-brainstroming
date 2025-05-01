@@ -31,28 +31,31 @@ export default defineConfig({
 				web: {
 					include: [
 						'@mui/material',
-						'@mui/icons-material',
 						'@emotion/react',
 						'@emotion/styled',
+						'react',
+						'react-dom',
+						'@testing-library/react',
+						'i18next',
+						'react-i18next',
 					],
 				},
 			},
 		},
 		// Test execution configuration
-		maxConcurrency: 1,
-		fileParallelism: false,
-		// Handle large test suites
-		bail: 5, // Stop after 5 test failures
+		fileParallelism: true,
+		maxConcurrency: undefined, // Uses available CPU cores
+		bail: 5,
 		onConsoleLog: (log, type) => {
 			if (type === 'stderr' && log.includes('EMFILE')) {
-				return false // Suppress EMFILE errors
+				return false
 			}
 			return true
 		},
 		// Resource management
 		poolOptions: {
 			threads: {
-				singleThread: true,
+				singleThread: false,
 			},
 		},
 		// Browser APIs
@@ -61,11 +64,9 @@ export default defineConfig({
 				resources: 'usable',
 			},
 		},
-		// Additional options
 		sequence: {
-			shuffle: false, // Don't randomize test order
+			shuffle: false,
 		},
-		// Test timeouts
 		testTimeout: 20000,
 		hookTimeout: 10000,
 		watch: false,
