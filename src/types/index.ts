@@ -1,6 +1,6 @@
 // Base types
 // Enums
-import { NodeType, EdgeType, ThemeMode, LogLevel, LogCategory, NodeSize, ConnectionMode, PanelPosition } from './enums'
+import { NodeType, EdgeType, ThemeMode, LogLevel, LogCategory, NodeSize, ConnectionMode, PanelPosition, NODE_TYPES } from './enums'
 
 export type {
 	NodeData,
@@ -19,7 +19,7 @@ export type { ChatMessage, NodeSuggestion, ChatSuggestion } from './chat'
 export { createNodeSuggestionFromNodeData, createNodeDataFromSuggestion } from './chat'
 
 // Project types
-export type { Project, GitCommit, ProjectHistoryEntry } from './project'
+export type { Project } from './project'
 
 export { createEmptyProject, isValidProject, normalizeProjectVersion, DEFAULT_PROJECT_VERSION } from './project'
 
@@ -57,7 +57,7 @@ export {
 // Version utilities
 export { normalizeVersion, formatVersion, isValidVersion, DEFAULT_VERSION } from '../utils/version'
 
-export { NodeType, EdgeType, ThemeMode, LogLevel, LogCategory, NodeSize, ConnectionMode, PanelPosition }
+export { NodeType, EdgeType, ThemeMode, LogLevel, LogCategory, NodeSize, ConnectionMode, PanelPosition, NODE_TYPES }
 
 // Constants
 export const NodeColors: Record<NodeType, string> = {

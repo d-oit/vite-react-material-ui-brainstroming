@@ -30,6 +30,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { useI18n } from '../../contexts/I18nContext'
 import type { Project } from '../../types'
+import { NodeType, NODE_TYPES } from '../../types'
 import { formatDate } from '../../utils/dateUtils'
 
 interface ProjectCardProps {
@@ -95,7 +96,7 @@ export const ProjectCard = ({ project, onDelete, onArchive, onSync, onPin }: Pro
 
 	// Calculate node count by type
 	const nodeTypes = project.nodes.reduce<Record<string, number>>((acc, node) => {
-		const type = (typeof node.type === 'string' && node.type !== '') ? node.type : 'unknown'
+		const type = NODE_TYPES.includes(node.type as NodeType) ? node.type : 'unknown'
 		// Create a new object to avoid mutation
 		return {
 			...acc,

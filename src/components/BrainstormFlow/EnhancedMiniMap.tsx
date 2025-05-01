@@ -1,3 +1,4 @@
+import { css } from '@emotion/react'
 import {
 	ZoomIn as ZoomInIcon,
 	ZoomOut as ZoomOutIcon,
@@ -14,10 +15,27 @@ import { MiniMap as ReactFlowMiniMap, Node } from 'reactflow'
 import { useI18n } from '../../contexts/I18nContext'
 import type { Edge } from '../../types'
 
+const nodeContentStyles = css`
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+`
+
+// Global style to target the text element within the minimap node
+// Assuming the text is within a div or span inside the minimap node element
+const globalMinimapNodeTextStyles = css`
+	.react-flow__minimap-node div,
+	.react-flow__minimap-node span {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+`
+
 interface EnhancedMiniMapProps extends Omit<MiniMapProps, 'onNodeClick'> {
-	defaultVisible?: boolean;
-	defaultExpanded?: boolean;
-	onNodeClick: (nodeId: string) => void;
+	defaultVisible?: boolean
+	defaultExpanded?: boolean
+	onNodeClick: (nodeId: string) => void
 }
 
 export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
@@ -120,6 +138,7 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
 					onNodeClick={(_, node) => onNodeClick(node.id)}
 					aria-hidden="true"
 					id="minimap-container"
+					nodeClassName={nodeContentStyles.name}
 				/>
 			</Box>
 		</Box>

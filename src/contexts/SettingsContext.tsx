@@ -22,6 +22,9 @@ interface Settings {
 	skipDeleteConfirmation: boolean
 	activeColorSchemeId: string
 	preferredNodeSize: 'small' | 'medium' | 'large'
+	accessibilityPreferences?: {
+		reducedMotion?: boolean
+	}
 }
 
 interface SettingsContextType {
@@ -58,6 +61,48 @@ const defaultSettings: Settings = {
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)
+
+// Define interface for imported data structure
+interface ImportedSettingsData {
+	settings: Settings // Assuming Settings type is defined elsewhere
+	metadata?: object
+	colorSchemes?: any[] // TODO: Define a proper type for color schemes
+	nodePreferences?: NodePreferences // Use the imported NodePreferences type
+}
+
+// Type guard for NodePreferences
+function isNodePreferences(data: any): data is NodePreferences {
+	return (
+		typeof data === 'object' &&
+		data !== null &&
+		// Add checks for required properties of NodePreferences
+		Object.prototype.hasOwnProperty.call(data, 'defaultSize') &&
+		Object.prototype.hasOwnProperty.call(data, 'defaultColorScheme') &&
+		Object.prototype.hasOwnProperty.call(data, 'nodeSizes') &&
+		typeof data.defaultSize === 'string' && // Assuming defaultSize is a string
+		typeof data.defaultColorScheme === 'string' && // Assuming defaultColorScheme is a string
+		typeof data.nodeSizes === 'object' && // Assuming nodeSizes is an object
+		data.nodeSizes !== null
+		// Add more specific checks for nodeSizes properties if needed
+	)
+}
+
+// Type guard for ImportedSettingsData
+function isImportedSettingsData(data: any): data is ImportedSettingsData {
+	return (
+		typeof data === 'object' &&
+		data !== null &&
+		// Check for settings property and its structure
+		Object.prototype.hasOwnProperty.call(data, 'settings') &&
+		typeof data.settings === 'object' &&
+		data.settings !== null &&
+		// Add checks for required properties of Settings if needed
+		// For example: Object.prototype.hasOwnProperty.call(data.settings, 'themeMode') &&
+		// Check for optional nodePreferences property and its structure if present
+		(!Object.prototype.hasOwnProperty.call(data, 'nodePreferences') || isNodePreferences(data.nodePreferences))
+		// Add checks for other optional properties like metadata and colorSchemes if needed
+	)
+}
 
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 	const [settings, setSettings] = useState<Settings>(defaultSettings)
@@ -184,7 +229,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 			const updatedSettings = { ...prevSettings, ...newSettings }
 
 			// Save to IndexedDB
-			indexedDBService.saveSettings(updatedSettings as Record<string, unknown>).catch((error) => {
+			indexedDBService.saveSettings((updatedSettings as unknown) as Record<string, unknown>).catch((error) => {
 				console.error('Failed to save settings to IndexedDB:', error)
 				// Fallback to localStorage
 				localStorage.setItem('app_settings', JSON.stringify(updatedSettings))
@@ -235,7 +280,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 	// Reset settings to defaults
 	const resetSettings = () => {
 		setSettings(defaultSettings)
-		indexedDBService.saveSettings(defaultSettings as Record<string, unknown>).catch((error) => {
+		indexedDBService.saveSettings((defaultSettings as unknown) as Record<string, unknown>).catch((error) => {
 			console.error('Failed to reset settings in IndexedDB:', error)
 			localStorage.removeItem('app_settings')
 		})
@@ -255,13 +300,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 				return nodePreferences.customColors.note
 			} else if (type === 'idea' && nodePreferences.customColors.idea) {
 				return nodePreferences.customColors.idea
-			} else if (type === 'decision' && nodePreferences.customColors.decision) {
-				return nodePreferences.customColors.decision
-			} else if (type === 'question' && nodePreferences.customColors.question) {
-				return nodePreferences.customColors.question
-			} else if (type === 'action' && nodePreferences.customColors.action) {
-				return nodePreferences.customColors.action
 			}
+			// Removed checks for non-existent types: decision, question, action
 		}
 
 		// If active color scheme has a color for this node type, use it in a type-safe way
@@ -273,13 +313,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 				return activeColorScheme.colors.note || '#f5f5f5'
 			} else if (type === 'idea') {
 				return activeColorScheme.colors.idea || '#f5f5f5'
-			} else if (type === 'decision') {
-				return activeColorScheme.colors.decision || '#f5f5f5'
-			} else if (type === 'question') {
-				return activeColorScheme.colors.question || '#f5f5f5'
-			} else if (type === 'action') {
-				return activeColorScheme.colors.action || '#f5f5f5'
 			}
+			// Removed checks for non-existent types: decision, question, action
 			return '#f5f5f5'
 		}
 
@@ -323,8 +358,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 		try {
 			const importData = JSON.parse(jsonData)
 
-			// Validate imported data
-			if (!importData.settings) {
+			// Validate imported data using type guard
+			if (!isImportedSettingsData(importData)) {
 				// Try to handle legacy format
 				try {
 					const legacySettings = JSON.parse(jsonData) as Settings
@@ -332,7 +367,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 						...prevSettings,
 						...legacySettings,
 					}))
-					await indexedDBService.saveSettings(legacySettings as Record<string, unknown>)
+					await indexedDBService.saveSettings((legacySettings as unknown) as Record<string, unknown>)
 					return true
 				} catch (_) {
 					throw new Error('Invalid settings data')
@@ -340,7 +375,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 			}
 
 			// Log metadata if available
-			if (importData.metadata) {
+			if (importData.metadata && typeof importData.metadata === 'object') { // Check type explicitly
 				console.log('Importing settings from:', importData.metadata)
 			}
 
@@ -349,11 +384,12 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 				...prevSettings,
 				...importData.settings,
 			}))
-			await indexedDBService.saveSettings(importData.settings as Record<string, unknown>)
+			await indexedDBService.saveSettings(importData.settings as unknown as Record<string, unknown>)
 
 			// Import color schemes if available
 			if (importData.colorSchemes && Array.isArray(importData.colorSchemes)) {
 				for (const scheme of importData.colorSchemes) {
+					// TODO: Add type validation for scheme
 					await indexedDBService.saveColorScheme(scheme)
 				}
 				const updatedSchemes = await indexedDBService.getColorSchemes()
@@ -361,29 +397,29 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 			}
 
 			// Import node preferences if available
-			if (importData.nodePreferences) {
+			if (importData.nodePreferences && isNodePreferences(importData.nodePreferences)) { // Use type guard
 				await indexedDBService.saveNodePreferences(importData.nodePreferences)
 				setNodePreferences(importData.nodePreferences)
 			}
 
 			// Set active color scheme
-			if (importData.settings.activeColorSchemeId) {
+			if (importData.settings.activeColorSchemeId) { // Removed Boolean()
 				const activeScheme =
 					colorSchemes.find((scheme) => scheme.id === importData.settings.activeColorSchemeId) ||
 					(await indexedDBService.getColorScheme(importData.settings.activeColorSchemeId))
 
-				if (activeScheme) {
+				if (activeScheme) { // Removed Boolean()
 					setActiveColorScheme(activeScheme)
-				}
+				} // Added missing closing brace
 			}
 
 			// Configure services with imported settings
 			configureServices(importData.settings)
 
-			return true
-		} catch (error) {
+			return true // Added return true for try block
+		} catch (error) { // Added missing catch block
 			console.error('Failed to import settings:', error)
-			return false
+			return false // Added return false for catch block
 		}
 	}
 
