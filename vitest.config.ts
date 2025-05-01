@@ -8,17 +8,13 @@ export default defineConfig({
 		globals: true,
 		environment: 'jsdom',
 		setupFiles: ['./src/setupTests.ts'],
-		testTimeout: 20000,
-		include: [
-			'src/**/*.{test,spec}.{js,jsx,ts,tsx}',
-		],
+		include: ['src/**/*.{test,spec}.{js,jsx,ts,tsx}'],
 		exclude: [
-			'**/node_modules/**',
-			'**/dist/**',
-			'**/cypress/**',
-			'**/.{idea,git,cache,output,temp}/**',
-			'**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*',
-			'src/tests/e2e/**', // Exclude Playwright E2E tests
+			'node_modules/**',
+			'dist/**',
+			'src/tests/e2e/**',
+			'.idea/**',
+			'.git/**',
 		],
 		coverage: {
 			provider: 'v8',
@@ -26,8 +22,7 @@ export default defineConfig({
 			exclude: [
 				'node_modules/',
 				'src/setupTests.ts',
-				'src/test.d.ts',
-				'src/**/*.d.ts',
+				'**/*.d.ts',
 				'src/__mocks__/**',
 			],
 		},
@@ -39,14 +34,36 @@ export default defineConfig({
 				'@emotion/styled',
 			],
 		},
-		// Add performance optimizations
-		pool: 'forks', // Use forks instead of threads to avoid hanging issues
+		// Test execution configuration
+		maxConcurrency: 1,
+		fileParallelism: false,
+		// Handle large test suites
+		bail: 5, // Stop after 5 test failures
+		onConsoleLog: (log, type) => {
+			if (type === 'stderr' && log.includes('EMFILE')) {
+				return false // Suppress EMFILE errors
+			}
+			return true
+		},
+		// Resource management
 		poolOptions: {
-			forks: {
-				singleFork: true, // Run tests in a single fork for better performance
+			threads: {
+				singleThread: true,
 			},
 		},
-		fileParallelism: false, // Disable file parallelism to reduce resource contention
-		isolate: false, // Disable isolation for better performance
+		// Browser APIs
+		environmentOptions: {
+			jsdom: {
+				resources: 'usable',
+			},
+		},
+		// Additional options
+		sequence: {
+			shuffle: false, // Don't randomize test order
+		},
+		// Test timeouts
+		testTimeout: 20000,
+		hookTimeout: 10000,
+		watch: false,
 	},
 })

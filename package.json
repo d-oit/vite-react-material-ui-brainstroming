@@ -19,6 +19,8 @@
     "test": "vitest run --config vitest.config.ts",
     "test:watch": "vitest --config vitest.config.ts",
     "test:coverage": "vitest run --config vitest.config.ts --coverage",
+    "test:serial": "vitest run --config vitest.config.ts --pool=threads --poolOptions.threads.singleThread --maxConcurrency=1",
+    "test:debug": "vitest run --config vitest.config.ts --pool=threads --poolOptions.threads.singleThread --maxConcurrency=1 --testNamePattern",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:a11y": "playwright test src/tests/accessibility/a11y-audit.ts",
