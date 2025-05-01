@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config'; // or 'vite'
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
@@ -230,5 +230,15 @@ export default defineConfig({
         global: 'globalThis',
       },
     },
+  },
+  test: {
+    // Place Vitest configuration here
+    deps: {
+      optimizer: {
+        web: {
+          include: [] // Move your inline dependencies here
+        }
+      }
+    }
   },
 });

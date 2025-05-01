@@ -27,12 +27,16 @@ export default defineConfig({
 			],
 		},
 		deps: {
-			inline: [
-				'@mui/material',
-				'@mui/icons-material',
-				'@emotion/react',
-				'@emotion/styled',
-			],
+			optimizer: {
+				web: {
+					include: [
+						'@mui/material',
+						'@mui/icons-material',
+						'@emotion/react',
+						'@emotion/styled',
+					],
+				},
+			},
 		},
 		// Test execution configuration
 		maxConcurrency: 1,
