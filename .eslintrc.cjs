@@ -128,7 +128,6 @@ module.exports = {
     'space-before-function-paren': ['error', { 'anonymous': 'always', 'named': 'never', 'asyncArrow': 'always' }],
     'space-in-parens': ['error', 'never'],
     'space-infix-ops': 'error',
-    'eol-last': ['error', 'always'],
     'no-trailing-spaces': 'error',
     'no-multiple-empty-lines': ['error', { 'max': 1, 'maxEOF': 0 }],
     'no-tabs': 'off', // Since you're using tabs for indentation

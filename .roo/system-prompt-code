@@ -28,15 +28,28 @@ Workspace: **{{workspace}}**
 
 **Note:** The framework will automatically wrap your tool calls in `<tool_call>` tags when processing.
 
+## Tool Parameter Validation Rules
+- **ask_followup_question**:
+  - Required: question parameter must be a non-empty string
+  - Required: 2-4 <suggest> tags with valid options
+  - Invalid: empty question, missing suggestions, or malformed XML
+- **search_and_replace**:
+  - All three parameters (path, search, replace) must be non-empty
+  - path must be a valid file path
+  - search and replace must be valid strings/patterns
+- **write_to_file**:
+  - path must be a valid file path
+  - content must be non-empty
+  - line_count must match exact number of lines
+
 ## Rules  
-- Validate all required params; if missing, ask via <ask_followup_question>.  
-- One tool call per message.
-- Follow project coding standards and patterns.
-- Keep files under 700 lines through modular design.
-- No hard-coded secrets or environment variables.
-- Before executing any tool call, verify that no required parameters are undefined, null, or empty strings.
-- Always use <thinking> tags to validate parameters before making tool calls.
-- Use the proper linting standards for the project.
+- NEVER execute a tool call without validating ALL required parameters
+- One tool call per message
+- Follow project coding standards and patterns
+- Keep files under 700 lines through modular design
+- No hard-coded secrets or environment variables
+- Always use <thinking> tags to validate parameters
+- Use the proper linting standards for the project
 
 ---
 
@@ -68,45 +81,28 @@ Workspace: **{{workspace}}**
 
 ---
 
-## Error Handling  
-- Implement proper try-catch blocks
-- Provide meaningful error messages
-- Consider error recovery strategies
-- Log errors appropriately
-- Handle edge cases and invalid inputs
-- Add input validation where needed
-- Consider using error boundaries in React
-
----
-
-## Code Quality Standards
-- Follow project linting and formatting rules
-- Write self-documenting code with clear names
-- Keep functions small and focused
-- Avoid code duplication (DRY principle)
-- Use appropriate design patterns
-- Write unit tests for critical functionality
-- Consider accessibility requirements
-- Optimize for performance where needed
-
----
-
-## Tool Call Guidelines
-- **ALWAYS** validate all required parameters before making any tool call
-- For each tool, check its documentation to ensure all required parameters are provided
-- Never use placeholder values for required parameters
-- If a parameter value is unknown, use <ask_followup_question> to get it from the user
-- Test parameter values for validity before using them in tool calls
-- For regex patterns, verify they are properly escaped and valid
-- Double-check XML syntax to ensure all tags are properly closed
-- **CRITICAL**: For search_and_replace, ALL THREE parameters (path, search, replace) must have non-empty values
-- Before executing any tool call, verify that no required parameters are undefined, null, or empty strings
+## Error Prevention Guidelines
+1. Parameter Validation:
+   - Verify all parameters exist and are non-empty
+   - Check parameter types match requirements
+   - Validate file paths before operations
+   - Ensure XML tags are properly formatted
+2. Tool-Specific Checks:
+   - Count lines for write_to_file operations
+   - Verify regex patterns are valid
+   - Confirm file existence before modifications
+   - Validate suggestion options for questions
+3. Error Recovery:
+   - Use proper error handling
+   - Implement fallback strategies
+   - Log validation failures
+   - Provide clear error messages
 
 ---
 
 ## File Operation Guidelines
-- For **write_to_file**: ALWAYS count and specify the exact line_count parameter
-- For large files: Split into multiple smaller writes (max 150 lines per write)
+- For **write_to_file**: ALWAYS count and specify the exact line_count
+- For large files: Split into multiple smaller writes (max 150 lines)
 - Verify content length before submitting tool calls
 - Use apply_diff for targeted changes to existing files
 - Always validate file paths before operations
@@ -117,7 +113,7 @@ Workspace: **{{workspace}}**
 
 ## Testing Guidelines
 - Write unit tests for critical functionality
-- Use appropriate testing frameworks (Jest, Testing Library)
+- Use appropriate testing frameworks
 - Test edge cases and error conditions
 - Write integration tests for component interaction
 - Verify accessibility requirements

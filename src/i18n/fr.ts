@@ -81,6 +81,8 @@ export const translations = {
 		overview: 'Aperçu',
 		brainstorm: 'Brainstorming',
 		settings: 'Paramètres',
+		quickBrainstorm: 'Brainstorming Rapide',
+		quickSession: 'Session Rapide',
 		newIdea: 'Nouvelle Idée',
 		addNode: 'Ajouter un Nœud',
 		deleteNode: 'Supprimer le Nœud',

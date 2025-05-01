@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 import type { CustomNodeType, CustomEdge } from '../../components/BrainstormFlow/types'
 import projectService from '../../services/ProjectService'
+import { useBrainstormStore } from '../../store/brainstormStore'
 import type { Project } from '../../types'
 import { NodeType , EdgeType } from '../../types/enums'
 import { ProjectTemplate } from '../../types/project'
-import { useBrainstormStore } from '../brainstormStore'
 
 // Mock projectService
 vi.mock('../../services/ProjectService', () => ({
@@ -35,7 +35,9 @@ describe('brainstormStore', () => {
 	describe('saveAllNodes', () => {
 		it('should do nothing if projectId is null', async () => {
 			const store = useBrainstormStore.getState()
-			await store.saveAllNodes()
+			await vi.waitFor(async () => {
+				await store.saveAllNodes()
+			})
 
 			expect(projectService.updateProject).not.toHaveBeenCalled()
 			expect(store.isLoading).toBe(false)
@@ -68,14 +70,19 @@ describe('brainstormStore', () => {
 				type: EdgeType.DEFAULT,
 			}
 
-			useBrainstormStore.setState({
-				projectId: 'test-project',
-				nodes: [testNode],
-				edges: [testEdge],
+			await vi.runOnlyPendingTimersAsync()
+			await vi.waitFor(async () => {
+				useBrainstormStore.setState({
+					projectId: 'test-project',
+					nodes: [testNode],
+					edges: [testEdge],
+				})
 			})
 
 			const store = useBrainstormStore.getState()
-			await store.saveAllNodes()
+			await vi.waitFor(async () => {
+				await store.saveAllNodes()
+			})
 
 			expect(projectService.updateProject).toHaveBeenCalledWith('test-project', {
 				nodes: expect.arrayContaining([expect.objectContaining({ id: 'test-node' })]),
@@ -96,8 +103,11 @@ describe('brainstormStore', () => {
 			})
 
 			const store = useBrainstormStore.getState()
-			await store.saveAllNodes()
+			await vi.waitFor(async () => {
+				await store.saveAllNodes()
+			})
 
+			expect(store.isLoading).toBe(false)
 			expect(store.error).toBe('Failed to save nodes')
 			expect(store.isLoading).toBe(false)
 		})
@@ -116,6 +126,7 @@ describe('brainstormStore', () => {
 				syncSettings: {
 					enableS3Sync: false,
 					syncFrequency: 'manual',
+					autoSave: true,
 				},
 				nodes: [{
 					id: 'test-node',
@@ -144,7 +155,9 @@ describe('brainstormStore', () => {
 			vi.mocked(projectService.getProject).mockResolvedValueOnce(mockProject)
 
 			const store = useBrainstormStore.getState()
-			await store.loadNodesWithPositions('test-project')
+			await vi.waitFor(async () => {
+				await store.loadNodesWithPositions('test-project')
+			})
 
 			expect(projectService.getProject).toHaveBeenCalledWith('test-project')
 			expect(store.nodes).toHaveLength(1)
@@ -158,7 +171,9 @@ describe('brainstormStore', () => {
 			vi.mocked(projectService.getProject).mockRejectedValueOnce(new Error('Load failed'))
 
 			const store = useBrainstormStore.getState()
-			await store.loadNodesWithPositions('test-project')
+			await vi.waitFor(async () => {
+				await store.loadNodesWithPositions('test-project')
+			})
 
 			expect(store.error).toBe('Failed to load nodes')
 			expect(store.isLoading).toBe(false)
@@ -178,6 +193,7 @@ describe('brainstormStore', () => {
 				syncSettings: {
 					enableS3Sync: false,
 					syncFrequency: 'manual',
+					autoSave: true,
 				},
 				nodes: [],
 				edges: [],
@@ -189,7 +205,9 @@ describe('brainstormStore', () => {
 			})
 
 			const store = useBrainstormStore.getState()
-			await store.loadNodesWithPositions('test-project')
+			await vi.waitFor(async () => {
+				await store.loadNodesWithPositions('test-project')
+			})
 
 			expect(store.isLoading).toBe(false)
 		})
