@@ -8,7 +8,6 @@ import type { NodeProps } from 'reactflow'
 import { Handle, Position } from 'reactflow'
 
 import { useSettings } from '../../../contexts/SettingsContext'
-import type { NodeType } from '../../../types/enums'
 import type { NodeData } from '../types'
 
 const CustomNode: React.FC<NodeProps<NodeData>> = ({ data, selected, id }) => {
@@ -99,7 +98,12 @@ const CustomNode: React.FC<NodeProps<NodeData>> = ({ data, selected, id }) => {
 							mt: 1,
 							color: theme.palette.text.secondary,
 							fontSize: '0.85em',
-							whiteSpace: 'pre-wrap',
+							display: '-webkit-box',
+							WebkitLineClamp: 1,
+							WebkitBoxOrient: 'vertical',
+							overflow: 'hidden',
+							textOverflow: 'ellipsis',
+							whiteSpace: 'normal',
 							wordBreak: 'break-word',
 						}}>
 						{data.content}
