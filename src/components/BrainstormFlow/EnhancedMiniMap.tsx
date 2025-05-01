@@ -92,8 +92,8 @@ export const EnhancedMiniMap: React.FC<EnhancedMiniMapProps> = ({
 						display: 'flex',
 						flexDirection: 'column',
 						gap: 0.5,
-						marginRight: 1,
-						zIndex: 1001,
+						marginRight: 20,
+						zIndex: 1010,
 					}}
 				>
 					<Tooltip title={t('flow.hideMiniMap') || 'Hide mini map'} placement="left">

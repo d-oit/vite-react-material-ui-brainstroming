@@ -32,6 +32,7 @@ export const ProjectSchema = z.object({
 	nodes: z.array(z.custom<Node>()),
 	edges: z.array(z.custom<Edge>()),
 	syncSettings: SyncSettingsSchema,
+	isPinned: z.boolean().default(false),
 })
 
 export type Project = z.infer<typeof ProjectSchema>
@@ -115,6 +116,7 @@ export function createEmptyProject(
 			syncFrequency: 'manual',
 			autoSave: true,  // Set default autoSave in createEmptyProject
 		},
+		isPinned: false,
 	}
 }
 

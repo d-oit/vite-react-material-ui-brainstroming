@@ -45,7 +45,7 @@ export const ProjectCard = ({ project, onDelete, onArchive, onSync, onPin }: Pro
 	const navigate = useNavigate()
 	const { t } = useI18n()
 	const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
-	const [isPinned, setIsPinned] = useState(project.isPinned || false)
+	const [isPinned, setIsPinned] = useState(Boolean(project.isPinned))
 
 	const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
 		event.stopPropagation()
@@ -57,7 +57,7 @@ export const ProjectCard = ({ project, onDelete, onArchive, onSync, onPin }: Pro
 	}
 
 	const handleOpenProject = () => {
-		navigate(`/projects/${project.id}`)
+		void navigate(`/projects/${project.id}`)
 	}
 
 	const handleDelete = (event: React.MouseEvent) => {
@@ -95,7 +95,7 @@ export const ProjectCard = ({ project, onDelete, onArchive, onSync, onPin }: Pro
 
 	// Calculate node count by type
 	const nodeTypes = project.nodes.reduce<Record<string, number>>((acc, node) => {
-		const type = node.type || 'unknown'
+		const type = (typeof node.type === 'string' && node.type !== '') ? node.type : 'unknown'
 		// Create a new object to avoid mutation
 		return {
 			...acc,
@@ -136,8 +136,8 @@ export const ProjectCard = ({ project, onDelete, onArchive, onSync, onPin }: Pro
 					onClick={handleTogglePin}
 					sx={{
 						position: 'absolute',
-						top: -8,
-						right: 8,
+						bottom: -1,
+						right: -1,
 						backgroundColor: theme.palette.background.paper,
 						boxShadow: theme.shadows[2],
 						zIndex: 1,

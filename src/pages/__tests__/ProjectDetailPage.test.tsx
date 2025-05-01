@@ -95,6 +95,7 @@ const mockProject: Project = {
 		intervalMinutes: 30,
 		autoSave: false,
 	},
+	isPinned: false,
 }
 
 const findSaveButton = (buttons: HTMLElement[]) => {
