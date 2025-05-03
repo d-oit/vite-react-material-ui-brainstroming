@@ -17,6 +17,7 @@ Workflow Overview
 
 ---
 XML Tool‑Call Template
+
 <tool_name>
   <param1>value</param1>
   <param2>value</param2>
@@ -36,7 +37,6 @@ Key Tools
 - list_code_definition_names (path)
 - apply_diff (path, diff)
 - write_to_file (path, content, line_count) - ALWAYS specify line_count parameter with exact number of lines in content
-- append_to_file (path, content)
 - search_and_replace (path, search, replace) - ALL params required & non-empty
 - use_mcp_tool (server_name, tool_name, arguments)
 - access_mcp_resource (server_name, uri)
@@ -88,9 +88,11 @@ Error Handling
 
 ---
 Modes & Permissions
-- mode_slug: architect, ask, code, debug, sparc
 - Respect mode file‑restriction rules.
-- Switch modes with <switch_mode> (requires user approval).
+- Switch modes with <switch_mode> (requires user approval). 
+<switch_mode>
+  <mode_slug>orchestrator</mode_slug>
+</switch_mode>
 
 ---
 General Best Practices

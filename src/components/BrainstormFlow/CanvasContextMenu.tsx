@@ -63,7 +63,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
 			}
 			// Ensure the menu is properly labeled for screen readers
 			MenuListProps={{
-				'aria-label': t('flow.canvasContextMenu') || 'Canvas context menu',
+				'aria-label': t('brainstorm.canvasContextMenu') || 'Canvas context menu',
 				dense: true,
 			}}
 			PaperProps={{
@@ -82,11 +82,11 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
 					}
 					onClose()
 				}}
-				aria-label={t('flow.addIdeaNode') || 'Add idea node'}>
+				aria-label={t('brainstorm.addIdeaNode') || 'Add idea node'}>
 				<ListItemIcon>
 					<AddNodeIcon fontSize="small" />
 				</ListItemIcon>
-				<ListItemText>{t('flow.addIdea') || 'Add Idea'}</ListItemText>
+				<ListItemText>{t('brainstorm.addIdea') || 'Add Idea'}</ListItemText>
 			</MenuItem>
 
 			<MenuItem
@@ -96,11 +96,11 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
 					}
 					onClose()
 				}}
-				aria-label={t('flow.addTaskNode') || 'Add task node'}>
+				aria-label={t('brainstorm.addTaskNode') || 'Add task node'}>
 				<ListItemIcon>
 					<AddNodeIcon fontSize="small" />
 				</ListItemIcon>
-				<ListItemText>{t('flow.addTask') || 'Add Task'}</ListItemText>
+				<ListItemText>{t('brainstorm.addTask') || 'Add Task'}</ListItemText>
 			</MenuItem>
 
 			<MenuItem
@@ -110,11 +110,11 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
 					}
 					onClose()
 				}}
-				aria-label={t('flow.addNoteNode') || 'Add note node'}>
+				aria-label={t('brainstorm.addNoteNode') || 'Add note node'}>
 				<ListItemIcon>
 					<AddNodeIcon fontSize="small" />
 				</ListItemIcon>
-				<ListItemText>{t('flow.addNote') || 'Add Note'}</ListItemText>
+				<ListItemText>{t('brainstorm.addNote') || 'Add Note'}</ListItemText>
 			</MenuItem>
 
 			<MenuItem
@@ -124,11 +124,11 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
 					}
 					onClose()
 				}}
-				aria-label={t('flow.addResourceNode') || 'Add resource node'}>
+				aria-label={t('brainstorm.addResourceNode') || 'Add resource node'}>
 				<ListItemIcon>
 					<AddNodeIcon fontSize="small" />
 				</ListItemIcon>
-				<ListItemText>{t('flow.addResource') || 'Add Resource'}</ListItemText>
+				<ListItemText>{t('brainstorm.addResource') || 'Add Resource'}</ListItemText>
 			</MenuItem>
 
 			<Divider />
@@ -139,11 +139,11 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
 					onClose()
 				}}
 				disabled={!canPaste}
-				aria-label={t('flow.paste') || 'Paste'}>
+				aria-label={t('brainstorm.paste') || 'Paste'}>
 				<ListItemIcon>
 					<PasteIcon fontSize="small" />
 				</ListItemIcon>
-				<ListItemText>{t('flow.paste') || 'Paste'}</ListItemText>
+				<ListItemText>{t('brainstorm.paste') || 'Paste'}</ListItemText>
 			</MenuItem>
 
 			<Divider />
@@ -153,11 +153,11 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
 					onFitView()
 					onClose()
 				}}
-				aria-label={t('flow.fitView') || 'Fit view'}>
+				aria-label={t('brainstorm.fitView') || 'Fit view'}>
 				<ListItemIcon>
 					<FitViewIcon fontSize="small" />
 				</ListItemIcon>
-				<ListItemText>{t('flow.fitView') || 'Fit View'}</ListItemText>
+				<ListItemText>{t('brainstorm.fitView') || 'Fit View'}</ListItemText>
 			</MenuItem>
 
 			<MenuItem
@@ -165,12 +165,12 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
 					onToggleGrid()
 					onClose()
 				}}
-				aria-label={showGrid ? t('flow.hideGrid') || 'Hide grid' : t('flow.showGrid') || 'Show grid'}>
+				aria-label={showGrid ? t('brainstorm.hideGrid') || 'Hide grid' : t('brainstorm.showGrid') || 'Show grid'}>
 				<ListItemIcon>
 					{showGrid ? <GridOffIcon fontSize="small" /> : <GridIcon fontSize="small" />}
 				</ListItemIcon>
 				<ListItemText>
-					{showGrid ? t('flow.hideGrid') || 'Hide Grid' : t('flow.showGrid') || 'Show Grid'}
+					{showGrid ? t('brainstorm.hideGrid') || 'Hide Grid' : t('brainstorm.showGrid') || 'Show Grid'}
 				</ListItemText>
 			</MenuItem>
 
@@ -182,11 +182,11 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
 					onClose()
 				}}
 				disabled={!canUndo}
-				aria-label={t('flow.undo') || 'Undo'}>
+				aria-label={t('brainstorm.undo') || 'Undo'}>
 				<ListItemIcon>
 					<UndoIcon fontSize="small" />
 				</ListItemIcon>
-				<ListItemText>{t('flow.undo') || 'Undo'}</ListItemText>
+				<ListItemText>{t('brainstorm.undo') || 'Undo'}</ListItemText>
 			</MenuItem>
 
 			<MenuItem
@@ -195,11 +195,11 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
 					onClose()
 				}}
 				disabled={!canRedo}
-				aria-label={t('flow.redo') || 'Redo'}>
+				aria-label={t('brainstorm.redo') || 'Redo'}>
 				<ListItemIcon>
 					<RedoIcon fontSize="small" />
 				</ListItemIcon>
-				<ListItemText>{t('flow.redo') || 'Redo'}</ListItemText>
+				<ListItemText>{t('brainstorm.redo') || 'Redo'}</ListItemText>
 			</MenuItem>
 		</Menu>
 	)

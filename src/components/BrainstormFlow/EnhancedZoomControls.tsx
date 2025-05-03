@@ -47,19 +47,19 @@ const EnhancedZoomControls: React.FC<EnhancedZoomControlsProps> = ({
 				boxShadow: theme.shadows[3],
 			}}
 		>
-			<Tooltip title={t('flow.zoomIn') || 'Zoom In'}>
+			<Tooltip title={t('brainstorm.zoomIn') || 'Zoom In'}>
 				<IconButton onClick={zoomIn} size="small">
 					<ZoomIn fontSize="small" />
 				</IconButton>
 			</Tooltip>
 
-			<Tooltip title={t('flow.zoomOut') || 'Zoom Out'}>
+			<Tooltip title={t('brainstorm.zoomOut') || 'Zoom Out'}>
 				<IconButton onClick={zoomOut} size="small">
 					<ZoomOut fontSize="small" />
 				</IconButton>
 			</Tooltip>
 
-			<Tooltip title={t('flow.fitView') || 'Fit View'}>
+			<Tooltip title={t('brainstorm.fitView') || 'Fit View'}>
 				<IconButton onClick={fitView} size="small">
 					<FitScreen fontSize="small" />
 				</IconButton>
@@ -75,13 +75,13 @@ const EnhancedZoomControls: React.FC<EnhancedZoomControlsProps> = ({
 				sx={{ height: 80, my: 1 }}
 			/>
 
-			<Tooltip title={t('flow.toggleGrid') || (showGrid ? 'Hide Grid' : 'Show Grid')}>
+			<Tooltip title={t('brainstorm.toggleGrid') || (showGrid ? 'Hide Grid' : 'Show Grid')}>
 				<IconButton onClick={onToggleGrid} size="small">
 					{showGrid ? <GridOff fontSize="small" /> : <GridOn fontSize="small" />}
 				</IconButton>
 			</Tooltip>
 
-			<Tooltip title={t('flow.toggleFullscreen') || (isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen')}>
+			<Tooltip title={t('brainstorm.toggleFullscreen') || (isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen')}>
 				<IconButton onClick={onToggleFullscreen} size="small">
 					{isFullscreen ? <FullscreenExit fontSize="small" /> : <Fullscreen fontSize="small" />}
 				</IconButton>
