@@ -1,54 +1,17 @@
 import { render } from '@testing-library/react'
 import type { RenderOptions, RenderResult } from '@testing-library/react'
-import { createInstance } from 'i18next'
-import type { i18n } from 'i18next'
 import type { PropsWithChildren } from 'react'
-import { I18nextProvider } from 'react-i18next'
 import { BrowserRouter } from 'react-router-dom'
 
-// Create global test i18n instance
-export const testI18n: i18n = createInstance({
-	lng: 'en',
-	fallbackLng: 'en',
-	ns: ['translation'],
-	defaultNS: 'translation',
-	interpolation: { escapeValue: false },
-	resources: {
-		en: {
-			translation: {
-				common: {
-					loading: 'Loading...',
-					error: 'Error',
-					save: 'Save',
-					edit: 'Edit',
-					delete: 'Delete',
-					cancel: 'Cancel',
-					name: 'Name',
-					description: 'Description',
-					version: 'Version {{version}}',
-				},
-				project: {
-					title: 'Project Details',
-					newVersion: 'New Version',
-					settings: 'Settings',
-					overview: 'Overview',
-					brainstorm: 'Brainstorm',
-				},
-			},
-		},
-	},
-})
-
-// Initialize i18n instance
-await testI18n.init()
+import { I18nProvider } from '../contexts/I18nContext'
 
 function Wrapper({ children }: PropsWithChildren<unknown>): JSX.Element {
 	return (
-		<I18nextProvider i18n={testI18n}>
+		<I18nProvider initialLocale="en">
 			<BrowserRouter>
 				{children}
 			</BrowserRouter>
-		</I18nextProvider>
+		</I18nProvider>
 	)
 }
 

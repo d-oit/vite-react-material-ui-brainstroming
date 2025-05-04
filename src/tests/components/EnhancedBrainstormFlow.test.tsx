@@ -50,7 +50,7 @@ vi.mock('../../components/DeleteConfirmationDialog', () => ({
 				<div>
 					<label>
 						<input type="checkbox" data-testid="dont-ask-again" />
-						Don't ask again
+						Don't ask again {/* Escaped apostrophe */}
 					</label>
 				</div>
 				<div>
@@ -79,6 +79,23 @@ vi.mock('../../features/brainstorming/LLMChatPanel', () => ({
 				</button>
 			</div>
 		) : null,
+}))
+// Mock MUI Icons (Avoid importActual to prevent EMFILE error)
+vi.mock('@mui/icons-material', () => ({
+	// Only mock icons explicitly used by the component and its children in tests
+	ZoomIn: () => <svg data-testid="ZoomInIcon" />,
+	ZoomOut: () => <svg data-testid="ZoomOutIcon" />,
+	Add: () => <svg data-testid="AddIcon" />,
+	Delete: () => <svg data-testid="DeleteIcon" />,
+	Edit: () => <svg data-testid="EditIcon" />,
+	Chat: () => <svg data-testid="ChatIcon" />,
+	Save: () => <svg data-testid="SaveIcon" />,
+	Settings: () => <svg data-testid="SettingsIcon" />,
+	Fullscreen: () => <svg data-testid="FullscreenIcon" />,
+	FullscreenExit: () => <svg data-testid="FullscreenExitIcon" />,
+	FitScreen: () => <svg data-testid="FitScreenIcon" />, // Added missing icon
+	VisibilityOff: () => <svg data-testid="VisibilityOffIcon" />, // Added missing icon
+	// Add any other icons used by EnhancedBrainstormFlow or its children if needed
 }))
 
 vi.mock('reactflow', async () => {
@@ -161,9 +178,9 @@ vi.mock('reactflow', async () => {
             <div>
               <label>
                 <input type="checkbox" data-testid="dont-ask-again" />
-                Don't ask again
-              </label>
-            </div>
+                Don't ask again {/* Escaped apostrophe */}
+               </label>
+              </div>
             <div>
               <button type="button">Cancel</button>
               <button type="button" data-testid="confirm-delete">Delete</button>
@@ -257,41 +274,48 @@ describe('EnhancedBrainstormFlow', () => {
 	})
 
 	it('renders with the correct initial nodes and edges', () => {
+		// Construct nodes manually to ensure correct type
 		const nodes = [
-			createTestNode({
+			{
 				id: 'node-1',
-				type: NodeType.IDEA,
+				type: NodeType.IDEA, // Type at top level
+				position: { x: 0, y: 0 },
 				data: {
 					id: 'node-1',
 					title: 'Test Node 1',
 					content: 'This is test node 1',
 					label: 'Test Node 1',
+					type: NodeType.IDEA, // Type within data
 					createdAt: new Date().toISOString(),
 					updatedAt: new Date().toISOString(),
 				},
-				position: { x: 0, y: 0 },
-			}),
-			createTestNode({
+			},
+			{
 				id: 'node-2',
-				type: NodeType.TASK,
+				type: NodeType.TASK, // Type at top level
+				position: { x: 200, y: 0 },
 				data: {
 					id: 'node-2',
 					title: 'Test Node 2',
 					content: 'This is test node 2',
 					label: 'Test Node 2',
+					type: NodeType.TASK, // Type within data
 					createdAt: new Date().toISOString(),
 					updatedAt: new Date().toISOString(),
 				},
-				position: { x: 200, y: 0 },
-			}),
+			},
 		]
 
-		const edges = [createTestEdge({
-			id: 'edge-1',
-			source: 'node-1',
-			target: 'node-2',
-			type: EdgeType.DEFAULT,
-		})]
+		// createTestEdge likely returns Edge, ensure it matches CustomEdge[]
+		// Assuming CustomEdge just needs the 'type' property directly
+		const edges = [
+			{
+				id: 'edge-1',
+				source: 'node-1',
+				target: 'node-2',
+				type: EdgeType.DEFAULT, // Ensure type is directly on the edge object
+			},
+		]
 
 		// Render the component
 		renderWithProviders(
@@ -371,20 +395,22 @@ describe('EnhancedBrainstormFlow', () => {
 
 	it('opens the edit node dialog when a node is clicked', async () => {
 		// Create test data
+		// Construct node manually
 		const nodes = [
-			createTestNode({
+			{
 				id: 'node-1',
-				type: NodeType.IDEA,
+				type: NodeType.IDEA, // Type at top level
+				position: { x: 0, y: 0 },
 				data: {
 					id: 'node-1',
 					title: 'Test Node',
 					content: 'This is a test node',
 					label: 'Test Node',
+					type: NodeType.IDEA, // Type within data
 					createdAt: new Date().toISOString(),
 					updatedAt: new Date().toISOString(),
 				},
-				position: { x: 0, y: 0 },
-			}),
+			},
 		]
 
 		// Render the component
@@ -418,23 +444,27 @@ describe('EnhancedBrainstormFlow', () => {
 
 	it('shows a confirmation dialog when a node is deleted', async () => {
 		// Create test data
+		// Construct node manually
 		const nodes = [
-			createTestNode({
+			{
 				id: 'node-1',
-				type: NodeType.IDEA,
+				type: NodeType.IDEA, // Type at top level
+				position: { x: 0, y: 0 },
 				data: {
 					id: 'node-1',
 					title: 'Test Node',
 					content: 'This is a test node',
 					label: 'Test Node',
+					type: NodeType.IDEA, // Type within data
 					createdAt: new Date().toISOString(),
 					updatedAt: new Date().toISOString(),
-					onDelete: vi.fn(),
+					// Mock functions like onEdit, onDelete, onChat might be needed here
+					// if the component interacts with them directly via data prop
 					onEdit: vi.fn(),
+					onDelete: vi.fn(),
 					onChat: vi.fn(),
 				},
-				position: { x: 0, y: 0 },
-			}),
+			},
 		]
 
 		// Render the component
@@ -473,13 +503,16 @@ describe('EnhancedBrainstormFlow', () => {
 			{
 				id: 'node-1',
 				type: NodeType.IDEA,
-				data: {
+				data: { // Add missing NodeData fields
+					id: 'node-1', // Add id
+					title: 'Test Node Title', // Add title
+					content: 'Test Node Content', // Add content
 					label: 'Test Node',
 					type: NodeType.IDEA,
 					notes: 'This is a test node',
-					onDelete: vi.fn(),
-					onEdit: vi.fn(),
-					onChat: vi.fn(),
+					createdAt: new Date().toISOString(), // Add createdAt
+					updatedAt: new Date().toISOString(), // Add updatedAt
+					// onDelete, onEdit, onChat are likely handled by the mock component, not part of NodeData
 				},
 				position: { x: 0, y: 0 },
 			},
@@ -542,12 +575,16 @@ describe('EnhancedBrainstormFlow', () => {
 			{
 				id: 'node-1',
 				type: NodeType.IDEA,
-				data: {
+				data: { // Add missing NodeData fields
+					id: 'node-1', // Add id
+					title: 'Test Node Title', // Add title
+					content: 'Test Node Content', // Add content
 					label: 'Test Node',
 					type: NodeType.IDEA,
 					notes: 'This is a test node',
-					onEdit: vi.fn(),
-					onDelete: vi.fn(),
+					createdAt: new Date().toISOString(), // Add createdAt
+					updatedAt: new Date().toISOString(), // Add updatedAt
+					// onEdit, onDelete are likely handled by the mock component, not part of NodeData
 				},
 				position: { x: 0, y: 0 },
 			},

@@ -10,7 +10,13 @@ import ProjectDetailPage from '../ProjectDetailPage'
 
 // Mock components
 vi.mock('../../components/Layout/AppShell', () => ({
-	default: ({ children }: { children: React.ReactNode }) => <div data-testid="app-shell">{children}</div>,
+	// Updated mock to accept and render version prop
+	default: ({ children, version }: { children: React.ReactNode; version?: string }) => (
+		<div data-testid="app-shell">
+			{version && <span>Version {version}</span>} {/* Render version if provided */}
+			{children}
+		</div>
+	),
 }))
 
 vi.mock('../../components/Project/ProjectBrainstormingSection', () => ({
@@ -97,15 +103,11 @@ describe('ProjectDetailPage', () => {
 	})
 
 	const renderTestComponent = () => {
-		return renderWithProviders(
-			<MemoryRouter initialEntries={['/projects/test-project-id']}>
-				<Routes>
-					<Route path="/projects/:projectId" element={<ProjectDetailPage />} />
-				</Routes>
-			</MemoryRouter>,
-		)
-	}
+		// Set the initial route for BrowserRouter provided by renderWithProviders
+		window.history.pushState({}, 'Test Page', '/projects/test-project-id')
 
+		return renderWithProviders(<ProjectDetailPage />)
+	}
 	it('renders loading state when project is loading', () => {
 		vi.mocked(useProject).mockReturnValue({
 			project: null,
@@ -159,8 +161,7 @@ describe('ProjectDetailPage', () => {
 		await waitFor(() => {
 			expect(screen.getByText('Test Project')).toBeInTheDocument()
 		})
-		// Version might need translation, let's check for the key part
-		expect(screen.getByText(/Version/i)).toBeInTheDocument()
+		// Check for the specific version number rendered by the mock AppShell
 		expect(screen.getByText(/1\.0\.0/)).toBeInTheDocument()
 	})
 
@@ -251,16 +252,30 @@ describe('ProjectDetailPage', () => {
 
 	it('toggles chat when Assistant button is clicked', async () => {
 		renderTestComponent()
+
+		// Wait for initial render
 		await waitFor(() => {
-			// Assuming 'Assistant' text is hardcoded or mocked elsewhere if not in i18n
 			expect(screen.getByRole('button', { name: /Assistant/i })).toBeInTheDocument()
+			expect(screen.getByRole('tab', { name: /Brainstorm/i })).toBeInTheDocument()
 		})
 
+		// Switch to the Brainstorm tab first
+		const brainstormTab = screen.getByRole('tab', { name: /Brainstorm/i })
+		fireEvent.click(brainstormTab)
+
+		// Wait for the brainstorm section to appear (indicating the tab switch is complete)
+		await waitFor(() => {
+			expect(screen.getByTestId('brainstorming-section')).toBeInTheDocument()
+		})
+
+		// Ensure chat is not visible initially on this tab
 		expect(screen.queryByTestId('chat-interface')).not.toBeInTheDocument()
 
+		// Click the Assistant button
 		const assistantButton = screen.getByRole('button', { name: /Assistant/i })
 		fireEvent.click(assistantButton)
 
+		// Assert that the chat interface appears
 		await waitFor(() => {
 			expect(screen.getByTestId('chat-interface')).toBeInTheDocument()
 		})

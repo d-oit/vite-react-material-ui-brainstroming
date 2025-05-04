@@ -72,7 +72,7 @@ export const translations = {
 		templates: 'Project Templates',
 		createTemplate: 'Create Template',
 		currentVersion: 'Current Version:',
-		version: 'Version',
+		version: 'Version {{version}}',
 		history: 'History',
 	},
 	brainstorm: {

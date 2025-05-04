@@ -1,23 +1,51 @@
 import { render, screen, fireEvent } from '@testing-library/react'
+import type { RenderOptions, RenderResult } from '@testing-library/react'
+import type { PropsWithChildren } from 'react'
 import { vi } from 'vitest'
 
-import { useSettings } from '../../../contexts/SettingsContext'
+// Corrected Import Order
+import { I18nProvider } from '../../../contexts/I18nContext' // Import I18nProvider
+import { useSettings, SettingsProvider } from '../../../contexts/SettingsContext' // Import SettingsProvider too
+import { NodeType } from '../../../types'
+import { createTestNode } from '../../../types/test-utils'
 import { EnhancedBrainstormFlow } from '../EnhancedBrainstormFlow'
 
-// Mock the useSettings hook
-vi.mock('../../../contexts/SettingsContext', () => ({
-	useSettings: vi.fn(),
-}))
+// Mock the useSettings hook but keep other exports like SettingsProvider
+vi.mock('../../../contexts/SettingsContext', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('../../../contexts/SettingsContext')>()
+	return {
+		...actual, // Keep original exports (like SettingsProvider)
+		useSettings: vi.fn(), // Mock only the hook
+	}
+})
+
+// Define mock functions outside the mock factory to make them accessible in tests
+const mockZoomTo = vi.fn()
+const mockGetZoom = vi.fn().mockReturnValue(1)
+const mockFitView = vi.fn()
+const mockZoomIn = vi.fn()
+const mockZoomOut = vi.fn()
+const mockGetNodes = vi.fn().mockReturnValue([])
+const mockGetEdges = vi.fn().mockReturnValue([])
+const mockSetNodes = vi.fn()
+const mockSetEdges = vi.fn()
+const mockProject = vi.fn().mockImplementation((pos) => pos)
+const mockScreenToFlowPosition = vi.fn().mockImplementation((pos) => pos)
 
 // Mock the ReactFlow component
 vi.mock('reactflow', () => {
-	const mockZoomTo = vi.fn()
-	const mockGetZoom = vi.fn().mockReturnValue(1)
-	const mockFitView = vi.fn()
-	const mockZoomIn = vi.fn()
-	const mockZoomOut = vi.fn()
-
-	const ReactFlowMock = ({ children, onNodeClick, nodes, onInit }: any) => {
+	// Use the mock functions defined above
+	const ReactFlowMock = ({
+		children,
+		onNodeClick,
+		nodes,
+		onInit,
+	}: {
+		children?: React.ReactNode
+		onNodeClick?: (event: any, node: any) => void
+		nodes?: any[]
+		onInit?: (instance: any) => void
+	}) => {
 		// Create a mock instance that will be passed to onInit
 		const mockInstance = {
 			zoomTo: mockZoomTo,
@@ -25,27 +53,30 @@ vi.mock('reactflow', () => {
 			fitView: mockFitView,
 			zoomIn: mockZoomIn,
 			zoomOut: mockZoomOut,
-			getNodes: vi.fn().mockReturnValue(nodes || []),
+			getNodes: vi.fn().mockReturnValue(nodes ?? []), // Use nullish coalescing
 			getEdges: vi.fn().mockReturnValue([]),
 			screenToFlowPosition: vi.fn().mockImplementation((pos) => pos),
 		}
 
 		// Call onInit with the mock instance if provided
-		if (onInit) {
+		if (typeof onInit === 'function') { // Add type check
 			setTimeout(() => onInit(mockInstance), 0)
 		}
 
 		return (
 			<div data-testid="react-flow-mock">
 				{children}
-				<button type="button" data-testid="mock-node" onClick={() => onNodeClick({}, nodes[0])}>
-					Mock Node
-				</button>
+				{/* Ensure nodes exist before accessing */}
+				{nodes && nodes.length > 0 && (
+					<button type="button" data-testid="mock-node" onClick={() => onNodeClick?.({}, nodes[0])}>
+						Mock Node
+					</button>
+				)}
 			</div>
 		)
 	}
 
-	ReactFlowMock.Panel = ({ children }: any) => <div data-testid="panel-mock">{children}</div>
+	ReactFlowMock.Panel = ({ children }: { children?: React.ReactNode }) => <div data-testid="panel-mock">{children}</div>
 	ReactFlowMock.Background = () => <div data-testid="background-mock" />
 
 	return {
@@ -55,16 +86,26 @@ vi.mock('reactflow', () => {
 		Background: () => <div data-testid="background-mock" />,
 		Controls: () => <div data-testid="controls-mock" />,
 		MiniMap: () => <div data-testid="minimap-mock" />,
-		Panel: ({ children }: any) => <div data-testid="panel-mock">{children}</div>,
+		Panel: ({ children }: { children?: React.ReactNode }) => <div data-testid="panel-mock">{children}</div>, // Add basic type
 		applyNodeChanges: vi.fn((changes, nodes) => nodes),
 		applyEdgeChanges: vi.fn((changes, edges) => edges),
 		addEdge: vi.fn((connection, edges) => edges),
-		// Export the mock functions for testing
-		mockZoomTo,
-		mockGetZoom,
-		mockFitView,
-		mockZoomIn,
-		mockZoomOut,
+		// Mock functions (like mockZoomTo) are accessible within the test scope
+		// due to closure, no need to export them from here.
+		// Add useReactFlow mock with correct indentation
+		useReactFlow: vi.fn(() => ({
+			zoomIn: mockZoomIn,
+			zoomOut: mockZoomOut,
+			fitView: mockFitView,
+			zoomTo: mockZoomTo,
+			getZoom: mockGetZoom,
+			getNodes: mockGetNodes, // Use defined mock
+			getEdges: mockGetEdges, // Use defined mock
+			setNodes: mockSetNodes, // Use defined mock
+			setEdges: mockSetEdges, // Use defined mock
+			project: mockProject, // Use defined mock
+			screenToFlowPosition: mockScreenToFlowPosition, // Use defined mock
+		})),
 	}
 })
 
@@ -100,11 +141,36 @@ vi.mock('../NodeEditDialog', () => ({
 	default: () => <div data-testid="node-edit-dialog-mock" />,
 }))
 
+// Mock MUI Icons needed for this test file
+vi.mock('@mui/icons-material', () => ({
+	ZoomIn: () => <svg data-testid="ZoomInIcon" />,
+	ZoomOut: () => <svg data-testid="ZoomOutIcon" />,
+	FitScreen: () => <svg data-testid="FitScreenIcon" />,
+	GridOn: () => <svg data-testid="GridOnIcon" />,
+	GridOff: () => <svg data-testid="GridOffIcon" />,
+	// Add other icons if needed by components used here
+}))
+
 // Mock the DeleteConfirmationDialog component
 vi.mock('../../DeleteConfirmationDialog', () => ({
 	__esModule: true,
 	default: () => <div data-testid="delete-confirmation-dialog-mock" />,
 }))
+
+// Helper function to render with necessary providers
+const renderWithProviders = (
+	ui: React.ReactElement,
+	options?: Omit<RenderOptions, 'wrapper'>,
+): RenderResult => {
+	function Wrapper({ children }: PropsWithChildren<unknown>): JSX.Element {
+		return (
+			<I18nProvider initialLocale="en">
+				<SettingsProvider>{children}</SettingsProvider>
+			</I18nProvider>
+		)
+	}
+	return render(ui, { wrapper: Wrapper, ...options })
+}
 
 describe('EnhancedBrainstormFlow', () => {
 	beforeEach(() => {
@@ -126,16 +192,31 @@ describe('EnhancedBrainstormFlow', () => {
 	})
 
 	it('renders the component correctly', () => {
-		render(
+		// 1. Create node with top-level overrides
+		const testNode = createTestNode({
+			id: '1',
+			type: NodeType.IDEA,
+			position: { x: 100, y: 100 },
+			// Don't override data here initially
+		})
+
+		// 2. Modify the data object after creation
+		testNode.data.title = 'Test Node'
+		testNode.data.content = 'Test content'
+		testNode.data.label = 'Test Node'
+		// Add required nested type (use 'as any' if NodeData doesn't strictly define it)
+		;(testNode.data as any).type = NodeType.IDEA
+
+		// 3. Add component-specific functions
+		;(testNode.data as any).onEdit = expect.any(Function)
+		;(testNode.data as any).onDelete = expect.any(Function)
+		;(testNode.data as any).onChat = expect.any(Function)
+
+		// 4. Render with the fully prepared node
+		renderWithProviders( // Use helper
 			<EnhancedBrainstormFlow
-				initialNodes={[
-					{
-						id: '1',
-						type: 'idea',
-						position: { x: 100, y: 100 },
-						data: { label: 'Test Node' },
-					},
-				]}
+				projectId="test-project"
+				initialNodes={[testNode as any]} // Use 'as any' here to bypass final check if needed
 				initialEdges={[]}
 				onSave={vi.fn()}
 			/>,
@@ -151,16 +232,31 @@ describe('EnhancedBrainstormFlow', () => {
 	})
 
 	it('opens the node edit dialog when a node is clicked', () => {
-		render(
+		// 1. Create node with top-level overrides
+		const testNode = createTestNode({
+			id: '1',
+			type: NodeType.IDEA,
+			position: { x: 100, y: 100 },
+			// Don't override data here initially
+		})
+
+		// 2. Modify the data object after creation
+		testNode.data.title = 'Test Node'
+		testNode.data.content = 'Test content'
+		testNode.data.label = 'Test Node'
+		// Add required nested type (use 'as any' if NodeData doesn't strictly define it)
+		;(testNode.data as any).type = NodeType.IDEA
+
+		// 3. Add component-specific functions
+		;(testNode.data as any).onEdit = expect.any(Function)
+		;(testNode.data as any).onDelete = expect.any(Function)
+		;(testNode.data as any).onChat = expect.any(Function)
+
+		// 4. Render with the fully prepared node
+		renderWithProviders( // Use helper
 			<EnhancedBrainstormFlow
-				initialNodes={[
-					{
-						id: '1',
-						type: 'idea',
-						position: { x: 100, y: 100 },
-						data: { label: 'Test Node' },
-					},
-				]}
+				projectId="test-project"
+				initialNodes={[testNode as any]} // Use 'as any' here to bypass final check if needed
 				initialEdges={[]}
 				onSave={vi.fn()}
 			/>,
@@ -190,7 +286,9 @@ describe('EnhancedBrainstormFlow', () => {
 			getNodeColor: vi.fn(() => '#e3f2fd'),
 		})
 
-		const { container } = render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />)
+		const { container } = renderWithProviders( // Use helper
+			<EnhancedBrainstormFlow projectId="test-project" initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />,
+		)
 
 		// The save button should not be visible in the enhanced controls
 		// Note: This is an indirect test since we're mocking EnhancedControls
@@ -214,7 +312,9 @@ describe('EnhancedBrainstormFlow', () => {
 			getNodeColor: vi.fn(() => '#e3f2fd'),
 		})
 
-		render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />)
+		renderWithProviders( // Use helper
+			<EnhancedBrainstormFlow projectId="test-project" initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />,
+		)
 
 		// The save button should be visible in the enhanced controls
 		// Note: This is an indirect test since we're mocking EnhancedControls
@@ -222,10 +322,11 @@ describe('EnhancedBrainstormFlow', () => {
 	})
 
 	it('uses zoomTo method when zoom level changes', async () => {
-		// Get access to the mock functions
-		const { mockZoomTo } = require('reactflow')
+		// Mock functions are available in scope
 
-		render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />)
+		renderWithProviders( // Use helper
+			<EnhancedBrainstormFlow projectId="test-project" initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />,
+		)
 
 		// Wait for the ReactFlow instance to be initialized
 		await new Promise((resolve) => setTimeout(resolve, 10))
@@ -239,6 +340,6 @@ describe('EnhancedBrainstormFlow', () => {
 		fireEvent.change(slider, { target: { value: 1.5 } })
 
 		// Check if zoomTo was called with the correct value
-		expect(mockZoomTo).toHaveBeenCalledWith(1.5)
+		expect(mockZoomTo).toHaveBeenCalledWith(1.5) // Assert against the mock function in scope
 	})
 })
