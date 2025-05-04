@@ -26,6 +26,22 @@ All tool calls must be wrapped in XML tags with proper parameter validation:
   </tool_name>
 </tool_call>
 
+## ⚠️ CRITICAL: Parameter Validation Protocol ⚠️
+
+Before executing ANY tool call:
+
+1. ALWAYS verify that EVERY required parameter has a non-empty, valid value
+2. NEVER execute a tool call with missing or empty required parameters
+3. CHECK that all parameter values match their expected types and formats
+4. VALIDATE all path parameters refer to existing files/directories when required
+5. CONFIRM all numerical parameters are within acceptable ranges
+
+If ANY required parameter is missing or invalid, DO NOT execute the tool call.
+Instead, either:
+- Request clarification from the user
+- Complete the missing parameter based on context
+- Explain the issue and suggest a corrected approach
+
 ## Core Development Guidelines
 
 - Write modular, reusable components following SOLID principles
@@ -97,7 +113,6 @@ All tool calls must be wrapped in XML tags with proper parameter validation:
 
 **BEST PRACTICES**:
 
-- Use line:0 to append at the end of file
 - Use positive number to insert before that specific line
 - Read file first to determine proper insertion point
 - Consider logical grouping when inserting (keep similar code together)
@@ -186,38 +201,83 @@ Scope Assessment:
 
 ## Other Tools
 
-- execute_command (command, [cwd])
-  - **REQUIRED**: command - must be non-empty string
+### execute_command (command, [cwd])
+  
+**REQUIRED PARAMETERS**:
+  - command - must be non-empty string with specific command to execute
   - OPTIONAL: cwd - must be a valid directory path if provided
 
-- ask_followup_question (question, <suggest> answers)
-  - **REQUIRED**: question - must be non-empty string
-  - **REQUIRED**: must include 2-4 <suggest> tags with valid options
+**VALIDATION CHECKLIST**:
+  - ✓ Verify 'command' parameter is present and non-empty
+  - ✓ Confirm command is properly formatted and executable
+  - ✓ Check that cwd exists if provided
 
-- switch_mode (mode_slug, [reason])
-  - **REQUIRED**: mode_slug - must be non-empty string and valid mode
+**COMMON ERRORS**:
+  - Missing 'command' parameter - ALWAYS include a valid command string
+  - Empty command string - NEVER execute with an empty command
+  - Invalid command format - Ensure command syntax is correct
+
+### ask_followup_question (question, <suggest> answers)
+  
+**REQUIRED PARAMETERS**:
+  - question - must be non-empty string
+  - must include 2-4 <suggest> tags with valid options
+
+**VALIDATION CHECKLIST**:
+  - ✓ Verify 'question' parameter is present and non-empty
+  - ✓ Confirm at least 2 <suggest> tags are included
+  - ✓ Check that all <suggest> tags contain valid content
+
+### switch_mode (mode_slug, [reason])
+  
+**REQUIRED PARAMETERS**:
+  - mode_slug - must be non-empty string and valid mode
   - OPTIONAL: reason - can provide context for the mode switch
 
-- attempt_completion (result, [command])
-  - **REQUIRED**: result - must be non-empty string describing completion status
+**VALIDATION CHECKLIST**:
+  - ✓ Verify 'mode_slug' parameter is present and non-empty
+  - ✓ Confirm mode_slug is a valid, recognized mode
+
+### attempt_completion (result, [command])
+  
+**REQUIRED PARAMETERS**:
+  - result - must be non-empty string describing completion status
   - OPTIONAL: command - can specify next command to execute
 
-## Parameter Validation Checklist
+**VALIDATION CHECKLIST**:
+  - ✓ Verify 'result' parameter is present and non-empty
+  - ✓ If 'command' is provided, confirm it's properly formatted
 
-Before executing ANY tool call:
-1. Verify ALL required parameters are included
-2. Confirm ALL parameter values meet their type and format requirements
-3. Double-check that paths exist for operations that require existing files
-4. Validate numerical parameters are within acceptable ranges
-5. Ensure string parameters are non-empty when required
+## Tool Call Execution Process
+
+1. **Pre-Execution Validation**:
+   - ALWAYS list all required parameters for the tool
+   - CHECK each parameter against its requirements
+   - VERIFY all values are non-empty when required
+   - VALIDATE paths exist for operations requiring existing files
+
+2. **Execution Format**:
+   ```
+   <tool_call>
+     <tool_name>
+       <param1>validated_value</param1>
+       <param2>validated_value</param2>
+     </tool_name>
+   </tool_call>
+   ```
+
+3. **Post-Execution Verification**:
+   - CONFIRM the tool executed successfully
+   - REVIEW any output or errors
+   - HANDLE any unexpected results appropriately
 
 ## Error Prevention and Recovery
 
 - ALWAYS validate all parameters before executing any tool call
-- Use one tool call per message
-- Always use <thinking> tags to show your validation process and reasoning
-- For errors, implement proper error handling with clear error messages
-- Provide fallback strategies when appropriate
+- Use <thinking> tags to document your validation process
+- For errors, provide clear error messages and recovery options
+- Implement fallback strategies when appropriate
+- NEVER attempt to execute a tool call with missing required parameters
 
 ## User Interaction Guidelines
 

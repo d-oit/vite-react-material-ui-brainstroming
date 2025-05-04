@@ -1,11 +1,11 @@
-import { screen, fireEvent, waitFor, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { MemoizedNodeEditDialog as NodeEditDialog } from '../../components/BrainstormFlow/NodeEditDialog'
 import { NodeType, NodeSize } from '../../types'
 import type { NodeData } from '../../types'
-import { renderWithProviders } from '../test-utils'
+import { renderWithProviders } from '../test-setup'
 
 describe('NodeEditDialog', () => {
 	const mockOnClose = vi.fn()
@@ -39,13 +39,10 @@ describe('NodeEditDialog', () => {
 			/>,
 		)
 
-		expect(screen.getByText('Edit Node')).toBeInTheDocument()
+		expect(screen.getByRole('heading', { name: 'Edit Node' })).toBeInTheDocument()
 		expect(screen.getByRole('textbox', { name: /label/i })).toHaveValue('Test Node')
 		expect(screen.getByRole('textbox', { name: /content/i })).toHaveValue('This is a test node')
-
-		const tagListContainer = screen.getByTestId('tag-list-container')
-		expect(tagListContainer).toBeInTheDocument()
-		expect(within(tagListContainer).getByText('tag1')).toBeInTheDocument()
+		expect(screen.getByText('tag1')).toBeInTheDocument()
 	})
 
 	it('calls onSave with the updated values when the save button is clicked', async () => {
@@ -59,22 +56,15 @@ describe('NodeEditDialog', () => {
 			/>,
 		)
 
-		fireEvent.change(screen.getByRole('textbox', { name: /label/i }), {
-			target: { value: 'Updated Label' },
-		})
+		const user = userEvent.setup()
 
-		fireEvent.change(screen.getByRole('textbox', { name: /content/i }), {
-			target: { value: 'Updated content' },
-		})
+		await user.clear(screen.getByRole('textbox', { name: /label/i }))
+		await user.type(screen.getByRole('textbox', { name: /label/i }), 'Updated Label')
 
-		const actions = screen.getByRole('dialog').querySelector('.MuiDialogActions-root')
-		expect(actions).toBeInstanceOf(HTMLElement)
-		if (!actions) {
-			throw new Error('Actions not found')
-		}
+		await user.clear(screen.getByRole('textbox', { name: /content/i }))
+		await user.type(screen.getByRole('textbox', { name: /content/i }), 'Updated content')
 
-		const saveButton = within(actions as HTMLElement).getByRole('button', { name: 'Save' })
-		fireEvent.click(saveButton)
+		await user.click(screen.getByRole('button', { name: 'Save' }))
 
 		await waitFor(() => {
 			expect(mockOnSave).toHaveBeenCalledWith(
@@ -91,7 +81,7 @@ describe('NodeEditDialog', () => {
 		})
 	})
 
-	it('calls onClose when the cancel button is clicked', () => {
+	it('calls onClose when the cancel button is clicked', async () => {
 		renderWithProviders(
 			<NodeEditDialog
 				open={true}
@@ -101,14 +91,10 @@ describe('NodeEditDialog', () => {
 				initialType={NodeType.IDEA}
 			/>,
 		)
-		const actions = screen.getByRole('dialog').querySelector('.MuiDialogActions-root')
-		expect(actions).toBeInstanceOf(HTMLElement)
-		if (!actions) {
-			throw new Error('Actions not found')
-		}
 
-		const cancelButton = within(actions as HTMLElement).getByRole('button', { name: 'Cancel' })
-		fireEvent.click(cancelButton)
+		const user = userEvent.setup()
+		await user.click(screen.getByRole('button', { name: 'Cancel' }))
+
 		expect(mockOnClose).toHaveBeenCalled()
 	})
 
@@ -123,36 +109,18 @@ describe('NodeEditDialog', () => {
 			/>,
 		)
 
-		const tagListContainer = screen.getByTestId('tag-list-container')
+		const user = userEvent.setup()
+
 		const addTagInput = screen.getByRole('textbox', { name: /add tag/i })
+		await user.type(addTagInput, 'tag2{Enter}')
 
-		await userEvent.type(addTagInput, 'tag2')
-		fireEvent.keyPress(addTagInput, { key: 'Enter', code: 'Enter', charCode: 13 })
-		// Wait for the tag to appear
-		await waitFor(() => {
-			expect(within(tagListContainer).getByText('tag2')).toBeInTheDocument()
-		})
+		expect(await screen.findByText('tag2')).toBeInTheDocument()
 
-		const tag1Text = within(tagListContainer).getByText('tag1')
-		const tag1Chip = tag1Text.closest('.MuiChip-root')
-		expect(tag1Chip).toBeInTheDocument()
+		await user.click(screen.getByLabelText('Remove tag1'))
 
-		const deleteButton = within(tag1Chip as HTMLElement).getByTestId('CancelIcon')
-		expect(deleteButton).toBeInTheDocument()
-		fireEvent.click(deleteButton)
+		expect(screen.queryByText('tag1')).not.toBeInTheDocument()
 
-		await waitFor(() => {
-			expect(within(tagListContainer).queryByText('tag1')).not.toBeInTheDocument()
-		})
-
-		const actions = screen.getByRole('dialog').querySelector('.MuiDialogActions-root')
-		expect(actions).toBeInstanceOf(HTMLElement)
-		if (!actions) {
-			throw new Error('Actions not found')
-		}
-
-		const saveButton = within(actions as HTMLElement).getByRole('button', { name: 'Save' })
-		fireEvent.click(saveButton)
+		await user.click(screen.getByRole('button', { name: 'Save' }))
 
 		await waitFor(() => {
 			expect(mockOnSave).toHaveBeenCalledWith(
@@ -175,18 +143,12 @@ describe('NodeEditDialog', () => {
 			/>,
 		)
 
-		fireEvent.mouseDown(screen.getByRole('combobox', { name: /node type/i }))
-		await screen.findByRole('listbox')
-		fireEvent.click(screen.getByRole('option', { name: 'Task' }))
+		const user = userEvent.setup()
 
-		const actions = screen.getByRole('dialog').querySelector('.MuiDialogActions-root')
-		expect(actions).toBeInstanceOf(HTMLElement)
-		if (!actions) {
-			throw new Error('Actions not found')
-		}
+		await user.click(screen.getByRole('combobox', { name: /node type/i }))
+		await user.click(screen.getByRole('option', { name: 'Task' }))
 
-		const saveButton = within(actions as HTMLElement).getByRole('button', { name: 'Save' })
-		fireEvent.click(saveButton)
+		await user.click(screen.getByRole('button', { name: 'Save' }))
 
 		await waitFor(() => {
 			expect(mockOnSave).toHaveBeenCalledWith(
@@ -210,18 +172,12 @@ describe('NodeEditDialog', () => {
 			/>,
 		)
 
-		fireEvent.mouseDown(screen.getByRole('combobox', { name: /size/i }))
-		await screen.findByRole('listbox')
-		fireEvent.click(screen.getByRole('option', { name: 'Large' }))
+		const user = userEvent.setup()
 
-		const actions = screen.getByRole('dialog').querySelector('.MuiDialogActions-root')
-		expect(actions).toBeInstanceOf(HTMLElement)
-		if (!actions) {
-			throw new Error('Actions not found')
-		}
+		await user.click(screen.getByRole('combobox', { name: /size/i }))
+		await user.click(screen.getByRole('option', { name: 'Large' }))
 
-		const saveButton = within(actions as HTMLElement).getByRole('button', { name: 'Save' })
-		fireEvent.click(saveButton)
+		await user.click(screen.getByRole('button', { name: 'Save' }))
 
 		await waitFor(() => {
 			expect(mockOnSave).toHaveBeenCalledWith(
@@ -239,20 +195,11 @@ describe('NodeEditDialog', () => {
 			<NodeEditDialog open={true} onClose={mockOnClose} onSave={mockOnSave} initialType={NodeType.IDEA} />,
 		)
 
-		expect(screen.getByText('Add New Node')).toBeInTheDocument()
+		expect(screen.getByRole('heading', { name: 'Add New Node' })).toBeInTheDocument()
 		expect(screen.getByRole('textbox', { name: /label/i })).toHaveValue('')
 		expect(screen.getByRole('textbox', { name: /content/i })).toHaveValue('')
 
-		const actions = screen.getByRole('dialog').querySelector('.MuiDialogActions-root')
-		expect(actions).toBeInstanceOf(HTMLElement)
-		if (!actions) {
-			throw new Error('Actions not found')
-		}
-
-		const addButton = within(actions as HTMLElement).getByRole('button', { name: 'Add' })
-		expect(addButton).toBeInTheDocument()
-
-		const saveButton = within(actions as HTMLElement).queryByRole('button', { name: 'Save' })
-		expect(saveButton).not.toBeInTheDocument()
+		expect(screen.getByRole('button', { name: 'Add' })).toBeInTheDocument()
+		expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument()
 	})
 })

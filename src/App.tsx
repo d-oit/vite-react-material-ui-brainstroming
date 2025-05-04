@@ -275,7 +275,7 @@ const AppWithTheme = () => {
 		return () => {
 			// Only try to stop auto sync if the service is initialized
 			try {
-				if (offlineService && typeof offlineService.stopAutoSync === 'function') {
+				if (typeof offlineService?.stopAutoSync === 'function') {
 					// stopAutoSync returns void, not a Promise
 					offlineService.stopAutoSync()
 				}

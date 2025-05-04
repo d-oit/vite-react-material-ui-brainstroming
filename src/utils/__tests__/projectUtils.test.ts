@@ -13,7 +13,7 @@ vi.mock('../performanceMonitoring', () => ({
 		endMeasure: vi.fn(),
 	},
 	PerformanceCategory: {
-		PROCESSING: 'processing',
+		DATA_LOADING: 'data_loading',
 	},
 }))
 
@@ -30,6 +30,7 @@ describe('projectUtils', () => {
 			updatedAt: '2023-01-01T00:00:00.000Z',
 			version: '1.0.0',
 			template: ProjectTemplate.CUSTOM,
+			isPinned: false,
 			nodes: [
 				{
 					id: 'node1',
@@ -57,6 +58,7 @@ describe('projectUtils', () => {
 				enableS3Sync: false,
 				syncFrequency: 'manual',
 				intervalMinutes: 30,
+				autoSave: false,
 			},
 		}
 
@@ -66,7 +68,7 @@ describe('projectUtils', () => {
 			expect(hasProjectChanged(project1, project2)).toBe(false)
 
 			// Verify performance monitoring was used
-			expect(performanceTracker.startMeasure).toHaveBeenCalledWith('hasProjectChanged', 'processing')
+			expect(performanceTracker.startMeasure).toHaveBeenCalledWith('hasProjectChanged', 'data_loading')
 			expect(performanceTracker.endMeasure).toHaveBeenCalledWith('test-metric-id')
 		})
 
@@ -87,7 +89,7 @@ describe('projectUtils', () => {
 					...baseProject.nodes,
 					{
 						id: 'node2',
-						type: 'task',
+						type: NodeType.TASK,
 						position: { x: 200, y: 200 },
 						data: {
 							id: 'node2',
@@ -95,7 +97,7 @@ describe('projectUtils', () => {
 							content: 'Content 2',
 							createdAt: '2023-01-01T00:00:00.000Z',
 							updatedAt: '2023-01-01T00:00:00.000Z',
-							type: 'task',
+							type: NodeType.TASK,
 						},
 					},
 				],
@@ -250,7 +252,7 @@ describe('projectUtils', () => {
 						id: `edge${index}`,
 						source: `node${index}`,
 						target: `node${index + 1}`,
-						type: 'default',
+						type: EdgeType.DEFAULT,
 					})),
 			}
 

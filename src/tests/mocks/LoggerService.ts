@@ -1,5 +1,24 @@
 import { vi } from 'vitest'
 
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
+
+export interface LogMeta {
+	[key: string]: unknown
+}
+
+export interface LogEntry {
+	level: LogLevel
+	message: string
+	meta?: LogMeta
+	timestamp: Date
+	context: string
+}
+
+export interface LoggerConfig {
+	enabled?: boolean
+	minLevel?: LogLevel
+}
+
 // Create a mock for the log method
 const logMock = vi.fn()
 
@@ -7,7 +26,7 @@ const logMock = vi.fn()
 export class LoggerService {
 	private context: string
 	private _isEnabled: boolean = true
-	private _minLevel: string = 'debug'
+	private _minLevel: LogLevel = 'debug'
 
 	constructor(context: string) {
 		this.context = context
@@ -17,49 +36,49 @@ export class LoggerService {
 	log = logMock
 
 	// Convenience methods that call log
-	info = vi.fn().mockImplementation((message: string, meta?: any) => {
+	info = vi.fn().mockImplementation((message: string, meta?: LogMeta) => {
 		return this.log('info', message, meta)
 	})
 
-	warn = vi.fn().mockImplementation((message: string, meta?: any) => {
+	warn = vi.fn().mockImplementation((message: string, meta?: LogMeta) => {
 		return this.log('warn', message, meta)
 	})
 
-	error = vi.fn().mockImplementation((message: string, error?: Error, meta?: any) => {
-		return this.log('error', message, { ...meta, error })
+	error = vi.fn().mockImplementation((message: string, error?: Error, meta?: LogMeta) => {
+		const errorMeta: LogMeta = { ...meta, error }
+		return this.log('error', message, errorMeta)
 	})
 
-	debug = vi.fn().mockImplementation((message: string, meta?: any) => {
+	debug = vi.fn().mockImplementation((message: string, meta?: LogMeta) => {
 		return this.log('debug', message, meta)
 	})
 
 	// Configuration methods
-	configure = vi.fn().mockImplementation((options: { enabled?: boolean; minLevel?: string }) => {
+	configure = vi.fn().mockImplementation((options: LoggerConfig) => {
 		if (options.enabled !== undefined) this._isEnabled = options.enabled
 		if (options.minLevel) this._minLevel = options.minLevel
 		return this
 	})
 
-	isEnabled() {
+	isEnabled(): boolean {
 		return this._isEnabled
 	}
 
-	getMinLevel() {
+	getMinLevel(): LogLevel {
 		return this._minLevel
 	}
 
-	// Add any other methods that might be used
-	getContext() {
+	getContext(): string {
 		return this.context
 	}
 
-	// Add missing methods
-	getLogs = vi.fn().mockResolvedValue([])
-	clearLogs = vi.fn().mockResolvedValue(undefined)
-	initialize = vi.fn().mockResolvedValue(true) // Return true to indicate successful initialization
+	// Mock methods for logs management
+	getLogs = vi.fn(() => Promise.resolve([] as LogEntry[]))
+	clearLogs = vi.fn(() => Promise.resolve())
+	initialize = vi.fn(() => Promise.resolve(true))
 
 	// Add static methods
-	static getInstance() {
+	static getInstance(): LoggerService {
 		return new LoggerService('test')
 	}
 }

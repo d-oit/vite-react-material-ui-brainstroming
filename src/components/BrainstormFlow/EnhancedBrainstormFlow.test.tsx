@@ -1,6 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react'
+import { BrowserRouter } from 'react-router-dom'
 import { vi } from 'vitest'
 
+import { I18nProvider } from '../../contexts/I18nContext'
 import { useSettings } from '../../contexts/SettingsContext'
 import { useBrainstormStore } from '../../store/brainstormStore'
 import { EdgeType, NodeType } from '../../types/enums'
@@ -16,12 +18,32 @@ vi.mock('./utils/autoLayout', () => ({
 
 // Mock the ReactFlow component and other dependencies
 vi.mock('reactflow', async () => {
+	const mockSetNodes = vi.fn()
+	const mockSetEdges = vi.fn()
+	const mockFitView = vi.fn()
+	const mockZoomIn = vi.fn()
+	const mockZoomOut = vi.fn()
+	const store = useBrainstormStore()
+
 	return {
 		Background: () => <div data-testid="background" />,
 		Panel: ({ children }: { children: React.ReactNode }) => <div data-testid="panel">{children}</div>,
 		addEdge: vi.fn(),
 		applyNodeChanges: vi.fn(),
 		applyEdgeChanges: vi.fn(),
+		useReactFlow: () => ({
+			getNodes: vi.fn(() => store.nodes),
+			getEdges: vi.fn(() => store.edges),
+			setNodes: mockSetNodes,
+			setEdges: mockSetEdges,
+			fitView: mockFitView,
+			zoomIn: mockZoomIn,
+			zoomOut: mockZoomOut,
+			project: vi.fn(),
+			getIntersectingNodes: vi.fn(),
+			screenToFlowPosition: vi.fn(),
+			flowToScreenPosition: vi.fn(),
+		}),
 		ReactFlow: ({
 			children,
 			onNodeClick,
@@ -57,9 +79,9 @@ vi.mock('reactflow', async () => {
 			</div>
 		),
 		default: ({ children }: { children: React.ReactNode }) => <div data-testid="react-flow">{children}</div>,
-		fitView: vi.fn(),
-		zoomIn: vi.fn(),
-		zoomOut: vi.fn(),
+		fitView: mockFitView,
+		zoomIn: mockZoomIn,
+		zoomOut: mockZoomOut,
 	}
 })
 
@@ -167,12 +189,24 @@ describe('EnhancedBrainstormFlow', () => {
 	})
 
 	it('renders without crashing', () => {
-		render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />)
+		render(
+			<BrowserRouter>
+				<I18nProvider>
+					<EnhancedBrainstormFlow projectId="test-project" initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />
+				</I18nProvider>
+			</BrowserRouter>,
+		)
 		expect(screen.getByTestId('react-flow')).toBeInTheDocument()
 	})
 
 	it('renders controls and minimap', () => {
-		render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />)
+		render(
+			<BrowserRouter>
+				<I18nProvider>
+					<EnhancedBrainstormFlow projectId="test-project" initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />
+				</I18nProvider>
+			</BrowserRouter>,
+		)
 		expect(screen.getByTestId('panel')).toBeInTheDocument()
 		expect(screen.getByTestId('minimap')).toBeInTheDocument()
 	})
@@ -191,14 +225,26 @@ describe('EnhancedBrainstormFlow', () => {
 			writable: true,
 		})
 
-		render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />)
+		render(
+			<BrowserRouter>
+				<I18nProvider>
+					<EnhancedBrainstormFlow projectId="test-project" initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />
+				</I18nProvider>
+			</BrowserRouter>,
+		)
 		const fullscreenButton = screen.getAllByRole('button')[2]
 		fireEvent.click(fullscreenButton)
 		expect(requestFullscreenMock).toHaveBeenCalled()
 	})
 
 	it('opens node edit dialog when clicking a node', () => {
-		render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />)
+		render(
+			<BrowserRouter>
+				<I18nProvider>
+					<EnhancedBrainstormFlow projectId="test-project" initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />
+				</I18nProvider>
+			</BrowserRouter>,
+		)
 
 		// Click the ReactFlow component (mocked to simulate node click)
 		fireEvent.click(screen.getByTestId('react-flow'))
@@ -208,7 +254,13 @@ describe('EnhancedBrainstormFlow', () => {
 	})
 
 	it('updates node data when saving edit dialog', async () => {
-		render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />)
+		render(
+			<BrowserRouter>
+				<I18nProvider>
+					<EnhancedBrainstormFlow projectId="test-project" initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />
+				</I18nProvider>
+			</BrowserRouter>,
+		)
 
 		// Click node to open dialog
 		fireEvent.click(screen.getByTestId('react-flow'))
@@ -247,11 +299,16 @@ describe('EnhancedBrainstormFlow', () => {
 		}]
 
 		render(
-			<EnhancedBrainstormFlow
-				initialNodes={initialNodes}
-				initialEdges={initialEdges}
-				onSave={vi.fn()}
-			/>,
+			<BrowserRouter>
+				<I18nProvider>
+					<EnhancedBrainstormFlow
+						projectId="test-project"
+						initialNodes={initialNodes}
+						initialEdges={initialEdges}
+						onSave={vi.fn()}
+					/>
+				</I18nProvider>
+			</BrowserRouter>,
 		)
 
 		expect(mockSetNodes).toHaveBeenCalledWith(initialNodes)
@@ -267,7 +324,13 @@ describe('EnhancedBrainstormFlow', () => {
 			reactFlowInstance: { zoomTo: mockZoomTo },
 		})
 
-		render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />)
+		render(
+			<BrowserRouter>
+				<I18nProvider>
+					<EnhancedBrainstormFlow projectId="test-project" initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />
+				</I18nProvider>
+			</BrowserRouter>,
+		)
 
 		// Open settings menu
 		const settingsButton = screen.getAllByRole('button')[0]
@@ -281,7 +344,13 @@ describe('EnhancedBrainstormFlow', () => {
 	})
 
 	it('toggles grid visibility when grid button is clicked', () => {
-		render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />)
+		render(
+			<BrowserRouter>
+				<I18nProvider>
+					<EnhancedBrainstormFlow projectId="test-project" initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />
+				</I18nProvider>
+			</BrowserRouter>,
+		)
 
 		const gridButton = screen.getAllByRole('button')[1]
 
@@ -317,7 +386,13 @@ describe('EnhancedBrainstormFlow', () => {
 			nodes: [...mockBrainstormStore.nodes, archivedNode],
 		})
 
-		render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />)
+		render(
+			<BrowserRouter>
+				<I18nProvider>
+					<EnhancedBrainstormFlow projectId="test-project" initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />
+				</I18nProvider>
+			</BrowserRouter>,
+		)
 
 		// Toggle archived visibility
 		fireEvent.click(screen.getByText('Toggle Archived'))
@@ -327,7 +402,13 @@ describe('EnhancedBrainstormFlow', () => {
 	})
 
 	it('handles keyboard shortcuts', () => {
-		render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />)
+		render(
+			<BrowserRouter>
+				<I18nProvider>
+					<EnhancedBrainstormFlow projectId="test-project" initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />
+				</I18nProvider>
+			</BrowserRouter>,
+		)
 
 		// Test auto-layout (Ctrl + L)
 		fireEvent.keyDown(document, { key: 'l', ctrlKey: true })
@@ -354,7 +435,13 @@ describe('EnhancedBrainstormFlow', () => {
 			reactFlowInstance: { fitView: mockFitView },
 		})
 
-		render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />)
+		render(
+			<BrowserRouter>
+				<I18nProvider>
+					<EnhancedBrainstormFlow projectId="test-project" initialNodes={[]} initialEdges={[]} onSave={vi.fn()} />
+				</I18nProvider>
+			</BrowserRouter>,
+		)
 
 		// Click the auto-layout button
 		const layoutButton = screen.getAllByRole('button')[3]
@@ -376,7 +463,13 @@ describe('EnhancedBrainstormFlow', () => {
 			edges: mockEdges,
 		})
 
-		render(<EnhancedBrainstormFlow initialNodes={[]} initialEdges={[]} onSave={onSave} />)
+		render(
+			<BrowserRouter>
+				<I18nProvider>
+					<EnhancedBrainstormFlow projectId="test-project" initialNodes={[]} initialEdges={[]} onSave={onSave} />
+				</I18nProvider>
+			</BrowserRouter>,
+		)
 
 		expect(onSave).toHaveBeenCalledWith(mockNodes, mockEdges)
 	})

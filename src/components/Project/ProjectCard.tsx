@@ -29,8 +29,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useI18n } from '../../contexts/I18nContext'
-import type { Project } from '../../types'
-import { NodeType, NODE_TYPES } from '../../types'
+import type { Project , NodeType } from '../../types'
+import { NODE_TYPES } from '../../types'
 import { formatDate } from '../../utils/dateUtils'
 
 interface ProjectCardProps {

@@ -1,39 +1,24 @@
 import { vi } from 'vitest'
 
-export const mockLocalStorage = () => {
-	const storage = new Map<string, string>()
-
-	const localStorageMock = {
-		getItem: vi.fn((key: string) => storage.get(key) || null),
-		setItem: vi.fn((key: string, value: string) => storage.set(key, value)),
-		removeItem: vi.fn((key: string) => storage.delete(key)),
-		clear: vi.fn(() => storage.clear()),
-		key: vi.fn((index: number) => Array.from(storage.keys())[index] || null),
-		get length() {
-			return storage.size
-		},
-	}
-
-	vi.stubGlobal('localStorage', localStorageMock)
-	return localStorageMock
-}
-
-export const mockOnlineStatus = (online: boolean) => {
-	Object.defineProperty(window.navigator, 'onLine', {
-		writable: true,
-		value: online,
-	})
-	return online
-}
+import { createMockResizeObserver, createMockStorage, createMockNetworkStatus } from '../types/test-utils'
 
 export const mockResizeObserver = () => {
-	const ResizeObserverMock = vi.fn().mockImplementation(() => ({
-		observe: vi.fn(),
-		unobserve: vi.fn(),
-		disconnect: vi.fn(),
-	}))
+	const observer = createMockResizeObserver()
+	vi.stubGlobal('ResizeObserver', vi.fn(() => observer))
+	return observer
+}
 
-	vi.stubGlobal('ResizeObserver', ResizeObserverMock)
+export const mockLocalStorage = () => {
+	const storage = createMockStorage()
+	vi.stubGlobal('localStorage', storage)
+	return storage
+}
 
-	return ResizeObserverMock
+export const mockOnlineStatus = (online: boolean = true) => {
+	const networkStatus = createMockNetworkStatus({ online })
+	Object.defineProperty(window.navigator, 'onLine', {
+		configurable: true,
+		value: networkStatus.online,
+	})
+	return networkStatus
 }

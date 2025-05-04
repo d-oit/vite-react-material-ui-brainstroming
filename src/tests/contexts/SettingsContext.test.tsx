@@ -1,7 +1,9 @@
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { SettingsProvider, useSettings } from '../../contexts/SettingsContext'
-import { render, screen, fireEvent, waitFor, mockLocalStorage } from '../test-utils'
+import { ThemeMode } from '../../types'
+import { mockLocalStorage } from '../test-utils'
 
 // Create a test component that uses the SettingsContext
 const TestComponent = () => {
@@ -11,7 +13,7 @@ const TestComponent = () => {
 		<div>
 			<div data-testid="theme-mode">{settings.themeMode}</div>
 			<div data-testid="language">{settings.language}</div>
-			<button type="button" onClick={() => updateSettings({ themeMode: 'dark' })}>
+			<button type="button" onClick={() => updateSettings({ themeMode: ThemeMode.DARK })}>
 				Set Dark Theme
 			</button>
 			<button type="button" onClick={() => updateSettings({ language: 'de' })}>
@@ -19,13 +21,19 @@ const TestComponent = () => {
 			</button>
 			<button
 				type="button"
-				onClick={async () => {
-					const json = await exportSettings()
-					document.getElementById('export-result')!.textContent = json
+				onClick={() => {
+					void (async () => {
+						const json = await exportSettings()
+						document.getElementById('export-result')!.textContent = json
+					})()
 				}}>
 				Export Settings
 			</button>
-			<button type="button" onClick={() => importSettings('{"themeMode":"dark","language":"fr"}')}>
+			<button
+				type="button"
+				onClick={() => {
+					void importSettings(`{"themeMode":"${ThemeMode.DARK}","language":"fr"}`)
+				}}>
 				Import Settings
 			</button>
 			<div id="export-result" />

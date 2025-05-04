@@ -10,7 +10,7 @@ import { performanceTracker, PerformanceCategory } from './performanceMonitoring
  */
 export function hasProjectChanged(currentProject: Project | null, previousProject: Project | null): boolean {
 	// Start performance measurement
-	const metricId = performanceTracker.startMeasure('hasProjectChanged', PerformanceCategory.PROCESSING)
+	const metricId = performanceTracker.startMeasure('hasProjectChanged', PerformanceCategory.DATA_LOADING)
 
 	try {
 		// If either project is null, consider it a change if they're not both null
@@ -18,9 +18,12 @@ export function hasProjectChanged(currentProject: Project | null, previousProjec
 			return currentProject !== previousProject
 		}
 
-		// Check for missing properties
-		if (!currentProject.nodes || !previousProject.nodes || !currentProject.edges || !previousProject.edges) {
-			return true // Consider it changed if any essential property is missing
+		// Check for missing or invalid properties
+		const hasValidNodes = Array.isArray(currentProject.nodes) && Array.isArray(previousProject.nodes)
+		const hasValidEdges = Array.isArray(currentProject.edges) && Array.isArray(previousProject.edges)
+
+		if (!hasValidNodes || !hasValidEdges) {
+			return true // Consider it changed if any essential property is missing or invalid
 		}
 
 		// Quick checks for primitive properties first (these are fast)
